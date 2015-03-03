@@ -18,11 +18,9 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 export TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
-SOURCES		:=	source source/lib source/lib/fatfs source/ctrdecryptor source/nanddumper \
-				source/titlekey source/padgen
+SOURCES		:=	source source/lib source/lib/fatfs source/features
 DATA		:=	
-INCLUDES	:=	include source source/lib source/lib/fatfs source/ctrdecryptor source/nanddumper \
-				source/titlekey source/padgen
+INCLUDES	:=	include source source/lib source/lib/fatfs source/features
 
 FILES       := data/SplashScreen.bin
 #---------------------------------------------------------------------------------

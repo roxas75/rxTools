@@ -51,7 +51,15 @@ void MenuSelect(){
 	if(MyMenu->Option[MyMenu->Current].Func != NULL){
 		MenuChain[openedMenus++] = MyMenu;
 		MyMenu->Option[MyMenu->Current].Func();
-		MenuInit(MenuChain[openedMenus--]);
+		MenuInit(MenuChain[--openedMenus]);
 		MenuShow();
 	}
 }
+
+void MenuClose(){
+	if(openedMenus > 0){
+		MenuInit(MenuChain[--openedMenus]);
+		MenuShow();
+	}
+}
+

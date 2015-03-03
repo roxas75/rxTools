@@ -8,16 +8,15 @@
 #include "padgen.h"
 
 static Menu MainMenu = {	
-		"Roxas75 3DS Toolkit [RX v1.1]", 
+		"Roxas75 3DS Toolkit [RX v1.2]", 
 		{	
 			" Decrypt CTR Titles", &CTRDecryptor,
-			" Create NAND dump", &NandDumper,
 			" Decrypt Title Keys", &DecryptTitleKeys,
 			" Dump Tickets", &DumpTicketDb,
 			" Generate Xorpads", &PadGen,
-			" Decrypt NAND partitions", &DumpNandPartitions,
+			" NAND Options", &NandMenu,
 		},
-		6,
+		5,
 		0,
 		0
 	};

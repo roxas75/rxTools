@@ -12,6 +12,8 @@
 #define TITLE "CTR Decryptor\n"
 #define BUFFER_ADDR ((volatile u8*)0x21000000)
 #define BLOCK_SIZE  (8*1024*1024)
+
+unsigned char workDirectory[256] = "";
 static char workspace[1024];
 
 u32 DecryptPartition(PartitionInfo* info){
@@ -171,7 +173,7 @@ void CTRDecryptor(){
 	FILINFO *myInfo = &workspace;  //Explanation : Since i noticed that the filename overflew for the most of the times, i reserved it a bigger space
 	
 	myInfo->fname[0] = 'A';
-	while(f_opendir(&myDir, "") != FR_OK);
+	while(f_opendir(&myDir, workDirectory) != FR_OK);
 	for(int i = 0; myInfo->fname[0] != 0; i++){ 
 		f_readdir(&myDir, myInfo);
 		if(ProcessCTR(myInfo->fname) == 0){
@@ -187,4 +189,8 @@ void CTRDecryptor(){
 	ConsoleShow();
 	f_closedir(&myDir);
 	WaitForButton(BUTTON_A);
+}
+
+void SetCTRDecryptorDir(char* path){
+	strcpy(workDirectory, path);
 }

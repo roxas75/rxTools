@@ -85,12 +85,15 @@ void FileClose(File *Handle)
 
 int checkEmuNAND(){
 	sdmmc_sdcard_readsectors(0x3AF00000/0x200, 1, 0x20000000);
-	
 	if(*((char*)0x20000100) == 'N' && *((char*)0x20000101) == 'C' && *((char*)0x20000102) == 'S' && *((char*)0x20000103) == 'D'){
 		return 1;
 	}else{
 		return 0;
 	}
+}
+
+void GetNANDCTR(u8* ctr){
+	for(int i = 0; i < 16; i++) *(ctr + i) = NANDCTR[i];
 }
 
 int nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition){
@@ -100,9 +103,12 @@ int nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsi
 	info.ctr = &myCtr; info.buffer = out; info.size = numsectors*0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition/16);
 	switch(partition){
-		case CTRNAND : info.keyslot = 0x4; break;
-		case FIRM0   : info.keyslot = 0x6; break;
-		case FIRM1   : info.keyslot = 0x6; break;
+		case TWLN	  : info.keyslot = 0x3; break;
+		case TWLP	  : info.keyslot = 0x3; break;
+		case AGB_SAVE : info.keyslot = 0x7; break;
+		case FIRM0    : info.keyslot = 0x6; break;
+		case FIRM1    : info.keyslot = 0x6; break;
+		case CTRNAND  : info.keyslot = 0x4; break;
 	}
 	add_ctr(info.ctr, sector_no*0x20);
 	
@@ -117,9 +123,12 @@ int nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, uns
 	info.ctr = &myCtr; info.buffer = out; info.size = numsectors*0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition/16);
 	switch(partition){
-		case CTRNAND : info.keyslot = 0x4; break;
-		case FIRM0   : info.keyslot = 0x6; break;
-		case FIRM1   : info.keyslot = 0x6; break;
+		case TWLN	  : info.keyslot = 0x3; break;
+		case TWLP	  : info.keyslot = 0x3; break;
+		case AGB_SAVE : info.keyslot = 0x7; break;
+		case FIRM0    : info.keyslot = 0x6; break;
+		case FIRM1    : info.keyslot = 0x6; break;
+		case CTRNAND  : info.keyslot = 0x4; break;
 	}
 	add_ctr(info.ctr, sector_no*0x20);
 	

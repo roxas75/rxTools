@@ -23,6 +23,7 @@ size_t FileGetSize(File* Handle);
 void FileClose(File* Handle);
 
 int checkEmuNAND();
+void GetNANDCTR(u8* ctr);
 int nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);
 int nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);
 int emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);

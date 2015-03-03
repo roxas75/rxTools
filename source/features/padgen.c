@@ -128,7 +128,7 @@ File pf;
     if (!FileOpen(&pf, info->filename, 1))
         return 1;
 
-    if(info->setKeyY)
+    if(info->setKeyY != 0)
         setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
     use_aeskey(info->keyslot);
 
@@ -151,11 +151,6 @@ File pf;
 		DrawString(TOP_SCREEN, STR, x, y, ConsoleGetTextColor(),  ConsoleGetBackgroundColor());
         bytesWritten = FileWrite(&pf, (void*)BUFFER_ADDR, j, seekpos);
         seekpos += j;
-        if(bytesWritten != j)
-        {
-            FileClose(&pf);
-            return 1;
-        }
     }
 
     FileClose(&pf);

@@ -22,5 +22,6 @@ void MenuShow();
 void MenuNextSelection();
 void MenuPrevSelection();
 void MenuSelect();
+void MenuClose();
 
 #endif
