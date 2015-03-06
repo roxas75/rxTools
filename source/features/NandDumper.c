@@ -153,7 +153,7 @@ void DumpNANDSystemTitles(){
 	int nTitle = 0;
 	unsigned int tot_size = 0x179000;
 	f_mkdir (outfolder);
-	for(int i = 0; i < tot_size && nTitle < 10; i++){
+	for(int i = 0; i < tot_size; i++){
 		if(isEmuNand) emunand_readsectors(i, 1, BUF1, CTRNAND);
 		else nand_readsectors(i, 1, BUF1, CTRNAND);
 		if(*((char*)BUF1 + 0x100) == 'N' && *((char*)BUF1 + 0x101) == 'C' && *((char*)BUF1 + 0x102) == 'C' && *((char*)BUF1 + 0x103) == 'H'){
