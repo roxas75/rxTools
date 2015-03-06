@@ -41,17 +41,18 @@ int main(){
 		DrawString(TOP_SCREEN, " NewKeyX ", 0, 240-8, GREEN, BLACK);
 	}else{
 		ConsoleInit();
-		ConsoleAddText("WARNING:\n \nCannot find slot0x25KeyX.bin.\nIf your console firmware is\nless than 7.0, some titles\ndecryption will fail.\n \nPress A to continue...");
+		ConsoleAddText("WARNING:\n \nCannot find slot0x25KeyX.bin.\nIf your console firmware is\nless than 7.0, some titles\n \
+		decryption will fail.\n \nPress A to continue...");
 		ConsoleShow();
 		WaitForButton(BUTTON_A);
 		DrawString(TOP_SCREEN, " NewKeyX ", 0, 240-8, RED, BLACK);
 	}
 	DrawString(TOP_SCREEN, " EmuNAND ", 0, 240-16, checkEmuNAND() ? GREEN : RED, BLACK);
-	
+
 	//That's the Main Menu initialization, easy and cool
 	MenuInit(&MainMenu);
 	MenuShow();
-	
+
     while (true) {
         u32 pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
@@ -60,7 +61,7 @@ int main(){
 		TryScreenShot();
 		MenuShow();
     }
-	
+
     DeinitFS();
     return 0;
 }
