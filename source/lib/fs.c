@@ -86,9 +86,14 @@ void FileClose(File *Handle)
 int checkEmuNAND(){
 	sdmmc_sdcard_readsectors(0x3AF00000/0x200, 1, 0x20000000);
 	if(*((char*)0x20000100) == 'N' && *((char*)0x20000101) == 'C' && *((char*)0x20000102) == 'S' && *((char*)0x20000103) == 'D'){
-		return 1;
+		return 0x3AF00000;
 	}else{
-		return 0;
+		sdmmc_sdcard_readsectors(0x3BA00000/0x200, 1, 0x20000000);
+		if(*((char*)0x20000100) == 'N' && *((char*)0x20000101) == 'C' && *((char*)0x20000102) == 'S' && *((char*)0x20000103) == 'D'){
+			return 0x3BA00000;
+		}else{
+			return 0;
+		}
 	}
 }
 
@@ -109,11 +114,12 @@ int nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsi
 		case FIRM0    : info.keyslot = 0x6; break;
 		case FIRM1    : info.keyslot = 0x6; break;
 		case CTRNAND  : info.keyslot = 0x4; break;
+		default 	  : info.keyslot = 0x3; break;
 	}
 	add_ctr(info.ctr, sector_no*0x20);
-	
+
 	sdmmc_nand_readsectors(sector_no + partition/0x200, numsectors, out);
-	DecryptPartition(&info);	
+	DecryptPartition(&info);
 }
 
 int nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition){
@@ -129,9 +135,10 @@ int nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, uns
 		case FIRM0    : info.keyslot = 0x6; break;
 		case FIRM1    : info.keyslot = 0x6; break;
 		case CTRNAND  : info.keyslot = 0x4; break;
+		default 	  : info.keyslot = 0x3; break;
 	}
 	add_ctr(info.ctr, sector_no*0x20);
-	
+
 	DecryptPartition(&info);
 	//sdmmc_nand_writesectors(sector_no + partition/0x200, numsectors, out);	//Stubbed, i don't wanna risk
 }
@@ -151,9 +158,9 @@ int emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, u
 		case CTRNAND  : info.keyslot = 0x4; break;
 	}
 	add_ctr(info.ctr, sector_no*0x20);
-	
+
 	sdmmc_sdcard_readsectors(sector_no + partition/0x200, numsectors, out);
-	DecryptPartition(&info);	
+	DecryptPartition(&info);
 }
 
 int emunand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition){
@@ -171,7 +178,7 @@ int emunand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, 
 		case CTRNAND  : info.keyslot = 0x4; break;
 	}
 	add_ctr(info.ctr, sector_no*0x20);
-	
+
 	DecryptPartition(&info);
-	//sdmmc_sdcard_writesectors(sector_no + partition/0x200, numsectors, out);	//Stubbed, i don't wanna risk
+	sdmmc_sdcard_writesectors(sector_no + partition/0x200, numsectors, out);	//Stubbed, i don't wanna risk
 }

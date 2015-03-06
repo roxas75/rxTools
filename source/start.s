@@ -5,7 +5,7 @@
 	.extern main
 	.align	4
 	.arm
-	
+
 _vectors:
 	ldr pc, =InfiniteLoop
 	.pool
@@ -23,7 +23,7 @@ _vectors:
 _start:
 @---------------------------------------------------------------------------------
 	ldr sp,=0x22140000
-		
+
 		@@wait for the arm11 kernel threads to be ready
 		ldr r1, =0x10000
 		waitLoop9:
@@ -38,13 +38,12 @@ _start:
 
 			cmp r1, #0
 			bgt waitLoop92
-			
-		ldr sp,=0x22160000
+
+		ldr sp,=0x23000000
 		ldr	r3, =main
 		blx r3
-		
+
 .pool
-		
+
 InfiniteLoop:
 	b InfiniteLoop
-

@@ -13,8 +13,6 @@
 #define BUFFER_ADDR ((volatile u8*)0x21000000)
 #define BLOCK_SIZE  (8*1024*1024)
 
-unsigned char workDirectory[256] = "";
-static char workspace[1024];
 
 u32 DecryptPartition(PartitionInfo* info){
     size_t bytesWritten;
@@ -39,12 +37,12 @@ u32 DecryptPartition(PartitionInfo* info){
 }
 
 void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. Why? No exefs right now reached 8MB.
-	if(info->keyslot == 0x2C){ 
+	if(info->keyslot == 0x2C){
 		DecryptPartition(info);
 	}else if(info->keyslot == 0x25){  //The new keyX is a bit tricky, 'couse only .code is encrypted with it
 		PartitionInfo myInfo;
 		memcpy((void*)&myInfo, (void*)info, sizeof(PartitionInfo));
-		u8 OriginalCTR[16]; memcpy(OriginalCTR, info->ctr, 16);    
+		u8 OriginalCTR[16]; memcpy(OriginalCTR, info->ctr, 16);
 		myInfo.keyslot = 0x2C; myInfo.size = 0x200;
 		DecryptPartition(&myInfo); add_ctr(myInfo.ctr, 0x200 / 16);
 		if(myInfo.buffer[0] == '.' && myInfo.buffer[1] == 'c' && myInfo.buffer[2] == 'o' && myInfo.buffer[3] == 'd' && myInfo.buffer[4] == 'e'){
@@ -73,7 +71,7 @@ int ProcessCTR(char* path){
 	char myString[256];  //In case it is needed...
 	if(FileOpen(&myFile, path, 0)){
 		ConsoleInit();
-		ConsoleAddText(TITLE); ConsoleShow();
+		ConsoleAddText(TITLE);
 		unsigned int ncch_base = 0x100;
 		unsigned char magic[] = { 0, 0, 0, 0, 0};
 		FileRead(&myFile, magic, 4, ncch_base);
@@ -92,8 +90,8 @@ int ProcessCTR(char* path){
 		}
 		ctr_ncchheader NCCH; unsigned int mediaunitsize = 0x200;
 		FileRead(&myFile, &NCCH, 0x200, ncch_base);
-		
-		ConsoleAddText(path);
+
+		//ConsoleAddText(path);
 		ConsoleAddText(NCCH.productcode);
 		unsigned int NEWCRYPTO = 0, CRYPTO = 1;
 		if(NCCH.flags[3] != 0) NEWCRYPTO = 1;
@@ -109,44 +107,44 @@ int ProcessCTR(char* path){
 			ConsoleShow();
 			return 3;
 		}
-		
+
 		ConsoleShow();
 		u8 CTR[16];
 		if(getle32(NCCH.extendedheadersize) > 0){
-			ConsoleAddText("Decrypting ExHeader..."); ConsoleShow(); 
-			ncch_get_counter(NCCH, CTR, 1); 
+			ConsoleAddText("Decrypting ExHeader..."); ConsoleShow();
+			ncch_get_counter(NCCH, CTR, 1);
 			FileRead(&myFile, BUFFER_ADDR, 0x800, ncch_base + 0x200);
-			myInfo.buffer = BUFFER_ADDR; 
-			myInfo.size = 0x800; 
-			myInfo.keyslot = 0x2C; 
+			myInfo.buffer = BUFFER_ADDR;
+			myInfo.size = 0x800;
+			myInfo.keyslot = 0x2C;
 			myInfo.ctr = CTR;
 			myInfo.keyY = NCCH.signature;
 			DecryptPartition(&myInfo);
 			FileWrite(&myFile, BUFFER_ADDR, 0x800, ncch_base + 0x200);
 		}
 		if(getle32(NCCH.exefssize) > 0){
-			ConsoleAddText("Decrypting ExeFS..."); ConsoleShow(); 
-			ncch_get_counter(NCCH, CTR, 2); 
-			myInfo.buffer = BUFFER_ADDR; 
-			myInfo.keyslot = NEWCRYPTO ? 0x25 : 0x2C; 
+			ConsoleAddText("Decrypting ExeFS..."); ConsoleShow();
+			ncch_get_counter(NCCH, CTR, 2);
+			myInfo.buffer = BUFFER_ADDR;
+			myInfo.keyslot = NEWCRYPTO ? 0x25 : 0x2C;
 			myInfo.ctr = CTR;
 			myInfo.keyY = NCCH.signature;
-			
+
 			size_t bytesRead = FileRead(&myFile, BUFFER_ADDR, getle32(NCCH.exefssize) * mediaunitsize, ncch_base + getle32(NCCH.exefsoffset) * mediaunitsize);
 			myInfo.size = bytesRead;
 			ProcessExeFS(&myInfo); //Explanation at function definition
 			FileWrite(&myFile, BUFFER_ADDR, getle32(NCCH.exefssize) * mediaunitsize, ncch_base + getle32(NCCH.exefsoffset) * mediaunitsize);
 		}
 		if(getle32(NCCH.romfssize) > 0){
-			ConsoleAddText("Decrypting RomFS..."); ConsoleShow(); 
-			ncch_get_counter(NCCH, CTR, 3); 
-			myInfo.buffer = BUFFER_ADDR; 
-			myInfo.keyslot = NEWCRYPTO ? 0x25 : 0x2C; 
+			ConsoleAddText("Decrypting RomFS..."); ConsoleShow();
+			ncch_get_counter(NCCH, CTR, 3);
+			myInfo.buffer = BUFFER_ADDR;
+			myInfo.keyslot = NEWCRYPTO ? 0x25 : 0x2C;
 			myInfo.ctr = CTR;
 			myInfo.keyY = NCCH.signature;
 			for(int i = 0; i < getle32(NCCH.romfssize) * mediaunitsize / BLOCK_SIZE; i++){
 				sprintf(myString, "%i%%", (int)((i*BLOCK_SIZE)/(getle32(NCCH.romfssize) * mediaunitsize/ 100)));
-				int x, y; ConsoleGetXY(&x, &y); y += CHAR_WIDTH * 4; x += CHAR_WIDTH*22; 
+				int x, y; ConsoleGetXY(&x, &y); y += CHAR_WIDTH * 4; x += CHAR_WIDTH*22;
 				DrawString(TOP_SCREEN, myString, x, y, ConsoleGetTextColor(),  ConsoleGetBackgroundColor());
 				size_t bytesRead = FileRead(&myFile, BUFFER_ADDR, BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
 				myInfo.size = bytesRead;
@@ -160,37 +158,52 @@ int ProcessCTR(char* path){
 		FileWrite(&myFile, &NCCH, 0x200, ncch_base);
 		if(ncch_base == 0x4000) FileWrite(&myFile, ((u8*)&NCCH) + 0x100, 0x100, 0x1100);   //Only for NCSD
 		FileClose(&myFile);
-		ConsoleAddText("Decryption completed!"); ConsoleShow(); 
+		ConsoleAddText("Decryption completed!"); ConsoleShow();
 		return 0;
 	}else return 1;
 }
 
-void CTRDecryptor(){
-	ConsoleInit();
-	ConsoleAddText(TITLE); //ConsoleShow();
-	int nFiles = 0;
+int ExploreFolders(char* folder){
+	int nfiles = 0;
 	DIR myDir;
-	FILINFO *myInfo = &workspace;  //Explanation : Since i noticed that the filename overflew for the most of the times, i reserved it a bigger space
-	
+	FILINFO curInfo;
+	FILINFO *myInfo = &curInfo;
+
 	myInfo->fname[0] = 'A';
-	while(f_opendir(&myDir, workDirectory) != FR_OK);
-	for(int i = 0; myInfo->fname[0] != 0; i++){ 
-		f_readdir(&myDir, myInfo);
-		if(ProcessCTR(myInfo->fname) == 0){
-			nFiles++;
+	while(f_opendir(&myDir, folder) != FR_OK);
+	for(int i = 0; myInfo->fname[0] != 0; i++){
+		if( f_readdir(&myDir, myInfo)) break;
+		if(myInfo->fname[0] == '.' || !strcmp(myInfo->fname, "NINTEN~1")) continue;
+
+		char path[1024];
+		sprintf(path, "%s/%s", folder, myInfo->fname);
+		if(path[strlen(path) - 1] == '/') break;
+
+		if(myInfo->fattrib & AM_DIR){
+			nfiles += ExploreFolders(path);
+		}else if(true){
+			if(ProcessCTR(path) == 0){
+				nfiles++;
+			}
 		}
+
 	}
-	
-	ConsoleInit();
-	ConsoleAddText(TITLE);
-	sprintf(workspace, "Decrypted %d files\n", nFiles);
-	ConsoleAddText(workspace); 
-	ConsoleAddText("Press A to exit"); 
-	ConsoleShow();
 	f_closedir(&myDir);
-	WaitForButton(BUTTON_A);
+	return nfiles;
 }
 
-void SetCTRDecryptorDir(char* path){
-	strcpy(workDirectory, path);
+void CTRDecryptor(){
+	ConsoleInit();
+	ConsoleAddText(TITLE);
+	ConsoleShow();
+
+	int nfiles = ExploreFolders("");
+    char str[256];
+	ConsoleInit();
+	ConsoleAddText(TITLE);
+	sprintf(str, "Decrypted %d files\n", nfiles);
+	ConsoleAddText(str);
+	ConsoleAddText("Press A to exit");
+	ConsoleShow();
+	WaitForButton(BUTTON_A);
 }

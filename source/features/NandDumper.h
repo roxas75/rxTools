@@ -4,25 +4,21 @@
 
 void NandMenu();
 void NandDumper();
-void EmuNandDumper();
 void DumpNandPartitions();
-void DumpEmuNandPartitions();
 void GenerateNandXorpads();
 void DumpNANDSystemTitles();
-void DumpEmuNANDSystemTitles();
+void RebuildNand();
 
-static Menu NandOptions = {	
-		"Nand Options", 
-		{	
-			" Create EmuNAND dump", &EmuNandDumper,
+static Menu NandOptions = {
+		"NAND Options",
+		{
 			" Create NAND dump", &NandDumper,
-			" Decrypt EmuNAND partitions", &DumpEmuNandPartitions,
-			" Decrypt NAND partitions", &DumpNandPartitions,
-			" Dump EmuNAND System Titles", &DumpEmuNANDSystemTitles,
-			" Dump NAND System Titles", &DumpNANDSystemTitles,
-			" Generate fat16 Xorpad", &GenerateNandXorpads,			
+			" Decrypt partitions", &DumpNandPartitions,
+			" Scan System Titles", &DumpNANDSystemTitles,
+			" Generate fat16 Xorpad", &GenerateNandXorpads,
+			" Inject EmuNAND partitions", &RebuildNand,		
 		},
-		7,
+		5,
 		0,
 		0
 	};

@@ -7,9 +7,9 @@
 #include "TitleKeyDecrypt.h"
 #include "padgen.h"
 
-static Menu MainMenu = {	
-		"Roxas75 3DS Toolkit [RX v1.2]", 
-		{	
+static Menu MainMenu = {
+		"Roxas75 3DS Toolkit [RX v1.3]", 
+		{
 			" Decrypt CTR Titles", &CTRDecryptor,
 			" Decrypt Title Keys", &DecryptTitleKeys,
 			" Dump Tickets", &DumpTicketDb,

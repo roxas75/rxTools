@@ -13,6 +13,5 @@ typedef struct{
 
 u32 DecryptPartition(PartitionInfo* info);
 void CTRDecryptor();
-void SetCTRDecryptorDir(char* path);
 
 #endif
