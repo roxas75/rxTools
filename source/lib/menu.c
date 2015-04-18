@@ -1,5 +1,5 @@
 #include "common.h"
-#include "Menu.h"
+#include "menu.h"
 #include "draw.h"
 #include "hid.h"
 
