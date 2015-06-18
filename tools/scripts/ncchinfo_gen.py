@@ -12,7 +12,7 @@
 #   4 bytes   Size in MB(rounded up)
 #   8 bytes   Reserved
 #   4 bytes   Uses 7x crypto? (0 or 1)
-# 112 bytes   Output file name in UTF-16 (format used: "/titleId.partitionName.sectionName.xorpad")
+# 112 bytes   Output file name in UTF-8 (format used: "/titleId.partitionName.sectionName.xorpad")
 #####
 #seedinfo.bin format
 #
@@ -193,16 +193,8 @@ def getNewkeyY(keyY,header,titleId):
             seedcheck = struct.unpack('>I',header.seedcheck)[0]
             if int(sha256(seeds[i] + tids[i]).hexdigest()[:8],16) == seedcheck:
                 keystr = sha256(keyY + seeds[i]).hexdigest()[:32]
-                v = []
-                for j in range(0,32,8):
-                    v.append(int(keystr[j:j+8],16))
-                w = []
-                for j in v:
-                    w.append(struct.pack('>I',j))
-                newkeyY = ''
-                for j in w:
-                    newkeyY += j
-                return bytearray(newkeyY)
+				newkeyY = unhexlify(keystr)
+				return bytearray(newkeyY)
             else:
                 raise SeedError('Seed check fail, wrong seed?')
     raise SeedError("Can't find SEEDDB file!\nPlease dump savedata files from \n(nand:/data/<console-unique>/sysdata/0001000f/) and rename as *.sav")
@@ -255,6 +247,7 @@ def parseNCCH(fh, offs=0, idx=0, titleId='', standAlone=1):
         print tab + 'Uses 7.x NCCH crypto'
     a = header.flags[7]
     useSeedCrypto = header.flags[7] == 32
+	
     if useSeedCrypto:
         keyY = getNewkeyY(keyY,header,struct.pack('I',int(titleId[8:],16))+struct.pack('I',int(titleId[:8],16)))
         print tab + 'Use Seed NCCH crypto'
@@ -332,7 +325,6 @@ def genOutName(titleId, partitionName, sectionName):
 
 
 if __name__ == "__main__":
-    sys.argv.append('00000001.dec')
     if len(sys.argv) < 2:
         print 'usage: ctrKeyGen.py files..'
         print '  Supports parsing both CCI(.3ds) and NCCH files.'
