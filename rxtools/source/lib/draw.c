@@ -33,63 +33,63 @@ void ClearScreen(unsigned char *screen, int color)
 void DrawCharacter(unsigned char *screen, int character, int x, int y, int color, int bgcolor)
 {
     int yy, xx;
+    int xDisplacement = x * SCREEN_HEIGHT;
+    int yDisplacement = SCREEN_HEIGHT - y - 1;
+    unsigned char *screenPos = screen + (xDisplacement + yDisplacement) * BYTES_PER_PIXEL;
     for (yy = 0; yy < 8; yy++)
     {
-        int xDisplacement = (x * BYTES_PER_PIXEL * SCREEN_HEIGHT);
-        int yDisplacement = ((SCREEN_HEIGHT - (y + yy) - 1) * BYTES_PER_PIXEL);
-        unsigned char *screenPos = screen + xDisplacement + yDisplacement;
-
         unsigned char charPos = font[character * 8 + yy];
         for (xx = 7; xx >= 0; xx--)
         {
             if ((charPos >> xx) & 1)
             {
 				if(color != TRANSPARENT){
-					*(screenPos + 0) = color >> 16; //B
-					*(screenPos + 1) = color >> 8; //G
-					*(screenPos + 2) = color & 0xFF; //R
+					*(screenPos++) = color >> 16; //B
+					*(screenPos++) = color >> 8; //G
+					*(screenPos++) = color & 0xFF; //R
 				}
             }
             else
             {
 				if(bgcolor != TRANSPARENT){
-					*(screenPos + 0) = bgcolor >> 16; //B
-					*(screenPos + 1) = bgcolor >> 8; //G
-					*(screenPos + 2) = bgcolor & 0xFF; //R
+					*(screenPos++) = bgcolor >> 16; //B
+					*(screenPos++) = bgcolor >> 8; //G
+					*(screenPos++) = bgcolor & 0xFF; //R
 				}
             }
-            screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT;
+            screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT - 3;
         }
+        screenPos -= BYTES_PER_PIXEL * (SCREEN_HEIGHT * 8 + 1);
     }
     if(screen = TOP_SCREEN && TOP_SCREEN2){
         screen = TOP_SCREEN2;
+        int xDisplacement = x * SCREEN_HEIGHT;
+        int yDisplacement = SCREEN_HEIGHT - y - 1;
+        unsigned char *screenPos = screen + (xDisplacement + yDisplacement) * BYTES_PER_PIXEL;
         for (yy = 0; yy < 8; yy++)
         {
-            int xDisplacement = (x * BYTES_PER_PIXEL * SCREEN_HEIGHT);
-            int yDisplacement = ((SCREEN_HEIGHT - (y + yy) - 1) * BYTES_PER_PIXEL);
-            unsigned char *screenPos = screen + xDisplacement + yDisplacement;
-
             unsigned char charPos = font[character * 8 + yy];
             for (xx = 7; xx >= 0; xx--)
             {
                 if ((charPos >> xx) & 1)
                 {
     				if(color != TRANSPARENT){
-    					*(screenPos + 0) = color >> 16; //B
-    					*(screenPos + 1) = color >> 8; //G
-    					*(screenPos + 2) = color & 0xFF; //R
+    					*(screenPos++) = color >> 16; //B
+    					*(screenPos++) = color >> 8; //G
+    					*(screenPos++) = color & 0xFF; //R
     				}
                 }
                 else
                 {
     				if(bgcolor != TRANSPARENT){
-    					*(screenPos + 0) = bgcolor >> 16; //B
-    					*(screenPos + 1) = bgcolor >> 8; //G
-    					*(screenPos + 2) = bgcolor & 0xFF; //R
+    					*(screenPos++) = bgcolor >> 16; //B
+    					*(screenPos++) = bgcolor >> 8; //G
+    					*(screenPos++) = bgcolor & 0xFF; //R
     				}
                 }
-                screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT;
+                screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT - 3;
             }
+            screenPos -= BYTES_PER_PIXEL * (SCREEN_HEIGHT * 8 + 1);
         }
     }
 }
