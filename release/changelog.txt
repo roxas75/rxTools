@@ -1,0 +1,17 @@
+Version 2.5
+    - Progect made open-source
+    - Signature checks disabled
+    - MSET Downgrading utilities
+    - FBI Installing on emuNAND and sysNAND for CIA managing
+    - Graphic restyle and fix of the annoying flickering
+    - rxMode autoboot
+    - rxMode booting un sysNAND by pressing X during the launch
+    - Improved stability of the code
+    - Fixed some wrong KeyX usage when it was not necessary
+    - Opened up DevMode
+
+Enjoy!
+
+SUPPORT THE ORIGINAL, NOT THE IMITATION!
+
+-Roxas75
