@@ -3,8 +3,8 @@
 #include "common.h"
 //Screen Macros
 #define BYTES_PER_PIXEL 3
-#define SCREEN_WIDTH 240
-#define SCREEN_HEIGHT 400
+#define SCREEN_WIDTH 400
+#define SCREEN_HEIGHT 240
 #define SCREEN_SIZE (BYTES_PER_PIXEL*SCREEN_WIDTH*SCREEN_HEIGHT)
 #define TOP_SCREEN (u8*)(*(u32*)((uint32_t)0x080FFFC0 + 4 * (*(u32*)0x080FFFD8 & 1)))
 #define TOP_SCREEN2 (u8*)(*(u32*)0x080FFFC4 )
