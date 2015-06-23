@@ -17,6 +17,7 @@ I do not support piracy in any way, all the data and informations in my software
 - Support for Ninjhax (Not Stable)
 - Hacking tools collection
 - DevMode, a semplification and automation of what you all call "PastaCFW", which i used for debug and always hidden in the menu
+
 ### rxMode
 - Support for the latest emuNAND version
 - Support for sysNAND, in case an emuNAND is not found
