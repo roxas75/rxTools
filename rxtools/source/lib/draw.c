@@ -14,12 +14,16 @@ unsigned char* tmpscreen = 0x26000000;
 void ClearScreen(unsigned char *screen, int color)
 {
     int i;
-    unsigned char *screenPos = screen;
-    for (i = 0; i < (SCREEN_HEIGHT * SCREEN_WIDTH); i++)
+//    unsigned char *screenPos = screen;
+    color = color >> 16 & 0xFF | color & 0xFF00 | color << 16 & 0xFF0000
+    for (i = 0; i < (SCREEN_HEIGHT * SCREEN_WIDTH * 3) >> 2; i++)
     {
-        *(screenPos++) = color >> 16; //B
-        *(screenPos++) = color >> 8; //G
-        *(screenPos++) = color & 0xFF; //R
+//        *(screenPos++) = color >> 16; //B
+//        *(screenPos++) = color >> 8; //G
+//        *(screenPos++) = color & 0xFF; //R
+        color |= color << 24;
+        *(unsigned *)screen = color;
+        color >>= 8;
     }
 
     //memset(screen,color,SCREEN_SIZE);
