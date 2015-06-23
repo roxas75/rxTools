@@ -35,8 +35,8 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
     int yy, xx;
     for (yy = 0; yy < 8; yy++)
     {
-        int xDisplacement = (x * BYTES_PER_PIXEL * SCREEN_WIDTH);
-        int yDisplacement = ((SCREEN_WIDTH - (y + yy) - 1) * BYTES_PER_PIXEL);
+        int xDisplacement = (x * BYTES_PER_PIXEL * SCREEN_HEIGHT);
+        int yDisplacement = ((SCREEN_HEIGHT - (y + yy) - 1) * BYTES_PER_PIXEL);
         unsigned char *screenPos = screen + xDisplacement + yDisplacement;
 
         unsigned char charPos = font[character * 8 + yy];
@@ -58,15 +58,15 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
 					*(screenPos + 2) = bgcolor & 0xFF; //R
 				}
             }
-            screenPos += BYTES_PER_PIXEL * SCREEN_WIDTH;
+            screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT;
         }
     }
     if(screen = TOP_SCREEN && TOP_SCREEN2){
         screen = TOP_SCREEN2;
         for (yy = 0; yy < 8; yy++)
         {
-            int xDisplacement = (x * BYTES_PER_PIXEL * SCREEN_WIDTH);
-            int yDisplacement = ((SCREEN_WIDTH - (y + yy) - 1) * BYTES_PER_PIXEL);
+            int xDisplacement = (x * BYTES_PER_PIXEL * SCREEN_HEIGHT);
+            int yDisplacement = ((SCREEN_HEIGHT - (y + yy) - 1) * BYTES_PER_PIXEL);
             unsigned char *screenPos = screen + xDisplacement + yDisplacement;
 
             unsigned char charPos = font[character * 8 + yy];
@@ -88,7 +88,7 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
     					*(screenPos + 2) = bgcolor & 0xFF; //R
     				}
                 }
-                screenPos += BYTES_PER_PIXEL * SCREEN_WIDTH;
+                screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT;
             }
         }
     }
