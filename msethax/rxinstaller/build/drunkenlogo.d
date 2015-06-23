@@ -1,0 +1,1 @@
+drunkenlogo.o: drunkenlogo.s
