@@ -74,8 +74,8 @@ LIBDIRS := $(LIBNDS) $(PORTLIBS)
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
-
-export OUTPUT := $(CURDIR)/$(TARGET)
+export TOOLS := ../../tools
+export OUTPUT := $(CURDIR)
 
 export VPATH := $(CURDIR)/$(subst /,,$(dir $(ICON)))\
                 $(foreach dir,$(SOURCES),$(CURDIR)/$(dir))\
@@ -88,7 +88,7 @@ CFILES   := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES   := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PNGFILES := $(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
-BINFILES := $(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
+BINFILES := mset4x.bin mset6x.bin
 
 # prepare NitroFS directory
 ifneq ($(strip $(NITRO)),)
@@ -150,18 +150,26 @@ else
   endif
 endif
 
-.PHONY: $(BUILD) clean ropchains
+.PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
+all: data/mset4x.bin data/mset6x.bin $(BUILD)
+
+data/mset4x.bin: rop/mset4x.s
+	@$(TOOLS)/armips.exe $<
+	
+data/mset6x.bin: rop/mset6x.s
+	@$(TOOLS)/armips.exe $<
+	
 $(BUILD):
 	@mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@rm $(OUTPUT).elf
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(SOUNDBANK) 
-	@$(MAKE) -C ROPChains clean
+	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(SOUNDBANK) data/*.bin
 
 #---------------------------------------------------------------------------------
 else
