@@ -1,73 +1,64 @@
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
+PYTHON = python
 
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
-endif
-#---------------------------------------------------------------------------------
-TOOLS := tools
+CFLAGS = -std=c11 -O2 -Wall -Wextra
 
-#---------------------------------------------------------------------------------
+tools = tools/fill_with_zero tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/fill_with_crap
 
-.PHONY: all clean
+.PHONY: all
+all: rxTools.dat
 
-#i know, these binary do not exist. The purpouse is to update the package everytime
+.PHONY: distclean
+distclean: clean
+	@rm -rf release/rxTools.dat release/ninjhax release/mset
 
-all: rxtools.bin rxmode.bin data.bin spiderhax.bin brahma.bin msethax.bin release.bin
-
-rxtools.bin:
-	@cls
-	@echo BUILDING RXTOOLS...
-	@cd rxtools && make
-	@$(TOOLS)/fill_with_zero.exe rxtools\rxtools.bin 917504
-	@$(TOOLS)/addxor_tool.exe rxtools\rxtools.bin payload.bin 0x67893421 0x12756342
-
-rxmode.bin:
-	@cls
-	@echo BUILDING RXMODE...
-	@cd rxmode && make
-
-data.bin:
-	@cls
-	@echo BUILDING DATA...
-	@$(TOOLS)/pack_tool.exe data/titlekey.bin data/reboot.bin data/patch.bin data/top_bg.bin data.bin
-	@$(TOOLS)/xor.exe data.bin $(TOOLS)\xorpad\data.xor
-	@rm data.bin
-	@mv data.bin.out data.bin
-
-spiderhax.bin:
-	@cls
-	@echo CREATING RXTOOLS.DAT...
-	@cp spiderhax/Launcher.dat rxTools.dat
-	@python $(TOOLS)/insert.py rxTools.dat payload.bin 0x20000
-	@python $(TOOLS)/insert.py rxTools.dat data.bin 0x100000
-	@$(TOOLS)/fill_with_crap.exe rxTools.dat 4194304
-	@rm payload.bin data.bin
-
-brahma.bin:
-	@cls
-	@echo BUILDING BRAHMA FOR NINJHAX...
-	@cd brahma && make
-
-msethax.bin:
-	@cls
-	@echo BUILDING MSETHAX...
-	@cd msethax && make
-	@python $(TOOLS)/insert.py rxTools.dat msethax\mset.bin 0
-
-release.bin:
-	@cls 
-	@echo MAKING THE RELEASE...
-	@mkdir -p release/mset
-	@mkdir -p release/ninjhax
-	@mv rxTools.dat release/rxTools.dat
-	@cp brahma\brahma.3dsx release\ninjhax\rxtools.3dsx
-	@cp brahma\brahma.smdh release\ninjhax\rxtools.smdh
-	@cp msethax\rxinstaller.nds release\mset\rxinstaller.nds
-	@echo DONE!!
+.PHONY: clean
 clean:
-	@cd rxtools && make clean
-	@cd rxmode && make clean
-	@cd brahma && make clean
-	@cd msethax && make clean
+	@make -C rxtools clean
+	@make -C rxmode clean
+	@make -C brahma clean
+	@make -C msethax clean
+	@rm -f $(tools) payload.bin data.bin rxTools.dat
+
+.PHONY: release
+release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh
+	@mkdir -p release/mset release/ninjhax
+	@cp rxTools.dat release
+	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
+	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
+	@cp msethax/rxinstaller.nds release/mset/rxinstaller.nds
+
+rxTools.dat: payload.bin data.bin msethax/mset.bin tools/fill_with_crap
+	@cp spiderhax/Launcher.dat $@
+	@$(PYTHON) tools/insert.py $@ payload.bin 0x20000
+	@$(PYTHON) tools/insert.py $@ data.bin 0x10000
+	@$(PYTHON) tools/insert.py $@ msethax/mset.bin 0
+	@tools/fill_with_crap $@ 4194304
+
+.PHONY: brahma/brahma.3dsx brahma/brahma.smdh
+brahma/brahma.3dsx brahma/brahma.smdh:
+	make -C $(dir $@) all
+
+.PHONY: msethax/mset.bin
+msethax/mset.bin:
+	make -C $(dir $@) all
+
+data.bin: rxmode/patch.bin data/titlekey.bin data/reboot.bin data/top_bg.bin tools/pack_tool tools/xor
+	@tools/pack_tool $(filter %.bin, $^) $@
+	@tools/xor $@ tools/xorpad/data.xor
+	@rm $@
+	@mv $@.out $@
+
+.PHONY: rxmode/patch.bin
+rxmode/patch.bin: tools/cfwtool
+	@make -C $(dir $@) all
+
+payload.bin: rxtools/rxtools.bin tools/addxor_tool
+	@tools/addxor_tool $< $@ 0x67893421 0x12756342
+
+.PHONY: rxtools/rxtools.bin
+rxtools/rxtools.bin: tools/fill_with_zero tools/addxor_tool
+	@make -C $(dir $@) all
+	@tools/fill_with_zero $@ 917504
+
+$(tools): tools/%: tools/toolsrc/%/main.c
+	$(LINK.c) $(OUTPUT_OPTION) $^
