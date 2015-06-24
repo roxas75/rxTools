@@ -37,7 +37,7 @@ What is actually necessary is:
 - [armips] (https://github.com/Kingcom/armips)
 - GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with gcc-base will be fine)
 
-Just run the **make.exe** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
+Just run the **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
 
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
