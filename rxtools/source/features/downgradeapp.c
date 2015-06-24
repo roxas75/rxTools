@@ -91,7 +91,8 @@ void downgradeMSET(){
     unsigned int titleid_low = 0x00040010;
     unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000/*, 0x00026000, 0x00027000, 0x00028000*/}; //JPN, USA, EUR, CHN, KOR, TWN
     char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
-    unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
+    unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B };   //JPN, USA, EUR
+	unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
     unsigned int region;
     ConsoleInit();
     ConsoleSetTitle("MSET Downgrader");
