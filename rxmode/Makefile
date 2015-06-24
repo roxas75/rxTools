@@ -3,16 +3,26 @@
 #---------------------------------------------------------------------------------
 TARGET 		:=  patch.bin
 BUILD		:=	build
-ARMIPS    	:=  tools/armips.exe
-SFILES 		 =  $(wildcard source/*.s)
+TOOLS		:=	../tools
+ARMIPS    	:=  $(TOOLS)/armips.exe
+SFILES 		:=  $(wildcard source/*.s)
 
-all: 
+.PHONY: clean all
+
+all: $(BUILD) arm9payload.bin patch.bin
+
+$(BUILD):
+	@[ -d $@ ] || mkdir -p $@
 	
-#all the targets here
+arm9payload.bin:
+	@cd source/arm9 && make
+	
+patch.bin:
 	@$(foreach sfile,$(SFILES), $(ARMIPS) $(sfile);)
-	@tools\cfwtool.exe $(BUILD) $(TARGET)
+	@$(TOOLS)/cfwtool.exe $(BUILD) $(TARGET)
+	@mv patch.bin ../data/patch.bin
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD)
+	@rm -fr $(BUILD) *.bin
  

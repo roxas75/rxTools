@@ -58,7 +58,7 @@ LIBDIRS	:=
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
  
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+export OUTPUT	:=	$(CURDIR)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
 			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
@@ -105,7 +105,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin Launcher.dat
+	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin
  
  
 #---------------------------------------------------------------------------------
@@ -123,8 +123,8 @@ $(OUTPUT).elf	:	$(OFILES)
 #---------------------------------------------------------------------------------
 %.bin: %.elf
 	@$(OBJCOPY) -O binary $< $@
+	@rm $<
 	@echo built ... $(notdir $@)
- 
 
 -include $(DEPENDS)
 
