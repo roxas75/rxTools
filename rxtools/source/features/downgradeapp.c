@@ -151,12 +151,14 @@ void installFBI(){
     char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
     unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
     unsigned int region;
-	int choice = NandSwitch();
-	if(choice == -1) return;
+    switch(NandSwitch()){
+    	case 0: drive = "1"; break;
+    	case 1: drive = "2"; break;
+    	default: return;
+    }
 	ConsoleInit();
     ConsoleSetTitle("FBI Installation");
 	print("Editing Health&Safety Information...\n"); ConsoleShow();
-	char filepath[256];
 	memset(filepath, 0, 256);
 	for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], drive); region++);
     if(region < supported_regions){
