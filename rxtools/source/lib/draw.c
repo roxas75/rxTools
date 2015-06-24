@@ -185,15 +185,10 @@ int GetPixel(int x, int y, int screen){
 
 //----------------Some of my shit..........
 void SplashScreen(){
-	u8* Top = GetFilePack(TOP_PIC);
-    for(int i = 0; i < 0x46500; i+=3){
-		*(TOP_SCREEN + i + 0) = Top[i];
-		*(TOP_SCREEN + i + 1) = Top[i + 1];
-		*(TOP_SCREEN + i + 2) = Top[i + 2];
-        if(TOP_SCREEN2){
-           *(TOP_SCREEN2 + i + 0) = Top[i];
-    		*(TOP_SCREEN2 + i + 1) = Top[i + 1];
-    		*(TOP_SCREEN2 + i + 2) = Top[i + 2];
-        }
+	unsigned *Top = (unsigned *)GetFilePack(TOP_PIC);
+	for(int i = 0; i < SCREEN_SIZE >> 4; i++){
+		*(unsigned *)(TOP_SCREEN + i) = Top[i];
+        if(TOP_SCREEN2)
+            *(unsigned *)(TOP_SCREEN2 + i) = Top[i];
 	}
 }
