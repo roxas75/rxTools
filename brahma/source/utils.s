@@ -30,12 +30,6 @@ EnableInterrupts:
 	msr cpsr_cx, r0
 	bx lr
 
-.global svcBackdoor
-.type svcBackdoor, %function
-svcBackdoor:
-	svc 0x7B
-	bx lr
-	
 .global svcCorruptedCreateThread
 .type svcCorruptedCreateThread, %function
 svcCorruptedCreateThread:

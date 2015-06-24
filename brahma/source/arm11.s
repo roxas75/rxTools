@@ -102,8 +102,6 @@ wait_arm11_loop:
 	pa_firm_header:      .long 0x24000000
 	pa_arm9_payload:     .long 0x23F00000
 	pa_io_mem:           .long 0x10140000
-	
-	.align 4
 hijack_arm9_end:
 
 copy_mem:
@@ -129,9 +127,6 @@ loc_FFFF0AA8:
 	BNE             loc_FFFF0AA8
 locret_FFFF0AC0:
 	BX              LR
-
-
-.align 4
 
 busy_spin:
 	SUBS            R0, R0, #2
@@ -169,7 +164,7 @@ pxi_sync:
 	STRB            R1, [R0,#3]
 	BX              LR
 
-.global	arm11_end	
+.global arm11_end
 arm11_end:
 
 .global arm11_globals_start

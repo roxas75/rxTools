@@ -3,31 +3,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
-#include <dirent.h>
 #include "brahma.h"
+#include "hid.h"
+#include "menus.h"
+#include "sochlp.h"
+#include "payload_bin.h"
 
-void waitKey() {
-	while (aptMainLoop()) {
-		// Wait next screen refresh
-		gspWaitForVBlank();
-
-		// Read which buttons are currently pressed 
-		hidScanInput();
-		u32 kDown = hidKeysDown();
-		u32 kHeld = hidKeysHeld();
-		
-		// If B is pressed, break loop and quit
-		if (kDown & KEY_B){
-			break;
-		}
-
-		// Flush and swap framebuffers
-		gfxFlushBuffers();
-		gfxSwapBuffers();
-	}
+s32 quick_boot_firm (s32 load_from_disk) {
+	if (load_from_disk)
+		load_arm9_payload_from_mem(payload_bin, payload_bin_size);
+	firm_reboot();	
 }
 
-int main() {
+s32 main (void) {
 	// Initialize services
 	srvInit();
 	aptInit();
@@ -36,9 +24,7 @@ int main() {
 	fsInit();
 	sdmcInit();
 	hbInit();
-
 	qtmInit();
-	consoleInit(GFX_BOTTOM, NULL);
 	
 	Handle fileHandle;
 	u32 bytesRead;
@@ -49,14 +35,17 @@ int main() {
     FSFILE_Read(fileHandle, &bytesRead, 0x20000, 0x14400000, 320*1024);
     FSFILE_Close(fileHandle);
 	
-	run_exploit();
-		                     
-	printf("\nPress [B] to return to launcher\n");
-	waitKey();
-	printf("[+] Exiting...\n");
-	
-	EXIT:
-	// Exit services
+	consoleInit(GFX_BOTTOM, NULL);
+	if (brahma_init()) {
+		quick_boot_firm(1);
+		printf("[!] Quickload failed\n");
+		brahma_exit();
+
+	} else {
+		printf("* BRAHMA *\n\n[!]Not enough memory\n");
+		wait_any_key();
+	}
+  EXIT:
 	hbExit();
 	sdmcExit();
 	fsExit();
@@ -64,7 +53,6 @@ int main() {
 	hidExit();
 	aptExit();
 	srvExit();
-	
 	// Return to hbmenu
 	return 0;
 }
