@@ -16,7 +16,7 @@
 
 //----------------- PROCESS9 ----------------------
 .nds
-.create build/080859C8.bin, 0x080859C8
+.create build/080859FC.bin, 0x080859FC
 .arm
 .align 4
 
