@@ -20,6 +20,7 @@ arm9payload.bin:
 patch.bin:
 	@$(foreach sfile,$(SFILES), $(ARMIPS) $(sfile);)
 	@$(TOOLS)/cfwtool $(BUILD) $(TARGET)
+	@mv patch.bin ../data/patch.bin
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
