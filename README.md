@@ -33,12 +33,11 @@ Since the project is open-source you are welcome to implement other some systems
 
 What is actually necessary is:
 - Python 2.7
-- DevkitARM 
-- armips
-- ctrulib
-- libnds
+- [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM, libctru, libnds installed
+- [armips] (https://github.com/Kingcom/armips)
+- GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with gcc-base will be fine)
 
-Just run the **build.bat** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
+Just run the **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
 
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
