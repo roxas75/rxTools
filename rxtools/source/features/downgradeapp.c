@@ -159,7 +159,7 @@ void installFBI(){
 		if(!FindApp(&filepath, 0x00040010, 0x00021300, choice ? "2" : "1")) //USA
 			FindApp(&filepath, 0x00040010, 0x00022300, choice ? "2" : "1");  //EUR
 	//One of them should actually be found
-	print("%s\n", filepath);
+	//print("%s\n", filepath);
 	if(FileCopy(filepath, "0:fbi_inject.app") == 1){
 		print("Success!\nDeleting 'fbi_inject.app'...\n");
 		f_unlink("0:fbi_inject.app");

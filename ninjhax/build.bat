@@ -1,3 +1,0 @@
-make
-del *.elf
-pause
