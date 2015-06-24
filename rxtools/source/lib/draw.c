@@ -15,7 +15,7 @@ void ClearScreen(unsigned char *screen, int color)
 {
     int i;
 //    unsigned char *screenPos = screen;
-    color = color >> 16 & 0xFF | color & 0xFF00 | color << 16 & 0xFF0000
+    color = color >> 16 & 0xFF | color & 0xFF00 | color << 16 & 0xFF0000;
     for (i = 0; i < SCREEN_SIZE; i += 4)
     {
 //        *(screenPos++) = color >> 16; //B
