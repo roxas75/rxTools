@@ -15,7 +15,7 @@ void ClearScreen(unsigned char *screen, int color)
 {
     int i;
 //    unsigned char *screenPos = screen;
-    color = color >> 16 & 0xFF | color & 0xFF00 | color << 16 & 0xFF0000
+    color = color >> 16 & 0xFF | color & 0xFF00 | color << 16 & 0xFF0000;
     for (i = 0; i < SCREEN_SIZE; i += 4)
     {
 //        *(screenPos++) = color >> 16; //B
@@ -187,8 +187,8 @@ int GetPixel(int x, int y, int screen){
 void SplashScreen(){
 	unsigned *Top = (unsigned *)GetFilePack(TOP_PIC);
 	for(int i = 0; i < SCREEN_SIZE >> 4; i++){
-		*(TOP_SCREEN + i) = Top[i];
+		*(unsigned *)(TOP_SCREEN + i) = Top[i];
         if(TOP_SCREEN2)
-            *(TOP_SCREEN2 + i) = Top[i];
+            *(unsigned *)(TOP_SCREEN2 + i) = Top[i];
 	}
 }
