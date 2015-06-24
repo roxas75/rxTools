@@ -99,8 +99,8 @@ void FileClose(File *Handle)
 int FileCopy(char* dest, char* source){
 	File out;
 	File in;
-	if(!FileOpen(&in, source, 0)) return -2;
-	if(!FileOpen(&out, dest, 1)) return -1;
+	if(!FileOpen(&in, source, 0)) return -1;
+	FileOpen(&out, dest, 1);
 	unsigned int chunk_size = 0x4000;
 	unsigned char* buf = 0x26000200;
 	int pos = 0;

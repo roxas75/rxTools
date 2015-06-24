@@ -90,8 +90,10 @@ DRESULT disk_write (
             break;
         case 1:
             nand_writesectors(sector, count, buff, CTRNAND);
+			break;
         case 2:
             emunand_writesectors(sector, count, buff, CTRNAND);
+			break;
     }
     return RES_OK;
 }

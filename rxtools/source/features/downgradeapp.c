@@ -58,12 +58,13 @@ int FindApp(char* filepath, unsigned int tid_low, unsigned int tid_high, char* d
 			memset(&path, 0, 256);
 			sprintf(path, "%s/%02X%02X%02X%02X.APP", folder, tmd_entry.id&0xFF, tmd_entry.id>>8&0xFF, tmd_entry.id>>16&0xFF, tmd_entry.id>>24&0xFF);
 			//print(path); print("\n"); ConsoleShow();
+			if(FileOpen(&tmp, path, 0)){
+				FileClose(&tmp);
+				strcpy(filepath, path);
+				f_closedir(curDir);
+				return 1;
+			}
 		}else continue;
-		
-		FileClose(&tmp);
-        strcpy(filepath, path);
-        f_closedir(curDir);
-        return 1;
 	}
 	f_closedir(curDir);
 	return 0;
@@ -86,7 +87,7 @@ int checkDgFile(char* path, unsigned int hash){
 void downgradeMSET(){
     File dg;
     char filepath[256];
-    char* dgpath = "msetdg.bin";
+    char* dgpath = "0:msetdg.bin";
     unsigned int titleid_low = 0x00040010;
     unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000}; //JPN, USA, EUR
     unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B };   //JPN, USA, EUR
@@ -97,7 +98,7 @@ void downgradeMSET(){
     ConsoleSetTitle("MSET Downgrader");
 	
     print("Opening MSET app...\n"); ConsoleShow();
-    if(FindApp(filepath, titleid_low, titleid_high[0], "1")) region = 0;
+    if(FindApp(&filepath, titleid_low, titleid_high[0], "1")) region = 0;
     else if(FindApp(&filepath, titleid_low, titleid_high[1], "1")) region = 1;
     else if(FindApp(&filepath, titleid_low, titleid_high[2], "1")) region = 2;
     if(region != -1){
@@ -149,17 +150,19 @@ void installFBI(){
 	char* drive;
 	int choice = NandSwitch();
 	if(choice == -1) return;
-	if(choice) drive = "2"; //emuNAND
-	else drive = "1"; //sysNAND
 	ConsoleInit();
     ConsoleSetTitle("FBI Installation");
 	print("Editing Health&Safety Information...\n"); ConsoleShow();
 	char filepath[256];
-	FindApp(&filepath, 0x00040010, 0x00022300, drive);
-	//print("%s\n", filepath);
-	if(FileCopy(filepath, "fbi_inject.app") == 1){
+	memset(filepath, 0, 256);
+	if(!FindApp(&filepath, 0x00040010, 0x00020300, choice ? "2" : "1"))	 //JPN
+		if(!FindApp(&filepath, 0x00040010, 0x00021300, choice ? "2" : "1")) //USA
+			FindApp(&filepath, 0x00040010, 0x00022300, choice ? "2" : "1");  //EUR
+	//One of them should actually be found
+	print("%s\n", filepath);
+	if(FileCopy(filepath, "0:fbi_inject.app") == 1){
 		print("Success!\nDeleting 'fbi_inject.app'...\n");
-		f_unlink("fbi_inject.app");
+		f_unlink("0:fbi_inject.app");
 	}else
 		print("Failure!\n");
 	print("\nPress A to exit\n");

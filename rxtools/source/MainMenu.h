@@ -152,7 +152,7 @@ static Menu MainMenu = {
 			" Credits", &Credits,
 			" DevMode", &DevMode,
 		},
-		6,
+		7,
 		0,
 		0
 	};
