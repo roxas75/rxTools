@@ -88,62 +88,53 @@ void downgradeMSET(){
     char filepath[256];
     char* dgpath = "msetdg.bin";
     unsigned int titleid_low = 0x00040010;
-    unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000}; //JPN, USA, EUR, CHN, KOR, TWN
-    unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B };   //JPN, USA, EUR, CHN, KOR, TWN
-    char* regions[] = { "Unknown", "Japan", "USA", "Europe", "China", "Korea", "Taiwan"};
-    unsigned int supported_regions = 3;
-    unsigned int region = -1;
+    unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000/*, 0x00026000, 0x00027000, 0x00028000*/}; //JPN, USA, EUR, CHN, KOR, TWN
+    unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B/*, 0x, 0x, 0x*/};   //JPN, USA, EUR, CHN, KOR, TWN
+    char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
+    unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
+    unsigned int region;
     ConsoleInit();
     ConsoleSetTitle("MSET Downgrader");
 	
     print("Opening MSET app...\n"); ConsoleShow();
-    if(FindApp(&filepath, titleid_low, titleid_high[0], "1")) region = 0;
-    else if(FindApp(&filepath, titleid_low, titleid_high[1], "1")) region = 1;
-    else if(FindApp(&filepath, titleid_low, titleid_high[2], "1")) region = 2;
-    else if(FindApp(&filepath, titleid_low, titleid_high[3], "1")) region = 3;
-    else if(FindApp(&filepath, titleid_low, titleid_high[4], "1")) region = 4;
-    else if(FindApp(&filepath, titleid_low, titleid_high[5], "1")) region = 5;
-    if(region != -1){
-        print("Region : %s\n\n", regions[region + 1]); ConsoleShow();
-        if(region<supported_regions){
-    		//print(filepath); print("\n"); ConsoleShow(); FileCopy("mset.app", filepath);
-            FileOpen(&dg, filepath, 0);
-            unsigned int check_val;
-            FileRead(&dg, &check_val, 4, 0x130);
-            FileClose(&dg);
-            if(check_val == 0){
-                print("MSET is already in his exploitable\nversion.\nThere's no need to downgrade.\n"); ConsoleShow();
-            }else if(checkDgFile(dgpath, mset_hash[region])){
-                    print("Opening Downgrade Pack...\n"); ConsoleShow();
-                    FileOpen(&dg, dgpath, 0);
-                    unsigned int dgsize = FileGetSize(&dg);
-                    unsigned char* buf = 0x21000000;
-                    FileRead(&dg, buf, dgsize, 0);
-                    //Decrypting...
-                    u8 iv[0x10] = {0};
-                    u8 Key[0x10] = {0};
-                    GetTitleKey(&Key, titleid_low, titleid_high[region]);
-                	aes_context aes_ctxt;
-                	aes_setkey_dec(&aes_ctxt, Key, 0x80);
-                	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, dgsize, iv, buf, buf);
-                    FileWrite(&dg, buf, dgsize, 0);
-                    FileClose(&dg);
-                    //[/Decrypting]
+	for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], "1"); region++);
+    if(region < supported_regions){
+        print("Region : %s\n\n", regions[region]); ConsoleShow();
+    	//print(filepath); print("\n"); ConsoleShow(); FileCopy("mset.app", filepath);
+        FileOpen(&dg, filepath, 0);
+        unsigned int check_val;
+        FileRead(&dg, &check_val, 4, 0x130);
+        FileClose(&dg);
+        if(check_val == 0){
+            print("MSET is already in his exploitable\nversion.\nThere's no need to downgrade.\n"); ConsoleShow();
+        }else if(checkDgFile(dgpath, mset_hash[region])){
+                print("Opening Downgrade Pack...\n"); ConsoleShow();
+                FileOpen(&dg, dgpath, 0);
+                unsigned int dgsize = FileGetSize(&dg);
+                unsigned char* buf = 0x21000000;
+                FileRead(&dg, buf, dgsize, 0);
+                //Decrypting...
+                u8 iv[0x10] = {0};
+                u8 Key[0x10] = {0};
+                GetTitleKey(&Key, titleid_low, titleid_high[region]);
+            	aes_context aes_ctxt;
+            	aes_setkey_dec(&aes_ctxt, Key, 0x80);
+            	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, dgsize, iv, buf, buf);
+                FileWrite(&dg, buf, dgsize, 0);
+                FileClose(&dg);
+                //[/Decrypting]
     
-                    if(*((unsigned int*)(buf + 0x100)) == 0x4843434E){
-                        print("Downgrading...\n"); ConsoleShow();
-                        FileCopy(filepath, dgpath);
-                        print("Done!\nRemoving Downgrade Pack...\n"); ConsoleShow();
-                        f_unlink(dgpath);
-                    }else{
-                        print("Bad Downgrade Pack!\n"); ConsoleShow();
-                    }
+                if(*((unsigned int*)(buf + 0x100)) == 0x4843434E){
+                    print("Downgrading...\n"); ConsoleShow();
+                    FileCopy(filepath, dgpath);
+                    print("Done!\nRemoving Downgrade Pack...\n"); ConsoleShow();
+                    f_unlink(dgpath);
                 }else{
-                    print("Cannot read Downgrade Pack!\n"); ConsoleShow();
+                    print("Bad Downgrade Pack!\n"); ConsoleShow();
                 }
-        }else{
-            print("Not yet supported!"); ConsoleShow();
-        }
+            }else{
+                print("Cannot read Downgrade Pack!\n"); ConsoleShow();
+            }
     }else{
         print("Cannot read MSET app!\n"); ConsoleShow();
     }
@@ -156,10 +147,10 @@ void installFBI(){
 	char* drive;
     char filepath[256];
     unsigned int titleid_low = 0x00040010;
-    unsigned int titleid_high[] = { 0x00022300, 0x00022300, 0x00022300, 0x00026300, 0x00027300, 0x00028300}; //JPN, USA, EUR, CHN, KOR, TWN
-    char* regions[] = { "Unknown", "Japan", "USA", "Europe", "China", "Korea", "Taiwan"};
-    unsigned int supported_regions = 3;
-    unsigned int region = -1;
+    unsigned int titleid_high[] = { 0x00022300, 0x00022300, 0x00022300/*, 0x00026300, 0x00027300, 0x00028300*/}; //JPN, USA, EUR, CHN, KOR, TWN
+    char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
+    unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
+    unsigned int region;
 	int choice = NandSwitch();
 	if(choice == -1) return;
 	if(choice) drive = "2"; //emuNAND
@@ -167,24 +158,16 @@ void installFBI(){
 	ConsoleInit();
     ConsoleSetTitle("FBI Installation");
     print("Editing Health&Safety Information...\n"); ConsoleShow();
-    if(FindApp(&filepath, titleid_low, titleid_high[0], drive)) region = 0;
-    else if(FindApp(&filepath, titleid_low, titleid_high[1], drive)) region = 1;
-    else if(FindApp(&filepath, titleid_low, titleid_high[2], drive)) region = 2;
-    else if(FindApp(&filepath, titleid_low, titleid_high[3], drive)) region = 3;
-    else if(FindApp(&filepath, titleid_low, titleid_high[4], drive)) region = 4;
-    else if(FindApp(&filepath, titleid_low, titleid_high[5], drive)) region = 5;
-    if(region != -1){
-        print("Region : %s\n\n", regions[region + 1]); ConsoleShow();
-        if(region < supported_regions){
-	        //print("%s\n", filepath);
-	        if(FileCopy(filepath, "fbi_inject.app") == 1){
-		        print("Success!\nDeleting 'fbi_inject.app'...\n");
-        		f_unlink("fbi_inject.app");
-    	    }else
-	    	    print("Failure!\n");
-        }else{
-            print("Not supported yet!"); ConsoleShow();
-        }
+    
+	for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], drive); region++);
+    if(region < supported_regions){
+        print("Region : %s\n\n", regions[region]); ConsoleShow();
+        //print("%s\n", filepath);
+        if(FileCopy(filepath, "fbi_inject.app") == 1){
+	        print("Success!\nDeleting 'fbi_inject.app'...\n");
+       		f_unlink("fbi_inject.app");
+   	    }else
+    	    print("Failure!\n");
     }else{
         print("Cannot read Health&Safety app!\n"); ConsoleShow();
     }
