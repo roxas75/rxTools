@@ -4,7 +4,7 @@
 TARGET 		:=  patch.bin
 BUILD		:=	build
 TOOLS		:=	../tools
-ARMIPS    	:=  $(TOOLS)/armips.exe
+ARMIPS    	:=  armips
 SFILES 		:=  $(wildcard source/*.s)
 
 .PHONY: clean all
@@ -19,10 +19,9 @@ arm9payload.bin:
 	
 patch.bin:
 	@$(foreach sfile,$(SFILES), $(ARMIPS) $(sfile);)
-	@$(TOOLS)/cfwtool.exe $(BUILD) $(TARGET)
-	@mv patch.bin ../data/patch.bin
+	@$(TOOLS)/cfwtool $(BUILD) $(TARGET)
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) *.bin
+	@rm -fr $(BUILD) $(TARGET) *.bin
  
