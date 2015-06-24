@@ -123,7 +123,7 @@ void downgradeMSET(){
                 FileWrite(&dg, buf, dgsize, 0);
                 FileClose(&dg);
                 //[/Decrypting]
-    
+
                 if(*((unsigned int*)(buf + 0x100)) == 0x4843434E){
                     print("Downgrading...\n"); ConsoleShow();
                     FileCopy(filepath, dgpath);
@@ -162,7 +162,6 @@ void installFBI(){
 	for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], drive); region++);
     if(region < supported_regions){
         print("Region : %s\n\n", regions[region]); ConsoleShow();
-        //print("%s\n", filepath);
         if(FileCopy(filepath, "fbi_inject.app") == 1){
 	        print("Success!\nDeleting 'fbi_inject.app'...\n");
        		f_unlink("fbi_inject.app");
