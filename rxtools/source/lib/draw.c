@@ -61,7 +61,7 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
         }
         screenPos -= BYTES_PER_PIXEL * (SCREEN_HEIGHT * 8 + 1);
     }
-    if(screen = TOP_SCREEN && TOP_SCREEN2){
+    if(screen == TOP_SCREEN && TOP_SCREEN2){
         screen = TOP_SCREEN2;
         int xDisplacement = x * SCREEN_HEIGHT;
         int yDisplacement = SCREEN_HEIGHT - y - 1;
