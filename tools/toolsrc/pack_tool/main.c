@@ -16,7 +16,8 @@ typedef struct{
 
 unsigned int HashGen(unsigned char* file, unsigned int size){  //that's the simplest and crappiest hash engine i could invent
 	unsigned int HASH = 0;							  //but it works, so i don't give a shit
-	for(int i = 0; i < size - 4; i++){
+	int i;
+	for(i = 0; i < size - 4; i++){
 		HASH ^= file[i];
 		HASH ^= file[i+1] << 8;
 		HASH ^= file[i+2] << 16;
@@ -26,6 +27,7 @@ unsigned int HashGen(unsigned char* file, unsigned int size){  //that's the simp
 }
 
 int main(int argc, char** argv){
+	int i;
 	if(argc < 3) return -1;
 	FILE* out = fopen(argv[argc-1], "wb");
 	if(!out){
@@ -36,9 +38,11 @@ int main(int argc, char** argv){
 	if(nfiles == 0){
 		printf("No files specified to pack!");
 	}
-	fwrite(&nfiles, 1, 4, out); for(int i = 0; i < 12; i++) fputc(0x00, out);
-	for(int i = 0; i < nfiles*sizeof(PackEntry); i++) fputc(0x00, out);
-	for(int i = 0; i < nfiles; i++){
+	fwrite(&nfiles, 1, 4, out); 
+	for(i = 0; i < 12; i++) 
+		fputc(0x00, out);
+	for(i = 0; i < nfiles*sizeof(PackEntry); i++) fputc(0x00, out);
+	for(i = 0; i < nfiles; i++){
 		FILE* file = fopen(argv[1 + i], "rb");
 		if(!file){
 			printf("Cannot open %s!\n", argv[1 + i]);

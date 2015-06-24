@@ -51,6 +51,7 @@ int listfiles(char* curDir){
 }
 
 int main(int argc, char** argv){
+	int i;
 	char str[256];
 	int print = 0;
 	if(argc < 3){
@@ -67,7 +68,7 @@ int main(int argc, char** argv){
 	}
 
 	fwrite(&npatch, 1, 4, patch);
-	for(int i = 0; i < npatch; i++){
+	for(i = 0; i < npatch; i++){
 		unsigned int off = 0, size = 0;
 		sscanf(patch_name[i], "%08x.bin", &off);
 		sprintf(str, "%s/%s", argv[1], patch_name[i]);
