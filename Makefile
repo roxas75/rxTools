@@ -30,7 +30,7 @@ release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh
 rxTools.dat: payload.bin data.bin msethax/mset.bin tools/fill_with_crap
 	@cp spiderhax/Launcher.dat $@
 	@$(PYTHON) tools/insert.py $@ payload.bin 0x20000
-	@$(PYTHON) tools/insert.py $@ data.bin 0x10000
+	@$(PYTHON) tools/insert.py $@ data.bin 0x100000
 	@$(PYTHON) tools/insert.py $@ msethax/mset.bin 0
 	@tools/fill_with_crap $@ 4194304
 
@@ -42,7 +42,7 @@ brahma/brahma.3dsx brahma/brahma.smdh:
 msethax/mset.bin:
 	make -C $(dir $@) all
 
-data.bin: rxmode/patch.bin data/titlekey.bin data/reboot.bin data/top_bg.bin tools/pack_tool tools/xor
+data.bin: data/titlekey.bin data/reboot.bin data/patch.bin data/top_bg.bin tools/pack_tool tools/xor
 	@tools/pack_tool $(filter %.bin, $^) $@
 	@tools/xor $@ tools/xorpad/data.xor
 	@rm $@
