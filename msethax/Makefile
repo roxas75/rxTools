@@ -5,6 +5,10 @@ LD=arm-none-eabi-ld
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+endif
+
 TARGET 		:=  mset.bin
 BUILD		:=	build
 ARMIPS    	:=  armips
@@ -14,22 +18,26 @@ KEY    = 9113BC189113AC189113AC3C00002400
 IV2    = 00000000000000000000000000000000
 KEY2   = 0160A0E14ADF4DE2EC109FE50250A0E1 
 
-.PHONY: mset
+.PHONY: $(BUILD) clean all
 
-mset:
+all: rxinstaller.nds arm9_code.bin mset.bin
+
+rxinstaller.nds:
+	@cd rxinstaller && make
+
+arm9_code.bin:
+	@mkdir -p $(BUILD)
+	@cd payload && make
+	@mv payload.bin build/arm9_code.bin
+
+mset.bin:
 	armips mset4/arm9hax.s
 	armips mset4/arm11hax.s
-#openssl enc -aes-128-cbc -K $(KEY) -iv $(IV) -in build/arm11hax.bin -out build/arm11hax_enc.bin
 	armips mset4/rop.s
 	openssl enc -aes-128-cbc -K $(KEY2) -iv $(IV2) -in build/rop.bin -out $(TARGET)
-#@rm -fr $(BUILD)
-#armips mset6/arm9hax.s
-#armips mset6/arm11hax.s
-#armips mset6/rop.s
-#python ..\tools\insert.py $(TARGET) build/rop.bin 0x1000
-	
 
-#---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	
+	@cd rxinstaller && make clean
+	@cd payload && make clean
+	@rm -fr $(BUILD) *.nds *.bin

@@ -2,7 +2,7 @@
 //Roxas75
 
 .nds
-.create "data/mset4x.bin", 0x279400
+.create "data/mset6x.bin", 0x279400
 .arm
 .align 4
 
