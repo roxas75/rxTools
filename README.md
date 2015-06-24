@@ -33,9 +33,9 @@ Since the project is open-source you are welcome to implement other some systems
 
 What is actually necessary is:
 - Python 2.7
-- devkitPRO (with devkitARM, libctru, libnds) http://sourceforge.net/projects/devkitpro/
-- armips https://github.com/Kingcom/armips
-- GCC to build supplimentary tools (MinGW gcc-base will work fine for Windows http://sourceforge.net/projects/mingw/)
+- [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM, libctru, libnds installed
+- [armips] (https://github.com/Kingcom/armips)
+- GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with gcc-base will be fine)
 
 Just run the **make.exe** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
 
