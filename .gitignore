@@ -41,3 +41,35 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# =========================
+# Project files
+# =========================
+brahma/brahma.3dsx
+brahma/brahma.elf
+brahma/brahma.smdh
+brahma/build/
+brahma/data/payload.bin
+brahma/data/payload/build/
+data.bin
+msethax/build/
+msethax/mset.bin
+msethax/payload/build/
+msethax/rxinstaller.nds
+msethax/rxinstaller/build/
+msethax/rxinstaller/data/
+payload.bin
+release/mset/
+release/ninjhax/
+release/rxTools.dat
+rxTools.dat
+rxmode/build/
+rxmode/patch.bin
+rxtools/build/
+rxtools/rxtools.bin
+tools/addxor_tool
+tools/cfwtool
+tools/fill_with_crap
+tools/fill_with_zero
+tools/pack_tool
+tools/xor
