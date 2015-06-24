@@ -1,5 +1,9 @@
 #include <stdio.h>
+#ifdef __APPLE__
+#include <sys/malloc.h>
+#else
 #include <malloc.h>
+#endif
 
 unsigned int HashGen(unsigned char* file, unsigned int size){
 	unsigned int HASH = 0;
