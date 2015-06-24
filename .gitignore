@@ -73,3 +73,14 @@ tools/fill_with_crap
 tools/fill_with_zero
 tools/pack_tool
 tools/xor
+tools/hash_gen
+tools/addxor_tool.exe
+tools/cfwtool.exe
+tools/fill_with_crap.exe
+tools/fill_with_zero.exe
+tools/pack_tool.exe
+tools/xor.exe
+tools/hash_gen.exe
+build.bat
+clean.bat
+build.bat
