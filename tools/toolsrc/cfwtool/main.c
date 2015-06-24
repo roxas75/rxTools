@@ -83,9 +83,11 @@ int main(int argc, char** argv){
 			while((ftell(patch) % 4) != 0) fputc(0, patch);		//Aligned 4
 			if(print) printf("Addr : %08X		Size : %d\n", off, size);
 			free(buf);
-		}
-		fclose(fp);
+		} else {
+		    fclose(fp);
+        }
 	}
+    fclose(patch);
 
 	return 0;
 }
