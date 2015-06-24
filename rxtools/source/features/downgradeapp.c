@@ -89,20 +89,17 @@ void downgradeMSET(){
     char filepath[256];
     char* dgpath = "0:msetdg.bin";
     unsigned int titleid_low = 0x00040010;
-    unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000}; //JPN, USA, EUR
-    unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B };   //JPN, USA, EUR
-    char* regions[] = { "Unknown", "Japan", "USA", "Europe"};
-    unsigned int supported_regions = 3;
-    unsigned int region = -1;
+    unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000/*, 0x00026000, 0x00027000, 0x00028000*/}; //JPN, USA, EUR, CHN, KOR, TWN
+    char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
+    unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
+    unsigned int region;
     ConsoleInit();
     ConsoleSetTitle("MSET Downgrader");
 	
     print("Opening MSET app...\n"); ConsoleShow();
-    if(FindApp(&filepath, titleid_low, titleid_high[0], "1")) region = 0;
-    else if(FindApp(&filepath, titleid_low, titleid_high[1], "1")) region = 1;
-    else if(FindApp(&filepath, titleid_low, titleid_high[2], "1")) region = 2;
-    if(region != -1){
-        print("Region : %s\n\n", regions[region + 1]); ConsoleShow();
+    for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], "1"); region++);
+    if(region < supported_regions){
+        print("Region : %s\n\n", regions[region]); ConsoleShow();
 		//print(filepath); print("\n"); ConsoleShow(); FileCopy("mset.app", filepath);
         FileOpen(&dg, filepath, 0);
         unsigned int check_val;
@@ -148,23 +145,33 @@ void downgradeMSET(){
 
 void installFBI(){
 	char* drive;
-	int choice = NandSwitch();
-	if(choice == -1) return;
+    char filepath[256];
+    unsigned int titleid_low = 0x00040010;
+    unsigned int titleid_high[] = { 0x00020300, 0x00021300, 0x00022300/*, 0x00026300, 0x00027300, 0x00028300*/}; //JPN, USA, EUR, CHN, KOR, TWN
+    char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
+    unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
+    unsigned int region;
+    switch(NandSwitch()){
+    	case 0: drive = "1"; break;
+    	case 1: drive = "2"; break;
+    	default: return;
+    }
 	ConsoleInit();
     ConsoleSetTitle("FBI Installation");
 	print("Editing Health&Safety Information...\n"); ConsoleShow();
-	char filepath[256];
 	memset(filepath, 0, 256);
-	if(!FindApp(&filepath, 0x00040010, 0x00020300, choice ? "2" : "1"))	 //JPN
-		if(!FindApp(&filepath, 0x00040010, 0x00021300, choice ? "2" : "1")) //USA
-			FindApp(&filepath, 0x00040010, 0x00022300, choice ? "2" : "1");  //EUR
-	//One of them should actually be found
-	//print("%s\n", filepath);
-	if(FileCopy(filepath, "0:fbi_inject.app") == 1){
-		print("Success!\nDeleting 'fbi_inject.app'...\n");
-		f_unlink("0:fbi_inject.app");
-	}else
-		print("Failure!\n");
+	for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], drive); region++);
+    if(region < supported_regions){
+        print("Region : %s\n\n", regions[region]); ConsoleShow();
+    	//print("%s\n", filepath);
+	    if(FileCopy(filepath, "0:fbi_inject.app") == 1){
+    		print("Success!\nDeleting 'fbi_inject.app'...\n");
+		    f_unlink("0:fbi_inject.app");
+	    }else
+    		print("Failure!\n");
+    }else{
+        print("Cannot read Health&Safety app!\n"); ConsoleShow();
+    }
 	print("\nPress A to exit\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
