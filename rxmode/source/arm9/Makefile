@@ -4,7 +4,7 @@ OC=arm-none-eabi-objcopy
 OD=arm-none-eabi-objdump
 LD=arm-none-eabi-ld
 
-PATCHES= source/EmuNAND.s source/CreateThread.s source/myThread/FS.s
+PATCHES= source/EmuNAND.s source/CreateThread.s source/myThread/FS.S
 CFLAGS=-c -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -std=c99
 SFLAGS=-c -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar
 # No linker flags yet, but here if you need it
