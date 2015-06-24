@@ -79,7 +79,7 @@ int findCursorLine(){
 	return cont;
 }
 void ConsoleShow(){
-	unsigned char* tmpscreen = 0x26000000;
+	unsigned char* tmpscreen = 0x27000000;
 	memcpy(tmpscreen, TOP_SCREEN, 0x46500);
 	if(!consoleInited) return;
 	int titley = 2*CHAR_WIDTH;
