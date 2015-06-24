@@ -33,7 +33,7 @@ DATA		:=	data
 INCLUDES	:=	include
 APP_TITLE	:=	rxTools - Ninjhax Loader
 APP_DESCRIPTION :=	Roxas75 3DS Toolkit & Custom Firmware
-APP_AUTHOR	:=	Roxas75
+APP_AUTHOR	:=	Roxas75 (Thanks Patois)
 
 #---------------------------------------------------------------------------------
 # options for code generation

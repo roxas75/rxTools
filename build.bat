@@ -38,13 +38,12 @@ tools\insert.py rxTools.dat data.bin 0x100000
 tools\fill_with_crap.exe rxTools.dat 4194304
 pause
 
-cls BUILDING NINJHAX...
-cd ninjhax
+cls BUILDING BRAHMA...
+cd brahma
 cd data\loader
 make
 del *.elf  *.out
 cd ..\..
-..\tools\addxor_tool.exe data/loader/loader.bin data/payload.bin 0x12832738 0x76298987
 make
 del *.elf
 cd ..
@@ -73,8 +72,8 @@ cls
 echo MAKING RELEASE...
 copy rxTools.dat release\rxTools.dat
 mkdir release\ninjhax
-copy ninjhax\ninjhax.3dsx release\ninjhax\rxtools.3dsx
-copy ninjhax\ninjhax.smdh release\ninjhax\rxtools.smdh
+copy brahma\brahma.3dsx release\ninjhax\rxtools.3dsx
+copy brahma\brahma.smdh release\ninjhax\rxtools.smdh
 mkdir release\mset
 copy msethax\rxinstaller.nds release\mset\rxinstaller.nds
 copy rxTools.dat G:\rxTools.dat

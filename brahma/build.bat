@@ -1,3 +1,2 @@
 make
-del *.elf
 pause
