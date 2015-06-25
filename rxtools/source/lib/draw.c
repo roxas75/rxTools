@@ -9,25 +9,21 @@
 
 int current_y = 1;
 
-unsigned char* tmpscreen = 0x26000000;
+u8* tmpscreen = (u8*)0x26000000;
 
 void ClearScreen(unsigned char *screen, int color)
 {
-    int i;
-//    unsigned char *screenPos = screen;
-    color = color >> 16 & 0xFF | color & 0xFF00 | color << 16 & 0xFF0000;
-    for (i = 0; i < SCREEN_SIZE; i += 4)
-    {
-//        *(screenPos++) = color >> 16; //B
-//        *(screenPos++) = color >> 8; //G
-//        *(screenPos++) = color & 0xFF; //R
-        color |= color << 24;
-        *(unsigned *)(screen + i) = color;
-        color >>= 8;
+    u32 i = SCREEN_SIZE/4;  //Surely this is an interger.
+    u32* tmpscr = (u32*)screen; //To avoid using array index which would decrease speed.
+    //Prepared 3 u32, that includes 4 24-bits color, cached. 4x(BGR)
+    u32 color0 = (color) | (color << 24),
+        color1 = (color << 16) | (color >> 8),
+        color2 = (color >> 16) | (color << 8);
+    while (i--) {
+        *(tmpscr++) = color0;
+        *(tmpscr++) = color1;
+        *(tmpscr++) = color2;
     }
-
-    //memset(screen,color,SCREEN_SIZE);
-    //memset(screen + SCREEN_SIZE + 16,color,SCREEN_SIZE);
 }
 
 void DrawCharacter(unsigned char *screen, int character, int x, int y, int color, int bgcolor)
@@ -36,6 +32,9 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
     int xDisplacement = x * SCREEN_HEIGHT;
     int yDisplacement = SCREEN_HEIGHT - y - 1;
     unsigned char *screenPos = screen + (xDisplacement + yDisplacement) * BYTES_PER_PIXEL;
+    //Use cached value, yep.
+    u8 foreR = color >> 16, foreG = color >> 8, foreB = color;
+    u8 backR = bgcolor >> 16, backG = bgcolor >> 8, backB = bgcolor;
     for (yy = 0; yy < 8; yy++)
     {
         unsigned char charPos = font[character * 8 + yy];
@@ -44,23 +43,24 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
             if ((charPos >> xx) & 1)
             {
 				if(color != TRANSPARENT){
-					*(screenPos++) = color >> 16; //B
-					*(screenPos++) = color >> 8; //G
-					*(screenPos++) = color & 0xFF; //R
+                    *(screenPos++) = foreB;
+                    *(screenPos++) = foreG;
+                    *(screenPos++) = foreR;
 				}
             }
             else
             {
 				if(bgcolor != TRANSPARENT){
-					*(screenPos++) = bgcolor >> 16; //B
-					*(screenPos++) = bgcolor >> 8; //G
-					*(screenPos++) = bgcolor & 0xFF; //R
+					*(screenPos++) = backB;
+                    *(screenPos++) = backG;
+                    *(screenPos++) = backR;
 				}
             }
             screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT - 3;
         }
         screenPos -= BYTES_PER_PIXEL * (SCREEN_HEIGHT * 8 + 1);
     }
+    //Still i don't know if we should draw the text twice.
     if(screen == TOP_SCREEN && TOP_SCREEN2){
         screen = TOP_SCREEN2;
         int xDisplacement = x * SCREEN_HEIGHT;
@@ -74,17 +74,17 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
                 if ((charPos >> xx) & 1)
                 {
     				if(color != TRANSPARENT){
-    					*(screenPos++) = color >> 16; //B
-    					*(screenPos++) = color >> 8; //G
-    					*(screenPos++) = color & 0xFF; //R
+                        *(screenPos++) = foreB;
+                        *(screenPos++) = foreG;
+                        *(screenPos++) = foreR;
     				}
                 }
                 else
                 {
     				if(bgcolor != TRANSPARENT){
-    					*(screenPos++) = bgcolor >> 16; //B
-    					*(screenPos++) = bgcolor >> 8; //G
-    					*(screenPos++) = bgcolor & 0xFF; //R
+    					*(screenPos++) = backB;
+                        *(screenPos++) = backG;
+                        *(screenPos++) = backR;
     				}
                 }
                 screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT - 3;
@@ -102,21 +102,16 @@ void DrawString(unsigned char *screen, const char *str, int x, int y, int color,
         DrawCharacter(screen, str[i], x + i * 8, y, color, bgcolor);
     }
 }
-
+//[Unused]
 void DrawHex(unsigned char *screen, unsigned int hex, int x, int y, int color, int bgcolor)
 {
-    int i;
-    for(i=0; i<8; i++)
-    {
-        int character = '-';
-        int nibble = (hex >> ((7-i)*4))&0xF;
-        if(nibble > 9) character = 'A' + nibble-10;
-        else character = '0' + nibble;
-
-        DrawCharacter(screen, character, x+(i*8), y, color, bgcolor);
+    char HexStr[4+1] = {0,}, i = 4; //4=sizeof(u32)
+    while (i) {
+        HexStr[(i--)-1] = 0x30 + (hex & 0xF); hex = hex >> 4;
     }
+    DrawString(screen, HexStr, x+(i*8), y, color, bgcolor);
 }
-
+//[Unused]
 void DrawHexWithName(unsigned char *screen, const char *str, unsigned int hex, int x, int y, int color, int bgcolor)
 {
     DrawString(screen, str, x, y, color, bgcolor);
@@ -137,37 +132,36 @@ void Debug(const char *format, ...)
 
     current_y += 10;
 }
-
-void writeByte(int address, u8 value) {
-	char *addr = (u8*)address;
-
-	*addr = value;
+//No need to enter and exit again and again, isn't it
+inline void writeByte(int address, u8 value) {
+	*((u8*)address) = value;
 }
 
-u8 readByte(int address) {
-	char *addr = (u8*)address;
-
-	return *addr;
+inline u8 readByte(int address) {
+	return *((u8*)address);
 }
 
 void DrawPixel(int x, int y, int color, int screen){
 	if(x >= 400 || x < 0) return;
 	if(y >= 240 || y < 0) return;
 	if(color != TRANSPARENT){
-		int cord = 720 * x + 720 -(y * 3);
-		int address  = cord + screen;
-		writeByte(address, color >> 16);
+        int cord = 720 * x + 720 -(y * 3);
+        int address  = cord + screen;
+		writeByte(address, color);
 		writeByte(address+1, color >> 8);
-		writeByte(address+2, color & 0xFF);
+		writeByte(address+2, color >>16);
 	}
+    //Mind i ask why paint the pixel twice?
+    //GCC: comparison between pointer and integer
+    //GCC: assignment makes integer from pointer without a cast
     if(screen == TOP_SCREEN && TOP_SCREEN2){
         screen = TOP_SCREEN2;
+        int cord = 720 * x + 720 -(y * 3);
+        int address  = cord + screen;
         if(color != TRANSPARENT){
-    		int cord = 720 * x + 720 -(y * 3);
-    		int address  = cord + screen;
-    		writeByte(address, color >> 16);
+    		writeByte(address, color);
     		writeByte(address+1, color >> 8);
-    		writeByte(address+2, color & 0xFF);
+    		writeByte(address+2, color >>16);
     	}
     }
 }
@@ -175,25 +169,23 @@ void DrawPixel(int x, int y, int color, int screen){
 int GetPixel(int x, int y, int screen){
 	int cord = 720 * x + 720 -(y * 3);
 	int address  = cord + screen;
-	int color = 0;
-	color |= readByte(address+0)<<0;
-	color |= readByte(address+1)<<8;
-	color |= readByte(address+2)<<16;
-	return color;
+    return RGB(readByte(address+0),readByte(address+1),readByte(address+2));
 }
 
 
 //----------------Some of my shit..........
-void SplashScreen(){
-	u8* Top = GetFilePack(TOP_PIC);
+void SplashScreen(void){
+	u8 *top = GetFilePack(TOP_PIC), *tmp = top;
+    //Use pointer not array. dangarous but quite quicker.
+    u8 *scr = TOP_SCREEN, *mir = TOP_SCREEN2;
     for(int i = 0; i < 0x46500; i+=3){
-		*(TOP_SCREEN + i + 0) = Top[i];
-		*(TOP_SCREEN + i + 1) = Top[i + 1];
-		*(TOP_SCREEN + i + 2) = Top[i + 2];
+        *(scr++) = *(top++);
+        *(scr++) = *(top++);
+        *(scr++) = *(top++);
         if(TOP_SCREEN2){
-            *(TOP_SCREEN2 + i + 0) = Top[i];
-    		*(TOP_SCREEN2 + i + 1) = Top[i + 1];
-    		*(TOP_SCREEN2 + i + 2) = Top[i + 2];
+            *(mir++) = *(tmp++);
+            *(mir++) = *(tmp++);
+            *(mir++) = *(tmp++);
         }
 	}
 }
