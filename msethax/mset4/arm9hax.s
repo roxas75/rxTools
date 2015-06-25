@@ -152,4 +152,4 @@ jump_table:
         bx lr
 
 .pool
-.close
+
