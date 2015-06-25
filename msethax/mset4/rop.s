@@ -7,30 +7,30 @@
 
 @.create "build/rop.bin", 0x2B0000
 .arm
-.align 4
+.align 2
 
-#DEFINE pop_pc                                    0x001002F9
-#DEFINE pop_r0                                    0x00143D8C
-#DEFINE pop_r0_r2                                 0x0010f2b9
-#DEFINE pop_r3                                    0x0010538C
-#DEFINE pop_r1                                    0x001549E1
-#DEFINE pop_r4_lr_bx_r1                           0x001182C0
-#DEFINE pop_r0_r4                                 0x0016FE91
+.equ  pop_pc,                                    0x001002F9
+.equ  pop_r0,                                    0x00143D8C
+.equ  pop_r0_r2,                                 0x0010f2b9
+.equ  pop_r3,                                    0x0010538C
+.equ  pop_r1,                                    0x001549E1
+.equ  pop_r4_lr_bx_r1,                           0x001182C0
+.equ  pop_r0_r4,                                 0x0016FE91
 
-#DEFINE memcpy                                    0x001BFA60
-#DEFINE GSPGPU_FlushDataCache                     0x0013C5D4
-#DEFINE nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue 0x001AC924
-#DEFINE svcSleepThread                            0x001AEA50
-#DEFINE ifile_open                                0x001B82A8
-#DEFINE ifile_read                                0x001B3954
-#DEFINE ifile_write                               0x001B3B50
-#DEFINE ssl_dec                                   0x0022EFA8
+.equ  memcpy,                                    0x001BFA60
+.equ  GSPGPU_FlushDataCache,                     0x0013C5D4
+.equ  nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue, 0x001AC924
+.equ  svcSleepThread,                            0x001AEA50
+.equ  ifile_open,                                0x001B82A8
+.equ  ifile_read,                                0x001B3954
+.equ  ifile_write,                               0x001B3B50
+.equ  ssl_dec,                                   0x0022EFA8
 
-#DEFINE gsp_addr                                  0x14000000
-#DEFINE gsp_handle                                0x0027FAC4
-#DEFINE gsp_code_addr                             0x00700000
-#DEFINE fcram_code_addr                           0x03E6D000
-#DEFINE payload_addr                              0x00140000
+.equ  gsp_addr,                                  0x14000000
+.equ  gsp_handle,                                0x0027FAC4
+.equ  gsp_code_addr,                             0x00700000
+.equ  fcram_code_addr,                           0x03E6D000
+.equ  payload_addr,                              0x00140000
 
 initial_rop:
 
@@ -111,4 +111,3 @@ arm_code:
 arm_code_end:
 
 .pool
-.close
