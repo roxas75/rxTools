@@ -31,13 +31,13 @@ arm9_code.bin:
 	@mv payload.bin build/arm9_code.bin
 
 mset.bin:
-        @$(AS) -c -o build/arm9hax.bin mset4/arm9hax.s
-        @$(OC) -O binary build/arm9hax.bin
-        @$(AS) -c -o build/arm11hax.bin mset4/arm11hax.s
-        @$(OC) -O binary build/arm11hax.bin
-        @$(AS) -c -o build/rop.bin mset4/rop.s
-        @$(OC) -O binary build/rop.bin
-        openssl enc -aes-128-cbc -K $(KEY2) -iv $(IV2) -in build/rop.bin -out $(TARGET)
+	@$(AS) -c -o build/arm9hax.bin mset4/arm9hax.s
+	@$(OC) -O binary build/arm9hax.bin
+	@$(AS) -c -o build/arm11hax.bin mset4/arm11hax.s
+	@$(OC) -O binary build/arm11hax.bin
+	@$(AS) -c -o build/rop.bin mset4/rop.s
+	@$(OC) -O binary build/rop.bin
+	openssl enc -aes-128-cbc -K $(KEY2) -iv $(IV2) -in build/rop.bin -out $(TARGET)
 
 clean:
 	@echo clean ...
