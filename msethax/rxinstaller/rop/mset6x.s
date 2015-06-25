@@ -1,32 +1,31 @@
-//3DS memchunkhax & firmlaunchax from mset 4.x, on firmware >= 5.x
-//Roxas75
+@3DS memchunkhax & firmlaunchax from mset 4.x, on firmware >= 5.x
+@Roxas75
 
-.nds
-.create "data/mset6x.bin", 0x279400
+@.create "data/mset6x.bin", 0x279400
 .arm
 .align 4
 
-.definelabel pop_pc,                                    0x001002F9
-.definelabel pop_r0,                                    0x00143D8C
-.definelabel pop_r0_r2,                                 0x0010f2b9
-.definelabel pop_r3,                                    0x0010538C
-.definelabel pop_r1,                                    0x001549E1
-.definelabel pop_r4_lr_bx_r1,                           0x001182C0
-.definelabel pop_r0_r4,                                 0x0016FE91
-.definelabel add_sp_r3,                                 0x00143D60
+#DEFINE pop_pc                                    0x001002F9
+#DEFINE pop_r0                                    0x00143D8C
+#DEFINE pop_r0_r2                                 0x0010f2b9
+#DEFINE pop_r3                                    0x0010538C
+#DEFINE pop_r1                                    0x001549E1
+#DEFINE pop_r4_lr_bx_r1                           0x001182C0
+#DEFINE pop_r0_r4                                 0x0016FE91
+#DEFINE add_sp_r3                                 0x00143D60
 
-.definelabel YS_label,                                  0x00272BAE
-.definelabel fs_mountsdmc,                              0x0018F19C ; pops 3
-.definelabel load_addr,                                 0x002AF000
+#DEFINE YS_label                                  0x00272BAE
+#DEFINE fs_mountsdmc                              0x0018F19C @ pops 3
+#DEFINE load_addr                                 0x002AF000
 
-.definelabel read_nvram,                                0x001334FC
-.definelabel memcpy,                                    0x001BFA60
-.definelabel svcSleepThread,                            0x001AEA50
-.definelabel filehandle,                                0x00279000
-.definelabel ifile_open,                                0x001B82A8
-.definelabel ifile_read,                                0x001B3954
-.definelabel ifile_write,                               0x001B3B50
-.definelabel ssl_dec,                                   0x0022EFA8
+#DEFINE read_nvram                                0x001334FC
+#DEFINE memcpy                                    0x001BFA60
+#DEFINE svcSleepThread                            0x001AEA50
+#DEFINE filehandle                                0x00279000
+#DEFINE ifile_open                                0x001B82A8
+#DEFINE ifile_read                                0x001B3954
+#DEFINE ifile_write                               0x001B3B50
+#DEFINE ssl_dec                                   0x0022EFA8
 
 first_profile:
 
@@ -42,7 +41,7 @@ first_profile:
             .word filehandle
             .word 1
         .word pop_r1
-            .word 0x00295E0C ; YS:/rxTools.dat
+            .word 0x00295E0C @ YS:/rxTools.dat
         .word ifile_open+4
             .word 0xDEADBEEF
             .word 0xDEADBEEF
