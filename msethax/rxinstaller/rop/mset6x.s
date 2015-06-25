@@ -22,6 +22,10 @@
 .equ memcpy,                                    0x001BFA60
 .equ svcSleepThread,                            0x001AEA50
 .equ filehandle,                                0x00279000
+.equ ifile_open,                                0x001B82A8
+.equ ifile_read,                                0x001B3954
+.equ ifile_write,                               0x001B3B50
+.equ ssl_dec,                                   0x0022EFA8
 
 first_profile:
 
