@@ -17,6 +17,7 @@
 .equ YS_label,                                  0x00272BAE
 .equ fs_mountsdmc,                              0x0018F19C @ pops 3
 .equ load_addr,                                 0x002AF000
+.equ load_offset,				0x00279400
 
 .equ read_nvram,                                0x001334FC
 .equ memcpy,                                    0x001BFA60
@@ -65,14 +66,15 @@ first_profile:
             .word 0x9000
             .word pop_pc
         .word pop_r3
-            .word load_addr-jump_to_payload-4
+            .word load_addr-load_offset-jump_to_payload-4
 
     jump_to_payload:
         .word add_sp_r3
 
         .fill 16,4,0xDEADBEEF
     _end:
-_orga100: .fill (0x100+_start-_orga100)/4,4,0xDEADBEEF
+@_orga100: .fill (0x100+_start-_orga100)/4,4,0xDEADBEEF
+_orga100: .fill (0x100+_start-_orga100)/4,4,0
 
 second_profile:
     _start2:
@@ -80,11 +82,11 @@ second_profile:
         .hword 0x1D
         .string16 "rxTools"
 	.word 0x00000000
-	.hword 0x0000
 	.hword 0x0007
 	.string16 "YS:/rxTools.dat"
 .align 2
-_orga150: .fill (0x150+_start-_orga150)/4,4,0xDEADBEEF
+@_orga150: .fill (0x150+_start-_orga150)/4,4,0xDEADBEEF
+_orga150: .fill (0x150+_start-_orga150)/4,4,0
         .word 0x6E
         .word 0
         .word 0x0265021A
@@ -95,7 +97,8 @@ _orga150: .fill (0x150+_start-_orga150)/4,4,0xDEADBEEF
         .word 0
         .word 0x3A370052
         .word 0x003F0001
-_orga1B4: .fill (0x1B4+_start-_orga1B4)/4,4,0xDEADBEEF
+@_orga1B4: .fill (0x1B4+_start-_orga1B4)/4,4,0xDEADBEEF
+_orga1B4: .fill (0x1B4+_start-_orga1B4)/4,4,0
 
     first_rop:
         .word pop_r0_r2
