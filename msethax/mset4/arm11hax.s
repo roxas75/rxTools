@@ -5,7 +5,6 @@
 @   -Roxas75                                    @
 @-----------------------------------------------@
 
-@.create "build/arm11hax.bin", 0x240000
 .arm
 
 @-------------------------- GLOBALS ------------------------------
@@ -13,11 +12,11 @@
 .equ top_fb2,                                   0x141CB370
 .equ gsp_addr,                                  0x14000000
 .equ gsp_handle,                                0x0015801D
-.equ gsp_code_addr,                                0x00100000
-.equ fcram_code_addr,                              0x03E6D000
-.equ gpuhandle,                                 0x27c5D8
+.equ gsp_code_addr,                             0x00100000
+.equ fcram_code_addr,                           0x03E6D000
+.equ gpuhandle,                                 0x0027c5D8
 .equ payload_addr,                              0x00140000
-.equ filehandle,                                0x279000
+.equ filehandle,                                0x00279000
 
 @------------------------- FUNCTIONS -----------------------------
 .equ memcpy,                                    0x001BFA60
@@ -31,29 +30,29 @@
 .equ ifile_read,                                0x001B3954
 
 @---------------------- SPECIFIC COSTANTS ------------------------
-.equ costants,                                                          0x2A0000
-.equ kernel_patch_addr,                                         0x2A0000
-.equ fcram_address,                                             0x2A0004
-.equ jump_table_addr,                                                   0x2A0008
-.equ func_patch,                                                                0x2A000C
-.equ funct_to_call,                                                     0x2A0010
-.equ reboot_func,                                                               0x2A0014
-.equ jumptable_physical,                                                0x2A0018
-.equ func_patch_return_loc,                                     0x2A001C
-.equ pdn_regs,                                                          0x2A0020
-.equ pxi_regs,                                                          0x2A0024
+.equ costants,                                  0x2A0000
+.equ kernel_patch_addr,                         0x2A0000
+.equ fcram_address,                             0x2A0004
+.equ jump_table_addr,                           0x2A0008
+.equ func_patch,                                0x2A000C
+.equ funct_to_call,                             0x2A0010
+.equ reboot_func,                               0x2A0014
+.equ jumptable_physical,                        0x2A0018
+.equ func_patch_return_loc,                     0x2A001C
+.equ pdn_regs,                                  0x2A0020
+.equ pxi_regs,                                  0x2A0024
 
-.equ arm9_code_size,                                            arm9_code_end-arm9_code
-.equ jump_table_size,                                           jump_table_end-jump_table
-
+.equ load_offset,				0x240000
+.equ arm9_code_size,				arm9_code_end-arm9_code
+.equ jump_table_size,				jump_table_end-jump_table
 jump_table_specific_addresses:
 @ Explanation: the code after the jumptable which does firmlaunchax
 @ itself, does not like variables. So we actually assume to not
 @ change it anymore and replace here the firm-specific addresses.
 @ These are just the variables offsets in arm9hax.bin
-jt_func_patch_return_loc:  .word 0xCC
-jt_pdn_regs:               .word 0xC4
-jt_pxi_regs:               .word 0x1D8
+jt_func_patch_return_loc:  .word 0x000000CC
+jt_pdn_regs:               .word 0x000000C4
+jt_pxi_regs:               .word 0x000001D8
 
 @----------------------------- CODE ------------------------------
 .align 2
@@ -68,47 +67,47 @@ _start:
 	@ 2.34-0 4.1.0
 		ldr r1, =0x02220000		
 		cmp r0, r1
-		ldreq r1, =firm_data1
+		ldreq r1, =firm_data1+load_offset
 		beq copy_firm_data
 	@ 2.35-6 5.0.0
 		ldr r1, =0x02230600
 		cmp r0, r1
-		ldreq r1, =firm_data2
+		ldreq r1, =firm_data2+load_offset
 		beq copy_firm_data
 	@ 2.36-0 5.1.0
 		ldr r1, =0x02240000
 		cmp r0, r1
-		ldreq r1, =firm_data3
+		ldreq r1, =firm_data3+load_offset
 		beq copy_firm_data	
 	@ 2.37-0 6.0.0 
 		ldr r1, =0x02250000
 		cmp r0, r1
-		ldreq r1, =firm_data4
+		ldreq r1, =firm_data4+load_offset
 		beq copy_firm_data
 	@ 2.38-0 6.1.0
 		ldr r1, =0x02260000
 		cmp r0, r1
-		ldreq r1, =firm_data4
+		ldreq r1, =firm_data4+load_offset
 		beq copy_firm_data
 	@ 2.39-4 7.0.0
 		ldr r1, =0x02270400
 		cmp r0, r1
-		ldreq r1, =firm_data5
+		ldreq r1, =firm_data5+load_offset
 		beq copy_firm_data
 	@ 2.40-0 7.2.0
 		ldr r1, =0x02280000
 		cmp r0, r1
-		ldreq r1, =firm_data6
+		ldreq r1, =firm_data6+load_offset
 		beq copy_firm_data
 	@ 2.44-6 8.0.0
 		ldr r1, =0x022C0600
 		cmp r0, r1
-		ldreq r1, =firm_data7
+		ldreq r1, =firm_data7+load_offset
 		beq copy_firm_data
 	@ 2.26-0 9.0.0
 		ldr r1, =0x022E0000
 		cmp r0, r1
-		ldreq r1, =firm_data8
+		ldreq r1, =firm_data8+load_offset
 		beq copy_firm_data
 	
 	copy_firm_data:
@@ -129,7 +128,7 @@ _start:
 
     open_file:
         ldr r0, =filehandle
-        ldr r1, =rxTools_dat
+        ldr r1, =rxTools_dat+load_offset
         mov r2, #1
         ldr r4, =ifile_open
         blx r4
@@ -211,11 +210,10 @@ _start:
         blx lr
 
     arm11_kernel_jump:
-        ldr     R0, =arm11_kernel_entry
+        ldr     R0, =arm11_kernel_entry+load_offset
         .word 0xEF000008        @ SVC     8
         b arm11_kernel_jump
 .pool
-
 .align 2
 do_gspwn_copy:
         stmfd sp!, {r4,r5,r9-r11,lr}
@@ -390,14 +388,13 @@ firm_data8:							@ 2.26-0 9.0.0
 @---------------------- ARM11 KERNEL CODE ----------------------
 .align 2
 arm11_kernel_entry:
-
     arm11_start:
         .word 0xF57FF01F    @ clrex
         bl invalidate_dcache
         bl invalidate_icache
 		
     copy_arm9:
-        ldr r0, =arm9_code
+        ldr r0, =arm9_code+load_offset
         ldr r1, =arm9_code_size
         add r1, r0
         ldr r2, =fcram_address
@@ -411,7 +408,7 @@ arm11_kernel_entry:
             bcc memcpy_arm9_code
 
     copy_jumptable:
-        ldr r0, =jump_table
+        ldr r0, =jump_table+load_offset
         ldr r1, =jump_table_size
         add r1, r0
         ldr r2, =jump_table_addr
@@ -425,19 +422,19 @@ arm11_kernel_entry:
     change_jumptable_vars:
         ldr r0, =jump_table_addr
         ldr r0, [r0]
-        ldr r1, =jt_func_patch_return_loc
+        ldr r1, =jt_func_patch_return_loc+load_offset
         ldr r1, [r1]
         add r1, r0
         ldr r2, =func_patch_return_loc
         ldr r2, [r2]
         str r2, [r1]
-        ldr r1, =jt_pdn_regs
+        ldr r1, =jt_pdn_regs+load_offset
         ldr r1, [r1]
         add r1, r0
         ldr r2, =pdn_regs
         ldr r2, [r2]
         str r2, [r1]
-        ldr r1, =jt_pxi_regs
+        ldr r1, =jt_pxi_regs+load_offset
         ldr r1, [r1]
         add r1, r0
         ldr r2, =pxi_regs
