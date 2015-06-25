@@ -15,31 +15,34 @@ int GetSystemVersion(){
 	return sysversion;
 }
 
-void InitializeNandCrypto(){
-	u32 ctrStart=0;
-    u32 listCtrStart[] = {0x080D7CAC, 0x080D858C, 0x080D748C, 0x080D740C, 0x080D74CC, 0x080D794C};
-    char* listSystem[] = {"4.x", "5.x", "6.x", "7.x", "8.x", "9.x"};
-    u32 lenListCtrStart = sizeof(listCtrStart)/sizeof(u32);
-    for(u32 c=0; c < lenListCtrStart; c++){
-        if(*(u32*)listCtrStart[c] == 0x5C980){
-            ctrStart = listCtrStart[c] + 0x30;
-			sysversion = c;
-            break;
-        }
-    }
+static u8* FindNandCtr()
+{
+    static const u8* version_ctrs[] = {
+        (u8*)0x080D7CAC,//4.x
+        (u8*)0x080D858C,//5.x
+        (u8*)0x080D748C,//6.x
+        (u8*)0x080D740C,//7.x
+        (u8*)0x080D74CC,//8.x
+        (u8*)0x080D794C //9.x
+    };
+    static const u32 version_ctrs_len = sizeof(version_ctrs) / sizeof(u32);
 
-    //If value not in previous list start memory scanning (test range)
-    if (ctrStart == 0){
-        for(u32 c=0x080D7FFF; c > 0x080D7000; c--){
-            if(*(u32*)c == 0x5C980){
-                ctrStart = c + 0x30;
-                break;
-            }
-        }
-    }
-    for(int i = 0; i < 16; i++){
-        NANDCTR[i] = *((u8*)(ctrStart+(15-i))); //The CTR is stored backwards in memory.
-    }
+    for (u32 i = 0; i < version_ctrs_len; i++)
+        if (*(u32*)version_ctrs[i] == 0x5C980)
+            return (u8*)(version_ctrs[i] + 0x30);
+
+    // If value not in previous list start memory scanning (test range)
+    for (u8* c = (u8*)0x080D8FFF; c > (u8*)0x08000000; c--)
+        if (*(u32*)c == 0x5C980 && *(u32*)(c + 1) == 0x800005C9)
+            return c + 0x30;
+
+    return NULL;
+}
+
+void InitializeNandCrypto(){
+	u8* ctrStart = FindNandCtr();
+    for(u32 i = 0; i < 16; i++)
+        NANDCTR[i] = *(ctrStart + (15 - i)); //The CTR is stored backwards in memory.
 }
 
 bool InitFS()
