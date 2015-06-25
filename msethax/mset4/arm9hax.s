@@ -1,12 +1,11 @@
-;;-----------------------------------------------;;
-;;   firmlaunchax - arm9 kernel code execution   ;;
-;;       on mset (system settings) exploit.      ;;
-;;             FOR 4.X CONSOLES ONLY             ;;
-;;   -Roxas75                                    ;;
-;;-----------------------------------------------;;
+@-----------------------------------------------@
+@   firmlaunchax - arm9 kernel code execution   @
+@       on mset (system settings) exploit.      @
+@             FOR 4.X CONSOLES ONLY             @
+@   -Roxas75                                    @
+@-----------------------------------------------@
 
-.nds
-.create "build/arm9hax.bin", 0x1FFF4C80
+@.create "build/arm9hax.bin", 0x1FFF4C80
 .arm
 
 jump_table:
