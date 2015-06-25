@@ -1,31 +1,28 @@
 @3DS memchunkhax & firmlaunchax from mset 4.x
 @Roxas75
 
-@.create "data/mset4x.bin", 0x279400
 .arm
-.align 4
+.align 2
+@.org 0x00279400
 
-#DEFINE pop_pc                                    0x001002F9
-#DEFINE pop_r0                                    0x00143D8C
-#DEFINE pop_r0_r2                                 0x0010f2b9
-#DEFINE pop_r3                                    0x0010538C
-#DEFINE pop_r1                                    0x001549E1
-#DEFINE pop_r4_lr_bx_r1                           0x001182C0
-#DEFINE pop_r0_r4                                 0x0016FE91
-#DEFINE add_sp_r3                                 0x00143D60
+.equ pop_pc,                                    0x001002F9
+.equ pop_r0,                                    0x00143D8C
+.equ pop_r0_r2,                                 0x0010f2b9
+.equ pop_r3,                                    0x0010538C
+.equ pop_r1,                                    0x001549E1
+.equ pop_r4_lr_bx_r1,                           0x001182C0
+.equ pop_r0_r4,                                 0x0016FE91
+.equ add_sp_r3,                                 0x00143D60
 
-#DEFINE YS_label                                  0x00272BAE
-#DEFINE fs_mountsdmc                              0x0018F19C @ pops 3
-#DEFINE load_addr                                 0x002B0000
+.equ YS_label,                                  0x00272BAE
+.equ fs_mountsdmc,                              0x0018F19C @ pops 3
+.equ load_addr,                                 0x002B0000
 
-#DEFINE read_nvram                                0x001334FC
-#DEFINE memcpy                                    0x001BFA60
-#DEFINE svcSleepThread                            0x001AEA50
-#DEFINE filehandle                                0x00279000
-#DEFINE ifile_open                                0x001B82A8
-#DEFINE ifile_read                                0x001B3954
-#DEFINE ifile_write                               0x001B3B50
-#DEFINE ssl_dec                                   0x0022EFA8
+.equ read_nvram,                                0x001334FC
+.equ memcpy,                                    0x001BFA60
+.equ svcSleepThread,                            0x001AEA50
+.equ filehandle,                                0x00279000
+.equ ifile_open,
 
 first_profile:
 
@@ -34,20 +31,14 @@ first_profile:
             .word YS_label
             .word 0xDEADBEEF
         .word fs_mountsdmc
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
+            .fill 3,4,0xDEADBEEF
         .word pop_r0_r2
             .word filehandle
             .word 1
         .word pop_r1
             .word 0x00295E0C @ YS:/rxTools.dat
         .word ifile_open+4
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
+            .fill 5,4,0xDEADBEEF
         .word pop_r0_r2
             .word filehandle
             .word load_addr
@@ -56,12 +47,7 @@ first_profile:
         .word pop_r3
             .word 0x9000
         .word ifile_read+4
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
-            .word 0xDEADBEEF
+            .fill 6,4,0xDEADBEEF
         .word pop_r0_r4
             .word ssl_dec+4
             .word 0x144cbc
@@ -81,35 +67,21 @@ first_profile:
     jump_to_payload:
         .word add_sp_r3
 
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
+        .fill 16,4,0xDEADBEEF
     _end:
-        .orga 0x100
+_orga100: .fill (0x100+_start-_orga100)/4,4,0xDEADBEEF
 
 second_profile:
     _start2:
         .word 0x050F0005
-        .halfword 0x1D
-        dcw "rxTools"
-		.word 0
-		.halfword 0
-		.halfword 0x07
-		dcw "YS:/rxTools.dat"
-        .orga 0x150
+        .hword 0x001D
+        .string16 "rxTools"
+                .word 0x00000000
+                .hword 0x0000
+                .hword 0x0007
+                .string16 "YS:/rxTools.dat"
+.align 2
+_orga150: .fill (0x150+_start-_orga150)/4,4,0xDEADBEEF
         .word 0x6E
         .word 0
         .word 0x0265021A
@@ -120,7 +92,7 @@ second_profile:
         .word 0
         .word 0x3A370052
         .word 0x003F0001
-        .orga 0x1B4
+_orga1B4: .fill (0x1B4+_start-_orga1B4)/4,4,0xDEADBEEF
 
     first_rop:
         .word pop_r0_r2
@@ -135,17 +107,6 @@ second_profile:
         .word add_sp_r3
 
     _end2:
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-        .word 0xDEADBEEF
-
-
+        .fill 9,4,0xDEADBEEF
 
 .pool
-.close
