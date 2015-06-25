@@ -9,39 +9,42 @@
 .arm
 
 @-------------------------- GLOBALS ------------------------------
-#DEFINE top_fb1                                   0x14184E60
-#DEFINE top_fb2                                   0x141CB370
-#DEFINE gsp_addr                                  0x14000000
-#DEFINE gsp_handle                                0x0015801D
-#DEFINE gsp_code_addr                             0x00100000
-#DEFINE fcram_code_addr                           0x03E6D000
-#DEFINE gpuhandle                                 0x27c5D8
-#DEFINE payload_addr                              0x00140000
-#DEFINE filehandle                                0x279000
+.equ top_fb1,                                   0x14184E60
+.equ top_fb2,                                   0x141CB370
+.equ gsp_addr,                                  0x14000000
+.equ gsp_handle,                                0x0015801D
+.equ gsp_code_addr,                                0x00100000
+.equ fcram_code_addr,                              0x03E6D000
+.equ gpuhandle,                                 0x27c5D8
+.equ payload_addr,                              0x00140000
+.equ filehandle,                                0x279000
 
 @------------------------- FUNCTIONS -----------------------------
-#DEFINE memcpy                                    0x001BFA60
-#DEFINE GSPGPU_FlushDataCache                     0x001346C4
-#DEFINE GX_SetTextureCopy                         0x0013C284
-#DEFINE nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue 0x001AC924
-#DEFINE svcSleepThread                            0x001AEA50
-#DEFINE svcControlMemory                          0x001C3E24
-#DEFINE ifile_open                                0x001B82A8
-#DEFINE ifile_write                               0x001B3B50
-#DEFINE ifile_read                                0x001B3954
+.equ memcpy,                                    0x001BFA60
+.equ GSPGPU_FlushDataCache,                     0x001346C4
+.equ GX_SetTextureCopy,                         0x0013C284
+.equ nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue, 0x001AC924
+.equ svcSleepThread,                            0x001AEA50
+.equ svcControlMemory,                          0x001C3E24
+.equ ifile_open,                                0x001B82A8
+.equ ifile_write,                               0x001B3B50
+.equ ifile_read,                                0x001B3954
 
 @---------------------- SPECIFIC COSTANTS ------------------------
-#DEFINE costants								0x2A0000
-#DEFINE kernel_patch_addr      					0x2A0000
-#DEFINE fcram_address			        		0x2A0004
-#DEFINE jump_table_addr							0x2A0008
-#DEFINE func_patch								0x2A000C
-#DEFINE funct_to_call							0x2A0010
-#DEFINE reboot_func								0x2A0014
-#DEFINE jumptable_physical						0x2A0018
-#DEFINE func_patch_return_loc					0x2A001C
-#DEFINE pdn_regs								0x2A0020
-#DEFINE pxi_regs								0x2A0024
+.equ costants,                                                          0x2A0000
+.equ kernel_patch_addr,                                         0x2A0000
+.equ fcram_address,                                             0x2A0004
+.equ jump_table_addr,                                                   0x2A0008
+.equ func_patch,                                                                0x2A000C
+.equ funct_to_call,                                                     0x2A0010
+.equ reboot_func,                                                               0x2A0014
+.equ jumptable_physical,                                                0x2A0018
+.equ func_patch_return_loc,                                     0x2A001C
+.equ pdn_regs,                                                          0x2A0020
+.equ pxi_regs,                                                          0x2A0024
+
+.equ arm9_code_size,                                            arm9_code_end-arm9_code
+.equ jump_table_size,                                           jump_table_end-jump_table
 
 jump_table_specific_addresses:
 @ Explanation: the code after the jumptable which does firmlaunchax
@@ -53,7 +56,7 @@ jt_pdn_regs:               .word 0xC4
 jt_pxi_regs:               .word 0x1D8
 
 @----------------------------- CODE ------------------------------
-.align 4
+.align 2
 _start:
     secure_begin:
         nop
@@ -213,7 +216,7 @@ _start:
         b arm11_kernel_jump
 .pool
 
-.align 4
+.align 2
 do_gspwn_copy:
         stmfd sp!, {r4,r5,r9-r11,lr}
         mov r4, r0
@@ -385,7 +388,7 @@ firm_data8:							@ 2.26-0 9.0.0
 	.word 0xFFFC4000
 
 @---------------------- ARM11 KERNEL CODE ----------------------
-.align 4
+.align 2
 arm11_kernel_entry:
 
     arm11_start:
@@ -395,7 +398,7 @@ arm11_kernel_entry:
 		
     copy_arm9:
         ldr r0, =arm9_code
-        ldr r1, =arm9_code_end-arm9_code
+        ldr r1, =arm9_code_size
         add r1, r0
         ldr r2, =fcram_address
         ldr r2, [r2]
@@ -409,7 +412,7 @@ arm11_kernel_entry:
 
     copy_jumptable:
         ldr r0, =jump_table
-        ldr r1, =jump_table_end-jump_table
+        ldr r1, =jump_table_size
         add r1, r0
         ldr r2, =jump_table_addr
         ldr r2, [r2]
@@ -482,21 +485,20 @@ invalidate_icache:
     bx lr
 
 @---------------------------- ARM11 JUMPTABLE --------------------------
-.align 4
+.align 2
     jump_table:
     .incbin "build/arm9hax.bin"
     jump_table_end:
 
 @------------------------------- ARM9 CODE ------------------------------
-.align 4
+.align 2
  arm9_code:
     .incbin "build/arm9_code.bin"
  arm9_code_end:
 
- .align 4
+ .align 2
 rxTools_dat:
-    dcw "YS:/rxTools.dat"
+    .string16 "YS:/rxTools.dat"
     .word 0
 
 .pool
-.close
