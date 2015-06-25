@@ -158,12 +158,12 @@ all: data/mset4x.bin data/mset6x.bin $(BUILD)
 data/mset4x.bin: rop/mset4x.s
 	@mkdir -p data
 	@$(AS) -c -o data/mset4x.bin $< $(AFLAGS)
-        @$(OBJCOPY) -O binary data/mset4x.bin
+	@$(OBJCOPY) -O binary data/mset4x.bin
         
 data/mset6x.bin: rop/mset6x.s
 	@mkdir -p data
 	@$(AS) -c -o data/mset6x.bin $< $(AFLAGS)
-        @$(OBJCOPY) -O binary data/mset6x.bin
+	@$(OBJCOPY) -O binary data/mset6x.bin
 	
 $(BUILD):
 	@mkdir -p $@
