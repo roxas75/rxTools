@@ -5,8 +5,8 @@
 @   -Roxas75                                    @
 @-----------------------------------------------@
 
-@.create "build/rop.bin", 0x2B0000
 .arm
+.equ load_offset,		0x002B0000
 .align 2
 
 .equ  pop_pc,                                    0x001002F9
@@ -41,7 +41,7 @@ initial_rop:
             .word 0x44444444
             .word pop_pc
         .word pop_r1
-            .word arm_code
+            .word arm_code+load_offset
         .word pop_r0_r2
             .word gsp_addr+gsp_code_addr
             .word arm_code_end-arm_code
@@ -64,7 +64,7 @@ initial_rop:
         .word pop_r0
             .word 0x27c580+0x58
         .word pop_r1
-            .word gxCommand
+            .word gxCommand+load_offset
         .word nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue+4       @ LDMFD   SP!, {R4-R8,PC}
             .word 0x44444444
             .word 0x55555555
@@ -107,7 +107,6 @@ gxCommand:
 .align 4
 arm_code:
     .incbin "build/arm11hax.bin"
-    .fill 4,4,0xdeadbeef
 arm_code_end:
 
 .pool
