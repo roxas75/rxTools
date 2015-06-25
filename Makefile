@@ -42,7 +42,7 @@ brahma/brahma.3dsx brahma/brahma.smdh:
 msethax/mset.bin:
 	make -C $(dir $@) all
 
-data.bin: data/titlekey.bin data/reboot.bin data/patch.bin data/top_bg.bin tools/pack_tool tools/xor
+data.bin: data/titlekey.bin data/reboot.bin rxmode/patch.bin data/top_bg.bin tools/pack_tool tools/xor
 	@tools/pack_tool $(filter %.bin, $^) $@
 	@tools/xor $@ tools/xorpad/data.xor
 	@rm $@
