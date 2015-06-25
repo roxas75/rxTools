@@ -93,7 +93,7 @@ initial_rop:
     jump_to_code:
         .word 0x100000+payload_addr+0x10
 
-.align 4
+.align 2
 gxCommand:
 	.word 0x00000004 @ SetTextureCopy
 	.word gsp_addr+gsp_code_addr @ source
@@ -104,7 +104,7 @@ gxCommand:
 	.word 0x00000008 @ flags
 	.word 0x00000000 @ unused
 
-.align 16
+.align 4
 arm_code:
     .incbin "build/arm11hax.bin"
     .fill 4,4,0xdeadbeef
