@@ -7,5 +7,5 @@
 .thumb
 .align 1
 	mov		r0, #0
-	b		0x80631AA-load_offset
+	.hword	0xE776	@b		0x80631AA-load_offset
 .pool
