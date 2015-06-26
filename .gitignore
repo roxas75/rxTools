@@ -57,3 +57,4 @@ Temporary Items
 *.map
 **/build
 **/data
+*.bat
