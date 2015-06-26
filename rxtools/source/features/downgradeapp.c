@@ -295,6 +295,9 @@ void installFBI()
 			FileClose(&tmp);
 			
 			/* Create the Health & Safety data backup directory */
+			f_mkdir("rxTools/h&s_backup");
+			sprintf(tmpstr, "rxTools/h&s_backup/%s", regions[region]);
+			f_mkdir(tmpstr);
 			sprintf(tmpstr, "rxTools/h&s_backup/%s/v%u", regions[region], tmd_ver);
 			f_mkdir(tmpstr);
 			
