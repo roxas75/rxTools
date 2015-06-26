@@ -1,60 +1,61 @@
-;;-----------------------------------------------;;
-;;   firmlaunchax - arm9 kernel code execution   ;;
-;;       on mset (system settings) exploit.      ;;
-;;             FOR 4.X CONSOLES ONLY             ;;
-;;   -Roxas75                                    ;;
-;;-----------------------------------------------;;
+@-----------------------------------------------@
+@   firmlaunchax - arm9 kernel code execution   @
+@       on mset (system settings) exploit.      @
+@             FOR 4.X CONSOLES ONLY             @
+@   -Roxas75                                    @
+@-----------------------------------------------@
 
-.nds
-.create "build/arm11hax.bin", 0x240000
 .arm
 
-;-------------------------- GLOBALS ------------------------------
-.definelabel top_fb1,                                   0x14184E60
-.definelabel top_fb2,                                   0x141CB370
-.definelabel gsp_addr,                                  0x14000000
-.definelabel gsp_handle,                                0x0015801D
-.definelabel gsp_code_addr,                             0x00100000
-.definelabel fcram_code_addr,                           0x03E6D000
-.definelabel gpuhandle,                                 0x27c5D8
-.definelabel payload_addr,                              0x00140000
-.definelabel filehandle,                                0x279000
+@-------------------------- GLOBALS ------------------------------
+.equ top_fb1,                                   0x14184E60
+.equ top_fb2,                                   0x141CB370
+.equ gsp_addr,                                  0x14000000
+.equ gsp_handle,                                0x0015801D
+.equ gsp_code_addr,                             0x00100000
+.equ fcram_code_addr,                           0x03E6D000
+.equ gpuhandle,                                 0x0027c5D8
+.equ payload_addr,                              0x00140000
+.equ filehandle,                                0x00279000
 
-;------------------------- FUNCTIONS -----------------------------
-.definelabel memcpy,                                    0x001BFA60
-.definelabel GSPGPU_FlushDataCache,                     0x001346C4
-.definelabel GX_SetTextureCopy,                         0x0013C284
-.definelabel nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue, 0x001AC924
-.definelabel svcSleepThread,                            0x001AEA50
-.definelabel svcControlMemory,                          0x001C3E24
-.definelabel ifile_open,                                0x001B82A8
-.definelabel ifile_write,                               0x001B3B50
-.definelabel ifile_read,                                0x001B3954
+@------------------------- FUNCTIONS -----------------------------
+.equ memcpy,                                    0x001BFA60
+.equ GSPGPU_FlushDataCache,                     0x001346C4
+.equ GX_SetTextureCopy,                         0x0013C284
+.equ nn__gxlow__CTR__CmdReqQueueTx__TryEnqueue, 0x001AC924
+.equ svcSleepThread,                            0x001AEA50
+.equ svcControlMemory,                          0x001C3E24
+.equ ifile_open,                                0x001B82A8
+.equ ifile_write,                               0x001B3B50
+.equ ifile_read,                                0x001B3954
 
-;---------------------- SPECIFIC COSTANTS ------------------------
-.definelabel costants,									0x2A0000
-.definelabel kernel_patch_addr,      					0x2A0000
-.definelabel fcram_address,			        			0x2A0004
-.definelabel jump_table_addr,							0x2A0008
-.definelabel func_patch,								0x2A000C
-.definelabel funct_to_call,								0x2A0010
-.definelabel reboot_func,								0x2A0014
-.definelabel jumptable_physical,						0x2A0018
-.definelabel func_patch_return_loc,						0x2A001C
-.definelabel pdn_regs,									0x2A0020
-.definelabel pxi_regs,									0x2A0024
+@---------------------- SPECIFIC COSTANTS ------------------------
+.equ costants,                                  0x2A0000
+.equ kernel_patch_addr,                         0x2A0000
+.equ fcram_address,                             0x2A0004
+.equ jump_table_addr,                           0x2A0008
+.equ func_patch,                                0x2A000C
+.equ funct_to_call,                             0x2A0010
+.equ reboot_func,                               0x2A0014
+.equ jumptable_physical,                        0x2A0018
+.equ func_patch_return_loc,                     0x2A001C
+.equ pdn_regs,                                  0x2A0020
+.equ pxi_regs,                                  0x2A0024
 
+.equ load_offset,				0x240000
+.equ arm9_code_size,				arm9_code_end-arm9_code
+.equ jump_table_size,				jump_table_end-jump_table
 jump_table_specific_addresses:
-; Explanation: the code after the jumptable which does firmlaunchax
-; itself, does not like variables. So we actually assume to not
-; change it anymore and replace here the firm-specific addresses.
-; These are just the variables offsets in arm9hax.bin
-jt_func_patch_return_loc:  .word 0xCC
-jt_pdn_regs:               .word 0xC4
-jt_pxi_regs:               .word 0x1D8
+@ Explanation: the code after the jumptable which does firmlaunchax
+@ itself, does not like variables. So we actually assume to not
+@ change it anymore and replace here the firm-specific addresses.
+@ These are just the variables offsets in arm9hax.bin
+jt_func_patch_return_loc:  .word 0x000000CC
+jt_pdn_regs:               .word 0x000000C4
+jt_pxi_regs:               .word 0x000001D8
 
-;----------------------------- CODE ------------------------------
-.align 4
+@----------------------------- CODE ------------------------------
+.align 2
 _start:
     secure_begin:
         nop
@@ -63,50 +64,50 @@ _start:
 	read_firm_version:
 		ldr r0, =0x1ff80000
 		ldr r0, [r0]
-	; 2.34-0 4.1.0
+	@ 2.34-0 4.1.0
 		ldr r1, =0x02220000		
 		cmp r0, r1
-		ldreq r1, =firm_data1
+		ldreq r1, =firm_data1+load_offset
 		beq copy_firm_data
-	; 2.35-6 5.0.0
+	@ 2.35-6 5.0.0
 		ldr r1, =0x02230600
 		cmp r0, r1
-		ldreq r1, =firm_data2
+		ldreq r1, =firm_data2+load_offset
 		beq copy_firm_data
-	; 2.36-0 5.1.0
+	@ 2.36-0 5.1.0
 		ldr r1, =0x02240000
 		cmp r0, r1
-		ldreq r1, =firm_data3
+		ldreq r1, =firm_data3+load_offset
 		beq copy_firm_data	
-	; 2.37-0 6.0.0 
+	@ 2.37-0 6.0.0 
 		ldr r1, =0x02250000
 		cmp r0, r1
-		ldreq r1, =firm_data4
+		ldreq r1, =firm_data4+load_offset
 		beq copy_firm_data
-	; 2.38-0 6.1.0
+	@ 2.38-0 6.1.0
 		ldr r1, =0x02260000
 		cmp r0, r1
-		ldreq r1, =firm_data4
+		ldreq r1, =firm_data4+load_offset
 		beq copy_firm_data
-	; 2.39-4 7.0.0
+	@ 2.39-4 7.0.0
 		ldr r1, =0x02270400
 		cmp r0, r1
-		ldreq r1, =firm_data5
+		ldreq r1, =firm_data5+load_offset
 		beq copy_firm_data
-	; 2.40-0 7.2.0
+	@ 2.40-0 7.2.0
 		ldr r1, =0x02280000
 		cmp r0, r1
-		ldreq r1, =firm_data6
+		ldreq r1, =firm_data6+load_offset
 		beq copy_firm_data
-	; 2.44-6 8.0.0
+	@ 2.44-6 8.0.0
 		ldr r1, =0x022C0600
 		cmp r0, r1
-		ldreq r1, =firm_data7
+		ldreq r1, =firm_data7+load_offset
 		beq copy_firm_data
-	; 2.26-0 9.0.0
+	@ 2.26-0 9.0.0
 		ldr r1, =0x022E0000
 		cmp r0, r1
-		ldreq r1, =firm_data8
+		ldreq r1, =firm_data8+load_offset
 		beq copy_firm_data
 	
 	copy_firm_data:
@@ -127,7 +128,7 @@ _start:
 
     open_file:
         ldr r0, =filehandle
-        ldr r1, =rxTools_dat
+        ldr r1, =rxTools_dat+load_offset
         mov r2, #1
         ldr r4, =ifile_open
         blx r4
@@ -194,7 +195,7 @@ _start:
             add r0, #4
             subs r10, #1
             bne nop_gen_loop
-        ldr r1, =0xE12FFF1E     ; bx lr
+        ldr r1, =0xE12FFF1E     @ bx lr
         str r1, [r0,#-4]
 
     copy_nop_slide:
@@ -209,12 +210,11 @@ _start:
         blx lr
 
     arm11_kernel_jump:
-        ldr     R0, =arm11_kernel_entry
-        .word 0xEF000008        ; SVC     8
+        ldr     R0, =arm11_kernel_entry+load_offset
+        .word 0xEF000008        @ SVC     8
         b arm11_kernel_jump
 .pool
-
-.align 4
+.align 2
 do_gspwn_copy:
         stmfd sp!, {r4,r5,r9-r11,lr}
         mov r4, r0
@@ -295,8 +295,8 @@ do_gspwn_copy:
         bx lr
 .pool
 
-;---------------------------- SPECIFIC FIRM DATA ------------------------
-firm_data1:							; 2.34-0 4.1.0
+@---------------------------- SPECIFIC FIRM DATA ------------------------
+firm_data1:							@ 2.34-0 4.1.0
 	.word 0xEFF83C97
 	.word 0xF0000000
 	.word 0xEFFF4C80
@@ -307,7 +307,7 @@ firm_data1:							; 2.34-0 4.1.0
 	.word 0xFFF84DDC
 	.word 0xFFFD0000
 	.word 0xFFFD2000
-firm_data2:							; 2.35-6 5.0.0
+firm_data2:							@ 2.35-6 5.0.0
 	.word 0xEFF8372F
 	.word 0xF0000000
 	.word 0xEFFF4C80
@@ -318,7 +318,7 @@ firm_data2:							; 2.35-6 5.0.0
 	.word 0xFFF765C4
 	.word 0xFFFD0000
 	.word 0xFFFD2000
-firm_data3:							; 2.36-0 5.1.0
+firm_data3:							@ 2.36-0 5.1.0
 	.word 0xEFF8372B
 	.word 0xF0000000
 	.word 0xEFFF4C80
@@ -329,7 +329,7 @@ firm_data3:							; 2.36-0 5.1.0
 	.word 0xFFF765C0
 	.word 0xFFFD0000
 	.word 0xFFFD2000	
-firm_data4:							; 2.37-0 6.0.0 | 2.38-0 6.1.0
+firm_data4:							@ 2.37-0 6.0.0 | 2.38-0 6.1.0
 	.word 0xEFF8372B
 	.word 0xF0000000
 	.word 0xEFFF4C80
@@ -340,7 +340,7 @@ firm_data4:							; 2.37-0 6.0.0 | 2.38-0 6.1.0
 	.word 0xFFF76AF0
 	.word 0xFFFD0000
 	.word 0xFFFD2000
-firm_data5:							; 2.39-4 7.0.0
+firm_data5:							@ 2.39-4 7.0.0
 	.word 0xEFF8372F
 	.word 0xF0000000
 	.word 0xEFFF4C80
@@ -351,7 +351,7 @@ firm_data5:							; 2.39-4 7.0.0
 	.word 0xFFF76B3C
 	.word 0xFFFD0000
 	.word 0xFFFD2000
-firm_data6:							; 2.40-0 7.2.0
+firm_data6:							@ 2.40-0 7.2.0
 	.word 0xEFF8372B
 	.word 0xF0000000
 	.word 0xEFFF4C80
@@ -362,7 +362,7 @@ firm_data6:							; 2.40-0 7.2.0
 	.word 0xFFF76B38
 	.word 0xFFFD0000
 	.word 0xFFFD2000
-firm_data7:							; 2.44-6 8.0.0
+firm_data7:							@ 2.44-6 8.0.0
 	.word 0xDFF83767
 	.word 0xE0000000
 	.word 0xDFFF4C80
@@ -373,7 +373,7 @@ firm_data7:							; 2.44-6 8.0.0
 	.word 0xFFF66F30
 	.word 0xFFFBE000
 	.word 0xFFFC0000
-firm_data8:							; 2.26-0 9.0.0
+firm_data8:							@ 2.26-0 9.0.0
 	.word 0xDFF83837
 	.word 0xE0000000
 	.word 0xDFFF4C80
@@ -385,18 +385,17 @@ firm_data8:							; 2.26-0 9.0.0
 	.word 0xFFFC2000
 	.word 0xFFFC4000
 
-;---------------------- ARM11 KERNEL CODE ----------------------
-.align 4
+@---------------------- ARM11 KERNEL CODE ----------------------
+.align 2
 arm11_kernel_entry:
-
     arm11_start:
-        .word 0xF57FF01F    ; clrex
+        .word 0xF57FF01F    @ clrex
         bl invalidate_dcache
         bl invalidate_icache
 		
     copy_arm9:
-        ldr r0, =arm9_code
-        ldr r1, =arm9_code_end-arm9_code
+        ldr r0, =arm9_code+load_offset
+        ldr r1, =arm9_code_size
         add r1, r0
         ldr r2, =fcram_address
         ldr r2, [r2]
@@ -409,8 +408,8 @@ arm11_kernel_entry:
             bcc memcpy_arm9_code
 
     copy_jumptable:
-        ldr r0, =jump_table
-        ldr r1, =jump_table_end-jump_table
+        ldr r0, =jump_table+load_offset
+        ldr r1, =jump_table_size
         add r1, r0
         ldr r2, =jump_table_addr
         ldr r2, [r2]
@@ -423,19 +422,19 @@ arm11_kernel_entry:
     change_jumptable_vars:
         ldr r0, =jump_table_addr
         ldr r0, [r0]
-        ldr r1, =jt_func_patch_return_loc
+        ldr r1, =jt_func_patch_return_loc+load_offset
         ldr r1, [r1]
         add r1, r0
         ldr r2, =func_patch_return_loc
         ldr r2, [r2]
         str r2, [r1]
-        ldr r1, =jt_pdn_regs
+        ldr r1, =jt_pdn_regs+load_offset
         ldr r1, [r1]
         add r1, r0
         ldr r2, =pdn_regs
         ldr r2, [r2]
         str r2, [r1]
-        ldr r1, =jt_pxi_regs
+        ldr r1, =jt_pxi_regs+load_offset
         ldr r1, [r1]
         add r1, r0
         ldr r2, =pxi_regs
@@ -482,22 +481,21 @@ invalidate_icache:
     mcr p15, 0, r0,c7,c10, 4
     bx lr
 
-;---------------------------- ARM11 JUMPTABLE --------------------------
-.align 4
+@---------------------------- ARM11 JUMPTABLE --------------------------
+.align 2
     jump_table:
     .incbin "build/arm9hax.bin"
     jump_table_end:
 
-;------------------------------- ARM9 CODE ------------------------------
-.align 4
+@------------------------------- ARM9 CODE ------------------------------
+.align 2
  arm9_code:
     .incbin "build/arm9_code.bin"
  arm9_code_end:
 
- .align 4
+ .align 2
 rxTools_dat:
-    dcw "YS:/rxTools.dat"
+    .string16 "YS:/rxTools.dat"
     .word 0
 
 .pool
-.close

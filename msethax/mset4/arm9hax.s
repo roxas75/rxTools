@@ -1,13 +1,12 @@
-;;-----------------------------------------------;;
-;;   firmlaunchax - arm9 kernel code execution   ;;
-;;       on mset (system settings) exploit.      ;;
-;;             FOR 4.X CONSOLES ONLY             ;;
-;;   -Roxas75                                    ;;
-;;-----------------------------------------------;;
+@-----------------------------------------------@
+@   firmlaunchax - arm9 kernel code execution   @
+@       on mset (system settings) exploit.      @
+@             FOR 4.X CONSOLES ONLY             @
+@   -Roxas75                                    @
+@-----------------------------------------------@
 
-.nds
-.create "build/arm9hax.bin", 0x1FFF4C80
 .arm
+.equ load_offset,		0x1FFF4C80
 
 jump_table:
     b func_patch_hook
@@ -39,8 +38,8 @@ jump_table:
                 b k11_inf_loop
 
     reboot_function:
-        ldr r0, =arm11_reboot_hook
-        ldr r1, =invalidate_allcache
+        ldr r0, =arm11_reboot_hook+load_offset
+        ldr r1, =invalidate_allcache+load_offset
         ldr r2, =0x1FFFFC00
         mov r4, r2
         bl copy_mem
@@ -153,4 +152,3 @@ jump_table:
         bx lr
 
 .pool
-.close
