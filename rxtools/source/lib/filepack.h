@@ -17,7 +17,7 @@ typedef struct{
 
 void LoadPack();
 void SavePack();
-unsigned char* GetFilePack(int filenumber);
+void* GetFilePack(int filenumber);
 PackEntry* GetEntryPack(int filenumber);
 
 unsigned int HashGen(unsigned char* file, unsigned int size);
