@@ -83,8 +83,8 @@ void DrawCharacter(unsigned char *screen, int character, int x, int y, int color
                 {
     				if(bgcolor != TRANSPARENT){
     					*(screenPos++) = backB;
-                        *(screenPos++) = backG;
-                        *(screenPos++) = backR;
+					*(screenPos++) = backG;
+					*(screenPos++) = backR;
     				}
                 }
                 screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT - 3;
@@ -142,11 +142,10 @@ inline u8 readByte(int address) {
 }
 
 void DrawPixel(int x, int y, int color, int screen){
-	if(x >= 400 || x < 0) return;
-	if(y >= 240 || y < 0) return;
+	if(x >= SCREEN_WIDTH || x < 0) return;
+	if(y >= SCREEN_HEIGHT || y < 0) return;
 	if(color != TRANSPARENT){
-        int cord = 720 * x + 720 -(y * 3);
-        int address  = cord + screen;
+	        int address  = screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
 		writeByte(address, color);
 		writeByte(address+1, color >> 8);
 		writeByte(address+2, color >>16);
@@ -155,10 +154,8 @@ void DrawPixel(int x, int y, int color, int screen){
     //GCC: comparison between pointer and integer
     //GCC: assignment makes integer from pointer without a cast
     if(screen == TOP_SCREEN && TOP_SCREEN2){
-        screen = TOP_SCREEN2;
-        int cord = 720 * x + 720 -(y * 3);
-        int address  = cord + screen;
         if(color != TRANSPARENT){
+	        int address = TOP_SCREEN2 + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
     		writeByte(address, color);
     		writeByte(address+1, color >> 8);
     		writeByte(address+2, color >>16);
@@ -167,25 +164,14 @@ void DrawPixel(int x, int y, int color, int screen){
 }
 
 int GetPixel(int x, int y, int screen){
-	int cord = 720 * x + 720 -(y * 3);
-	int address  = cord + screen;
-    return RGB(readByte(address+0),readByte(address+1),readByte(address+2));
+	int address = screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
+	return RGB(readByte(address+0),readByte(address+1),readByte(address+2));
 }
 
 
 //----------------Some of my shit..........
 void SplashScreen(void){
-	u8 *top = GetFilePack(TOP_PIC), *tmp = top;
-    //Use pointer not array. dangarous but quite quicker.
-    u8 *scr = TOP_SCREEN, *mir = TOP_SCREEN2;
-    for(int i = 0; i < 0x46500; i+=3){
-        *(scr++) = *(top++);
-        *(scr++) = *(top++);
-        *(scr++) = *(top++);
-        if(TOP_SCREEN2){
-            *(mir++) = *(tmp++);
-            *(mir++) = *(tmp++);
-            *(mir++) = *(tmp++);
-        }
-	}
+	memcpy(TOP_SCREEN, GetFilePack(TOP_PIC), SCREEN_SIZE);
+	if(TOP_SCREEN2)
+		memcpy(TOP_SCREEN2, GetFilePack(TOP_PIC), SCREEN_SIZE);
 }
