@@ -99,22 +99,38 @@ void FileClose(File *Handle)
     f_close(Handle);
 }
 
-int FileCopy(char* dest, char* source){
+int FileCopy(char* dest, char* source)
+{
 	File out;
 	File in;
-	if(!FileOpen(&in, source, 0)) return -1;
-	FileOpen(&out, dest, 1);
+	if (!FileOpen(&in, source, 0)) return -1;
+	if (!FileOpen(&out, dest, 1)) return -1;
+	
+	int pos = 0, res = 1;
 	unsigned int chunk_size = 0x4000;
 	unsigned char* buf = 0x26000200;
-	int pos = 0;
-	int res = 1;
-	for (;;) {
+	
+	for (;;)
+	{
 		int rb = FileRead(&in, buf, chunk_size, pos);
-		if (rb == 0) break; /* error or eof */
+		if (rb == 0)
+		{
+			/* error or eof */
+			res = 0;
+			break;
+		}
+		
 		int wb = FileWrite(&out, buf, rb, pos);
-		if (wb < rb){ break; res = 0; }/* error or disk full */
+		if (wb < rb)
+		{
+			/* error or disk full */
+			res = 0;
+			break;
+		}
+		
 		pos += wb;
 	}
+	
 	FileClose(&in);
 	FileClose(&out);
 	return res;
