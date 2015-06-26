@@ -45,6 +45,7 @@ import fnmatch
 from hashlib import sha256
 from ctypes import *
 from binascii import hexlify
+from binascii import unhexlify
 
 mediaUnitSize = 0x200
 
@@ -193,8 +194,8 @@ def getNewkeyY(keyY,header,titleId):
             seedcheck = struct.unpack('>I',header.seedcheck)[0]
             if int(sha256(seeds[i] + tids[i]).hexdigest()[:8],16) == seedcheck:
                 keystr = sha256(keyY + seeds[i]).hexdigest()[:32]
-				newkeyY = unhexlify(keystr)
-				return bytearray(newkeyY)
+                newkeyY = unhexlify(keystr)
+                return bytearray(newkeyY)
             else:
                 raise SeedError('Seed check fail, wrong seed?')
     raise SeedError("Can't find SEEDDB file!\nPlease dump savedata files from \n(nand:/data/<console-unique>/sysdata/0001000f/) and rename as *.sav")
