@@ -63,7 +63,7 @@ first_profile:
             .word 0xDEADBEEF
             .word 0xDEADBEEF
             .word 0xDEADBEEF
-        .word pop_r0_r4
+		.word pop_r0_r4
             .word ssl_dec+4
             .word 0x144cbc
             .word load_addr
