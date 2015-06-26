@@ -11,169 +11,429 @@
 #include "TitleKeyDecrypt.h"
 #include "NandDumper.h"
 #include "aes.h"
+#include "polarssl/sha2.h"
 
-typedef struct{
+#define bswap_32(a) ((((a) << 24) & 0xff000000) | (((a) << 8) & 0xff0000) | (((a) >> 8) & 0xff00) | (((a) >> 24) & 0xff))
+
+typedef struct {
 	unsigned int id;
 	unsigned short index;
 	unsigned short type;
-	unsigned char size[8];
+	unsigned int size;
 	unsigned char signature[0x20];
-} tmd_chunck_struct;
+} tmd_chunk_struct;
+
+unsigned char region = 0;
+char *regions[6] = { "Japan", "USA", "Europe", "China", "Korea", "Taiwan" };
 
 char tmpstr[256];
-char path[256];
 FILINFO curInfo;
 DIR myDir;
 
-int FindApp(char* filepath, unsigned int tid_low, unsigned int tid_high, char* drive){
-    char* folder = &tmpstr;
+char cntpath[256]; // Contains the NAND content path
+char tmdpath[256]; // Contains the NAND TMD path
+
+void print_sha256(unsigned char hash[32])
+{
+	int i;
+	for (i = 0; i < 32; i++)
+	{
+		print("%02X", hash[i]);
+		ConsoleShow();
+	}
+}
+
+int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
+{
+    char *folder = &tmpstr;
     memset(folder, 0, 256);
+	
     DIR* curDir = &myDir;
+	memset((unsigned char*)curDir, 0, sizeof(DIR));
+	
 	FILINFO *myInfo = &curInfo;
     memset((unsigned char*)myInfo, 0, sizeof(FILINFO));
-    memset((unsigned char*)curDir, 0, sizeof(DIR));
 	myInfo->fname[0] = 'A';
-    sprintf(folder, "%s:title/%08X/%08X/content", drive, tid_low, tid_high);
-    //print(folder); print("\n"); ConsoleShow();
+	
+    sprintf(folder, "%s:title/%08x/%08x/content", drive, tid_low, tid_high);
 
-	if(f_opendir(curDir, folder) != FR_OK) return 0;
-	for(int i = 0; myInfo->fname[0] != 0; i++){
-		if( f_readdir(curDir, myInfo)) break;
-		if(myInfo->fname[0] == '.') continue;
+	if (f_opendir(curDir, folder) != FR_OK) return 0;
+	
+	for (int i = 0; myInfo->fname[0] != 0; i++)
+	{
+		if (f_readdir(curDir, myInfo)) break;
+		if (myInfo->fname[0] == '.') continue;
 		
-		memset(&path, 0, 256);
-		File tmp;
-        sprintf(path, "%s/%s", folder, myInfo->fname);
-		if(strstr(myInfo->fname, ".tmd") || strstr(myInfo->fname, ".TMD")){
-			//print(path); print("\n"); ConsoleShow();
-			FileOpen(&tmp, path, 0);
+		if (strstr(myInfo->fname, ".tmd") || strstr(myInfo->fname, ".TMD"))
+		{
+			memset(&tmdpath, 0, 64);
+			sprintf(tmdpath, "%s/%s", folder, myInfo->fname);
+			
+			File tmp;
+			FileOpen(&tmp, tmdpath, 0);
 			unsigned int size = FileGetSize(&tmp);
-			tmd_chunck_struct tmd_entry; memset(&tmd_entry, 0xFF, 0x30);
+			
+			tmd_chunk_struct tmd_entry;
+			memset(&tmd_entry, 0, 0x30);
+			
 			int cont = 0;
-			while(tmd_entry.index != 0){
+			unsigned int b_read = 0;
+			while (tmd_entry.index != 0)
+			{
 				cont++;
-				FileRead(&tmp, &tmd_entry, 0x30, size-cont*0x30);
+				b_read = FileRead(&tmp, &tmd_entry, 0x30, size - (cont * 0x30));
+				if (b_read != 0x30) break;
 			}
+			
 			FileClose(&tmp);
-			memset(&path, 0, 256);
-			sprintf(path, "%s/%02X%02X%02X%02X.APP", folder, tmd_entry.id&0xFF, tmd_entry.id>>8&0xFF, tmd_entry.id>>16&0xFF, tmd_entry.id>>24&0xFF);
-			//print(path); print("\n"); ConsoleShow();
-			if(FileOpen(&tmp, path, 0)){
+			
+			if (b_read != 0x30) continue;
+			
+			memset(&cntpath, 0, 256);
+			sprintf(cntpath, "%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
+			
+			if (FileOpen(&tmp, cntpath, 0))
+			{
 				FileClose(&tmp);
-				strcpy(filepath, path);
 				f_closedir(curDir);
 				return 1;
 			}
-		}else continue;
+		} else {
+			continue;
+		}
 	}
+	
 	f_closedir(curDir);
 	return 0;
 }
 
-int checkDgFile(char* path, unsigned int hash){
+int CheckRegion(char* drive)
+{
+	bool opened;
+	File secureinfo;
+	int ret = -1;
+	
+	print("Opening SecureInfo_A... "); ConsoleShow();
+	sprintf(tmpstr, "%s:rw/sys/SecureInfo_A", drive);
+	opened = FileOpen(&secureinfo, tmpstr, 0);
+	if (!opened)
+	{
+		print("Error.\nTrying with SecureInfo_B... "); ConsoleShow();
+		sprintf(tmpstr, "%s:rw/sys/SecureInfo_B", drive);
+		opened = FileOpen(&secureinfo, tmpstr, 0);
+		if (!opened)
+		{
+			print("Error.\nProcess failed!\n"); ConsoleShow();
+		}
+	}
+	
+	if (opened)
+	{
+		print("OK!\n"); ConsoleShow();
+		FileRead(&secureinfo, &region, 1, 0x100);
+		FileClose(&secureinfo);
+		
+		if (region > 0x06)
+		{
+			print("Error: unsupported region.\nProcess failed!\n"); ConsoleShow();
+		} else {
+			/* Avoid problems with the unused "AUS" region code */
+			if (region >= 3) region--;
+			print("Region: %s\n", regions[region]); ConsoleShow();
+			ret = 0;
+		}
+	}
+	
+	return ret;
+}
+
+int checkDgFile(char* path, unsigned int hash)
+{
     unsigned char* buf = (unsigned char*)0x21000000;
     unsigned int rb, fixedsize = 0x00400000;
+	
     File fp;
-    if(FileOpen(&fp, path, 0)){
+    if (FileOpen(&fp, path, 0))
+	{
         rb = FileRead(&fp, buf, fixedsize, 0);
-        if(!CheckHash(buf, rb, hash)) return 0;
+        if (!CheckHash(buf, rb, hash)) return 0;
         FileClose(&fp);
-    }else{
+    } else {
         return 0;
     }
+	
     return 1;
 }
 
-void downgradeMSET(){
+void downgradeMSET()
+{
     File dg;
-    char filepath[256];
-    char* dgpath = "0:msetdg.bin";
+    char *dgpath = "0:msetdg.bin";
     unsigned int titleid_low = 0x00040010;
     unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000/*, 0x00026000, 0x00027000, 0x00028000*/}; //JPN, USA, EUR, CHN, KOR, TWN
-    char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
     unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B };   //JPN, USA, EUR
 	unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
-    unsigned int region;
-    ConsoleInit();
-    ConsoleSetTitle("MSET Downgrader");
 	
+	ConsoleInit();
+    ConsoleSetTitle("MSET Downgrader");
     print("Opening MSET app...\n"); ConsoleShow();
-    for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], "1"); region++);
-    if(region < supported_regions){
-        print("Region : %s\n\n", regions[region]); ConsoleShow();
-		//print(filepath); print("\n"); ConsoleShow(); FileCopy("mset.app", filepath);
-        FileOpen(&dg, filepath, 0);
-        unsigned int check_val;
-        FileRead(&dg, &check_val, 4, 0x130);
-        FileClose(&dg);
-        if(check_val == 0){
-            print("MSET is already in his exploitable\nversion.\nThere's no need to downgrade.\n"); ConsoleShow();
-        }else if(checkDgFile(dgpath, mset_hash[region])){
-                print("Opening Downgrade Pack...\n"); ConsoleShow();
-                FileOpen(&dg, dgpath, 0);
-                unsigned int dgsize = FileGetSize(&dg);
-                unsigned char* buf = 0x21000000;
-                FileRead(&dg, buf, dgsize, 0);
-                //Decrypting...
-                u8 iv[0x10] = {0};
-                u8 Key[0x10] = {0};
-                GetTitleKey(&Key, titleid_low, titleid_high[region]);
-            	aes_context aes_ctxt;
-            	aes_setkey_dec(&aes_ctxt, Key, 0x80);
-            	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, dgsize, iv, buf, buf);
-                FileWrite(&dg, buf, dgsize, 0);
-                FileClose(&dg);
-                //[/Decrypting]
-
-                if(*((unsigned int*)(buf + 0x100)) == 0x4843434E){
-                    print("Downgrading...\n"); ConsoleShow();
-                    FileCopy(filepath, dgpath);
-                    print("Done!\nRemoving Downgrade Pack...\n"); ConsoleShow();
-                    f_unlink(dgpath);
-                }else{
-                    print("Bad Downgrade Pack!\n"); ConsoleShow();
-                }
-            }else{
-                print("Cannot read Downgrade Pack!\n"); ConsoleShow();
-            }
-    }else{
-        print("Cannot read MSET app!\n"); ConsoleShow();
-    }
+	
+	if (CheckRegion("1") == 0)
+	{
+		if (region < supported_regions)
+		{
+			if (FindApp(titleid_low, titleid_high[region], "1")) // SysNAND only
+			{
+				FileOpen(&dg, cntpath, 0);
+				unsigned int check_val;
+				FileRead(&dg, &check_val, 4, 0x130);
+				FileClose(&dg);
+				
+				if (check_val != 0)
+				{
+					if (checkDgFile(dgpath, mset_hash[region]))
+					{
+						print("Opening downgrade pack...\n"); ConsoleShow();
+						
+						FileOpen(&dg, dgpath, 0);
+						unsigned int dgsize = FileGetSize(&dg);
+						unsigned char *buf = 0x21000000;
+						FileRead(&dg, buf, dgsize, 0);
+						
+						/* Downgrade pack decryption */
+						u8 iv[0x10] = {0};
+						u8 Key[0x10] = {0};
+						
+						GetTitleKey(&Key, titleid_low, titleid_high[region]);
+						
+						aes_context aes_ctxt;
+						aes_setkey_dec(&aes_ctxt, Key, 0x80);
+						aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, dgsize, iv, buf, buf);
+						
+						FileWrite(&dg, buf, dgsize, 0);
+						FileClose(&dg);
+						
+						if (*((unsigned int*)(buf + 0x100)) == 0x4843434E)
+						{
+							print("Downgrading... "); ConsoleShow();
+							FileCopy(cntpath, dgpath);
+							print("done!\nRemoving downgrade pack... "); ConsoleShow();
+							f_unlink(dgpath);
+							print("done.\n"); ConsoleShow();
+						} else {
+							print("Error: bad downgrade pack.\n"); ConsoleShow();
+						}
+					} else {
+						print("Error reading downgrade pack.\n"); ConsoleShow();
+					}
+				} else {
+					print("MSET is already in its exploitable\nversion.\nThere's no need to downgrade.\n"); ConsoleShow();
+				}
+			} else {
+				print("Error: couldn't find the MSET app.\n"); ConsoleShow();
+			}
+		} else {
+			print("Sorry, the MSET downgrade process is not\n"); ConsoleShow();
+			print("compatible with your region *yet*.\n"); ConsoleShow();
+		}
+	}
+	
     print("\nPress A to exit\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
 
-void installFBI(){
-	char* drive;
-    char filepath[256];
+void installFBI()
+{
+	char *drive;
     unsigned int titleid_low = 0x00040010;
-    unsigned int titleid_high[] = { 0x00020300, 0x00021300, 0x00022300/*, 0x00026300, 0x00027300, 0x00028300*/}; //JPN, USA, EUR, CHN, KOR, TWN
-    char* regions[] = { "Japan", "USA", "Europe", /*"China", "Korea", "Taiwan", */"Unknown"};
-    unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
-    unsigned int region;
-    switch(NandSwitch()){
-    	case 0: drive = "1"; break;
-    	case 1: drive = "2"; break;
-    	default: return;
+    unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
+	
+	File tmp;
+	char path[256] = {0};
+	unsigned char *buf = 0x21000000;
+	unsigned int size;
+	
+	unsigned char TmdCntInfoRecSum[32] = {0};
+	unsigned char CntInfoRecSum[32] = {0};
+	unsigned char TmdCntChnkRecSum[32] = {0};
+	unsigned char CntChnkRecSum[32] = {0};
+	unsigned char TmdCntDataSum[32] = {0};
+	unsigned char CntDataSum[32] = {0};
+	
+    switch (NandSwitch())
+	{
+    	case 0:
+			drive = "1";
+			break;
+    	case 1:
+			drive = "2";
+			break;
+    	default:
+			return;
     }
+	
 	ConsoleInit();
     ConsoleSetTitle("FBI Installation");
-	print("Editing Health&Safety Information...\n"); ConsoleShow();
-	memset(filepath, 0, 256);
-	for(region = 0; region < supported_regions && !FindApp(&filepath, titleid_low, titleid_high[region], drive); region++);
-    if(region < supported_regions){
-        print("Region : %s\n\n", regions[region]); ConsoleShow();
-    	//print("%s\n", filepath);
-	    if(FileCopy(filepath, "0:fbi_inject.app") == 1){
-    		print("Success!\nDeleting 'fbi_inject.app'...\n");
-		    f_unlink("0:fbi_inject.app");
-	    }else
-    		print("Failure!\n");
-    }else{
-        print("Cannot read Health&Safety app!\n"); ConsoleShow();
-    }
-	print("\nPress A to exit\n");
+	
+	if (CheckRegion(drive) == 0)
+	{
+		if (FindApp(titleid_low, titleid_high[region], drive))
+		{
+			/* Open the NAND H&S TMD */
+			FileOpen(&tmp, tmdpath, 0);
+			FileRead(&tmp, buf, 0xB34, 0);
+			FileClose(&tmp);
+			
+			/* Get the title version and the stored content size from the TMD */
+			unsigned short tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+			unsigned int cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+			
+			/* Open the NAND H&S content file */
+			FileOpen(&tmp, cntpath, 0);
+			FileRead(&tmp, buf + 0x1000, cntsize, 0);
+			FileClose(&tmp);
+			
+			/* Create the Health & Safety data backup directory */
+			sprintf(tmpstr, "rxTools/h&s_backup/%s/v%u", regions[region], tmd_ver);
+			f_mkdir(tmpstr);
+			
+			/* Backup the H&S TMD */
+			sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
+			if (FileOpen(&tmp, path, 1))
+			{
+				if (FileWrite(&tmp, buf, 0xB34, 0) == 0xB34)
+				{
+					FileClose(&tmp);
+					print("NAND H&S TMD backup created.\n"); ConsoleShow();
+					
+					/* Backup the H&S content file */
+					memset(&path, 0, 256);
+					sprintf(path, "0:%s/%.12s", tmpstr, cntpath+34);
+					if (FileOpen(&tmp, path, 1))
+					{
+						if (FileWrite(&tmp, buf + 0x1000, cntsize, 0) == cntsize)
+						{
+							FileClose(&tmp);
+							print("NAND H&S content backup created.\nEditing Health & Safety Information... "); ConsoleShow();
+							
+							/* Open the FBI TMD */
+							if (FileOpen(&tmp, "0:fbi_inject.tmd", 0))
+							{
+								size = FileGetSize(&tmp);
+								if (size == 0xB34)
+								{
+									if (FileRead(&tmp, buf, 0xB34, 0) == 0xB34)
+									{
+										FileClose(&tmp);
+										
+										/* Get the FBI TMD version and stored content size */
+										unsigned short fbi_tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+										unsigned int fbi_cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+										
+										if (fbi_tmd_ver == tmd_ver)
+										{
+											/* Get the SHA-256 hashes */
+											memcpy(TmdCntInfoRecSum, (void*)(buf + 0x1E4), 32);
+											memcpy(TmdCntChnkRecSum, (void*)(buf + 0x208), 32);
+											memcpy(TmdCntDataSum, (void*)(buf + 0xB14), 32);
+											
+											/* Verify the Content Info Record hash */
+											sha2((unsigned char*)(buf + 0x204), 0x900, CntInfoRecSum, 0);
+											if (memcmp(CntInfoRecSum, TmdCntInfoRecSum, 32) == 0)
+											{
+												/* Verify the Content Chunk Record hash */
+												sha2((unsigned char*)(buf + 0xB04), 0x30, CntChnkRecSum, 0);
+												if (memcmp(CntChnkRecSum, TmdCntChnkRecSum, 32) == 0)
+												{
+													/* Open the FBI content file */
+													if (FileOpen(&tmp, "0:fbi_inject.app", 0))
+													{
+														size = FileGetSize(&tmp);
+														if (size == fbi_cntsize)
+														{
+															if (FileRead(&tmp, buf + 0x1000, fbi_cntsize, 0) == fbi_cntsize)
+															{
+																FileClose(&tmp);
+																
+																/* Verify the Content Data hash */
+																sha2((unsigned char*)(buf + 0x1000), fbi_cntsize, CntDataSum, 0);
+																if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
+																{
+																	/* Now we are ready to rock 'n roll */
+																	if (FileCopy(tmdpath, "0:fbi_inject.tmd") == 1 && FileCopy(cntpath, "0:fbi_inject.app") == 1)
+																	{
+																		print("OK!\nDeleting 'fbi_inject.tmd'... "); ConsoleShow();
+																		f_unlink("0:fbi_inject.tmd");
+																		print("done.\nDeleting 'fbi_inject.app'... "); ConsoleShow();
+																		f_unlink("0:fbi_inject.app");
+																		print("done.\n"); ConsoleShow();
+																	} else {
+																		print("\nError injecting FBI files to the NAND.\n");
+																	}
+																} else {
+																	print("Error: the Content Data SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+																	print_sha256(CntDataSum);
+																	print("\nExpected: "); ConsoleShow();
+																	print_sha256(TmdCntDataSum);
+																}
+															} else {
+																FileClose(&tmp);
+																print("Error reading FBI content file.\n"); ConsoleShow();
+															}
+														} else {
+															FileClose(&tmp);
+															print("Error: invalid FBI content file size.\nGot: %u / Expected: %u\n", size, fbi_cntsize); ConsoleShow();
+														}
+													} else {
+														print("Error opening FBI content file.\n"); ConsoleShow();
+													}
+												} else {
+													print("Error: the Content Chunk Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+													print_sha256(CntChnkRecSum);
+													print("\nExpected: "); ConsoleShow();
+													print_sha256(TmdCntChnkRecSum);
+												}
+											} else {
+												print("Error: the Content Info Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+												print_sha256(CntInfoRecSum);
+												print("\nExpected: "); ConsoleShow();
+												print_sha256(TmdCntInfoRecSum);
+											}
+										} else {
+											print("Error: invalid FBI TMD version number.\nGot: v%u / Expected: v%u\n", fbi_tmd_ver, tmd_ver); ConsoleShow();
+										}
+									} else {
+										FileClose(&tmp);
+										print("Error reading FBI TMD.\n"); ConsoleShow();
+									}
+								} else {
+									FileClose(&tmp);
+									print("Error: invalid FBI TMD size.\nGot: %u / Expected: %u\n", size, 0xB34); ConsoleShow();
+								}
+							} else {
+								print("Error opening FBI TMD.\n"); ConsoleShow();
+							}
+						} else {
+							FileClose(&tmp);
+							print("Error writing H&S content backup.\n"); ConsoleShow();
+						}
+					} else {
+						print("Error creating H&S content backup.\n"); ConsoleShow();
+					}
+				} else {
+					FileClose(&tmp);
+					print("Error writing H&S TMD backup.\n"); ConsoleShow();
+				}
+			} else {
+				print("Error creating H&S TMD backup.\n"); ConsoleShow();
+			}
+		} else {
+			print("Error: couldn't find H&S TMD/content.\n"); ConsoleShow();
+		}
+	}
+	
+	print("\nPress A to exit.");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
