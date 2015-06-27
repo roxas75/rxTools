@@ -3,6 +3,6 @@
 
 void downgradeMSET();
 void installFBI();
-
+void restoreHS();
 
 #endif
