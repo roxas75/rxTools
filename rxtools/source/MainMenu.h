@@ -66,8 +66,9 @@ static Menu ExploitMenu = {
 	{
 		" Downgrade MSET on SysNAND", &downgradeMSET,
 		" Install FBI over Health&Safety App", &installFBI,
+		" Restore original Health&Safety App", &restoreHS,
 	},
-	2,
+	3,
 	0,
 	0
 };
