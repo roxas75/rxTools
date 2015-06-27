@@ -126,7 +126,7 @@ int FileCopy(char* dest, char* source)
 		if (rb != chunk_size)
 		{
 			/* error or eof */
-			res = 0;
+			res = -1;
 			break;
 		}
 		
@@ -134,7 +134,7 @@ int FileCopy(char* dest, char* source)
 		if (wb != chunk_size)
 		{
 			/* error or disk full */
-			res = 0;
+			res = -2;
 			break;
 		}
 		
