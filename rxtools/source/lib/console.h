@@ -35,5 +35,4 @@ void ConsoleSetSpacing(int space);
 int ConsoleGetSpacing();
 
 void print(const char *format, ...);
-
 #endif
