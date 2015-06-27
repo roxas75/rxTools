@@ -14,6 +14,7 @@
 
 void Initialize()
 {
+	ClearScreen(BOT_SCREEN, BLACK);
 	DrawString(TOP_SCREEN,  " INITIALIZE... ", 0, 240-8, WHITE, BLACK);
 	if(InitFS()){
 		DrawString(TOP_SCREEN,  " LOADING...    ", 0, 240-8, WHITE, BLACK);
