@@ -155,7 +155,6 @@ void print(const char *format, ...){
     vsnprintf(str, 256, format, va);
     va_end(va);
 	ConsoleAddText(str);
-	ConsoleShow();
 }
 
 void ConsoleNextLine(){
