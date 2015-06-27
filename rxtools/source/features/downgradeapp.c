@@ -38,8 +38,13 @@ void print_sha256(unsigned char hash[32])
 	int i;
 	for (i = 0; i < 32; i++)
 	{
-		print("%02X", hash[i]);
-		ConsoleShow();
+		print("%02X", hash[i]); ConsoleShow();
+		
+		if (i == 19)
+		{
+			/* Continue printing the SHA-256 sum in a new line after 40 characters (20 bytes) */
+			print("\n"); ConsoleShow();
+		}
 	}
 }
 
@@ -70,11 +75,17 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
 			sprintf(tmdpath, "%s/%s", folder, myInfo->fname);
 			
 			File tmp;
-			FileOpen(&tmp, tmdpath, 0);
+			if (!FileOpen(&tmp, tmdpath, 0)) continue;
+			
 			unsigned int size = FileGetSize(&tmp);
+			if (size < 0xB34)
+			{
+				FileClose(&tmp);
+				continue;
+			}
 			
 			tmd_chunk_struct tmd_entry;
-			memset(&tmd_entry, 0, 0x30);
+			memset(&tmd_entry, 0xFF, 0x30);
 			
 			int cont = 0;
 			unsigned int b_read = 0;
@@ -227,7 +238,7 @@ void downgradeMSET()
 						print("Error reading downgrade pack.\n"); ConsoleShow();
 					}
 				} else {
-					print("MSET is already in its exploitable\nversion.\nThere's no need to downgrade.\n"); ConsoleShow();
+					print("MSET is already in its exploitable version.\nThere's no need to downgrade.\n"); ConsoleShow();
 				}
 			} else {
 				print("Error: couldn't find the MSET app.\n"); ConsoleShow();
@@ -373,58 +384,63 @@ void manageFBI(bool restore)
 																	if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
 																	{
 																		/* Now we are ready to rock 'n roll */
-																		if (FileCopy(tmdpath, "0:fbi_inject.tmd") == 1 && FileCopy(cntpath, "0:fbi_inject.app") == 1)
+																		if (FileCopy(tmdpath, "0:fbi_inject.tmd") == 1)
 																		{
-																			print("OK!\nDeleting 'fbi_inject.tmd'... "); ConsoleShow();
-																			f_unlink("0:fbi_inject.tmd");
-																			print("done.\nDeleting 'fbi_inject.app'... "); ConsoleShow();
-																			f_unlink("0:fbi_inject.app");
-																			print("done.\n"); ConsoleShow();
+																			if (FileCopy(cntpath, "0:fbi_inject.app") == 1)
+																			{
+																				print("OK!\nDeleting 'fbi_inject.tmd'... "); ConsoleShow();
+																				f_unlink("0:fbi_inject.tmd");
+																				print("done.\nDeleting 'fbi_inject.app'... "); ConsoleShow();
+																				f_unlink("0:fbi_inject.app");
+																				print("done.\n"); ConsoleShow();
+																			} else {
+																				print("\nError injecting FBI content file.\n"); ConsoleShow();
+																			}
 																		} else {
-																			print("\nError injecting FBI files to the NAND.\n"); ConsoleShow();
+																			print("\nError injecting FBI TMD.\n"); ConsoleShow();
 																		}
 																	} else {
-																		print("Error: the Content Data SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+																		print("\nError: invalid Content Data hash.\nGot:\n"); ConsoleShow();
 																		print_sha256(CntDataSum);
-																		print("\nExpected: "); ConsoleShow();
+																		print("\nExpected:\n"); ConsoleShow();
 																		print_sha256(TmdCntDataSum);
 																	}
 																} else {
 																	FileClose(&tmp);
-																	print("Error reading FBI content file.\n"); ConsoleShow();
+																	print("\nError reading FBI content file.\n"); ConsoleShow();
 																}
 															} else {
 																FileClose(&tmp);
-																print("Error: invalid FBI content file size.\nGot: %u / Expected: %u\n", size, fbi_cntsize); ConsoleShow();
+																print("\nError: invalid FBI content file size.\nGot: %u / Expected: %u\n", size, fbi_cntsize); ConsoleShow();
 															}
 														} else {
-															print("Error opening FBI content file.\n"); ConsoleShow();
+															print("\nError opening FBI content file.\n"); ConsoleShow();
 														}
 													} else {
-														print("Error: the Content Chunk Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+														print("\nError: invalid Content Chunk Record hash.\nGot:\n"); ConsoleShow();
 														print_sha256(CntChnkRecSum);
-														print("\nExpected: "); ConsoleShow();
+														print("\nExpected:\n"); ConsoleShow();
 														print_sha256(TmdCntChnkRecSum);
 													}
 												} else {
-													print("Error: the Content Info Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+													print("\nError: invalid Content Info Record hash.\nGot:\n"); ConsoleShow();
 													print_sha256(CntInfoRecSum);
-													print("\nExpected: "); ConsoleShow();
+													print("\nExpected:\n"); ConsoleShow();
 													print_sha256(TmdCntInfoRecSum);
 												}
 											} else {
-												print("Error: invalid FBI TMD version number.\nGot: v%u / Expected: v%u\n", fbi_tmd_ver, tmd_ver); ConsoleShow();
+												print("\nError: invalid FBI TMD version.\nGot: v%u / Expected: v%u\n", fbi_tmd_ver, tmd_ver); ConsoleShow();
 											}
 										} else {
 											FileClose(&tmp);
-											print("Error reading FBI TMD.\n"); ConsoleShow();
+											print("\nError reading FBI TMD.\n"); ConsoleShow();
 										}
 									} else {
 										FileClose(&tmp);
-										print("Error: invalid FBI TMD size.\nGot: %u / Expected: %u\n", size, 0xB34); ConsoleShow();
+										print("\nError: invalid FBI TMD size.\nGot: %u / Expected: %u\n", size, 0xB34); ConsoleShow();
 									}
 								} else {
-									print("Error opening FBI TMD.\n"); ConsoleShow();
+									print("\nError opening FBI TMD.\n"); ConsoleShow();
 								}
 							} else {
 								FileClose(&tmp);
@@ -494,19 +510,24 @@ void manageFBI(bool restore)
 													if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
 													{
 														/* Let's do this */
-														if (FileCopy(tmdpath, path) == 1 && FileCopy(cntpath, path2) == 1)
+														if (FileCopy(tmdpath, path) == 1)
 														{
-															print("OK!\nDeleting backup data... "); ConsoleShow();
-															f_unlink(path);
-															f_unlink(path2);
-															print("done.\n"); ConsoleShow();
+															if (FileCopy(cntpath, path2) == 1)
+															{
+																print("OK!\nDeleting backup data... "); ConsoleShow();
+																f_unlink(path);
+																f_unlink(path2);
+																print("done.\n"); ConsoleShow();
+															} else {
+																print("\nError restoring H&S content file.\n"); ConsoleShow();
+															}
 														} else {
-															print("\nError restoring H&S files to the NAND.\n"); ConsoleShow();
+															print("\nError restoring H&S TMD.\n"); ConsoleShow();
 														}
 													} else {
-														print("\nError: the Content Data SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+														print("\nError: invalid Content Data hash.\nGot:\n"); ConsoleShow();
 														print_sha256(CntDataSum);
-														print("\nExpected: "); ConsoleShow();
+														print("\nExpected:\n"); ConsoleShow();
 														print_sha256(TmdCntDataSum);
 													}
 												} else {
@@ -521,19 +542,19 @@ void manageFBI(bool restore)
 											print("\nError opening H&S content file backup.\n");
 										}
 									} else {
-										print("\nError: the Content Chunk Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+										print("\nError: invalid Content Chunk Record hash.\nGot:\n"); ConsoleShow();
 										print_sha256(CntChnkRecSum);
-										print("\nExpected: "); ConsoleShow();
+										print("\nExpected:\n"); ConsoleShow();
 										print_sha256(TmdCntChnkRecSum);
 									}
 								} else {
-									print("\nError: the Content Info Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+									print("\nError: invalid Content Info Record hash.\nGot:\n"); ConsoleShow();
 									print_sha256(CntInfoRecSum);
-									print("\nExpected: "); ConsoleShow();
+									print("\nExpected:\n"); ConsoleShow();
 									print_sha256(TmdCntInfoRecSum);
 								}
 							} else {
-								print("\nError: invalid H&S TMD backup version number.\nGot: v%u / Expected: v%u\n", hs_tmd_ver, tmd_ver); ConsoleShow();
+								print("\nError: invalid H&S TMD backup version.\nGot: v%u / Expected: v%u\n", hs_tmd_ver, tmd_ver); ConsoleShow();
 							}
 						} else {
 							FileClose(&tmp);
