@@ -66,7 +66,7 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
 		
 		if (strstr(myInfo->fname, ".tmd") || strstr(myInfo->fname, ".TMD"))
 		{
-			memset(&tmdpath, 0, 64);
+			memset(&tmdpath, 0, 256);
 			sprintf(tmdpath, "%s/%s", folder, myInfo->fname);
 			
 			File tmp;
@@ -243,11 +243,12 @@ void downgradeMSET()
 	WaitForButton(BUTTON_A);
 }
 
-void installFBI()
+void manageFBI(bool restore)
 {
 	char *drive;
     unsigned int titleid_low = 0x00040010;
     unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
+	char *backup_path = "rxTools/h&s_backup";
 	
 	File tmp;
 	char path[256] = {0};
@@ -274,7 +275,7 @@ void installFBI()
     }
 	
 	ConsoleInit();
-    ConsoleSetTitle("FBI Installation");
+    ConsoleSetTitle(restore ? "Restore Health&Safety" : "FBI Installation");
 	
 	if (CheckRegion(drive) == 0)
 	{
@@ -285,151 +286,266 @@ void installFBI()
 			FileRead(&tmp, buf, 0xB34, 0);
 			FileClose(&tmp);
 			
-			/* Get the title version and the stored content size from the TMD */
+			/* Get the title version from the TMD */
 			unsigned short tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
-			unsigned int cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
-			
-			/* Open the NAND H&S content file */
-			FileOpen(&tmp, cntpath, 0);
-			FileRead(&tmp, buf + 0x1000, cntsize, 0);
-			FileClose(&tmp);
 			
 			/* Create the Health & Safety data backup directory */
-			f_mkdir("rxTools/h&s_backup");
-			sprintf(tmpstr, "rxTools/h&s_backup/%s", regions[region]);
-			f_mkdir(tmpstr);
-			sprintf(tmpstr, "rxTools/h&s_backup/%s/v%u", regions[region], tmd_ver);
-			f_mkdir(tmpstr);
-			
-			/* Backup the H&S TMD */
-			sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
-			if (FileOpen(&tmp, path, 1))
+			if (!restore)
 			{
-				if (FileWrite(&tmp, buf, 0xB34, 0) == 0xB34)
+				/* Get the stored content size from the TMD */
+				unsigned int cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+				
+				/* Open the NAND H&S content file and read it to the memory buffer */
+				FileOpen(&tmp, cntpath, 0);
+				FileRead(&tmp, buf + 0x1000, cntsize, 0);
+				FileClose(&tmp);
+				
+				f_mkdir(backup_path);
+				
+				memset(&tmpstr, 0, 256);
+				sprintf(tmpstr, "%s/%s", backup_path, regions[region]);
+				f_mkdir(tmpstr);
+				
+				memset(&tmpstr, 0, 256);
+				sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
+				f_mkdir(tmpstr);
+				
+				/* Backup the H&S TMD */
+				sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
+				if (FileOpen(&tmp, path, 1))
 				{
-					FileClose(&tmp);
-					print("NAND H&S TMD backup created.\n"); ConsoleShow();
-					
-					/* Backup the H&S content file */
-					memset(&path, 0, 256);
-					sprintf(path, "0:%s/%.12s", tmpstr, cntpath+34);
-					if (FileOpen(&tmp, path, 1))
+					if (FileWrite(&tmp, buf, 0xB34, 0) == 0xB34)
 					{
-						if (FileWrite(&tmp, buf + 0x1000, cntsize, 0) == cntsize)
+						FileClose(&tmp);
+						print("NAND H&S TMD backup created.\n"); ConsoleShow();
+						
+						/* Backup the H&S content file */
+						memset(&path, 0, 256);
+						sprintf(path, "0:%s/%.12s", tmpstr, cntpath+34);
+						if (FileOpen(&tmp, path, 1))
 						{
-							FileClose(&tmp);
-							print("NAND H&S content backup created.\nEditing Health & Safety Information... "); ConsoleShow();
-							
-							/* Open the FBI TMD */
-							if (FileOpen(&tmp, "0:fbi_inject.tmd", 0))
+							if (FileWrite(&tmp, buf + 0x1000, cntsize, 0) == cntsize)
 							{
-								size = FileGetSize(&tmp);
-								if (size == 0xB34)
+								FileClose(&tmp);
+								print("NAND H&S content backup created.\nEditing Health & Safety Information... "); ConsoleShow();
+								
+								/* Open the FBI TMD */
+								if (FileOpen(&tmp, "0:fbi_inject.tmd", 0))
 								{
-									if (FileRead(&tmp, buf, 0xB34, 0) == 0xB34)
+									size = FileGetSize(&tmp);
+									if (size == 0xB34)
 									{
-										FileClose(&tmp);
-										
-										/* Get the FBI TMD version and stored content size */
-										unsigned short fbi_tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
-										unsigned int fbi_cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
-										
-										if (fbi_tmd_ver == tmd_ver)
+										if (FileRead(&tmp, buf, 0xB34, 0) == 0xB34)
 										{
-											/* Get the SHA-256 hashes */
-											memcpy(TmdCntInfoRecSum, (void*)(buf + 0x1E4), 32);
-											memcpy(TmdCntChnkRecSum, (void*)(buf + 0x208), 32);
-											memcpy(TmdCntDataSum, (void*)(buf + 0xB14), 32);
+											FileClose(&tmp);
 											
-											/* Verify the Content Info Record hash */
-											sha2((unsigned char*)(buf + 0x204), 0x900, CntInfoRecSum, 0);
-											if (memcmp(CntInfoRecSum, TmdCntInfoRecSum, 32) == 0)
+											/* Get the FBI TMD version and stored content size */
+											unsigned short fbi_tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+											unsigned int fbi_cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+											
+											if (fbi_tmd_ver == tmd_ver)
 											{
-												/* Verify the Content Chunk Record hash */
-												sha2((unsigned char*)(buf + 0xB04), 0x30, CntChnkRecSum, 0);
-												if (memcmp(CntChnkRecSum, TmdCntChnkRecSum, 32) == 0)
+												/* Get the SHA-256 hashes */
+												memcpy(TmdCntInfoRecSum, (void*)(buf + 0x1E4), 32);
+												memcpy(TmdCntChnkRecSum, (void*)(buf + 0x208), 32);
+												memcpy(TmdCntDataSum, (void*)(buf + 0xB14), 32);
+												
+												/* Verify the Content Info Record hash */
+												sha2((unsigned char*)(buf + 0x204), 0x900, CntInfoRecSum, 0);
+												if (memcmp(CntInfoRecSum, TmdCntInfoRecSum, 32) == 0)
 												{
-													/* Open the FBI content file */
-													if (FileOpen(&tmp, "0:fbi_inject.app", 0))
+													/* Verify the Content Chunk Record hash */
+													sha2((unsigned char*)(buf + 0xB04), 0x30, CntChnkRecSum, 0);
+													if (memcmp(CntChnkRecSum, TmdCntChnkRecSum, 32) == 0)
 													{
-														size = FileGetSize(&tmp);
-														if (size == fbi_cntsize)
+														/* Open the FBI content file */
+														if (FileOpen(&tmp, "0:fbi_inject.app", 0))
 														{
-															if (FileRead(&tmp, buf + 0x1000, fbi_cntsize, 0) == fbi_cntsize)
+															size = FileGetSize(&tmp);
+															if (size == fbi_cntsize)
 															{
-																FileClose(&tmp);
-																
-																/* Verify the Content Data hash */
-																sha2((unsigned char*)(buf + 0x1000), fbi_cntsize, CntDataSum, 0);
-																if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
+																if (FileRead(&tmp, buf + 0x1000, fbi_cntsize, 0) == fbi_cntsize)
 																{
-																	/* Now we are ready to rock 'n roll */
-																	if (FileCopy(tmdpath, "0:fbi_inject.tmd") == 1 && FileCopy(cntpath, "0:fbi_inject.app") == 1)
+																	FileClose(&tmp);
+																	
+																	/* Verify the Content Data hash */
+																	sha2((unsigned char*)(buf + 0x1000), fbi_cntsize, CntDataSum, 0);
+																	if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
 																	{
-																		print("OK!\nDeleting 'fbi_inject.tmd'... "); ConsoleShow();
-																		f_unlink("0:fbi_inject.tmd");
-																		print("done.\nDeleting 'fbi_inject.app'... "); ConsoleShow();
-																		f_unlink("0:fbi_inject.app");
-																		print("done.\n"); ConsoleShow();
+																		/* Now we are ready to rock 'n roll */
+																		if (FileCopy(tmdpath, "0:fbi_inject.tmd") == 1 && FileCopy(cntpath, "0:fbi_inject.app") == 1)
+																		{
+																			print("OK!\nDeleting 'fbi_inject.tmd'... "); ConsoleShow();
+																			f_unlink("0:fbi_inject.tmd");
+																			print("done.\nDeleting 'fbi_inject.app'... "); ConsoleShow();
+																			f_unlink("0:fbi_inject.app");
+																			print("done.\n"); ConsoleShow();
+																		} else {
+																			print("\nError injecting FBI files to the NAND.\n"); ConsoleShow();
+																		}
 																	} else {
-																		print("\nError injecting FBI files to the NAND.\n");
+																		print("Error: the Content Data SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+																		print_sha256(CntDataSum);
+																		print("\nExpected: "); ConsoleShow();
+																		print_sha256(TmdCntDataSum);
 																	}
 																} else {
-																	print("Error: the Content Data SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
-																	print_sha256(CntDataSum);
-																	print("\nExpected: "); ConsoleShow();
-																	print_sha256(TmdCntDataSum);
+																	FileClose(&tmp);
+																	print("Error reading FBI content file.\n"); ConsoleShow();
 																}
 															} else {
 																FileClose(&tmp);
-																print("Error reading FBI content file.\n"); ConsoleShow();
+																print("Error: invalid FBI content file size.\nGot: %u / Expected: %u\n", size, fbi_cntsize); ConsoleShow();
 															}
 														} else {
-															FileClose(&tmp);
-															print("Error: invalid FBI content file size.\nGot: %u / Expected: %u\n", size, fbi_cntsize); ConsoleShow();
+															print("Error opening FBI content file.\n"); ConsoleShow();
 														}
 													} else {
-														print("Error opening FBI content file.\n"); ConsoleShow();
+														print("Error: the Content Chunk Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+														print_sha256(CntChnkRecSum);
+														print("\nExpected: "); ConsoleShow();
+														print_sha256(TmdCntChnkRecSum);
 													}
 												} else {
-													print("Error: the Content Chunk Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
-													print_sha256(CntChnkRecSum);
+													print("Error: the Content Info Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+													print_sha256(CntInfoRecSum);
 													print("\nExpected: "); ConsoleShow();
-													print_sha256(TmdCntChnkRecSum);
+													print_sha256(TmdCntInfoRecSum);
 												}
 											} else {
-												print("Error: the Content Info Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
-												print_sha256(CntInfoRecSum);
-												print("\nExpected: "); ConsoleShow();
-												print_sha256(TmdCntInfoRecSum);
+												print("Error: invalid FBI TMD version number.\nGot: v%u / Expected: v%u\n", fbi_tmd_ver, tmd_ver); ConsoleShow();
 											}
 										} else {
-											print("Error: invalid FBI TMD version number.\nGot: v%u / Expected: v%u\n", fbi_tmd_ver, tmd_ver); ConsoleShow();
+											FileClose(&tmp);
+											print("Error reading FBI TMD.\n"); ConsoleShow();
 										}
 									} else {
 										FileClose(&tmp);
-										print("Error reading FBI TMD.\n"); ConsoleShow();
+										print("Error: invalid FBI TMD size.\nGot: %u / Expected: %u\n", size, 0xB34); ConsoleShow();
 									}
 								} else {
-									FileClose(&tmp);
-									print("Error: invalid FBI TMD size.\nGot: %u / Expected: %u\n", size, 0xB34); ConsoleShow();
+									print("Error opening FBI TMD.\n"); ConsoleShow();
 								}
 							} else {
-								print("Error opening FBI TMD.\n"); ConsoleShow();
+								FileClose(&tmp);
+								print("Error writing H&S content backup.\n"); ConsoleShow();
+							}
+						} else {
+							print("Error creating H&S content backup.\n"); ConsoleShow();
+						}
+					} else {
+						FileClose(&tmp);
+						print("Error writing H&S TMD backup.\n"); ConsoleShow();
+					}
+				} else {
+					print("Error creating H&S TMD backup.\n"); ConsoleShow();
+				}
+			} else {
+				print("Restoring Health & Safety Information... "); ConsoleShow();
+				
+				memset(&tmpstr, 0, 256);
+				sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
+				
+				/* Open the H&S TMD backup */
+				sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
+				if (FileOpen(&tmp, path, 0))
+				{
+					size = FileGetSize(&tmp);
+					if (size == 0xB34)
+					{
+						if (FileRead(&tmp, buf, 0xB34, 0) == 0xB34)
+						{
+							FileClose(&tmp);
+							
+							/* Get the H&S TMD version and stored content size */
+							unsigned short hs_tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+							unsigned int hs_cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+							
+							if (hs_tmd_ver == tmd_ver)
+							{
+								/* Get the SHA-256 hashes */
+								memcpy(TmdCntInfoRecSum, (void*)(buf + 0x1E4), 32);
+								memcpy(TmdCntChnkRecSum, (void*)(buf + 0x208), 32);
+								memcpy(TmdCntDataSum, (void*)(buf + 0xB14), 32);
+								
+								/* Verify the Content Info Record hash */
+								sha2((unsigned char*)(buf + 0x204), 0x900, CntInfoRecSum, 0);
+								if (memcmp(CntInfoRecSum, TmdCntInfoRecSum, 32) == 0)
+								{
+									/* Verify the Content Chunk Record hash */
+									sha2((unsigned char*)(buf + 0xB04), 0x30, CntChnkRecSum, 0);
+									if (memcmp(CntChnkRecSum, TmdCntChnkRecSum, 32) == 0)
+									{
+										char path2[256] = {0};
+										sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
+										
+										/* Open the H&S content file */
+										if (FileOpen(&tmp, path2, 0))
+										{
+											size = FileGetSize(&tmp);
+											if (size == hs_cntsize)
+											{
+												if (FileRead(&tmp, buf + 0x1000, hs_cntsize, 0) == hs_cntsize)
+												{
+													FileClose(&tmp);
+													
+													/* Verify the Content Data hash */
+													sha2((unsigned char*)(buf + 0x1000), hs_cntsize, CntDataSum, 0);
+													if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
+													{
+														/* Let's do this */
+														if (FileCopy(tmdpath, path) == 1 && FileCopy(cntpath, path2) == 1)
+														{
+															print("OK!\nDeleting backup data... "); ConsoleShow();
+															f_unlink(path);
+															f_unlink(path2);
+															print("done.\n"); ConsoleShow();
+														} else {
+															print("\nError restoring H&S files to the NAND.\n"); ConsoleShow();
+														}
+													} else {
+														print("\nError: the Content Data SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+														print_sha256(CntDataSum);
+														print("\nExpected: "); ConsoleShow();
+														print_sha256(TmdCntDataSum);
+													}
+												} else {
+													FileClose(&tmp);
+													print("\nError reading H&S content file backup.\n");
+												}
+											} else {
+												FileClose(&tmp);
+												print("\nError: invalid H&S content file backup size.\nGot: v%u / Expected: v%u\n", size, hs_cntsize); ConsoleShow();
+											}
+										} else {
+											print("\nError opening H&S content file backup.\n");
+										}
+									} else {
+										print("\nError: the Content Chunk Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+										print_sha256(CntChnkRecSum);
+										print("\nExpected: "); ConsoleShow();
+										print_sha256(TmdCntChnkRecSum);
+									}
+								} else {
+									print("\nError: the Content Info Record SHA-256\n       hash isn't valid.\nGot: "); ConsoleShow();
+									print_sha256(CntInfoRecSum);
+									print("\nExpected: "); ConsoleShow();
+									print_sha256(TmdCntInfoRecSum);
+								}
+							} else {
+								print("\nError: invalid H&S TMD backup version number.\nGot: v%u / Expected: v%u\n", hs_tmd_ver, tmd_ver); ConsoleShow();
 							}
 						} else {
 							FileClose(&tmp);
-							print("Error writing H&S content backup.\n"); ConsoleShow();
+							print("\nError reading H&S TMD backup.\n");
 						}
 					} else {
-						print("Error creating H&S content backup.\n"); ConsoleShow();
+						FileClose(&tmp);
+						print("\nError: invalid H&S TMD backup size.\nGot: %u / Expected: %u\n", size, 0xB34); ConsoleShow();
 					}
 				} else {
-					FileClose(&tmp);
-					print("Error writing H&S TMD backup.\n"); ConsoleShow();
+					print("\nError opening H&S TMD backup.\n"); ConsoleShow();
 				}
-			} else {
-				print("Error creating H&S TMD backup.\n"); ConsoleShow();
 			}
 		} else {
 			print("Error: couldn't find H&S TMD/content.\n"); ConsoleShow();
@@ -439,4 +555,16 @@ void installFBI()
 	print("\nPress A to exit.");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
+}
+
+void installFBI()
+{
+	/* Injects FBI TMD and content file to the Health & Safety App */
+	manageFBI(false);
+}
+
+void restoreHS()
+{
+	/* Restores original Health & Safety TMD and content file to the NAND */
+	manageFBI(true);
 }
