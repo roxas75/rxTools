@@ -18,9 +18,8 @@ unsigned int emuNandMounted = 0;
 void (*_softreset)() = 0x080F0000;
 
 void softreset(){
-    u8* code = GetFilePack(REBOOT);
-	memcpy(0x080F0000, code, 0x8000);
-    _softreset();
+	memcpy(0x080F0000, GetFilePack(REBOOT), 0x8000);
+	_softreset();
 }
 
 #define emunand_write 0xCCF2C
