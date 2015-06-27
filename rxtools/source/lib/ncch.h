@@ -41,4 +41,5 @@ typedef struct
 } ctr_ncchheader;
 
 void ncch_get_counter(ctr_ncchheader header, unsigned char counter[16], unsigned char type);
+unsigned int getle32(const unsigned char* p);
 #endif

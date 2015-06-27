@@ -44,9 +44,9 @@ void SavePack(){
 	DecryptPartition(&packInfo);
 }
 
-unsigned char* GetFilePack(int filenumber){
+void* GetFilePack(int filenumber){
 	if(filenumber < nEntry)
-		return (unsigned char*)Entry[filenumber].off;
+		return (void*)Entry[filenumber].off;
 	else return NULL;
 }
 
