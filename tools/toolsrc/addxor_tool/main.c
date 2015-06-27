@@ -29,7 +29,6 @@ int main(int argc, char** argv){
 	printf("Base : %08X\nSeed : %08X\n", base, seed);
 
 	while(!feof(pf)){
-		unsigned int cur = ftell(pf);
 		unsigned int word;
 		fread(&word, 1, 4, pf);
 		word ^= base;
