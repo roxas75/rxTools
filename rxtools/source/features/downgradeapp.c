@@ -299,6 +299,7 @@ void manageFBI(bool restore)
 			
 			/* Get the title version from the TMD */
 			unsigned short tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+			print("TMD Version: v%u.\n", tmd_ver);
 			
 			/* Create the Health & Safety data backup directory */
 			if (!restore)
