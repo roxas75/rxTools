@@ -38,7 +38,7 @@ void print_sha256(unsigned char hash[32])
 	int i;
 	for (i = 0; i < 32; i++)
 	{
-		print("%02X", hash[i]); ConsoleShow();
+		print("%02X", hash[i]);
 		
 		if (i == 19)
 		{
@@ -46,6 +46,8 @@ void print_sha256(unsigned char hash[32])
 			print("\n"); ConsoleShow();
 		}
 	}
+	
+	ConsoleShow();
 }
 
 int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
@@ -120,42 +122,36 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
 
 int CheckRegion(char* drive)
 {
-	bool opened;
 	File secureinfo;
-	int ret = -1;
-	
 	print("Opening SecureInfo_A... "); ConsoleShow();
 	sprintf(tmpstr, "%s:rw/sys/SecureInfo_A", drive);
-	opened = FileOpen(&secureinfo, tmpstr, 0);
-	if (!opened)
+	if (!FileOpen(&secureinfo, tmpstr, 0))
 	{
 		print("Error.\nTrying with SecureInfo_B... "); ConsoleShow();
+		memset(&tmpstr, 0, 256);
 		sprintf(tmpstr, "%s:rw/sys/SecureInfo_B", drive);
-		opened = FileOpen(&secureinfo, tmpstr, 0);
-		if (!opened)
+		if (!FileOpen(&secureinfo, tmpstr, 0))
 		{
 			print("Error.\nProcess failed!\n"); ConsoleShow();
+			return -1;
 		}
 	}
 	
-	if (opened)
+	print("OK!\n"); ConsoleShow();
+	FileRead(&secureinfo, &region, 1, 0x100);
+	FileClose(&secureinfo);
+	
+	if (region > 0x06)
 	{
-		print("OK!\n"); ConsoleShow();
-		FileRead(&secureinfo, &region, 1, 0x100);
-		FileClose(&secureinfo);
-		
-		if (region > 0x06)
-		{
-			print("Error: unsupported region.\nProcess failed!\n"); ConsoleShow();
-		} else {
-			/* Avoid problems with the unused "AUS" region code */
-			if (region >= 3) region--;
-			print("Region: %s\n", regions[region]); ConsoleShow();
-			ret = 0;
-		}
+		print("Error: unsupported region.\nProcess failed!\n"); ConsoleShow();
+		return -1;
+	} else {
+		/* Avoid problems with the unused "AUS" region code */
+		if (region >= 3) region--;
+		print("Region: %s\n", regions[region]); ConsoleShow();
 	}
 	
-	return ret;
+	return 0;
 }
 
 int checkDgFile(char* path, unsigned int hash)
@@ -178,16 +174,16 @@ int checkDgFile(char* path, unsigned int hash)
 
 void downgradeMSET()
 {
-    File dg;
-    char *dgpath = "0:msetdg.bin";
-    unsigned int titleid_low = 0x00040010;
-    unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000/*, 0x00026000, 0x00027000, 0x00028000*/}; //JPN, USA, EUR, CHN, KOR, TWN
-    unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B };   //JPN, USA, EUR
+	File dg;
+	char *dgpath = "0:msetdg.bin";
+	unsigned int titleid_low = 0x00040010;
+	unsigned int titleid_high[] = { 0x00020000, 0x00021000, 0x00022000/*, 0x00026000, 0x00027000, 0x00028000*/}; //JPN, USA, EUR, CHN, KOR, TWN
+	unsigned int mset_hash[] = { 0x57358F14, 0xA28EAD9F, 0x530C345B };   //JPN, USA, EUR
 	unsigned int supported_regions = sizeof(titleid_high)/sizeof(titleid_high[0]);
 	
 	ConsoleInit();
-    ConsoleSetTitle("MSET Downgrader");
-    print("Opening MSET app...\n"); ConsoleShow();
+	ConsoleSetTitle("MSET Downgrader");
+	print("Opening MSET app...\n"); ConsoleShow();
 	
 	if (CheckRegion("1") == 0)
 	{
@@ -249,7 +245,7 @@ void downgradeMSET()
 		}
 	}
 	
-    print("\nPress A to exit\n");
+	print("\nPress A to exit\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
