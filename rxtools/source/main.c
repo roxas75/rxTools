@@ -14,6 +14,7 @@
 
 void Initialize()
 {
+	ClearScreen(BOT_SCREEN, BLACK);
 	DrawString(TOP_SCREEN,  " INITIALIZE... ", 0, 240-8, WHITE, BLACK);
 	if(InitFS()){
 		DrawString(TOP_SCREEN,  " LOADING...    ", 0, 240-8, WHITE, BLACK);
@@ -29,6 +30,7 @@ void Initialize()
     rxMode_boot();
 	
 	rxTools_boot:
+	ClearScreen(BOT_SCREEN, BLACK);
 	memset(TOP_SCREEN, 0x00, 0x46500);
 	memset(TOP_SCREEN2, 0x00, 0x46500);
 	ConsoleSetXY(15, 15);
@@ -46,6 +48,7 @@ void Initialize()
 
 int main(){
 	Initialize();
+	ClearScreen(BOT_SCREEN, BLACK);
 	DrawString(TOP_SCREEN, "SUPPORT THE ORIGINAL, NOT THE IMITATION!", 75, 240-10, GREY, BLACK);
 	//7.X Keys stuff
 	File KeyFile;
