@@ -106,22 +106,32 @@ int FileCopy(char* dest, char* source)
 	if (!FileOpen(&in, source, 0)) return -1;
 	if (!FileOpen(&out, dest, 1)) return -1;
 	
+	unsigned int size = FileGetSize(&in);
+	if (size == 0)
+	{
+		FileClose(&in);
+		FileClose(&out);
+		return -1;
+	}
+	
 	int pos = 0, res = 1;
-	unsigned int chunk_size = 0x4000;
+	unsigned int i, chunk_size = 0x4000;
 	unsigned char* buf = 0x26000200;
 	
-	for (;;)
+	for (i = 0; i < size; i += chunk_size)
 	{
-		int rb = FileRead(&in, buf, chunk_size, pos);
-		if (rb == 0)
+		if (chunk_size > (size - i)) chunk_size = (size - i);
+		
+		int rb = FileRead(&in, buf, chunk_size, i);
+		if (rb != chunk_size)
 		{
 			/* error or eof */
 			res = 0;
 			break;
 		}
 		
-		int wb = FileWrite(&out, buf, rb, pos);
-		if (wb < rb)
+		int wb = FileWrite(&out, buf, chunk_size, i);
+		if (wb != chunk_size)
 		{
 			/* error or disk full */
 			res = 0;
