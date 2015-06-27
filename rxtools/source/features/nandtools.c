@@ -50,7 +50,7 @@ char tmpstr[256];
 void dumpCoolFiles()
 {
 	int nandtype = NandSwitch();
-	if (nandtype == -1) return;
+	if (nandtype == UNK_NAND) return;
 
 	selectedFile = -1;
 	MenuInit(&CoolFilesMenu);
@@ -73,7 +73,7 @@ void dumpCoolFiles()
 
 	char dest[256];
 	sprintf(dest, "rxTools/%s", CoolFiles[selectedFile].name);
-	sprintf(tmpstr, "%d:%s", nandtype + 1, CoolFiles[selectedFile].path);
+	sprintf(tmpstr, "%d:%s", nandtype, CoolFiles[selectedFile].path);
 	print("Dumping...\n"); ConsoleShow();
 
 	char *showres;
@@ -83,7 +83,7 @@ void dumpCoolFiles()
 		/* Fix for SecureInfo_B */
 		print("Error. Trying with SecureInfo_B...\n");
 		sprintf(dest, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
-		sprintf(tmpstr, "%d:%.18s%c", nandtype + 1, CoolFiles[selectedFile].path, 'B');
+		sprintf(tmpstr, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
 		res = FileCopy(dest, tmpstr);
 	} else
 	if (res < 0 && selectedFile == 2)
@@ -91,7 +91,7 @@ void dumpCoolFiles()
 		/* Fix for LocalFriendCodeSeed_A */
 		print("Error. Trying with LocalFriendCodeSeed_A...\n");
 		sprintf(dest, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
-		sprintf(tmpstr, "%d:%.27s%c", nandtype + 1, CoolFiles[selectedFile].path, 'A');
+		sprintf(tmpstr, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
 		res = FileCopy(dest, tmpstr);
 	}
 
@@ -120,7 +120,7 @@ void dumpCoolFiles()
 void restoreCoolFiles()
 {
 	int nandtype = NandSwitch();
-	if (nandtype == -1) return;
+	if (nandtype == UNK_NAND) return;
 
 	selectedFile = -1;
 	MenuInit(&CoolFilesMenu);
@@ -142,7 +142,7 @@ void restoreCoolFiles()
 
 	char dest[256];
 	sprintf(tmpstr, "rxTools/%s", CoolFiles[selectedFile].name);
-	sprintf(dest, "%d:%s", nandtype + 1, CoolFiles[selectedFile].path);
+	sprintf(dest, "%d:%s", nandtype, CoolFiles[selectedFile].path);
 	print("Injecting...\n"); ConsoleShow();
 
 	char *showres;
@@ -152,7 +152,7 @@ void restoreCoolFiles()
 		/* Fix for SecureInfo_B */
 		print("Error. Trying with SecureInfo_B...\n");
 		sprintf(tmpstr, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
-		sprintf(dest, "%d:%.18s%c", nandtype + 1, CoolFiles[selectedFile].path, 'B');
+		sprintf(dest, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
 		res = FileCopy(dest, tmpstr);
 	} else
 	if (res < 0 && selectedFile == 2)
@@ -160,7 +160,7 @@ void restoreCoolFiles()
 		/* Fix for LocalFriendCodeSeed_A */
 		print("Error. Trying with LocalFriendCodeSeed_A...\n");
 		sprintf(tmpstr, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
-		sprintf(dest, "%d:%.27s%c", nandtype + 1, CoolFiles[selectedFile].path, 'A');
+		sprintf(dest, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
 		res = FileCopy(dest, tmpstr);
 	}
 
