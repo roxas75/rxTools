@@ -50,7 +50,7 @@ void print_sha256(unsigned char hash[32])
 	ConsoleShow();
 }
 
-int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
+int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 {
     char *folder = &tmpstr;
     memset(folder, 0, 256);
@@ -62,7 +62,7 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
     memset((unsigned char*)myInfo, 0, sizeof(FILINFO));
 	myInfo->fname[0] = 'A';
 	
-    sprintf(folder, "%s:title/%08x/%08x/content", drive, tid_low, tid_high);
+    sprintf(folder, "%d:title/%08x/%08x/content", drive, tid_low, tid_high);
 
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
 	
@@ -120,16 +120,16 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, char *drive)
 	return 0;
 }
 
-int CheckRegion(char* drive)
+int CheckRegion(int drive)
 {
 	File secureinfo;
 	print("Opening SecureInfo_A... "); ConsoleShow();
-	sprintf(tmpstr, "%s:rw/sys/SecureInfo_A", drive);
+	sprintf(tmpstr, "%d:rw/sys/SecureInfo_A", drive);
 	if (!FileOpen(&secureinfo, tmpstr, 0))
 	{
 		print("Error.\nTrying with SecureInfo_B... "); ConsoleShow();
 		memset(&tmpstr, 0, 256);
-		sprintf(tmpstr, "%s:rw/sys/SecureInfo_B", drive);
+		sprintf(tmpstr, "%d:rw/sys/SecureInfo_B", drive);
 		if (!FileOpen(&secureinfo, tmpstr, 0))
 		{
 			print("Error.\nProcess failed!\n"); ConsoleShow();
@@ -185,7 +185,7 @@ void downgradeMSET()
 	ConsoleSetTitle("MSET Downgrader");
 	print("Opening MSET app...\n"); ConsoleShow();
 	
-	if (CheckRegion("1") == 0)
+	if (CheckRegion(SYS_NAND) == 0)
 	{
 		if (region < supported_regions)
 		{
@@ -252,9 +252,9 @@ void downgradeMSET()
 
 void manageFBI(bool restore)
 {
-	char *drive;
-    unsigned int titleid_low = 0x00040010;
-    unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
+	int drive;
+	unsigned int titleid_low = 0x00040010;
+	unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
 	char *backup_path = "rxTools/h&s_backup";
 	
 	File tmp;
@@ -268,21 +268,11 @@ void manageFBI(bool restore)
 	unsigned char CntChnkRecSum[32] = {0};
 	unsigned char TmdCntDataSum[32] = {0};
 	unsigned char CntDataSum[32] = {0};
-	
-    switch (NandSwitch())
-	{
-    	case 0:
-			drive = "1";
-			break;
-    	case 1:
-			drive = "2";
-			break;
-    	default:
-			return;
-    }
+
+	if((drive=NandSwitch())==UNK_NAND) return;
 	
 	ConsoleInit();
-    ConsoleSetTitle(restore ? "Restore Health&Safety" : "FBI Installation");
+	ConsoleSetTitle(restore ? "Restore Health&Safety" : "FBI Installation");
 	
 	if (CheckRegion(drive) == 0)
 	{
