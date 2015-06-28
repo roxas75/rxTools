@@ -51,7 +51,7 @@ bool InitFS()
 	int res = 1;
 	if(f_mount(&fs[0], "0:", 0) != FR_OK) res = 0;
 	if(f_mount(&fs[1], "1:", 0) != FR_OK) res = 0;
-	if(f_mount(&fs[2], "2:", 0) != FR_OK);
+	if(f_mount(&fs[2], "2:", 0) != FR_OK) res = 0;
 	return res;
 }
 
@@ -67,7 +67,7 @@ bool FileOpen(File *Handle, const char* path, bool truncate)
     unsigned flags = FA_READ | FA_WRITE;
     flags |= truncate ? FA_CREATE_ALWAYS : FA_OPEN_EXISTING; //: FA_OPEN_ALWAYS;
     bool ret = (f_open(Handle, path, flags) == FR_OK);
-    f_lseek(Handle, 0);
+    if (f_tell(Handle)) f_lseek(Handle, 0); //Only seek to head if not
 	f_sync(&file);
     return ret;
 }
@@ -75,7 +75,7 @@ bool FileOpen(File *Handle, const char* path, bool truncate)
 size_t FileRead(File *Handle, void* buf, size_t size, size_t foffset)
 {
     UINT bytes_read = 0;
-    f_lseek(Handle, foffset);
+    if (f_tell(Handle) != foffset) f_lseek(Handle, foffset); //Avoid crazy lseeks
     f_read(Handle, buf, size, &bytes_read);
     return bytes_read;
 }
@@ -83,7 +83,7 @@ size_t FileRead(File *Handle, void* buf, size_t size, size_t foffset)
 size_t FileWrite(File *Handle, void* buf, size_t size, size_t foffset)
 {
     UINT bytes_written = 0;
-    f_lseek(Handle, foffset);
+    if (f_tell(Handle) != foffset) f_lseek(Handle, foffset); //Avoid crazy lseeks
     f_write(Handle, buf, size, &bytes_written);
 	f_sync(&file);
     return bytes_written;
