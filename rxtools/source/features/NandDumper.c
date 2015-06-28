@@ -26,17 +26,17 @@ int NandSwitch(){
 	ConsoleShow();
 	while (true) {
         u32 pad_state = InputWait();
-		if(pad_state & BUTTON_X)    return  0;
-		if(pad_state & BUTTON_Y)    return  1;
-		if(pad_state & BUTTON_B) 	return -1;
+		if(pad_state & BUTTON_X) return SYS_NAND;
+		if(pad_state & BUTTON_Y) return EMU_NAND;
+		if(pad_state & BUTTON_B) return UNK_NAND;
     }
 }
 
 void NandDumper(){
 	File myFile;
-	int isEmuNand = checkEmuNAND() ? NandSwitch() : 0;
-	if(isEmuNand == -1) return;
-
+	int isEmuNand = SYS_NAND;
+	if(checkEmuNAND() && (isEmuNand = NandSwitch()) == UNK_NAND) return;
+	isEmuNand--;
 	ConsoleInit();
 	ConsoleSetTitle(isEmuNand ? "EmuNAND Dumper" : "NAND Dumper");
 	unsigned char* buf = 0x21000000;
@@ -77,8 +77,9 @@ void NandDumper(){
 }
 
 void DumpNandPartitions(){
-	int isEmuNand = checkEmuNAND() ? NandSwitch() : 0;
-	if(isEmuNand == -1) return;
+	int isEmuNand = SYS_NAND;
+	if(checkEmuNAND() && (isEmuNand = NandSwitch()) == UNK_NAND) return;
+	isEmuNand--;
 	char* p_name[] = { "twln.bin", "twlp.bin", "agb_save.bin", "firm0.bin", "firm1.bin", "ctrnand.bin" };
 	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, 0x2F3E3600};
 	unsigned int p_addr[] = { TWLN, TWLP, AGB_SAVE, FIRM0, FIRM1, CTRNAND };
@@ -123,8 +124,9 @@ void GenerateNandXorpads(){
 }
 
 void DumpNANDSystemTitles(){
-	int isEmuNand = checkEmuNAND() ? NandSwitch() : 0;
-	if(isEmuNand == -1) return;
+	int isEmuNand = SYS_NAND;
+	if(checkEmuNAND() && (isEmuNand = NandSwitch()) == UNK_NAND) return;
+	isEmuNand--;
 	char* outfolder = "rxTools/titles";
 
 	ConsoleInit();
