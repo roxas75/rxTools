@@ -15,7 +15,8 @@ int main(int argc, char** argv){
 	unsigned int size = atoi(argv[2]);
 	printf("%d bytes\n", size);
 	fseek(pf, 0, 2);
-	while(ftell(pf) < size)
+	unsigned int fsize = ftell(pf);
+	while(fsize < size)
 		fputc(0, pf);
 	fclose(pf);
 	return 0;
