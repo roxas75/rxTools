@@ -13,8 +13,8 @@ enum {
 	CTRNAND = 0x0B95CA00,
 } NAND_PARTITIONS;
 ////////////////////////////////////////////////////////////////Basic FileSystem Operations
-bool InitFS();
-void DeinitFS();
+bool FSInit(void);
+void FSDeInit(void);
 bool FileOpen(File *Handle, const char *path, bool truncate);
 size_t FileRead(File *Handle, void *buf, size_t size, size_t foffset);
 size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);

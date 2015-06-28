@@ -15,7 +15,7 @@
 void Initialize()
 {
 	DrawString(TOP_SCREEN,  " INITIALIZE... ", 0, 240-8, WHITE, BLACK);
-	if(InitFS()){
+	if(FSInit()){
 		DrawString(TOP_SCREEN,  " LOADING...    ", 0, 240-8, WHITE, BLACK);
 	}else{
 		DrawString(TOP_SCREEN,  " ERROR!        ", 0, 240-8, RED, BLACK);
@@ -83,6 +83,6 @@ int main(){
 		MenuShow();
     }
 
-    DeinitFS();
+    FSDeInit();
     return 0;
 }

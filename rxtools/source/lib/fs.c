@@ -7,17 +7,16 @@
 
 ////////////////////////////////////////////////////////////////Basic FileSystem Operations
 static FATFS fs[3];
-
-bool InitFS() {
+/**Init FileSystems.*/
+bool FSInit(void) {
 	FSNandInitCrypto();
-	int res = 1;
-	if (f_mount(&fs[0], "0:", 0) != FR_OK) { res = 0; }
-	if (f_mount(&fs[1], "1:", 0) != FR_OK) { res = 0; }
-	if (f_mount(&fs[2], "2:", 0) != FR_OK) { res = 0; }
-	return res;
+	if (f_mount(&fs[0], "0:", 0) != FR_OK) return 0;		//SDCard
+	if (f_mount(&fs[1], "1:", 0) != FR_OK) return 0;		//NAND
+	if (f_mount(&fs[2], "2:", 0) != FR_OK) ; //return 0;	//EmuNAND, Sometimes it doesn't exist
+	return 1;
 }
-
-void DeinitFS() {
+/**[Unused?]DeInit FileSystems.*/
+void FSDeInit(void) {
 	f_mount(NULL, "0:", 0);
 	f_mount(NULL, "1:", 0);
 	f_mount(NULL, "2:", 0);
