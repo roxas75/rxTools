@@ -13,6 +13,7 @@
 #include "aes.h"
 #include "polarssl/sha2.h"
 
+#define bswap_16(a) ((((a) << 8) & 0xff00) | (((a) >> 8) & 0xff))
 #define bswap_32(a) ((((a) << 24) & 0xff000000) | (((a) << 8) & 0xff0000) | (((a) >> 8) & 0xff00) | (((a) >> 24) & 0xff))
 
 typedef struct {
@@ -63,8 +64,11 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 	myInfo->fname[0] = 'A';
 	
     sprintf(folder, "%d:title/%08x/%08x/content", drive, tid_low, tid_high);
-
+	
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
+	
+	unsigned short latest_ver = 0, cur_ver = 0;
+	bool is_v0 = false;
 	
 	for (int i = 0; myInfo->fname[0] != 0; i++)
 	{
@@ -86,30 +90,48 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 				continue;
 			}
 			
-			tmd_chunk_struct tmd_entry;
-			memset(&tmd_entry, 0xFF, 0x30);
-			
-			int cont = 0;
-			unsigned int b_read = 0;
-			while (tmd_entry.index != 0)
-			{
-				cont++;
-				b_read = FileRead(&tmp, &tmd_entry, 0x30, size - (cont * 0x30));
-				if (b_read != 0x30) break;
-			}
-			
-			FileClose(&tmp);
-			
-			if (b_read != 0x30) continue;
-			
-			memset(&cntpath, 0, 256);
-			sprintf(cntpath, "%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
-			
-			if (FileOpen(&tmp, cntpath, 0))
+			/* Get the TMD version */
+			/* There can be some instances in which more than one TMD/content file is available */
+			/* Of course, we want to use the latest one */
+			if (FileRead(&tmp, &cur_ver, 2, 0x1DC) != 2)
 			{
 				FileClose(&tmp);
-				f_closedir(curDir);
-				return 1;
+				continue;
+			}
+			
+			/* Change Endianness */
+			cur_ver = bswap_16(cur_ver);
+			
+			/* Verify the version number */
+			if ((latest_ver == 0 && !is_v0) || cur_ver > latest_ver)
+			{
+				tmd_chunk_struct tmd_entry;
+				memset(&tmd_entry, 0xFF, 0x30);
+				
+				int cont = 0;
+				unsigned int b_read = 0;
+				while (tmd_entry.index != 0)
+				{
+					cont++;
+					b_read = FileRead(&tmp, &tmd_entry, 0x30, size - (cont * 0x30));
+					if (b_read != 0x30) break;
+				}
+				
+				FileClose(&tmp);
+				
+				if (b_read != 0x30) continue;
+				
+				memset(&cntpath, 0, 256);
+				sprintf(cntpath, "%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
+				
+				if (FileOpen(&tmp, cntpath, 0))
+				{
+					FileClose(&tmp);
+					latest_ver = cur_ver;
+					if (cur_ver == 0) is_v0 = true;
+				}
+			} else {
+				FileClose(&tmp);
 			}
 		} else {
 			continue;
@@ -117,7 +139,8 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 	}
 	
 	f_closedir(curDir);
-	return 0;
+	if (latest_ver == 0 && !is_v0) return 0;
+	return 1;
 }
 
 int CheckRegion(int drive)
@@ -189,7 +212,7 @@ void downgradeMSET()
 	{
 		if (region < supported_regions)
 		{
-			if (FindApp(titleid_low, titleid_high[region], "1")) // SysNAND only
+			if (FindApp(titleid_low, titleid_high[region], 1)) // SysNAND only
 			{
 				FileOpen(&dg, cntpath, 0);
 				unsigned int check_val;
@@ -269,7 +292,7 @@ void manageFBI(bool restore)
 	unsigned char TmdCntDataSum[32] = {0};
 	unsigned char CntDataSum[32] = {0};
 
-	if((drive=NandSwitch())==UNK_NAND) return;
+	if ((drive = NandSwitch()) == UNK_NAND) return;
 	
 	ConsoleInit();
 	ConsoleSetTitle(restore ? "Restore Health&Safety" : "FBI Installation");
