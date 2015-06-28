@@ -99,6 +99,47 @@ void FileClose(File *Handle)
     f_close(Handle);
 }
 
+/** Copy Source File (source) to Target (target).
+  * @param  target Target file, will be created if not exists.
+  * @param  source Source file, must exists.
+  * @retval Compounded value of (STEP<<8)|FR_xx, so it contains real reasons.
+  * @note   directly FATFS calls. FATFS return value only ranges from 0 to 19.
+  */
+u32 FSFileCopy(char* target, char* source) {
+    FIL src, dst;
+    u32 step = 0; //Tells you where it failed
+    FRESULT retfatfs = 0; //FATFS return value
+    u32 blockSize = 0x4000;
+    u8* buffer = 0x26000200; //Temp buffer for transfer.
+    UINT byteI = 0, byteO = 0; //Bytes that read or written
+    retfatfs = f_open(&src, source, FA_OPEN_EXISTING);
+    if (retfatfs != FR_OK) {step = 1; goto closeExit;}
+    retfatfs = f_open(&dst, target, FA_CREATE_ALWAYS);
+    if (retfatfs != FR_OK) {step = 2; goto closeExit;}
+    u32 totalSize = src.fsize;
+    //If source file has no contents, nothing to be copied.
+    if (!totalSize) goto closeExit;
+    while (totalSize) {
+        if (totalSize < blockSize) blockSize = totalSize;
+        //FR_OK, FR_DISK_ERR, FR_INT_ERR, FR_INVALID_OBJECT, FR_TIMEOUT
+        retfatfs = f_read(&src, buffer, blockSize, &byteI);
+        if (retfatfs != FR_OK) {step = 3; goto closeExit;}
+        //Unexpected
+        if (byteI != blockSize) {step = 4; goto closeExit;}
+        //FR_OK, FR_DISK_ERR, FR_INT_ERR, FR_INVALID_OBJECT, FR_TIMEOUT
+        retfatfs = f_write(&dst, buffer, blockSize, &byteO);
+        if (retfatfs != FR_OK) {step = 5; goto closeExit;}
+        //Unexpected
+        if (byteO != blockSize) {step = 6; goto closeExit;}
+        totalSize -= blockSize;
+    }
+    step = 0; //Success return value.
+closeExit:
+    f_close(&src);
+    f_close(&dst);
+    return (step << 8) | retfatfs;
+}
+
 int FileCopy(char* dest, char* source)
 {
 	File out;
