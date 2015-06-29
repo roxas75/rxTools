@@ -38,7 +38,6 @@ What is actually necessary is:
 - [armips] (https://github.com/Kingcom/armips) (for Windows [Visual Studio 2013 Express for Windows](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or higher is required to build armips)
 - GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with gcc-base will be fine)
 
-
 Just run the **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
 
 ## Credits

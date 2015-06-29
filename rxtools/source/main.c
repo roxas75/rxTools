@@ -33,6 +33,8 @@ void Initialize(){
 	ConsoleSetSpacing(2);
 	ConsoleSetBorderWidth(3);
 	//Check that the data is installed
+	f_mkdir ("rxTools");
+	f_mkdir ("rxTools/nand");
 	InstallConfigData();
 	
 	SplashScreen();
@@ -44,9 +46,6 @@ void Initialize(){
 	rxTools_boot:
 	memset(TOP_SCREEN, 0x00, 0x46500);
 	memset(TOP_SCREEN2, 0x00, 0x46500);
-	f_mkdir ("rxTools");
-	f_mkdir ("rxTools/nand");
-	//f_mkdir ("capture");
 }
 
 int main(){
