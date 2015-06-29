@@ -27,15 +27,14 @@ typedef volatile s64 vs64;
 #define VRAM (unsigned char*)0x18000000
 
 //The basic functions we will need
-void* rx_memset(void * ptr, u8 value, u32 num);
+void *rx_memset(void *ptr, u8 value, u32 num);
 int rx_strcmp(char *s1, char *s2, u32 size, u32 w1, u32 w2);    // w1 = size of string1 letters
-void rx_strcpy(char * dest, char * source, u32 size, u32 w1, u32 w2);
-void rx_hextostr(u32 num, void * str);
-int rx_memcmp(void* buf1, void* buf2, int size);
-static inline void svc_Backdoor(void *addr)
-{
-    register void *_r0 __asm ("r0") = addr;
-    __asm volatile ( "SVC 0x7B" : : "r"(_r0) );
+void rx_strcpy(char *dest, char *source, u32 size, u32 w1, u32 w2);
+void rx_hextostr(u32 num, void *str);
+int rx_memcmp(void *buf1, void *buf2, int size);
+static inline void svc_Backdoor(void *addr) {
+	register void *_r0 __asm("r0") = addr;
+	__asm volatile("SVC 0x7B" : : "r"(_r0));
 }
 
 //hid
