@@ -2,7 +2,7 @@ PYTHON = python
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 
-tools = tools/fill_with_zero tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/fill_with_crap
+tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor
 
 .PHONY: all
 all: rxTools.dat
@@ -27,12 +27,12 @@ release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
 	@cp msethax/rxinstaller.nds release/mset/rxinstaller.nds
 
-rxTools.dat: payload.bin data.bin msethax/mset.bin tools/fill_with_crap
+rxTools.dat: payload.bin data.bin msethax/mset.bin
 	@cp spiderhax/Launcher.dat $@
 	@$(PYTHON) tools/insert.py $@ payload.bin 0x20000
 	@$(PYTHON) tools/insert.py $@ data.bin 0x100000
 	@$(PYTHON) tools/insert.py $@ msethax/mset.bin 0
-	@tools/fill_with_crap $@ 4194304
+	@dd if=/dev/zero bs=$$((4194304-$$(stat -c %s $@))) count=1 >> $@
 
 .PHONY: brahma/brahma.3dsx brahma/brahma.smdh
 brahma/brahma.3dsx brahma/brahma.smdh:
@@ -56,9 +56,9 @@ payload.bin: rxtools/rxtools.bin tools/addxor_tool
 	@tools/addxor_tool $< $@ 0x67893421 0x12756342
 
 .PHONY: rxtools/rxtools.bin
-rxtools/rxtools.bin: tools/fill_with_zero tools/addxor_tool
+rxtools/rxtools.bin: tools/addxor_tool
 	@make -C $(dir $@) all
-	@tools/fill_with_zero $@ 917504
+	@dd if=/dev/zero bs=$$((917504-$$(stat -c %s $@))) count=1 >> $@
 
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
