@@ -15,31 +15,32 @@
 #define DATAFOLDER "rxtools/data"
 #define KEYFILENAME "slot0x25KeyX.bin"
 #define WORKBUF (u8*)0x21000000
-
-#define rxmode_emu_label "RX3D"
-#define rxmode_sys_label "Ver."
+#define NAT_SIZE 0xEBC00
+#define AGB_SIZE 0xD9C00
+#define TWL_SIZE 0x1A1C00
 
 char tmpstr[256] = {0};
 File tmpfile;
 
 int InstallData(char* drive){
+	File firmfile;
 	char* progressbar = "[       ]";
 	char* progress = progressbar+1;
 	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
 	f_mkdir(tmpstr);
-	f_chmod(tmpstr, AM_HID, AM_HID);
+	//f_chmod(tmpstr, AM_HID, AM_HID);
 	
 	//Read firmware data
-	if(FileOpen(&tmpfile, "firmware.bin", 0)){
-		FileRead(&tmpfile, WORKBUF, 0x600000, 0);
-		FileClose(&tmpfile);
+	if(FileOpen(&firmfile, "firmware.bin", 0)){
+		//... We'll see
 	}else return CONF_NOFIRMBIN;
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create patched native_firm
-	u8* n_firm = decryptFirmTitle(WORKBUF, 0xF0000, 0x00000002);
+	FileRead(&firmfile, WORKBUF, NAT_SIZE, 0);
+	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002);
 	u8* n_firm_patch = GetFilePack("nat_patch.bin");
 	applyPatch(n_firm, n_firm_patch);
 	u8 keyx[16] = {0};
@@ -49,7 +50,7 @@ int InstallData(char* drive){
 		FileClose(&tmpfile);
 	}
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
-	for(int i = 0; i < 0xF0000; i+=0x4){
+	for(int i = 0; i < NAT_SIZE; i+=0x4){
 		if(!strcmp((char*)n_firm + i, "Shit")){
 			if(1){
 				memcpy((char*)n_firm + i, rxmode_emu_label, 4);
@@ -67,31 +68,33 @@ int InstallData(char* drive){
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tmpfile, tmpstr, 1)){
-		FileWrite(&tmpfile, n_firm, 0xF0000, 0);
+		FileWrite(&tmpfile, n_firm, NAT_SIZE, 0);
 		FileClose(&tmpfile);
 		//FileCopy("0004013800000002.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create AGB patched firmware
-	u8* a_firm = decryptFirmTitle(WORKBUF+0x200000, 0xD9C00, 0x00000202);
+	FileRead(&firmfile, WORKBUF, AGB_SIZE, NAT_SIZE);
+	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202);
 	u8* a_firm_patch = GetFilePack("agb_patch.bin");
 	applyPatch(a_firm, a_firm_patch);
 	sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
 	if(FileOpen(&tmpfile, tmpstr, 1)){
-		FileWrite(&tmpfile, a_firm, 0xD9000, 0);
+		FileWrite(&tmpfile, a_firm, AGB_SIZE, 0);
 		FileClose(&tmpfile);
 		//FileCopy("0004013800000202.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create TWL patched firmware
-	u8* t_firm = decryptFirmTitle(WORKBUF+0x400000, 0x1A1C00, 0x00000102);
+	FileRead(&firmfile, WORKBUF, TWL_SIZE, NAT_SIZE+AGB_SIZE);
+	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102);
 	u8* t_firm_patch = GetFilePack("twl_patch.bin");
 	applyPatch(t_firm, t_firm_patch);
 	sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
 	if(FileOpen(&tmpfile, tmpstr, 1)){
-		FileWrite(&tmpfile, t_firm, 0x1A1000, 0);
+		FileWrite(&tmpfile, t_firm, TWL_SIZE, 0);
 		FileClose(&tmpfile);
 		//FileCopy("0004013800000102.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
