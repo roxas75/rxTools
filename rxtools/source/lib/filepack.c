@@ -64,7 +64,7 @@ int CheckHash(unsigned char* file, unsigned int size, unsigned int hash){ //that
 		HASH ^= file[i+2] << 16;
 		HASH ^= file[i+3] << 24;
 	}
-	char str[256];
+	
 	if(HASH == hash) return 1;
 	else return 0;
 }

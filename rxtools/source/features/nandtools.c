@@ -77,34 +77,42 @@ void dumpCoolFiles()
 	print("Dumping...\n"); ConsoleShow();
 
 	char *showres;
-	int res = FileCopy(dest, tmpstr);
-	if (res < 0 && selectedFile == 1)
+	unsigned int res = FSFileCopy(dest, tmpstr);
+	if (res != 0 && selectedFile == 1)
 	{
 		/* Fix for SecureInfo_B */
 		print("Error. Trying with SecureInfo_B...\n");
 		sprintf(dest, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
 		sprintf(tmpstr, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
-		res = FileCopy(dest, tmpstr);
+		res = FSFileCopy(dest, tmpstr);
 	} else
-	if (res < 0 && selectedFile == 2)
+	if (res != 0 && selectedFile == 2)
 	{
 		/* Fix for LocalFriendCodeSeed_A */
 		print("Error. Trying with LocalFriendCodeSeed_A...\n");
 		sprintf(dest, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
 		sprintf(tmpstr, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
-		res = FileCopy(dest, tmpstr);
+		res = FSFileCopy(dest, tmpstr);
 	}
 
-	switch(res)
+	switch ((res >> 8) & 0xFF)
 	{
-		case 1:
+		case 0:
 			showres = "Success!";
 			break;
-		case -1:
-			showres = "Cannot write to file!";
+		case 1:
+			showres = "Error opening input file.";
 			break;
-		case -2:
-			showres = "Cannot read from file!";
+		case 2:
+			showres = "Error creating output file.";
+			break;
+		case 3:
+		case 4:
+			showres = "Error reading input file.";
+			break;
+		case 5:
+		case 6:
+			showres = "Error writing output file.";
 			break;
 		default:
 			showres = "Failure!";
@@ -146,34 +154,42 @@ void restoreCoolFiles()
 	print("Injecting...\n"); ConsoleShow();
 
 	char *showres;
-	int res = FileCopy(dest, tmpstr);
-	if (res < 0 && selectedFile == 1)
+	unsigned int res = FSFileCopy(dest, tmpstr);
+	if (res != 0 && selectedFile == 1)
 	{
 		/* Fix for SecureInfo_B */
 		print("Error. Trying with SecureInfo_B...\n");
 		sprintf(tmpstr, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
 		sprintf(dest, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
-		res = FileCopy(dest, tmpstr);
+		res = FSFileCopy(dest, tmpstr);
 	} else
-	if (res < 0 && selectedFile == 2)
+	if (res != 0 && selectedFile == 2)
 	{
 		/* Fix for LocalFriendCodeSeed_A */
 		print("Error. Trying with LocalFriendCodeSeed_A...\n");
 		sprintf(tmpstr, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
 		sprintf(dest, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
-		res = FileCopy(dest, tmpstr);
+		res = FSFileCopy(dest, tmpstr);
 	}
 
-	switch (res)
+	switch ((res >> 8) & 0xFF)
 	{
-		case 1:
+		case 0:
 			showres = "Success!";
 			break;
-		case -1:
-			showres = "Cannot write to file!";
+		case 1:
+			showres = "Error opening input file.";
 			break;
-		case -2:
-			showres = "Cannot read from file!";
+		case 2:
+			showres = "Error creating output file.";
+			break;
+		case 3:
+		case 4:
+			showres = "Error reading input file.";
+			break;
+		case 5:
+		case 6:
+			showres = "Error writing output file.";
 			break;
 		default:
 			showres = "Failure!";
