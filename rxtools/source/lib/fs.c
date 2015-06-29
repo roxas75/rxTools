@@ -64,9 +64,9 @@ u32 FSFileCopy(char *target, char *source) {
 	u32 blockSize = 0x4000;
 	u8 *buffer = (u8 *)0x26000200; //Temp buffer for transfer.
 	UINT byteI = 0, byteO = 0; //Bytes that read or written
-	retfatfs = f_open(&src, source, FA_OPEN_EXISTING);
+	retfatfs = f_open(&src, source, FA_READ | FA_OPEN_EXISTING);
 	if (retfatfs != FR_OK) {step = 1; goto closeExit;}
-	retfatfs = f_open(&dst, target, FA_CREATE_ALWAYS);
+	retfatfs = f_open(&dst, target, FA_WRITE | FA_CREATE_ALWAYS);
 	if (retfatfs != FR_OK) {step = 2; goto closeExit;}
 	u32 totalSize = src.fsize;
 	//If source file has no contents, nothing to be copied.
@@ -90,39 +90,4 @@ closeExit:
 	f_close(&src);
 	f_close(&dst);
 	return (step << 8) | retfatfs;
-}
-
-int FileCopy(char *dest, char *source) {
-	File out;
-	File in;
-	if (!FileOpen(&in, source, 0)) { return -1; }
-	if (!FileOpen(&out, dest, 1)) { return -1; }
-	unsigned int size = FileGetSize(&in);
-	if (size == 0) {
-		FileClose(&in);
-		FileClose(&out);
-		return -1;
-	}
-	int pos = 0, res = 1;
-	unsigned int i, chunk_size = 0x4000;
-	u8 *buf = (u8 *)0x26000200;
-	for (i = 0; i < size; i += chunk_size) {
-		if (chunk_size > (size - i)) { chunk_size = (size - i); }
-		int rb = FileRead(&in, buf, chunk_size, i);
-		if (rb != chunk_size) {
-			/* error or eof */
-			res = -1;
-			break;
-		}
-		int wb = FileWrite(&out, buf, chunk_size, i);
-		if (wb != chunk_size) {
-			/* error or disk full */
-			res = -2;
-			break;
-		}
-		pos += wb;
-	}
-	FileClose(&in);
-	FileClose(&out);
-	return res;
 }
