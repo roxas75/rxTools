@@ -14,5 +14,4 @@ size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);
 size_t FileGetSize(File *Handle);
 void FileClose(File *Handle);
 ////////////////////////////////////////////////////////////////Advanced FileSystem Operations
-int FileCopy(char *dest, char *source);
 u32 FSFileCopy(char *target, char *source);
