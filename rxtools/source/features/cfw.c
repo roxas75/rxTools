@@ -101,6 +101,14 @@ void rxModeEmu(){
 	}
 }
 
+void rxModeQuickBoot(){
+	if(!checkEmuNAND()){
+		rxMode(0);
+	}else{
+		rxMode(1);
+	}
+}
+
 //Just patches signatures check, loads in sysnand
 void DevMode(){
     u8* firm = 0x24000000;

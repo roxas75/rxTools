@@ -16,7 +16,6 @@ I do not support piracy in any way, all the data and informations in my software
 - Support for System Settings (MSET) downgrading for Old3DS
 - Support for Ninjhax (Not Stable)
 - Hacking tools collection
-- DevMode, a semplification and automation of what you all call "PastaCFW", which i used for debug and always hidden in the menu
 
 ### rxMode
 - Support for the latest emuNAND version
@@ -25,6 +24,8 @@ I do not support piracy in any way, all the data and informations in my software
 - Support for 100% of the games (newer ones will require emuNAND)
 - Signatures Checks disabled, which should allow just homebrew, but the world is cruel...
 - Support for installing FBI (a CIA Manager) in both emuNAND and sysNAND
+- Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND
+- Support for TWL (DS/DSi cardriges and Virtual Console) **only on sysNAND**
 - Dynamic ram dumping (just for debug purpouses)
 
 ## How to build
