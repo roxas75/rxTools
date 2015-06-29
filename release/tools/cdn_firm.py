@@ -15,14 +15,12 @@ try:
 		
 	url="http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000202/0000000B"
 	f = urlopen(url)
-	with open(fileName, "rb+") as lf:
-		lf.seek(0x200000, os.SEEK_SET)
+	with open(fileName, "ab") as lf:
 		lf.write(f.read())
 		
 	url="http://nus.cdn.c.shop.nintendowifi.net/ccs/download/0004013800000102/00000016"
 	f = urlopen(url)
-	with open(fileName, "rb+") as lf:
-		lf.seek(0x400000, os.SEEK_SET)
+	with open(fileName, "ab") as lf:
 		lf.write(f.read())
 	
 	print "Downloaded!"
