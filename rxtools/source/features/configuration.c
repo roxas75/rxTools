@@ -23,6 +23,9 @@ char tmpstr[256] = {0};
 File tmpfile;
 
 int InstallData(char* drive){
+	char* progressbar = "[       ]";
+	char* progress = progressbar+1;
+	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
 	f_mkdir(tmpstr);
@@ -33,6 +36,7 @@ int InstallData(char* drive){
 		FileRead(&tmpfile, WORKBUF, 0x600000, 0);
 		FileClose(&tmpfile);
 	}else return CONF_NOFIRMBIN;
+	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create patched native_firm
 	u8* n_firm = decryptFirmTitle(WORKBUF, 0xF0000, 0x00000002);
@@ -44,6 +48,7 @@ int InstallData(char* drive){
 		FileRead(&tmpfile, &keyx[0], 16, 0);
 		FileClose(&tmpfile);
 	}
+	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	for(int i = 0; i < 0xF0000; i+=0x4){
 		if(!strcmp((char*)n_firm + i, "Shit")){
 			if(1){
@@ -59,12 +64,14 @@ int InstallData(char* drive){
 			*((unsigned int*)(n_firm + i)) = (checkEmuNAND() / 0x200) - 1;
 		}
 	}
+	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tmpfile, tmpstr, 1)){
 		FileWrite(&tmpfile, n_firm, 0xF0000, 0);
 		FileClose(&tmpfile);
 		//FileCopy("0004013800000002.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
+	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create AGB patched firmware
 	u8* a_firm = decryptFirmTitle(WORKBUF+0x200000, 0xD9C00, 0x00000202);
@@ -76,6 +83,7 @@ int InstallData(char* drive){
 		FileClose(&tmpfile);
 		//FileCopy("0004013800000202.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
+	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create TWL patched firmware
 	u8* t_firm = decryptFirmTitle(WORKBUF+0x400000, 0x1A1C00, 0x00000102);
@@ -87,6 +95,7 @@ int InstallData(char* drive){
 		FileClose(&tmpfile);
 		//FileCopy("0004013800000102.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
+	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&tmpfile, tmpstr, 1)){
@@ -94,12 +103,13 @@ int InstallData(char* drive){
 		FileWrite(&tmpfile, __TIME__, 9, 12);
 		FileClose(&tmpfile);
 	}else return CONF_CANTOPENFILE;
+	*progress++ = '.'; print("%s\n", progressbar); ConsoleShow();
 	return 0;
 }
 
 int CheckInstallationData(){
 	File file;
-	char str[20];
+	char str[32];
 	if(!FileOpen(&file, "rxtools/data/0004013800000002.bin", 0)) return -1;
 	FileClose(&file);
 	if(!FileOpen(&file, "rxtools/data/0004013800000202.bin", 0)) return -2;
