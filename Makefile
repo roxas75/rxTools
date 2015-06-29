@@ -29,11 +29,10 @@ release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh
 	@cp msethax/rxinstaller.nds release/mset/rxinstaller.nds
 
 rxTools.dat: payload.bin rxmode/*.bin data.bin msethax/mset.bin
-	@cp spiderhax/Launcher.dat $@
-	@$(PYTHON) tools/insert.py $@ payload.bin 0x20000
-	@$(PYTHON) tools/insert.py $@ data.bin 0x100000
-	@$(PYTHON) tools/insert.py $@ msethax/mset.bin 0
-	@dd if=/dev/zero bs=$$((4194304-$$(stat -c %s $@))) count=1 >> $@
+	@dd if=spiderhax/Launcher.dat of=$@ bs=4M conv=sync
+	@dd if=msethax/mset.bin of=$@ conv=notrunc
+	@dd if=payload.bin of=$@ seek=256 conv=notrunc
+	@dd if=data.bin of=$@ seek=2K conv=notrunc
 
 .PHONY: brahma/brahma.3dsx brahma/brahma.smdh
 brahma/brahma.3dsx brahma/brahma.smdh:
@@ -43,14 +42,14 @@ brahma/brahma.3dsx brahma/brahma.smdh:
 msethax/mset.bin:
 	make -C $(dir $@) all
 
-data.bin: 
+data.bin: tools/pack_tool tools/xor
 	@tools/pack_tool $(DATA_FILES) $@
 	@tools/xor $@ tools/xorpad/data.xor
 	@rm $@
 	@mv $@.out $@
 
 .PHONY: rxmode/*.bin
-rxmode/*.bin:
+rxmode/*.bin: tools/cfwtool
 	@cd rxmode && make
 
 payload.bin: rxtools/rxtools.bin tools/addxor_tool
@@ -59,7 +58,7 @@ payload.bin: rxtools/rxtools.bin tools/addxor_tool
 .PHONY: rxtools/rxtools.bin
 rxtools/rxtools.bin: tools/addxor_tool
 	@make -C $(dir $@) all
-	@dd if=/dev/zero bs=$$((917504-$$(stat -c %s $@))) count=1 >> $@
+	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
