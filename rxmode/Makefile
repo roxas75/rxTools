@@ -25,4 +25,5 @@ clean:
 	@echo clean ...
 	@cd native_firm && make clean
 	@cd agb_firm && make clean
+	@cd twl_firm && make clean
 	@rm -fr $(BUILD) *.bin
