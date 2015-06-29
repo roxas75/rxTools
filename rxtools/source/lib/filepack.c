@@ -44,10 +44,11 @@ void SavePack(){
 	DecryptPartition(&packInfo);
 }
 
-void* GetFilePack(int filenumber){
-	if(filenumber < nEntry)
-		return (void*)Entry[filenumber].off;
-	else return NULL;
+void* GetFilePack(char* name){
+	for(int i = 0; i < nEntry; i++){
+		if(strncmp(name, Entry[i].name, 16) == 0) return (void*)Entry[i].off;
+	}
+	return NULL;
 }
 
 PackEntry* GetEntryPack(int filenumber){

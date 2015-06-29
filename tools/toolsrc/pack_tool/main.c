@@ -12,6 +12,7 @@ typedef struct{
 	unsigned int size;
 	unsigned int hash;
 	unsigned int edited;
+	char name[16];
 }PackEntry;
 
 unsigned int HashGen(unsigned char* file, unsigned int size){  //that's the simplest and crappiest hash engine i could invent
@@ -24,6 +25,15 @@ unsigned int HashGen(unsigned char* file, unsigned int size){  //that's the simp
 		HASH ^= file[i+3] << 24;
 	}
 	return HASH;
+}
+
+char* getFileName(char* fn){
+	char* ret = fn;
+	while(*fn != 0){
+		fn++;
+		if(*fn == '\\' || *fn == '/') ret = fn + 1;
+	}
+	return ret;
 }
 
 int main(int argc, char** argv){
@@ -60,7 +70,8 @@ int main(int argc, char** argv){
 		
 		Entry.size = size; Entry.off = off;
 		Entry.hash = HashGen(buf, size); Entry.edited = 0;
-		printf("%s	\n", argv[1 + i]);
+		memset(Entry.name, 0, 16); strncpy(Entry.name, getFileName(argv[1 + i]), 16);
+		printf("%s	\n", getFileName(argv[1 + i]));
 		fseek(out, i*sizeof(PackEntry) + 0x10, 0); fwrite(&Entry, 1, sizeof(PackEntry), out);
 		free(buf);
 	}

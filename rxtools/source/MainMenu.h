@@ -14,6 +14,7 @@
 #include "downgradeapp.h"
 #include "cfw.h"
 #include "i2c.h"
+#include "configuration.h"
 
 static void returnHomeMenu(){
 	i2cWriteRegister(I2C_DEV_MCU, 0x20, (unsigned char)(1<<2));
@@ -143,15 +144,15 @@ static void Credits(){
 }
 
 static Menu MainMenu = {
-		"rxTools - Roxas75 [v2.5]",
+		"rxTools - Roxas75 [v2.6]",
 		{
-			" Launch rxMode", &LaunchCfw,
+			" Launch rxMode in EmuNAND", &rxModeEmu,
+			" Launch rxMode in SysNAND", &rxModeSys,
 			" Decryption Options", &DecryptMenuInit,
 			" Dumping Options", &DumpMenuInit,
 			" Injection Options", &InjectMenuInit,
 			" Other Options", &ExploitMenuInit,
 			" Credits", &Credits,
-			" DevMode", &DevMode,
 		},
 		7,
 		0,

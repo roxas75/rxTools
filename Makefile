@@ -3,6 +3,7 @@ PYTHON = python
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 
 tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor
+DATA_FILES := $(wildcard data/*.*) rxmode/nat_patch.bin rxmode/agb_patch.bin rxmode/twl_patch.bin
 
 .PHONY: all
 all: rxTools.dat
@@ -27,7 +28,7 @@ release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
 	@cp msethax/rxinstaller.nds release/mset/rxinstaller.nds
 
-rxTools.dat: payload.bin data.bin msethax/mset.bin
+rxTools.dat: payload.bin rxmode/*.bin data.bin msethax/mset.bin
 	@cp spiderhax/Launcher.dat $@
 	@$(PYTHON) tools/insert.py $@ payload.bin 0x20000
 	@$(PYTHON) tools/insert.py $@ data.bin 0x100000
@@ -42,15 +43,15 @@ brahma/brahma.3dsx brahma/brahma.smdh:
 msethax/mset.bin:
 	make -C $(dir $@) all
 
-data.bin: data/titlekey.bin data/reboot.bin rxmode/patch.bin data/top_bg.bin tools/pack_tool tools/xor
-	@tools/pack_tool $(filter %.bin, $^) $@
+data.bin: 
+	@tools/pack_tool $(DATA_FILES) $@
 	@tools/xor $@ tools/xorpad/data.xor
 	@rm $@
 	@mv $@.out $@
 
-.PHONY: rxmode/patch.bin
-rxmode/patch.bin: tools/cfwtool
-	@make -C $(dir $@) all
+.PHONY: rxmode/*.bin
+rxmode/*.bin:
+	@cd rxmode && make
 
 payload.bin: rxtools/rxtools.bin tools/addxor_tool
 	@tools/addxor_tool $< $@ 0x67893421 0x12756342

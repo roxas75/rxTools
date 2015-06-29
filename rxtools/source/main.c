@@ -11,9 +11,9 @@
 #include "screenshot.h"
 #include "filepack.h"
 #include "cfw.h"
+#include "configuration.h"
 
-void Initialize()
-{
+void Initialize(){
 	DrawString(TOP_SCREEN,  " INITIALIZE... ", 0, 240-8, WHITE, BLACK);
 	if(FSInit()){
 		DrawString(TOP_SCREEN,  " LOADING...    ", 0, 240-8, WHITE, BLACK);
@@ -21,14 +21,7 @@ void Initialize()
 		DrawString(TOP_SCREEN,  " ERROR!        ", 0, 240-8, RED, BLACK);
 	}
 	LoadPack();
-	SplashScreen();
-	for(int i = 0; i < 0x333333*6; i++){
-		u32 pad = GetInput();
-		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
-	}
-    rxMode_boot();
-	
-	rxTools_boot:
+	//Console Stuff
 	memset(TOP_SCREEN, 0x00, 0x46500);
 	memset(TOP_SCREEN2, 0x00, 0x46500);
 	ConsoleSetXY(15, 15);
@@ -39,6 +32,18 @@ void Initialize()
 	ConsoleSetSpecialColor(BLUE);
 	ConsoleSetSpacing(2);
 	ConsoleSetBorderWidth(3);
+	//Check that the data is installed
+	InstallConfigData();
+	
+	SplashScreen();
+	for(int i = 0; i < 0x333333*6; i++){
+		u32 pad = GetInput();
+		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+	}
+    rxModeEmu();
+	rxTools_boot:
+	memset(TOP_SCREEN, 0x00, 0x46500);
+	memset(TOP_SCREEN2, 0x00, 0x46500);
 	f_mkdir ("rxTools");
 	f_mkdir ("rxTools/nand");
 	//f_mkdir ("capture");
