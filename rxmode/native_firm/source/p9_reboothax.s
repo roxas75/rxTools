@@ -4,6 +4,7 @@
 // ---------------------------------------- //
 //FIRM Reboot patch, which is necessary for the hi-ram using games to boot.
 //TODO : Do not exclude other FIRMS to be opened. Not important until we patch them for emunand
+
 //----------------- GLOBALS -----------------------
 //Taken From NATIVE_FIRM 9.6
 .definelabel fopen9,        0x0805B180
@@ -16,10 +17,15 @@
 
 //----------------- PROCESS9 ----------------------
 .nds
-.create build/080859FC.bin, 0x080859FC
+.create build/080859EC.bin, 0x080859EC
 .arm
 .align 4
-
+	GetFileName:
+		ldr r2, =filename
+		mov r1, #0x30
+		add r0, sp, #0x3A8-0x70
+		blx 0x080282CE
+		
     ClearWorkspace:
         ldr r0, =filehandle
         ldr r1, =0x200
@@ -33,40 +39,16 @@
 
     OpenFirm:
         ldr r0, =filehandle
-        ldr r1, =filename
+		add r1, sp, #0x3A8-0x70
         mov r2, #1
         blx fopen9
-
-    Fseek:
-    //Crappy method... if only i knew the addr of the real fseek, lol
-    //So we read until the cfw address and put the crap in a unsuseful place
-    ldr r0, =filehandle
-    ldr r1, =byteswritten
-    ldr r2, =0x21000000
-    ldr r3, =0x200000
-    blx fread9
 
     ReadFirm:
         ldr r0, =filehandle
         ldr r1, =byteswritten
         ldr r2, =buffer
-        ldr r3, =0xF0000
+        ldr r3, =0x200000
         blx fread9
-
-    DecryptFirm:
-        ldr r0, =buffer
-        ldr r1, =0xF0000
-        ldr r2, =0xDEADBEEF
-        ldr r4, =0x12345678
-        add r1, r0
-        dfl1:
-            ldr r3, [r0]
-            eor r3, r2
-            str r3, [r0]
-            add r0, #4
-            add r2, r4
-            cmp r0, r1
-            blt dfl1
 
     CheckFirm:
         ldr r0, =buffer
@@ -97,7 +79,8 @@
 
 .pool
 filename:
-dcw "sdmc:/rxTools.dat"
+	//dcw "nand:/rxtools/%08x%08x.bin"
+	dcw "sdmc:/rxtools/data/%08x%08x.bin"
 .halfword 0
 .close
 
@@ -159,7 +142,15 @@ dcw "sdmc:/rxTools.dat"
         LDR     R1, [R3,#4]
         LDR     R2, [R3,#8]
         BL      MemCopy
-
+		ADD     R3, R4, #0xD0
+        LDR     R0, [R3]
+		CMP		R0, #0
+		BEQ		invalidateDataCache
+        ADD     R0, R0, R4
+        LDR     R1, [R3,#4]
+        LDR     R2, [R3,#8]
+        BL      MemCopy
+		
     invalidateDataCache:
         MOV     R2, #0
         MOV     R1, R2

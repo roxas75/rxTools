@@ -171,7 +171,7 @@ int GetPixel(int x, int y, int screen){
 
 //----------------Some of my shit..........
 void SplashScreen(void){
-	memcpy(TOP_SCREEN, GetFilePack(TOP_PIC), SCREEN_SIZE);
+	memcpy(TOP_SCREEN, GetFilePack("top_bg.bin"), SCREEN_SIZE);
 	if(TOP_SCREEN2)
-		memcpy(TOP_SCREEN2, GetFilePack(TOP_PIC), SCREEN_SIZE);
+		memcpy(TOP_SCREEN2, GetFilePack("top_bg.bin"), SCREEN_SIZE);
 }

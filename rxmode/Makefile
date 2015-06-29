@@ -1,34 +1,28 @@
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
-
 ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-include $(DEVKITARM)/ds_rules
+.PHONY: $(BUILD) clean all
 
-TARGET 		:=  patch.bin
-BUILD		:=	build
-TOOLS		:=	../tools
-ARMIPS    	:=  armips
-SFILES 		:=  $(wildcard source/*.s)
+all: nat_patch.bin agb_patch.bin twl_patch.bin
 
-.PHONY: clean all
-
-all: $(BUILD) arm9payload.bin patch.bin
-
-$(BUILD):
-	@[ -d $@ ] || mkdir -p $@
+nat_patch.bin:
+	@cd native_firm && make
+	@cp native_firm/patch.bin $@
 	
-arm9payload.bin:
-	@cd source/arm9 && make
+agb_patch.bin:
+	@cd agb_firm && make
+	@cp agb_firm/patch.bin $@
+
+twl_patch.bin:
+	@cd twl_firm && make
+	@cp twl_firm/patch.bin $@
 	
-patch.bin:
-	@$(foreach sfile,$(SFILES), $(ARMIPS) $(sfile);)
-	@$(TOOLS)/cfwtool $(BUILD) $(TARGET)
-#---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET) *.bin
- 
+	@cd native_firm && make clean
+	@cd agb_firm && make clean
+	@rm -fr $(BUILD) *.bin

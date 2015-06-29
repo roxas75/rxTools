@@ -13,11 +13,12 @@ typedef struct{
 	unsigned int size;
 	unsigned int hash;
 	unsigned int edited;
+	char name[16];
 }PackEntry;
 
 void LoadPack();
 void SavePack();
-void* GetFilePack(int filenumber);
+void* GetFilePack(char* name);
 PackEntry* GetEntryPack(int filenumber);
 
 unsigned int HashGen(unsigned char* file, unsigned int size);
