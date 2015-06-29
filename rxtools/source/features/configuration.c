@@ -11,6 +11,7 @@
 #include "crypto.h"
 #include "aes.h"
 #include "cfw.h"
+#include "downgradeapp.h"
 
 #define DATAFOLDER "rxtools/data"
 #define KEYFILENAME "slot0x25KeyX.bin"
@@ -21,25 +22,27 @@
 
 char tmpstr[256] = {0};
 File tmpfile;
+u32 tmpu32;
 
 int InstallData(char* drive){
-	File firmfile;
+	FIL firmfile;
 	char* progressbar = "[       ]";
 	char* progress = progressbar+1;
 	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
 	f_mkdir(tmpstr);
-	//f_chmod(tmpstr, AM_HID, AM_HID);
+	f_chmod(tmpstr, AM_HID, AM_HID);
 	
 	//Read firmware data
-	if(FileOpen(&firmfile, "firmware.bin", 0)){
+	if(f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK){
 		//... We'll see
 	}else return CONF_NOFIRMBIN;
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create patched native_firm
-	FileRead(&firmfile, WORKBUF, NAT_SIZE, 0);
+	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002);
 	u8* n_firm_patch = GetFilePack("nat_patch.bin");
 	applyPatch(n_firm, n_firm_patch);
@@ -75,30 +78,57 @@ int InstallData(char* drive){
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create AGB patched firmware
-	FileRead(&firmfile, WORKBUF, AGB_SIZE, NAT_SIZE);
+	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
 	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202);
 	u8* a_firm_patch = GetFilePack("agb_patch.bin");
-	applyPatch(a_firm, a_firm_patch);
-	sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
-	if(FileOpen(&tmpfile, tmpstr, 1)){
-		FileWrite(&tmpfile, a_firm, AGB_SIZE, 0);
+	if(a_firm){
+		applyPatch(a_firm, a_firm_patch);
+		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
+		if(FileOpen(&tmpfile, tmpstr, 1)){
+			FileWrite(&tmpfile, a_firm, AGB_SIZE, 0);
+			FileClose(&tmpfile);
+		}else return CONF_ERRNFIRM;
+		*progress++ = '.';
+	}else{	
+		//If we cannot decrypt it from firmware.bin becouse of titlekey messed up, it probably means that AGB has been modified in some way.
+		//So we read it from his installed ncch...
+		FindApp(0x00040138, 0x00000202, 1);
+		char* path = getContentAppPath();
+		FileOpen(&tmpfile, path, 0);
+		FileRead(&tmpfile, WORKBUF, AGB_SIZE, 0);
 		FileClose(&tmpfile);
-		//FileCopy("0004013800000202.bin", tmpstr);
-	}else return CONF_ERRNFIRM;
-	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+		a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
+		if(a_firm){
+			applyPatch(a_firm, a_firm_patch);
+			sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
+			if(FileOpen(&tmpfile, tmpstr, 1)){
+				FileWrite(&tmpfile, a_firm, AGB_SIZE, 0);
+				FileClose(&tmpfile);
+			}else return CONF_ERRNFIRM;
+			*progress++ = '.';
+		}else{
+			*progress++ = 'x'; //If we get here, then we'll play without AGB, lol
+		}
+	}
+	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	//Create TWL patched firmware
-	FileRead(&firmfile, WORKBUF, TWL_SIZE, NAT_SIZE+AGB_SIZE);
+	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
 	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102);
 	u8* t_firm_patch = GetFilePack("twl_patch.bin");
-	applyPatch(t_firm, t_firm_patch);
-	sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
-	if(FileOpen(&tmpfile, tmpstr, 1)){
-		FileWrite(&tmpfile, t_firm, TWL_SIZE, 0);
-		FileClose(&tmpfile);
-		//FileCopy("0004013800000102.bin", tmpstr);
-	}else return CONF_ERRNFIRM;
-	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	if(t_firm){
+		applyPatch(t_firm, t_firm_patch);
+		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
+		if(FileOpen(&tmpfile, tmpstr, 1)){
+			FileWrite(&tmpfile, t_firm, TWL_SIZE, 0);
+			FileClose(&tmpfile);
+			//FileCopy("0004013800000102.bin", tmpstr);
+		}else return CONF_ERRNFIRM;
+		*progress++ = '.'; 
+	}else{
+		*progress++ = 'x'; 
+	}
+	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&tmpfile, tmpstr, 1)){
@@ -107,6 +137,8 @@ int InstallData(char* drive){
 		FileClose(&tmpfile);
 	}else return CONF_CANTOPENFILE;
 	*progress++ = '.'; print("%s\n", progressbar); ConsoleShow();
+	
+	f_close(&firmfile);
 	return 0;
 }
 
@@ -136,7 +168,7 @@ void InstallConfigData(){
 	ConsoleShow();
 	int res = InstallData("0");	//SD Card
 	if(res == 0) print("DONE!\n");
-	else print("FAIL! ERR %d", res);
+	else print("FAIL! ERR %d\n", res);
 	
 	print("\nPress A to exit\n"); ConsoleShow();
 	WaitForButton(BUTTON_A);
