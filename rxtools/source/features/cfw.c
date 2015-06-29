@@ -41,6 +41,19 @@ void applyPatch(unsigned char* file, unsigned char* patch){
 	}
 }
 
+u8* decryptFirmTitleNcch(u8* title, unsigned int size){
+	ctr_ncchheader NCCH; 
+	u8 CTR[16]; 
+	PartitionInfo INFO;
+	NCCH = *((ctr_ncchheader*)title); 
+	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
+	ncch_get_counter(NCCH, CTR, 2);
+	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*0x200; INFO.keyY = NCCH.signature; INFO.size = size; INFO.keyslot = 0x2C;
+	DecryptPartition(&INFO);
+	u8* firm = (u8*)(INFO.buffer + 0x200);
+	return firm;
+}
+
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid){
 	u8 key[0x10] = {0};
 	u8 iv[0x10] = {0};
@@ -48,12 +61,7 @@ u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid){
 	aes_context aes_ctxt;
 	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
 	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
-	ctr_ncchheader NCCH; u8 CTR[16]; PartitionInfo INFO;
-	NCCH = *((ctr_ncchheader*)title); ncch_get_counter(NCCH, CTR, 2);
-	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*0x200; INFO.keyY = NCCH.signature; INFO.size = size; INFO.keyslot = 0x2C;
-	DecryptPartition(&INFO);
-	u8* firm = (u8*)(INFO.buffer + 0x200);
-	return firm;
+	return decryptFirmTitleNcch(title, size);
 }
 
 void setFirmMode(int mode){ //0 : SysNand, 1 : EmuNand

@@ -66,7 +66,7 @@ int main(){
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
-		DrawString(TOP_SCREEN, " NewKeyX ", 0, 240-8, RED, WHITE);
+		DrawString(TOP_SCREEN, " NewKeyX ", 0, 240-8, RED, BLACK);
 	}
 	DrawString(TOP_SCREEN, " EmuNAND ", 0, 240-16, checkEmuNAND() ? GREEN : RED, BLACK);
 
