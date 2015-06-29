@@ -32,6 +32,8 @@ int rx_strcmp(char *s1, char *s2, u32 size, u32 w1, u32 w2);    // w1 = size of 
 void rx_strcpy(char *dest, char *source, u32 size, u32 w1, u32 w2);
 void rx_hextostr(u32 num, void *str);
 int rx_memcmp(void *buf1, void *buf2, int size);
+void* rx_memmem(const void* tb, const void* sb, u32 tl, u32 sl);
+
 static inline void svc_Backdoor(void *addr) {
 	register void *_r0 __asm("r0") = addr;
 	__asm volatile("SVC 0x7B" : : "r"(_r0));
