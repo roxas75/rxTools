@@ -1,6 +1,9 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+#define rxmode_emu_label "RX3D"
+#define rxmode_sys_label "Ver."
+
 enum {
 	CONF_NOKEYX = -1,
 	CONF_NOFIRMBIN = -2,
