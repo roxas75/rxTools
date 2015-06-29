@@ -40,7 +40,7 @@ void Initialize(){
 		u32 pad = GetInput();
 		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 	}
-    rxModeEmu();
+    rxModeQuickBoot();
 	rxTools_boot:
 	memset(TOP_SCREEN, 0x00, 0x46500);
 	memset(TOP_SCREEN2, 0x00, 0x46500);
