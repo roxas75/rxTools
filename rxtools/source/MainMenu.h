@@ -27,21 +27,22 @@ static void ShutDown(){
 
 static Menu DecryptMenu = {
 	"Decryption Options",
-	{
+	.Option = (MenuEntry[6]){
 		" Decrypt CTR Titles", &CTRDecryptor,
 		" Decrypt Title Keys", &DecryptTitleKeys,
+		" Decrypt encTitleKeys.bin", &DecryptTitleKeyFile,
 		" Generate Xorpads", &PadGen,
 		" Decrypt partitions", &DumpNandPartitions,
 		" Generate fat16 Xorpad", &GenerateNandXorpads,
 	},
-	5,
+	6,
 	0,
 	0
 };
 
 static Menu DumpMenu = {
 	"Dumping Options",
-	{
+	.Option = (MenuEntry[3]){
 		" Create NAND dump", &NandDumper,
 		" Dump System Titles", &DumpNANDSystemTitles,
 		" Dump NAND Files", &dumpCoolFiles,
@@ -53,7 +54,7 @@ static Menu DumpMenu = {
 
 static Menu InjectMenu = {
 	"Injection Options",
-	{
+	.Option = (MenuEntry[2]){
 		" Inject EmuNAND partitions", &RebuildNand,
 		" Inject NAND Files", &restoreCoolFiles,
 	},
@@ -64,7 +65,7 @@ static Menu InjectMenu = {
 
 static Menu ExploitMenu = {
 	"Other Options",
-	{
+	.Option = (MenuEntry[3]){
 		" Downgrade MSET on SysNAND", &downgradeMSET,
 		" Install FBI over Health&Safety App", &installFBI,
 		" Restore original Health&Safety App", &restoreHS,
@@ -145,7 +146,7 @@ static void Credits(){
 
 static Menu MainMenu = {
 		"rxTools - Roxas75 [v2.6]",
-		{
+		.Option = (MenuEntry[7]){
 			" Launch rxMode in EmuNAND", &rxModeEmu,
 			" Launch rxMode in SysNAND", &rxModeSys,
 			" Decryption Options", &DecryptMenuInit,
