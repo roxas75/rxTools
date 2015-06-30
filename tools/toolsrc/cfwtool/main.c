@@ -9,21 +9,23 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <dirent.h>
 #include <unistd.h>
 #define MAX_PATCHES 100
 
 typedef struct{
 	char* name;
-	int arm9_addr;
-	int arm9_size;
-	int arm9_entry;
-	int arm11_addr;
-	int arm11_size;
-	int arm11_entry;
-	int p9_addr;
-	int p9_start;
-	int p9_entry;
+        unsigned arm9_addr;
+        unsigned arm9_size;
+        unsigned arm9_entry;
+        unsigned arm11_addr;
+        unsigned arm11_size;
+        unsigned arm11_entry;
+        unsigned p9_addr;
+        unsigned p9_start;
+        unsigned p9_entry;
 } firm_info;
 
 firm_info native_info = { "NATIVE_FIRM", 0x66000, 0x84A00, 0x08006800, 0x35000, 0x31000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000};
@@ -57,6 +59,7 @@ int listfiles(char* curDir){
 		}
 		closedir (dir);
 		printf("Patches folder : %s\nNumber of patches : %d\n", curDir, npatch);
+		return 0;
 	} else {
 		return -1;
 	}

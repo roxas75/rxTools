@@ -22,7 +22,7 @@
 
 char tmpstr[256] = {0};
 File tmpfile;
-u32 tmpu32;
+UINT tmpu32;
 
 int InstallData(char* drive){
 	FIL firmfile;

@@ -79,7 +79,7 @@ int findCursorLine(){
 	return cont;
 }
 void ConsoleShow(){
-	unsigned char* tmpscreen = 0x27000000;
+        void *tmpscreen = (void*)0x27000000;
 	memcpy(tmpscreen, TOP_SCREEN, 0x46500);
 	if(!consoleInited) return;
 	int titley = 2*CHAR_WIDTH;
@@ -90,9 +90,9 @@ void ConsoleShow(){
 			   (y >= ConsoleY && y <= ConsoleY + BorderWidth) || 
 			   (y >= ConsoleH + ConsoleY - 1 && y <= ConsoleH + ConsoleY - 1 + BorderWidth) ||
 			   (y >= ConsoleY + titley - BorderWidth && y <= ConsoleY + titley)){
-				DrawPixel(x, y, BorderColor, tmpscreen);
+				DrawPixel(x, y, BorderColor, (int)tmpscreen);
 			}else{
-				DrawPixel(x, y, BackgroundColor, tmpscreen);
+				DrawPixel(x, y, BackgroundColor, (int)tmpscreen);
 			}
 		}
 	}
@@ -100,7 +100,7 @@ void ConsoleShow(){
 	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2*CHAR_WIDTH, ConsoleY + (titlespace-CHAR_WIDTH)/2 + BorderWidth, TextColor, BackgroundColor);
 	
 	char tmp[256], *point;
-	if(findCursorLine < MAXLINES) point = &console[0];
+        if(findCursorLine < MAXLINES) point = &console[0]; //must be findCursorLine()?
 	else{
 		int cont = 0;
 		int tmp1;
@@ -134,7 +134,7 @@ void ConsoleFlush(){
 }
 
 void ConsoleAddText(char* str){
-    int linel = ((int)((float)(ConsoleW)/(float)CHAR_WIDTH))-5;
+//    int linel = ((int)((float)(ConsoleW)/(float)CHAR_WIDTH))-5;
     for(int i = 0; *str != 0x00; i++){
 		if(!(*str == '\\' && *(str+1) == 'n')){	//we just handle the '\n' case, who cares of the rest
 			console[cursor++] = *str++;
