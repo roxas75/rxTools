@@ -63,7 +63,7 @@ u32 SdPadgen()
 {
     size_t bytesRead;
     u32 result;
-	File *fp;
+    File fp;
     SdInfo *info = (SdInfo*)0x20316000;
 
     u8 movable_seed[0x120] = {0};

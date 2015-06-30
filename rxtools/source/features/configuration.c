@@ -12,6 +12,7 @@
 #include "aes.h"
 #include "cfw.h"
 #include "downgradeapp.h"
+#include "stdio.h"
 
 #define DATAFOLDER "rxtools/data"
 #define KEYFILENAME "slot0x25KeyX.bin"
@@ -21,7 +22,7 @@
 #define TWL_SIZE 0x1A1C00
 
 char tmpstr[256] = {0};
-File tmpfile;
+File tempfile;
 UINT tmpu32;
 
 int InstallData(char* drive){
@@ -48,9 +49,9 @@ int InstallData(char* drive){
 	applyPatch(n_firm, n_firm_patch);
 	u8 keyx[16] = {0};
 	if(GetSystemVersion() < 3){
-		FileOpen(&tmpfile, KEYFILENAME, 0);
-		FileRead(&tmpfile, &keyx[0], 16, 0);
-		FileClose(&tmpfile);
+		FileOpen(&tempfile, KEYFILENAME, 0);
+		FileRead(&tempfile, &keyx[0], 16, 0);
+		FileClose(&tempfile);
 	}
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	for(int i = 0; i < NAT_SIZE; i+=0x4){
@@ -70,9 +71,9 @@ int InstallData(char* drive){
 	}
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
-	if(FileOpen(&tmpfile, tmpstr, 1)){
-		FileWrite(&tmpfile, n_firm, NAT_SIZE, 0);
-		FileClose(&tmpfile);
+	if(FileOpen(&tempfile, tmpstr, 1)){
+		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
+		FileClose(&tempfile);
 		//FileCopy("0004013800000002.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
@@ -84,9 +85,9 @@ int InstallData(char* drive){
 	if(a_firm){
 		applyPatch(a_firm, a_firm_patch);
 		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
-		if(FileOpen(&tmpfile, tmpstr, 1)){
-			FileWrite(&tmpfile, a_firm, AGB_SIZE, 0);
-			FileClose(&tmpfile);
+		if(FileOpen(&tempfile, tmpstr, 1)){
+			FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
+			FileClose(&tempfile);
 		}else return CONF_ERRNFIRM;
 		*progress++ = '.';
 	}else{	
@@ -94,16 +95,16 @@ int InstallData(char* drive){
 		//So we read it from his installed ncch...
 		FindApp(0x00040138, 0x00000202, 1);
 		char* path = getContentAppPath();
-		FileOpen(&tmpfile, path, 0);
-		FileRead(&tmpfile, WORKBUF, AGB_SIZE, 0);
-		FileClose(&tmpfile);
+		FileOpen(&tempfile, path, 0);
+		FileRead(&tempfile, WORKBUF, AGB_SIZE, 0);
+		FileClose(&tempfile);
 		a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
 		if(a_firm){
 			applyPatch(a_firm, a_firm_patch);
 			sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
-			if(FileOpen(&tmpfile, tmpstr, 1)){
-				FileWrite(&tmpfile, a_firm, AGB_SIZE, 0);
-				FileClose(&tmpfile);
+			if(FileOpen(&tempfile, tmpstr, 1)){
+				FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
+				FileClose(&tempfile);
 			}else return CONF_ERRNFIRM;
 			*progress++ = '.';
 		}else{
@@ -119,9 +120,9 @@ int InstallData(char* drive){
 	if(t_firm){
 		applyPatch(t_firm, t_firm_patch);
 		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
-		if(FileOpen(&tmpfile, tmpstr, 1)){
-			FileWrite(&tmpfile, t_firm, TWL_SIZE, 0);
-			FileClose(&tmpfile);
+		if(FileOpen(&tempfile, tmpstr, 1)){
+			FileWrite(&tempfile, t_firm, TWL_SIZE, 0);
+			FileClose(&tempfile);
 			//FileCopy("0004013800000102.bin", tmpstr);
 		}else return CONF_ERRNFIRM;
 		*progress++ = '.'; 
@@ -131,10 +132,10 @@ int InstallData(char* drive){
 	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
 	
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
-	if(FileOpen(&tmpfile, tmpstr, 1)){
-		FileWrite(&tmpfile, __DATE__, 12, 0);
-		FileWrite(&tmpfile, __TIME__, 9, 12);
-		FileClose(&tmpfile);
+	if(FileOpen(&tempfile, tmpstr, 1)){
+		FileWrite(&tempfile, __DATE__, 12, 0);
+		FileWrite(&tempfile, __TIME__, 9, 12);
+		FileClose(&tempfile);
 	}else return CONF_CANTOPENFILE;
 	*progress++ = '.'; print("%s\n", progressbar); ConsoleShow();
 	
