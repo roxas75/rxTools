@@ -15,15 +15,10 @@ typedef struct{
 	char name[16];
 }PackEntry;
 
-unsigned int HashGen(unsigned char* file, unsigned int size){  //that's the simplest and crappiest hash engine i could invent
-	unsigned int HASH = 0;							  //but it works, so i don't give a shit
+unsigned int HashGen(unsigned char* file, unsigned int size){ //BSD checksum
+	unsigned int HASH = 0;
 	unsigned int i;
-	for(i = 0; i + 4 < size; i++){
-		HASH ^= file[i];
-		HASH ^= file[i+1] << 8;
-		HASH ^= file[i+2] << 16;
-		HASH ^= file[i+3] << 24;
-	}
+	for(i = 0; i < size; HASH = (((HASH >> 1) | (HASH << 15)) + file[i++]) & 0xffff);
 	return HASH;
 }
 
