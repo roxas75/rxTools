@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void* (*rxTools)() = 0x08000030;
+void* (*rxTools)() = (void*)0x08000030;
 
 void main()
 {
@@ -10,11 +10,11 @@ void main()
 	unsigned char* fb2 = (unsigned char*)(0x201CB370);
 	unsigned char pure_color = 0x77;
 	
-	*((unsigned int*)0x080FFFC0) = fb1;
-	*((unsigned int*)0x080FFFC4) = fb2;
+	*((unsigned int*)0x080FFFC0) = (int)fb1;
+	*((unsigned int*)0x080FFFC4) = (int)fb2;
 	*((unsigned int*)0x080FFFD8) = 0;
 	
-	unsigned int* buf = 0x20400000;
+	unsigned int* buf = (void*)0x20400000;
 	unsigned int base = 0x67893421;
 	unsigned int seed = 0x12756342;
 	for(int i = 0; i < 400*1024/4; i++){
@@ -24,8 +24,8 @@ void main()
 	
 	if(buf[0] != 0xE51FF004) pure_color = 0x00;
 	
-	unsigned char*src = 0x20400000;
-	unsigned char*dst = 0x08000000;
+	unsigned char*src = (void*)0x20400000;
+	unsigned char*dst = (void*)0x08000000;
 	for(int i = 0; i < 320*1024; i++){
 		dst[i] = src[i];
 	}
