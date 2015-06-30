@@ -68,7 +68,7 @@ void DecryptTitleKeys() {
 	nKey = 0; int nullbyte = 0;
 	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
 		print("Decrypting title keys...\n"); ConsoleShow();
-		u8 *buf = (u8 *)0x21000000;
+		u8 *buf = BUF1;
 		int pos = 0;
 		for (;;) {
 			int rb = FileRead(&tick, buf, tick_size, pos);
@@ -205,7 +205,7 @@ int GetTitleKey(u8 *TitleKey, u32 low, u32 high) {
 	u32 tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
 	u32 tick_size = 0x200;     //Chunk size
 	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
-		u8 *buf = (u8 *)0x22000000;
+		u8 *buf = TITLES;
 		int pos = 0;
 		for (;;) {
 			int rb = FileRead(&tick, buf, tick_size, pos);

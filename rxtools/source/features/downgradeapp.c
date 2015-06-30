@@ -12,6 +12,8 @@
 #include "NandDumper.h"
 #include "aes.h"
 #include "polarssl/sha2.h"
+#include "stdio.h"
+#include "filepack.h"
 
 #define bswap_16(a) ((((a) << 8) & 0xff00) | (((a) >> 8) & 0xff))
 #define bswap_32(a) ((((a) << 24) & 0xff000000) | (((a) << 8) & 0xff0000) | (((a) >> 8) & 0xff00) | (((a) >> 24) & 0xff))
@@ -35,11 +37,11 @@ char cntpath[256]; // Contains the NAND content path
 char tmdpath[256]; // Contains the NAND TMD path
 
 char* getContentAppPath(){
-	return &cntpath;
+	return (char*)&cntpath;
 }
 
 char* getTMDAppPath(){
-	return &tmdpath;
+	return (char*)&tmdpath;
 }
 
 void print_sha256(unsigned char hash[32])
@@ -61,7 +63,7 @@ void print_sha256(unsigned char hash[32])
 
 int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 {
-    char *folder = &tmpstr;
+    char *folder = (char*)&tmpstr;
     memset(folder, 0, 256);
 	
     DIR* curDir = &myDir;
