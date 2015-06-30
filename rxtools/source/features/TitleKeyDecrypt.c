@@ -72,7 +72,7 @@ void DecryptTitleKeys(){
     nKey = 0; int nullbyte = 0;
     if(FileOpen(&tick, "1:dbs/ticket.db", 0)){
         print("Decrypting title keys...\n"); ConsoleShow();
-        unsigned char* buf = 0x21000000;
+        unsigned char* buf = BUF1;
         int pos = 0;
         for (;;) {
             int rb = FileRead(&tick, buf, tick_size, pos);
@@ -112,7 +112,7 @@ int GetTitleKey(unsigned char* TitleKey, unsigned int low, unsigned int high){
     unsigned int tid_high = ((high>>24)&0xff) | ((high<<8)&0xff0000) | ((high>>8)&0xff00) | ((high<<24)&0xff000000);
     unsigned int tick_size = 0x200;     //Chunk size
     if(FileOpen(&tick, "1:dbs/ticket.db", 0)){
-        unsigned char* buf = 0x22000000;
+        unsigned char* buf = TITLES;
         int pos = 0;
         for (;;) {
             int rb = FileRead(&tick, buf, tick_size, pos);

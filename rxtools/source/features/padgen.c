@@ -21,7 +21,7 @@ void PadGen(){
 
 u32 NcchPadgen()
 {
-    size_t bytesRead;
+//    size_t bytesRead;
     u32 result;
 	File pf;
     NcchInfo *info = (NcchInfo*)0x20316000;
@@ -30,13 +30,13 @@ u32 NcchPadgen()
         print("Could not open ncchinfo.bin!\n");
         return 1;
     }
-    bytesRead = FileRead(&pf, info, 16, 0);
+/*    bytesRead = */FileRead(&pf, info, 16, 0);
 
     if (!info->n_entries || info->n_entries > MAXENTRIES || (info->ncch_info_version != 0xF0000003)) {
         print("Too many/few entries, or \nwrong version ncchinfo.bin!\n");
         return 0;
     }
-    bytesRead = FileRead(&pf, info->entries, info->n_entries * sizeof(NcchInfoEntry), 16);
+/*    bytesRead = */FileRead(&pf, info->entries, info->n_entries * sizeof(NcchInfoEntry), 16);
     FileClose(&pf);
 	
 	print("Working on ncchinfo.bin ...\n"); ConsoleShow();
@@ -123,7 +123,7 @@ u32 CreatePad(PadInfo *info, int index)
 File pf;
 #define BUFFER_ADDR ((volatile uint8_t*)0x21000000)
 #define BLOCK_SIZE  (4*1024*1024)
-    size_t bytesWritten;
+//    size_t bytesWritten;
 
     if (!FileOpen(&pf, info->filename, 1))
         return 1;
@@ -148,7 +148,7 @@ File pf;
 		
 		print("Creating Pad %i : %i%%      ", index, (i+j)/size_100);
 		ConsolePrevLine(); ConsolePrevLine(); ConsoleShow();
-		bytesWritten = FileWrite(&pf, (void*)BUFFER_ADDR, j, seekpos);
+/*		bytesWritten = */FileWrite(&pf, (void*)BUFFER_ADDR, j, seekpos);
         seekpos += j;
     }
 

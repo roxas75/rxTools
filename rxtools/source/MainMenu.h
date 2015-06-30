@@ -28,11 +28,11 @@ static void ShutDown(){
 static Menu DecryptMenu = {
 	"Decryption Options",
 	{
-		" Decrypt CTR Titles", &CTRDecryptor,
-		" Decrypt Title Keys", &DecryptTitleKeys,
-		" Generate Xorpads", &PadGen,
-		" Decrypt partitions", &DumpNandPartitions,
-		" Generate fat16 Xorpad", &GenerateNandXorpads,
+		{" Decrypt CTR Titles", &CTRDecryptor},
+		{" Decrypt Title Keys", &DecryptTitleKeys},
+		{" Generate Xorpads", &PadGen},
+		{" Decrypt partitions", &DumpNandPartitions},
+		{" Generate fat16 Xorpad", &GenerateNandXorpads},
 	},
 	5,
 	0,
@@ -42,9 +42,9 @@ static Menu DecryptMenu = {
 static Menu DumpMenu = {
 	"Dumping Options",
 	{
-		" Create NAND dump", &NandDumper,
-		" Dump System Titles", &DumpNANDSystemTitles,
-		" Dump NAND Files", &dumpCoolFiles,
+		{" Create NAND dump", &NandDumper},
+		{" Dump System Titles", &DumpNANDSystemTitles},
+		{" Dump NAND Files", &dumpCoolFiles},
 	},
 	3,
 	0,
@@ -54,8 +54,8 @@ static Menu DumpMenu = {
 static Menu InjectMenu = {
 	"Injection Options",
 	{
-		" Inject EmuNAND partitions", &RebuildNand,
-		" Inject NAND Files", &restoreCoolFiles,
+		{" Inject EmuNAND partitions", &RebuildNand},
+		{" Inject NAND Files", &restoreCoolFiles},
 	},
 	2,
 	0,
@@ -65,9 +65,9 @@ static Menu InjectMenu = {
 static Menu ExploitMenu = {
 	"Other Options",
 	{
-		" Downgrade MSET on SysNAND", &downgradeMSET,
-		" Install FBI over Health&Safety App", &installFBI,
-		" Restore original Health&Safety App", &restoreHS,
+		{" Downgrade MSET on SysNAND", &downgradeMSET},
+		{" Install FBI over Health&Safety App", &installFBI},
+		{" Restore original Health&Safety App", &restoreHS},
 	},
 	3,
 	0,
@@ -146,13 +146,13 @@ static void Credits(){
 static Menu MainMenu = {
 		"rxTools - Roxas75 [v2.6]",
 		{
-			" Launch rxMode in EmuNAND", &rxModeEmu,
-			" Launch rxMode in SysNAND", &rxModeSys,
-			" Decryption Options", &DecryptMenuInit,
-			" Dumping Options", &DumpMenuInit,
-			" Injection Options", &InjectMenuInit,
-			" Other Options", &ExploitMenuInit,
-			" Credits", &Credits,
+			{" Launch rxMode in EmuNAND", &rxModeEmu},
+			{" Launch rxMode in SysNAND", &rxModeSys},
+			{" Decryption Options", &DecryptMenuInit},
+			{" Dumping Options", &DumpMenuInit},
+			{" Injection Options", &InjectMenuInit},
+			{" Other Options", &ExploitMenuInit},
+			{" Credits", &Credits},
 		},
 		7,
 		0,

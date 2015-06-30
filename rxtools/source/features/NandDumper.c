@@ -9,10 +9,12 @@
 #include "crypto.h"
 #include "ncch.h"
 #include "CTRDecryptor.h"
+#include "sdmmc.h"
+#include "stdio.h"
 
 #define NAND_SIZE 0x3AF00000
 #define NAND_SECTOR_SIZE 0x200
-#define BUF1 0x21000000
+#define BUF1 (void*)0x21000000
 
 char myString[256];		//for showing percentages
 
@@ -39,11 +41,11 @@ void NandDumper(){
 	isEmuNand--;
 	ConsoleInit();
 	ConsoleSetTitle(isEmuNand ? "EmuNAND Dumper" : "NAND Dumper");
-	unsigned char* buf = 0x21000000;
+	unsigned char* buf = (void*)0x21000000;
 	unsigned int nsectors = 0x200;  //sectors in a row
 	char ProgressBar[] = "[                            ]";
 	unsigned int progress = 1;
-	int BACKCOLOR = ConsoleGetBackgroundColor();
+/*      int BACKCOLOR = */ConsoleGetBackgroundColor(); //can be removed, left only to keep binaries the same
 	if(FileOpen(&myFile, isEmuNand ? "rxTools/nand/EMUNAND.bin" : "rxTools/nand/NAND.bin", 1)){
 		print("Dumping...\n\n"); ConsoleShow();
 		int x, y; ConsoleGetXY(&x, &y); y += CHAR_WIDTH * 6; x += CHAR_WIDTH*2;
