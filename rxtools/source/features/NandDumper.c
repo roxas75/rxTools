@@ -12,7 +12,7 @@
 
 #define NAND_SIZE 0x3AF00000
 #define NAND_SECTOR_SIZE 0x200
-#define BUF1 0x21000000
+#define BUF1 (void*)0x21000000
 
 char myString[256];		//for showing percentages
 
