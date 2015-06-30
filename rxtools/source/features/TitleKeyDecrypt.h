@@ -1,8 +1,11 @@
 #ifndef TITLE_KEY_DECRYPT_H
 #define TITLE_KEY_DECRYPT_H
 
+#include "common.h"
+
 void DecryptTitleKeys();
-unsigned int DecryptTitleKey(unsigned char* titleid, unsigned char* key, unsigned int index);
-int GetTitleKey(unsigned char* TitleKey, unsigned int low, unsigned int high);
+void DecryptTitleKeyFile(void);
+u32 DecryptTitleKey(u8 *titleid, u8 *key, u32 index);
+int GetTitleKey(u8 *TitleKey, u32 low, u32 high);
 
 #endif

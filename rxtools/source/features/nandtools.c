@@ -29,7 +29,7 @@ static struct {
 
 static Menu CoolFilesMenu = {
 	"Choose the file to work on",
-	{
+	.Option = (MenuEntry[5]){
         " movable.sed", &SelectFile,
         " SecureInfo_A", &SelectFile,
         " LocalFriendCodeSeed_B", &SelectFile,
