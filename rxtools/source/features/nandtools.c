@@ -10,6 +10,7 @@
 #include "crypto.h"
 #include "ncch.h"
 #include "NandDumper.h"
+#include "stdio.h"
 
 #define nCoolFiles sizeof(CoolFiles)/sizeof(CoolFiles[0])
 
@@ -20,21 +21,21 @@ static struct {
     char* name;
     char* path;
 } CoolFiles[] = {
-    "movable.sed", "private/movable.sed",
-    "SecureInfo_A", "rw/sys/SecureInfo_A",
-    "LocalFriendCodeSeed_B", "rw/sys/LocalFriendCodeSeed_B",
-    "rand_seed", "rw/sys/rand_seed",
-    "ticket.db", "dbs/ticket.db",
+    {"movable.sed", "private/movable.sed"},
+    {"SecureInfo_A", "rw/sys/SecureInfo_A"},
+    {"LocalFriendCodeSeed_B", "rw/sys/LocalFriendCodeSeed_B"},
+    {"rand_seed", "rw/sys/rand_seed"},
+    {"ticket.db", "dbs/ticket.db"},
 };
 
 static Menu CoolFilesMenu = {
 	"Choose the file to work on",
 	{
-        " movable.sed", &SelectFile,
-        " SecureInfo_A", &SelectFile,
-        " LocalFriendCodeSeed_B", &SelectFile,
-        " rand_seed", &SelectFile,
-        " ticket.db", &SelectFile,
+        {" movable.sed", &SelectFile},
+        {" SecureInfo_A", &SelectFile},
+        {" LocalFriendCodeSeed_B", &SelectFile},
+        {" rand_seed", &SelectFile},
+        {" ticket.db", &SelectFile},
 	},
 	nCoolFiles,
 	0,

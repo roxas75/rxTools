@@ -11,21 +11,20 @@
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
 
-#define FIRM_ADDR 0x24000000
+#define FIRM_ADDR (void*)0x24000000
 #define ARMBXR4	0x47204C00	
 
 char tmp[256];
 unsigned int emuNandMounted = 0;
-void (*_softreset)() = 0x080F0000;
+void (*_softreset)() = (void*)0x080F0000;
 
 void firmlaunch(u8* firm){
 	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
-	memcpy(0x080F0000, GetFilePack("reboot.bin"), 0x8000);
+	memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
 	_softreset();
 }
 
 void applyPatch(unsigned char* file, unsigned char* patch){
-	unsigned char* start = patch;
 	unsigned int ndiff = *((unsigned int*)patch); patch += 4;
 	for(int i = 0; i < ndiff; i++){
 		unsigned int off = *((unsigned int*)patch); patch += 4;
@@ -121,7 +120,7 @@ void rxModeQuickBoot(){
 
 //Just patches signatures check, loads in sysnand
 void DevMode(){
-    u8* firm = 0x24000000;
+    u8* firm = (void*)0x24000000;
     nand_readsectors(0, 0xF0000/0x200, firm, FIRM0);
     if(strncmp((char*)firm, "FIRM", 4))
     nand_readsectors(0, 0xF0000/0x200, firm, FIRM1);
@@ -139,6 +138,6 @@ void DevMode(){
             memcpy(firm + i, patch2, 2);
         }
     }
-    memcpy(0x080F0000, GetFilePack("reboot.bin"), 0x8000);
+    memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
 	_softreset();
 }
