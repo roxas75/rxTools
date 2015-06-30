@@ -1,5 +1,4 @@
 #include "TitleKeyDecrypt.h"
-#include "common.h"
 #include "console.h"
 #include "draw.h"
 #include "hid.h"
@@ -69,7 +68,7 @@ void DecryptTitleKeys() {
 	nKey = 0; int nullbyte = 0;
 	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
 		print("Decrypting title keys...\n"); ConsoleShow();
-		u8 *buf = 0x21000000;
+		u8 *buf = (u8 *)0x21000000;
 		int pos = 0;
 		for (;;) {
 			int rb = FileRead(&tick, buf, tick_size, pos);
@@ -103,13 +102,110 @@ void DecryptTitleKeys() {
 	WaitForButton(BUTTON_A);
 }
 
+/** This decrypts the encTitleKeys.bin inside RxTools directory on SD. */
+void DecryptTitleKeyFile(void) {
+	ConsoleInit();
+	ConsoleSetTitle("Title Key Decrypt");
+	FIL tick, dump;
+	FRESULT rr = 0;
+	UINT br = 0;
+	u8 step = 0;
+	print("Opening rxTools/encTitleKeys.bin...\n"); ConsoleShow();
+	//decTitleKeys.bin that generated from other stuff can be handled streamly.
+	FileOpen(&dump, "rxTools/decTitleKeys.bin", 1);
+	rr = f_open(&dump, "rxTools/decTitleKeysA.bin", FA_WRITE | FA_CREATE_ALWAYS);
+	if (rr != FR_OK) {
+		print("FAIL open rxTools/decTitleKeysA.bin [%04X].\n", rr);
+		f_close(&dump);
+		print("\nPress A to exit\n"); ConsoleShow();
+		WaitForButton(BUTTON_A);
+		return;
+	}
+	rr = f_open(&tick, "rxTools/encTitleKeys.bin", FA_READ | FA_OPEN_EXISTING);
+	if (rr != FR_OK) {
+		f_close(&tick); f_close(&dump);
+		print("FAIL open rxTools/encTitleKeys.bin [%04X].\n", rr);
+		print("\nPress A to exit\n"); ConsoleShow();
+		WaitForButton(BUTTON_A);
+		return;
+	}
+	
+	u32 line[4] = {0,};
+	u32 keycount = 0, i = 0;
+	u32 kindex = 0, nkeys = 0;
+	u8 titleid[8] = {0,};
+	u8 key[16] = {0,};
+	char* progressbar = "[          ]";
+	char* progress = progressbar+1;
+	u8 percent = 0;
+	step = 1;
+	
+	rr = f_read(&tick, line, sizeof(line), &br);
+	if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
+	keycount = line[0];
+	if (f_size(&tick) != 0x10 + 0x20*keycount) {
+		print("encrypted keys binary size mismatch. Retry later?\n");
+		print("keys count: %04X\n length: E@%08X, A@%08X\n", keycount, 0x10 + 0x20*keycount, f_size(&tick));
+		goto ioerror;
+	}
+	
+	print("%d encrypted keys found.\n", keycount);
+	print("%s%04X/%04X\n", progressbar, i, keycount);
+	ConsoleShow(); ConsolePrevLine();
+	
+	f_lseek(&dump, 0x10);
+	for (i = 0; i < keycount; i ++) {
+		rr = f_read(&tick, line, sizeof(line), &br);
+		if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
+		kindex = line[0]; //Title Type which decides which common KeyY.
+		memcpy(titleid, line + 2, 8);
+		rr = f_read(&tick, line, sizeof(line), &br);
+		if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
+		memcpy(key, line, 16);
+		
+		memcpy(TITLES + nkeys * 8, titleid, 8);
+		//Craft one line per time.
+		line[0] = kindex;
+		line[1] = 0;
+		memcpy(line + 2, titleid, 8);
+		rr = f_write(&dump, line, sizeof(line), &br);
+		if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
+		DecryptTitleKey(titleid, key, kindex);
+		rr = f_write(&dump, key, sizeof(key), &br);
+		if ((rr != FR_OK)||(br != sizeof(key))) goto ioerror;
+		nkeys ++;
+		
+		if (percent < i*10/keycount) {
+			percent ++; *(progress++) = '=';
+			print("%s%04X/%04X\n", progressbar, i, keycount);
+			ConsoleShow(); ConsolePrevLine();
+		}
+	}
+	percent ++; *(progress++) = '=';
+	print("%s%04X/%04X\n", progressbar, i, keycount);
+	ConsoleShow();
+	rr = f_write(&dump, line, sizeof(line), &br);
+	if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
+	f_close(&tick); f_close(&dump);
+	print("DONE %04X keys decrypted.\n\nPress A to exit\n", nkeys); ConsoleShow();
+	WaitForButton(BUTTON_A);
+	return;
+
+ioerror:
+	print("FAIL IO when %d. T@%08X,D@%08X,[%04X]\n\nPress A to exit\n", step, f_tell(&tick), f_tell(&dump), rr);
+	f_close(&tick); f_close(&dump);
+	ConsoleShow();
+	WaitForButton(BUTTON_A);
+	return;
+}
+
 int GetTitleKey(u8 *TitleKey, u32 low, u32 high) {
 	File tick;
 	u32 tid_low = ((low >> 24) & 0xff) | ((low << 8) & 0xff0000) | ((low >> 8) & 0xff00) | ((low << 24) & 0xff000000);
 	u32 tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
 	u32 tick_size = 0x200;     //Chunk size
 	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
-		u8 *buf = 0x22000000;
+		u8 *buf = (u8 *)0x22000000;
 		int pos = 0;
 		for (;;) {
 			int rb = FileRead(&tick, buf, tick_size, pos);
