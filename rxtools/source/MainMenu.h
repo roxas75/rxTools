@@ -27,14 +27,15 @@ static void ShutDown(){
 
 static Menu DecryptMenu = {
 	"Decryption Options",
-	.Option = (MenuEntry[5]){
+	.Option = (MenuEntry[6]){
 		" Decrypt CTR Titles", &CTRDecryptor,
 		" Decrypt Title Keys", &DecryptTitleKeys,
+		" Decrypt encTitleKeys.bin", &DecryptTitleKeyFile,
 		" Generate Xorpads", &PadGen,
 		" Decrypt partitions", &DumpNandPartitions,
 		" Generate fat16 Xorpad", &GenerateNandXorpads,
 	},
-	5,
+	6,
 	0,
 	0
 };
