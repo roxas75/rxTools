@@ -57,26 +57,15 @@ PackEntry* GetEntryPack(int filenumber){
 	else return NULL;
 }
 
-int CheckHash(unsigned char* file, unsigned int size, unsigned int hash){ //that's the simplest and crappiest hash engine i could invent, but it works, so i don't give a shit
+int CheckHash(unsigned char* file, unsigned int size, unsigned int hash){ //BSD checksum
 	unsigned int HASH = 0;
-	for(int i = 0; i < size - 4; i++){
-		HASH ^= file[i];
-		HASH ^= file[i+1] << 8;
-		HASH ^= file[i+2] << 16;
-		HASH ^= file[i+3] << 24;
-	}
-	
+	for(int i = 0; i < size; HASH = (((HASH >> 1) | (HASH << 15)) + file[i++]) & 0xffff);
 	if(HASH == hash) return 1;
 	else return 0;
 }
 
 unsigned int HashGen(unsigned char* file, unsigned int size){
 	unsigned int HASH = 0;
-	for(int i = 0; i < size - 4; i++){
-		HASH ^= file[i];
-		HASH ^= file[i+1] << 8;
-		HASH ^= file[i+2] << 16;
-		HASH ^= file[i+3] << 24;
-	}
+	for(int i = 0; i < size; HASH = (((HASH >> 1) | (HASH << 15)) + file[i++]) & 0xffff);
 	return HASH;
 }
