@@ -8,13 +8,13 @@
 #include "hid.h"
 #include "ncch.h"
 #include "crypto.h"
+#include "stdio.h"
 
-#define BUFFER_ADDR ((volatile u8*)0x21000000)
+#define BUFFER_ADDR ((u8*)0x21000000)
 #define BLOCK_SIZE  (8*1024*1024)
 
 
 u32 DecryptPartition(PartitionInfo* info){
-    size_t bytesWritten;
 	if(info->keyY != NULL)
 		setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
     use_aeskey(info->keyslot);
@@ -67,7 +67,6 @@ void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. 
 int ProcessCTR(char* path){
 	PartitionInfo myInfo;
 	File myFile;
-	char myString[256];  //In case it is needed...
 	if(FileOpen(&myFile, path, 0)){
 		ConsoleInit();
 		ConsoleSetTitle("CTR Decryptor");
@@ -91,7 +90,7 @@ int ProcessCTR(char* path){
 		FileRead(&myFile, &NCCH, 0x200, ncch_base);
 
 		//print(path); print("\n"); 
-		print(NCCH.productcode); print("\n"); 
+		print((char*)NCCH.productcode); print("\n"); 
 		unsigned int NEWCRYPTO = 0, CRYPTO = 1;
 		if(NCCH.flags[3] != 0) NEWCRYPTO = 1;
 		if(NCCH.flags[7] & 4) CRYPTO = 0;

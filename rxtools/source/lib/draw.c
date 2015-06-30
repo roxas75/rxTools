@@ -153,9 +153,9 @@ void DrawPixel(int x, int y, int color, int screen){
     //Mind i ask why paint the pixel twice?
     //GCC: comparison between pointer and integer
     //GCC: assignment makes integer from pointer without a cast
-    if(screen == TOP_SCREEN && TOP_SCREEN2){
+    if((void*)screen == TOP_SCREEN && TOP_SCREEN2){
         if(color != TRANSPARENT){
-	        int address = TOP_SCREEN2 + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
+	        int address = (int)TOP_SCREEN2 + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
     		writeByte(address, color);
     		writeByte(address+1, color >> 8);
     		writeByte(address+2, color >>16);
