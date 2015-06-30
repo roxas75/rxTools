@@ -5,7 +5,7 @@
 #include "CTRDecryptor.h"
 #include "console.h"
 
-#define FILEPACK_ADDR	0x20400000
+#define FILEPACK_ADDR	(void*)0x20400000
 #define FILEPACK_OFF	0x100000			//Offset in Launcher.dat
 #define FILEPACK_SIZE	0x100000
 
@@ -28,8 +28,8 @@ void LoadPack(){
 	nEntry = *((unsigned int*)(FILEPACK_ADDR));
 	Entry = ((PackEntry*)(FILEPACK_ADDR + 0x10));
 	for(int i = 0; i < nEntry; i++){
-		Entry[i].off += FILEPACK_ADDR;
-		if(!CheckHash(Entry[i].off, Entry[i].size, Entry[i].hash)){
+		Entry[i].off += (int)FILEPACK_ADDR;
+		if(!CheckHash((void*)Entry[i].off, Entry[i].size, Entry[i].hash)){
 			DrawString(TOP_SCREEN, " rxTools.dat is corrupted!", 0, 240-8, BLACK, WHITE); 		//Who knows, if there is any corruption in our files, we need to stop
 			while(1);
 		}

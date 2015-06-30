@@ -1,4 +1,5 @@
 #include "hid.h"
+#include "screenshot.h"
 
 u32 InputWait() {
     u32 pad_state_old = HID_STATE;
