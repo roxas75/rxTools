@@ -11,7 +11,7 @@ typedef struct{
 
 typedef struct{
 	char* Name;
-	MenuEntry Option[1000];
+	MenuEntry* Option;
 	int nEntryes;
 	int Current;    //The current selected option
 	bool Showed;    //Useful, to not refresh everything everytime
