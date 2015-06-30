@@ -100,7 +100,7 @@ void ConsoleShow(){
 	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2*CHAR_WIDTH, ConsoleY + (titlespace-CHAR_WIDTH)/2 + BorderWidth, TextColor, BackgroundColor);
 	
 	char tmp[256], *point;
-        if(findCursorLine < MAXLINES) point = &console[0]; //must be findCursorLine()?
+        if(findCursorLine() < MAXLINES) point = &console[0];
 	else{
 		int cont = 0;
 		int tmp1;

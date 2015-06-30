@@ -7,39 +7,39 @@ unsigned int align(unsigned int offset, unsigned int alignment)
 	return (offset + (alignment-1)) & mask;
 }
 
-unsigned long align64(unsigned long offset, unsigned int alignment)
+unsigned long long align64(unsigned long long offset, unsigned long long alignment)
 {
-	unsigned long mask = ~(alignment-1);
+	unsigned long long mask = ~(alignment-1);
 
 	return (offset + (alignment-1)) & mask;
 }
 
-unsigned long getle64(const unsigned char* p)
+unsigned long long getle64(const unsigned char* p)
 {
-	unsigned long n = p[0];
+	unsigned long long n = p[0];
 
-	n |= (unsigned long)p[1]<<8;
-	n |= (unsigned long)p[2]<<16;
-	n |= (unsigned long)p[3]<<24;
-	n |= (unsigned long)p[4]<<32;
-	n |= (unsigned long)p[5]<<40;
-	n |= (unsigned long)p[6]<<48;
-	n |= (unsigned long)p[7]<<56;
+	n |= (unsigned long long)p[1]<<8;
+	n |= (unsigned long long)p[2]<<16;
+	n |= (unsigned long long)p[3]<<24;
+	n |= (unsigned long long)p[4]<<32;
+	n |= (unsigned long long)p[5]<<40;
+	n |= (unsigned long long)p[6]<<48;
+	n |= (unsigned long long)p[7]<<56;
 	return n;
 }
 
-unsigned long getbe64(const unsigned char* p)
+unsigned long long getbe64(const unsigned char* p)
 {
-	unsigned long n = 0;
+	unsigned long long n = 0;
 
-	n |= (unsigned long)p[0]<<56;
-	n |= (unsigned long)p[1]<<48;
-	n |= (unsigned long)p[2]<<40;
-	n |= (unsigned long)p[3]<<32;
-	n |= (unsigned long)p[4]<<24;
-	n |= (unsigned long)p[5]<<16;
-	n |= (unsigned long)p[6]<<8;
-	n |= (unsigned long)p[7]<<0;
+	n |= (unsigned long long)p[0]<<56;
+	n |= (unsigned long long)p[1]<<48;
+	n |= (unsigned long long)p[2]<<40;
+	n |= (unsigned long long)p[3]<<32;
+	n |= (unsigned long long)p[4]<<24;
+	n |= (unsigned long long)p[5]<<16;
+	n |= (unsigned long long)p[6]<<8;
+	n |= (unsigned long long)p[7]<<0;
 	return n;
 }
 
