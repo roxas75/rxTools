@@ -34,7 +34,7 @@ int InstallData(char* drive){
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
 	f_mkdir(tmpstr);
-	f_chmod(tmpstr, AM_HID, AM_HID);
+	//f_chmod(tmpstr, AM_HID, AM_HID);
 	
 	//Read firmware data
 	if(f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK){
@@ -146,13 +146,13 @@ int InstallData(char* drive){
 int CheckInstallationData(){
 	File file;
 	char str[32];
-	if(!FileOpen(&file, "rxtools/data/0004013800000002.bin", 0)) return -1;
+	if(!FileOpen(&file, "rxTools/data/0004013800000002.bin", 0)) return -1;
 	FileClose(&file);
-	if(!FileOpen(&file, "rxtools/data/0004013800000202.bin", 0)) return -2;
+	if(!FileOpen(&file, "rxTools/data/0004013800000202.bin", 0)) return -2;
 	FileClose(&file);
-	if(!FileOpen(&file, "rxtools/data/0004013800000102.bin", 0)) return -3;
+	if(!FileOpen(&file, "rxTools/data/0004013800000102.bin", 0)) return -3;
 	FileClose(&file);
-	if(!FileOpen(&file, "rxtools/data/data.bin", 0)) return -4;
+	if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
 	FileRead(&file, str, 32, 0);
 	FileClose(&file);
 	if(memcmp(str, __DATE__, 11)) return -5;

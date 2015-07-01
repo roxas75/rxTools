@@ -16,15 +16,14 @@ SFILES 		:=  $(wildcard source/*.s)
 
 .PHONY: clean all
 
-all: $(BUILD) arm9payload.bin patch.bin
+all: $(BUILD) patch.bin
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	
-arm9payload.bin:
-	
+
 patch.bin:
 	@$(foreach sfile,$(SFILES), $(ARMIPS) $(sfile);)
+	@cp source/p9_agb_bios.bin build/0805e010.bin
 	@$(TOOLS)/cfwtool $(BUILD) $(TARGET) a
 #---------------------------------------------------------------------------------
 clean:
