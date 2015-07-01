@@ -211,7 +211,7 @@ void downgradeMSET()
 	char *dgpath = "0:msetdg.bin";
 	unsigned int titleid_low = 0x00040010;
 	unsigned int titleid_high[6] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000 }; //JPN, USA, EUR, CHN, KOR, TWN
-	unsigned int mset_hash[6] = { 0x57358F14, 0xA28EAD9F, 0x530C345B, 0xC2A961F1, 0x20B433E7, 0x55B7DCEC }; //JPN, USA, EUR, CHN, KOR, TWN
+	unsigned int mset_hash[6] = { 0x96AEC379, 0x3387F2CD, 0xACC1BE62, 0x565BCF20, 0xA04654C6, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned short mset_ver[6] = { 3074, 3078, 3075, 8, 1026, 8 };
 	
 	ConsoleInit();
