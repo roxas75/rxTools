@@ -24,17 +24,17 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 }
 static unsigned char originalcode[] = { 0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3, 0x11, 0x00, 0xA0, 0xE1, 0x03, 0x00, 0x00, 0x0A };
 static unsigned char patchcode[] = { 0x01, 0x00, 0xA0, 0xE3, 0x70, 0x80, 0xBD, 0xE8 };
-static unsigned char* dest = 0x20000400;
+static char* dest = (void*)0x20000400;
 void patchregion(){
 	for(int i = 0; i < 8; i++) *(dest + i) = patchcode[i];
 }	
 
 void patch_processes(){
-	unsigned char* mset = 0x24000000;
-	unsigned char* menu = 0x26A00000;
+	char* mset = (void*)0x24000000;
+	char* menu = (void*)0x26A00000;
 	for(int i = 0; i < 0x600000; i+=4){
 		//System Menu code, which locks the region
-		if(dest == 0x20000400){	//This means we haven't still found our code
+		if(dest == (void*)0x20000400){	//This means we haven't still found our code
 			if( (*((unsigned int*)(menu + i + 0x0)) == *((unsigned int*)&originalcode[0x0])) &&
 				(*((unsigned int*)(menu + i + 0x4)) == *((unsigned int*)&originalcode[0x4])) &&
 				(*((unsigned int*)(menu + i + 0x8)) == *((unsigned int*)&originalcode[0x8])) &&

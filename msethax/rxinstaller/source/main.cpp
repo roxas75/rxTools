@@ -18,7 +18,7 @@ u8 workbuffer[1024] ALIGN(32);
 using namespace std;
 
 typedef struct{
-	char* name;
+	const char* name;
 	const u8* patch;
 } rop_patch;
 

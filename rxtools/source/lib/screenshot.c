@@ -5,6 +5,7 @@
 #include "hid.h"
 #include "fs.h"
 #include "ff.h"
+#include "stdio.h"
 
 unsigned char bmpTopHeader[] = {	
 	0x42, 0x4D, 0x36, 0x65, 0x04, 0x00, 0x00, 0x00, 
@@ -27,9 +28,9 @@ void ScreenShot(){
 	if(FileOpen(&myFile, tmp, 1)){
 		FileWrite(&myFile, bmpTopHeader, 0x36, 0);
 		int pos = 0x36;
-		for(int i = 240-1; i >= 0; i--){
-			for(int j = 0; j < 400; j++){
-				int color = GetPixel(j, i, TOP_SCREEN);
+		for(int i = SCREEN_HEIGHT-1; i >= 0; i--){
+			for(int j = 0; j < SCREEN_WIDTH; j++){
+				int color = GetPixel(j, i, (int)TOP_SCREEN);
 				FileWrite(&myFile, &color, 0x4, pos);
 				pos += 3;
 			}
@@ -39,7 +40,7 @@ void ScreenShot(){
 }
 
 void TryScreenShot(){
-	u32 pad = GetInput();
+/*	u32 pad = */GetInput();
 	//if(pad & BUTTON_L1 && pad & BUTTON_R1) ScreenShot();
 	//Disabled, i don't need any screenshot for now, but the function is here
 }
