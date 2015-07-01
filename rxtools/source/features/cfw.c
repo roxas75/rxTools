@@ -92,7 +92,7 @@ int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
 void rxModeSys(){
     ConsoleInit();
     ConsoleSetTitle("rxMode - Booting in SysNand");
-    print("Loading...\n"); ConsoleShow();
+	print("Loading...\n"); ConsoleShow();
 	rxMode(0);
 	print("Cannot boot in rxMode.\n\nPress A to exit\n"); ConsoleShow();
 	WaitForButton(BUTTON_A);
