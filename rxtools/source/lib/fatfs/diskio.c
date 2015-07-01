@@ -56,14 +56,14 @@ DRESULT disk_read (
 {
     switch(pdrv){
         case 0:
-            if (sdmmc_sdcard_readsectors(sector,count,buff))
+            if (sdmmc_sdcard_readsectors(sector,count,(uint8_t *)buff))
                 return RES_PARERR;
             break;
         case 1:
-            nand_readsectors(sector, count, buff, CTRNAND);
+            nand_readsectors(sector, count, (uint8_t *)buff, CTRNAND);
             break;
         case 2:
-            emunand_readsectors(sector, count, buff, CTRNAND);
+            emunand_readsectors(sector, count, (uint8_t *)buff, CTRNAND);
             break;
     }
     return RES_OK;
@@ -85,14 +85,14 @@ DRESULT disk_write (
 {
     switch(pdrv){
         case 0:
-            if (sdmmc_sdcard_writesectors(sector,count,buff))
+            if (sdmmc_sdcard_writesectors(sector,count,(uint8_t *)buff))
                 return RES_PARERR;
             break;
         case 1:
-            nand_writesectors(sector, count, buff, CTRNAND);
+            nand_writesectors(sector, count, (uint8_t *)buff, CTRNAND);
 			break;
         case 2:
-            emunand_writesectors(sector, count, buff, CTRNAND);
+            emunand_writesectors(sector, count, (uint8_t *)buff, CTRNAND);
 			break;
     }
     return RES_OK;
