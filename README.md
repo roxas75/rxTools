@@ -36,7 +36,7 @@ Since the project is open-source you are welcome to implement other some systems
 
 What is actually necessary is:
 - [Python 2.7](https://www.python.org)
-- [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM, libctru and libnds installed (in case make.exe fails with stack trace dump, replace it with one from [GnuWin Make](http://gnuwin32.sourceforge.net) along with two .dlls)
+- [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM option and suboptions installed (in case make.exe fails with stack trace dump, install [GnuWin Make](http://gnuwin32.sourceforge.net) and place it in path before devkitPRO/msys/bin)
 - [armips] (https://github.com/Kingcom/armips) (for Windows [Visual Studio 2013 Express for Windows](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or higher is required to build armips)
 - GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with mingw32-base will be fine)
 
