@@ -38,7 +38,7 @@ What is actually necessary is:
 - [Python 2.7](https://www.python.org)
 - [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM, libctru and libnds installed (in case make.exe fails with stack trace dump, replace it with one from [GnuWin Make](http://gnuwin32.sourceforge.net) along with two .dlls)
 - [armips] (https://github.com/Kingcom/armips) (for Windows [Visual Studio 2013 Express for Windows](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or higher is required to build armips)
-- GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with gcc-base will be fine)
+- GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with mingw32-base will be fine)
 
 Just run the **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
 
