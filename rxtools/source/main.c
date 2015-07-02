@@ -62,7 +62,7 @@ int main(){
 	}else{
 		if(GetSystemVersion() < 3){
 			ConsoleInit();
-			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some some EmuNANDs will not boot.\n\nPress A to continue...\n");
+			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some EmuNANDs will not boot.\n\nPress A to continue...\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
