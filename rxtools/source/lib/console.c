@@ -90,9 +90,9 @@ void ConsoleShow(){
 			   (y >= ConsoleY && y <= ConsoleY + BorderWidth) || 
 			   (y >= ConsoleH + ConsoleY - 1 && y <= ConsoleH + ConsoleY - 1 + BorderWidth) ||
 			   (y >= ConsoleY + titley - BorderWidth && y <= ConsoleY + titley)){
-				DrawPixel(x, y, BorderColor, (int)tmpscreen);
+				DrawPixel(tmpscreen, x, y, BorderColor);
 			}else{
-				DrawPixel(x, y, BackgroundColor, (int)tmpscreen);
+				DrawPixel(tmpscreen, x, y, BackgroundColor);
 			}
 		}
 	}
