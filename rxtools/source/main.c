@@ -17,17 +17,16 @@ void Initialize(){
 	char str[100];
 	DrawClearScreenAll();
 
-	DrawString(TOP_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
+	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
-		DrawString(TOP_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
+		DrawString(BOT_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	}else{
-		DrawString(TOP_SCREEN,  " ERROR!        ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
+		DrawString(BOT_SCREEN,  " ERROR!        ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
 	}
 	LoadPack();
 	//Console Stuff
-	memset(TOP_SCREEN, 0x00, SCREEN_SIZE);
-	memset(TOP_SCREEN2, 0x00, SCREEN_SIZE);
-	ConsoleSetXY(15, 15);
+
+	ConsoleSetXY(15, 1);
 	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
 	ConsoleSetTextColor(WHITE);
@@ -40,7 +39,6 @@ void Initialize(){
 	f_mkdir ("rxTools/nand");
 	InstallConfigData();
 	
-	SplashScreen();
 	for(int i = 0; i < 0x333333*6; i++){
 		u32 pad = GetInput();
 		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
@@ -61,7 +59,7 @@ int main(){
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
-		DrawString(TOP_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, GREEN, BLACK);
+		DrawString(BOT_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, GREEN, BLACK);
 	}else{
 		if(GetSystemVersion() < 3){
 			ConsoleInit();
@@ -69,9 +67,9 @@ int main(){
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
-		DrawString(TOP_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
+		DrawString(BOT_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
 	}
-	DrawString(TOP_SCREEN, " EmuNAND ", 0, SCREEN_HEIGHT-FONT_SIZE*2, checkEmuNAND() ? GREEN : RED, BLACK);
+	DrawString(BOT_SCREEN, " EmuNAND ", 0, SCREEN_HEIGHT-FONT_SIZE*2, checkEmuNAND() ? GREEN : RED, BLACK);
 
 	//That's the Main Menu initialization, easy and cool
 	MenuInit(&MainMenu);
