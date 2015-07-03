@@ -11,7 +11,6 @@ Menu *MenuChain[100];
 int openedMenus = 0;
 char Theme = '0';
 char str[100];
-int mainmenu_current = 0;
 
 void MenuInit(Menu* menu){
 	MyMenu = menu;
@@ -81,10 +80,12 @@ void MenuClose(){
 
 void MenuRefresh(){
 	ConsoleInit();
+	sprintf(str, "/rxTools/Theme/%c/%s", Theme, MyMenu->Option[MyMenu->Current].gfx_splash);
+	DrawBottomSplash(str);
 	MyMenu->Showed = 0;
 	ConsoleSetTitle(MyMenu->Name);
 	for (int i = 0; i < MyMenu->nEntryes; i++){
-		print(MyMenu->Option[i].Str);
+		print("%s %s", i == MyMenu->Current ? "->" : "  ", MyMenu->Option[i].Str);
 		print("\n");
 	}
 	int x = 0, y = 0;
@@ -92,8 +93,5 @@ void MenuRefresh(){
 	if (!MyMenu->Showed){
 		ConsoleShow();
 		MyMenu->Showed = 1;
-	}
-	for (int i = 0; i < MyMenu->nEntryes; i++){
-		DrawString(BOT_SCREEN, i == MyMenu->Current ? ">" : " ", x + CHAR_WIDTH*(ConsoleGetSpacing() - 1), (i)* CHAR_WIDTH + y + CHAR_WIDTH*(ConsoleGetSpacing() + 1) + 20, ConsoleGetSpecialColor(), ConsoleGetBackgroundColor());
 	}
 }
