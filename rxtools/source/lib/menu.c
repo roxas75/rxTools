@@ -94,6 +94,6 @@ void MenuRefresh(){
 		MyMenu->Showed = 1;
 	}
 	for (int i = 0; i < MyMenu->nEntryes; i++){
-		DrawString(TOP_SCREEN, i == MyMenu->Current ? ">" : " ", x + CHAR_WIDTH*(ConsoleGetSpacing() - 1), (i)* CHAR_WIDTH + y + CHAR_WIDTH*(ConsoleGetSpacing() + 1), ConsoleGetSpecialColor(), ConsoleGetBackgroundColor());
+		DrawString(BOT_SCREEN, i == MyMenu->Current ? ">" : " ", x + CHAR_WIDTH*(ConsoleGetSpacing() - 1), (i)* CHAR_WIDTH + y + CHAR_WIDTH*(ConsoleGetSpacing() + 1) + 20, ConsoleGetSpecialColor(), ConsoleGetBackgroundColor());
 	}
 }
