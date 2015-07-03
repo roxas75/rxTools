@@ -14,6 +14,9 @@
 #include "configuration.h"
 
 void Initialize(){
+	char str[100];
+	DrawClearScreenAll();
+
 	DrawString(TOP_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
 		DrawString(TOP_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
@@ -43,14 +46,14 @@ void Initialize(){
 		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 	}
 	rxModeQuickBoot();
-	rxTools_boot:
-	memset(TOP_SCREEN, 0x00, SCREEN_SIZE);
-	memset(TOP_SCREEN2, 0x00, SCREEN_SIZE);
+rxTools_boot:
+
+	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
+	DrawTopSplash(str);
 }
 
 int main(){
 	Initialize();
-	DrawString(TOP_SCREEN, "SUPPORT THE ORIGINAL, NOT THE IMITATION!", 75, SCREEN_HEIGHT-10, GREY, BLACK);
 	//7.X Keys stuff
 	File KeyFile;
 	if(FileOpen(&KeyFile, "/slot0x25KeyX.bin", 0)){
@@ -75,11 +78,9 @@ int main(){
 	MenuShow();
 
 	while (true) {
-		DrawString(TOP_SCREEN,  "[SELECT] Reboot", SCREEN_WIDTH-51-18*FONT_SIZE, SCREEN_HEIGHT-59-24-FONT_SIZE, RED, BLACK);
-		DrawString(TOP_SCREEN,  "[START]  Shutdown", SCREEN_WIDTH-51-18*FONT_SIZE, SCREEN_HEIGHT-59-24, RED, BLACK);
 		u32 pad_state = InputWait();
-		if(pad_state & BUTTON_DOWN) 	MenuNextSelection();
-		if(pad_state & BUTTON_UP)   	MenuPrevSelection();
+		if (pad_state & BUTTON_DOWN || pad_state & BUTTON_RIGHT) 	MenuNextSelection();
+		if (pad_state & BUTTON_UP || pad_state & BUTTON_LEFT)   	MenuPrevSelection();
 		if(pad_state & BUTTON_A)    	MenuSelect();
 		if(pad_state & BUTTON_SELECT)	returnHomeMenu();
 		if(pad_state & BUTTON_START)	ShutDown();
