@@ -146,6 +146,7 @@ void ExploitMenuInit(){
 void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
 	MenuShow();
+	MenuRefresh();
 	bool autobootgui = false;
 	char str[100];
 
