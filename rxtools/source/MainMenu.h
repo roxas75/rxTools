@@ -77,10 +77,10 @@ static Menu ExploitMenu = {
 };
 
 static Menu SettingsMenu = {
-	"Settings",
+	"           SETTINGS",
 	.Option = (MenuEntry[2]){
 		{ "Force UI boot       ", NULL, "app.bin" },
-		{ "Theme selection     ", NULL, "app.bin" },
+		{ "Selected Theme:     ", NULL, "app.bin" },
 	},
 	2,
 	0,
@@ -145,11 +145,9 @@ void ExploitMenuInit(){
 
 void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
-	MenuShow();
-	MenuRefresh();
 	bool autobootgui = false;
 	char str[100];
-
+	
 	while (true) {
 		u32 pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
@@ -189,9 +187,9 @@ void SettingsMenuInit(){
 		TryScreenShot();
 
 		//UPDATE SETTINGS GUI
-		if (autobootgui)MyMenu->Option[0].Str = "Force UI boot      <Yes>";
-		else MyMenu->Option[0].Str = "Force UI boot      <No >";
-		sprintf(str, "Selected Theme:    < %c > ", Theme);
+		if (autobootgui)MyMenu->Option[0].Str = "Force UI boot           <Yes>";
+		else MyMenu->Option[0].Str =            "Force UI boot           <No >";
+	                               sprintf(str, "Selected Theme:         < %c > ", Theme);
 		MyMenu->Option[1].Str = str;
 		MenuRefresh();
 	}
