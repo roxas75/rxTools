@@ -26,10 +26,10 @@ void Initialize(){
 	LoadPack();
 
 	//Console Stuff
-	ConsoleSetXY(15, 1);
+	ConsoleSetXY(15, 15);
 	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
-	ConsoleSetTextColor(WHITE);
+	ConsoleSetTextColor(RGB(0, 141, 197));
 	ConsoleSetBackgroundColor(BLACK);
 	ConsoleSetSpecialColor(BLUE);
 	ConsoleSetSpacing(2);
