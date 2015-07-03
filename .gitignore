@@ -51,11 +51,9 @@ Temporary Items
 *.exe
 *.dat
 *.nds
-*.bin
 *.o
 *.d
 *.map
 **/build
-**/data
 *.bat
 release.zip

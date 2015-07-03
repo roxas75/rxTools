@@ -6,6 +6,7 @@ enum{
 	REBOOT,
 	PATCH,
 	TOP_PIC,
+	TOP_PIC2,
 };
 
 typedef struct{

@@ -24,6 +24,8 @@ void Initialize(){
 	//Console Stuff
 	memset(TOP_SCREEN, 0x00, SCREEN_SIZE);
 	memset(TOP_SCREEN2, 0x00, SCREEN_SIZE);
+	memset(BOT_SCREEN, 0x00, SCREEN_SIZE2);
+	SplashScreen2();
 	ConsoleSetXY(15, 15);
 	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
@@ -38,18 +40,23 @@ void Initialize(){
 	InstallConfigData();
 	
 	SplashScreen();
-	for(int i = 0; i < 0x333333*6; i++){
+	DrawString(TOP_SCREEN, " Hold [R] button to enter rxTools Menu... ", 0, SCREEN_HEIGHT-12, WHITE, BLACK);
+	for(int i = 0; i < 0x111111*6; i++){
 		u32 pad = GetInput();
-		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+		if(pad & BUTTON_R1 && i > 0x111111) goto rxTools_boot;
 	}
+	SplashScreen();
+	DrawString(TOP_SCREEN,  " Booting rxMode now... ", 0, SCREEN_HEIGHT-12, WHITE, BLACK);
 	rxModeQuickBoot();
 	rxTools_boot:
 	memset(TOP_SCREEN, 0x00, SCREEN_SIZE);
 	memset(TOP_SCREEN2, 0x00, SCREEN_SIZE);
+	memset(BOT_SCREEN, 0x00, SCREEN_SIZE2);
 }
 
 int main(){
 	Initialize();
+	SplashScreen2();
 	DrawString(TOP_SCREEN, "SUPPORT THE ORIGINAL, NOT THE IMITATION!", 75, SCREEN_HEIGHT-10, GREY, BLACK);
 	//7.X Keys stuff
 	File KeyFile;
@@ -60,12 +67,14 @@ int main(){
 		setup_aeskeyX(0x25, keyX);
 		DrawString(TOP_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, GREEN, BLACK);
 	}else{
-		if(GetSystemVersion() < 3){
-			ConsoleInit();
-			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some EmuNANDs will not boot.\n\nPress A to continue...\n");
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
-		}
+		//if(GetSystemVersion() < 3){
+			//ConsoleInit();
+			//print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some EmuNANDs will not boot.\n\nPress A to continue...\n");
+			//ConsoleShow();
+			//WaitForButton(BUTTON_A);
+		//}
+		DrawString(TOP_SCREEN, " Can't find slot0x25KeyX.bin! ", 0, SCREEN_HEIGHT-56, RED, BLACK);
+		DrawString(TOP_SCREEN, " Some features/NAND requiring 7x keys won't work! ", 0, SCREEN_HEIGHT-46, RED, BLACK);
 		DrawString(TOP_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
 	}
 	DrawString(TOP_SCREEN, " EmuNAND ", 0, SCREEN_HEIGHT-FONT_SIZE*2, checkEmuNAND() ? GREEN : RED, BLACK);

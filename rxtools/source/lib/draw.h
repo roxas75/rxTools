@@ -9,6 +9,10 @@
 #define FONT_SIZE	8
 #define TOP_SCREEN	(u8*)(*(u32*)((u32)0x080FFFC0 + 4 * (*(u32*)0x080FFFD8 & 1)))
 #define TOP_SCREEN2	(u8*)(*(u32*)0x080FFFC4)
+#define BYTES_PER_PIXEL2    3
+#define SCREEN_WIDTH2       320
+#define SCREEN_HEIGHT2      240
+#define SCREEN_SIZE2        (BYTES_PER_PIXEL2*SCREEN_WIDTH2*SCREEN_HEIGHT2)
 #define BOT_SCREEN	(u8*)(*(u32*)0x080FFFD4)
 
 //Colors Macros
@@ -24,6 +28,7 @@
 #define GREY		RGB(0x77, 0x77, 0x77) //GW Gray shade
 
 void ClearScreen(u8 *screen, u32 color);
+void ClearScreen2(u8 *screen, u32 color);
 void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgcolor);
 void DrawString(u8 *screen, const char *str, u32 x, u32 y, u32 color, u32 bgcolor);
 void DrawPixel(u8 *screen, u32 x, u32 y, u32 color);
@@ -31,6 +36,7 @@ u32 GetPixel(u8 *screen, u32 x, u32 y);
 void Debug(const char *format, ...);
 
 void SplashScreen();
+void SplashScreen2();
 //Unused functions.
 void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);
 void DrawHexWithName(u8 *screen, const char *str, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);

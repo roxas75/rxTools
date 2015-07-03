@@ -37,7 +37,7 @@ int InstallData(char* drive){
 	f_chmod(tmpstr, AM_HID, AM_HID);
 	
 	//Read firmware data
-	if(f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK){
+	if(f_open(&firmfile, "firmwareRX.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK){
 		//... We'll see
 	}else return CONF_NOFIRMBIN;
 	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();

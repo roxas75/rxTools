@@ -26,6 +26,21 @@ void ClearScreen(u8 *screen, u32 color)
 	}
 }
 
+void ClearScreen2(u8 *screen, u32 color)
+{
+	u32 i = SCREEN_SIZE2/sizeof(u32);  //Surely this is an interger.
+	u32* tmpscr = (u32*)screen; //To avoid using array index which would decrease speed.
+	//Prepared 3 u32, that includes 4 24-bits color, cached. 4x(BGR)
+	u32 color0 = (color) | (color << 24),
+		color1 = (color << 16) | (color >> 8),
+		color2 = (color >> 16) | (color << 8);
+	while (i--) {
+		*(tmpscr++) = color0;
+		*(tmpscr++) = color1;
+		*(tmpscr++) = color2;
+	}
+}
+
 void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgcolor)
 {
 	u32 yy, xx;
@@ -158,10 +173,13 @@ u32 GetPixel(u8 *screen, u32 x, u32 y){
 	return *(u32*)(screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL) & COLOR_MASK;
 }
 
-
 //----------------Some of my shit..........
 void SplashScreen(void){
 	memcpy(TOP_SCREEN, GetFilePack("top_bg.bin"), SCREEN_SIZE);
 	if(TOP_SCREEN2)
 		memcpy(TOP_SCREEN2, GetFilePack("top_bg.bin"), SCREEN_SIZE);
+}
+void SplashScreen2(void){
+	ClearScreen2(BOT_SCREEN, BLACK);
+	memcpy(BOT_SCREEN, GetFilePack("top_bg2.bin"), SCREEN_SIZE2);
 }
