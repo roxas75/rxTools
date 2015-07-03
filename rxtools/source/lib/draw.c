@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-
+#include "fs.h"
 #include "font.h"
 #include "draw.h"
 #include "filepack.h"
@@ -24,6 +24,14 @@ void ClearScreen(u8 *screen, u32 color)
 		*(tmpscr++) = color1;
 		*(tmpscr++) = color2;
 	}
+}
+
+void DrawClearScreenAll(void) {
+	ClearScreen(TOP_SCREEN, RGB(0, 0, 0));
+	ClearScreen(TOP_SCREEN2, RGB(0, 0, 0));
+	ClearScreen(BOT_SCREEN, RGB(0, 0, 0));
+	ClearScreen(BOT_SCREEN2, RGB(0, 0, 0));
+	current_y = 0;
 }
 
 void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgcolor)
@@ -164,4 +172,38 @@ void SplashScreen(void){
 	memcpy(TOP_SCREEN, GetFilePack("top_bg.bin"), SCREEN_SIZE);
 	if(TOP_SCREEN2)
 		memcpy(TOP_SCREEN2, GetFilePack("top_bg.bin"), SCREEN_SIZE);
+}
+
+void DrawTopSplash(char splash_file[]) {
+	unsigned int n = 0, bin_size;
+	File Splash;
+	FileOpen(&Splash, splash_file, 0);
+	//Load the spash image
+	bin_size = 0;
+	while ((n = FileRead(&Splash, (void*)((u32)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+		bin_size += n;
+	}
+	u32 *fb1 = (u32*)TOP_SCREEN;
+	u32 *fb2 = (u32*)TOP_SCREEN2;
+	for (n = 0; n < bin_size; n += 4){
+		*fb2++ = *fb1++;
+	}
+	FileClose(&Splash);
+}
+
+void DrawBottomSplash(char splash_file[]) {
+	unsigned int n = 0, bin_size;
+	File Splash;
+	FileOpen(&Splash, splash_file, 0);
+	//Load the spash image
+	bin_size = 0;
+	while ((n = FileRead(&Splash, (void*)((u32)BOT_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+		bin_size += n;
+	}
+	u32 *fb1 = (u32*)BOT_SCREEN;
+	u32 *fb2 = (u32*)BOT_SCREEN2;
+	for (n = 0; n < bin_size; n += 4){
+		*fb2++ = *fb1++;
+	}
+	FileClose(&Splash);
 }
