@@ -11,6 +11,7 @@ Menu *MenuChain[100];
 int openedMenus = 0;
 char Theme = '0';
 char str[100];
+int mainmenu_current = 0;
 
 void MenuInit(Menu* menu){
 	MyMenu = menu;
@@ -25,25 +26,24 @@ void MenuInit(Menu* menu){
 }
 
 void MenuShow(){
-	if (strcmp(MyMenu->Option[MyMenu->Current].gfx_splash, "app.bin") == 0)
-	{
-		int x = 0, y = 0;
-		ConsoleGetXY(&x, &y);
-		if (!MyMenu->Showed){
-			sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
-			DrawBottomSplash(str);
-			ConsoleShow();
-			MyMenu->Showed = 1;
-		}
-		for (int i = 0; i < MyMenu->nEntryes; i++){
-			DrawString(TOP_SCREEN, i == MyMenu->Current ? ">" : " ", x + CHAR_WIDTH*(ConsoleGetSpacing() - 1), (i)* CHAR_WIDTH + y + CHAR_WIDTH*(ConsoleGetSpacing() + 1), ConsoleGetSpecialColor(), ConsoleGetBackgroundColor());
-		}
-	}
-	else
-	{
-		sprintf(str, "/rxTools/Theme/%c/%s", Theme, MyMenu->Option[MyMenu->Current].gfx_splash);
+
+	//OLD TEXT MENU:
+	/*int x = 0, y = 0;
+	ConsoleGetXY(&x, &y);
+	if (!MyMenu->Showed){
+		sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
 		DrawBottomSplash(str);
+		ConsoleShow();
+		MyMenu->Showed = 1;
 	}
+	for (int i = 0; i < MyMenu->nEntryes; i++){
+		DrawString(BOT_SCREEN, i == MyMenu->Current ? ">" : " ", x + CHAR_WIDTH*(ConsoleGetSpacing() - 1), (i)* CHAR_WIDTH + y + CHAR_WIDTH*(ConsoleGetSpacing() + 1), ConsoleGetSpecialColor(), ConsoleGetBackgroundColor());
+	}*/
+
+	//NEW GUI:
+	sprintf(str, "/rxTools/Theme/%c/%s", Theme, MyMenu->Option[MyMenu->Current].gfx_splash);
+	DrawBottomSplash(str);
+
 }
 
 void MenuNextSelection(){
@@ -52,6 +52,7 @@ void MenuNextSelection(){
 	}else{
 		MyMenu->Current = 0;
 	}
+	
 }
 
 void MenuPrevSelection(){
@@ -72,7 +73,7 @@ void MenuSelect(){
 }
 
 void MenuClose(){
-	if(openedMenus > 0){
+	if (openedMenus > 0){
 		MenuInit(MenuChain[--openedMenus]);
 		MenuShow();
 	}
