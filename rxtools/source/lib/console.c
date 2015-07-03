@@ -80,7 +80,7 @@ int findCursorLine(){
 }
 void ConsoleShow(){
         void *tmpscreen = (void*)0x27000000;
-	memcpy(tmpscreen, BOT_SCREEN, 0x46500);
+	memcpy(tmpscreen, BOT_SCREEN, 0x38400);
 	if(!consoleInited) return;
 	int titley = 2*CHAR_WIDTH;
 	//for(int y = ConsoleY; y < ConsoleH + ConsoleY + BorderWidth; y++){
@@ -97,7 +97,7 @@ void ConsoleShow(){
 	//	}
 	//}
 	int titlespace = 2*CHAR_WIDTH-2*BorderWidth;
-	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * CHAR_WIDTH, ConsoleY + (titlespace - CHAR_WIDTH) / 2 + BorderWidth, TextColor, GetPixel(BOT_SCREEN, 15,5));
+	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * CHAR_WIDTH, ConsoleY + (titlespace - CHAR_WIDTH) / 2 + BorderWidth, TextColor, BackgroundColor);
 	
 	char tmp[256], *point;
         if(findCursorLine() < MAXLINES) point = &console[0];
@@ -119,12 +119,12 @@ void ConsoleShow(){
 			if(*point == '\n'){ point++; break; }
 			tmp[linelen++] = *point++;
 		}
-		DrawString(tmpscreen, tmp, ConsoleX + CHAR_WIDTH*Spacing, lines++ * CHAR_WIDTH + ConsoleY + 20 + CHAR_WIDTH*(Spacing - 1) + titley, TextColor, GetPixel(BOT_SCREEN, 15, 5));
+		DrawString(tmpscreen, tmp, ConsoleX + CHAR_WIDTH*Spacing, lines++ * CHAR_WIDTH + ConsoleY + 20 + CHAR_WIDTH*(Spacing - 1) + titley, TextColor, BackgroundColor);
 		if(!*point) break;
 		if(lines == MAXLINES) break;
 	}
-	memcpy(BOT_SCREEN, tmpscreen, 0x46500);
-	if(BOT_SCREEN2) memcpy(BOT_SCREEN2, tmpscreen, 0x46500);
+	memcpy(BOT_SCREEN, tmpscreen, 0x38400);
+	if (BOT_SCREEN2) memcpy(BOT_SCREEN2, tmpscreen, 0x38400);
 }
 
 void ConsoleFlush(){
