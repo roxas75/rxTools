@@ -17,6 +17,7 @@
 #define RGB(r,g,b)	ARGB(255,r,g,b) //opaque color
 #define COLOR_MASK	ARGB(0, 255, 255, 255)
 #define ALPHA_MASK	ARGB(255, 0, 0, 0)
+#define TRANSPARENT	ARGB(0, 0, 0, 0)
 #define BLACK		RGB(0, 0, 0)
 #define WHITE		RGB(255, 255, 255)
 #define RED		RGB(255, 0, 0)
