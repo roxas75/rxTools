@@ -15,7 +15,7 @@
 
 void Initialize(){
 	char str[100];
-	DrawClearScreenAll();
+	
 
 	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
@@ -24,8 +24,8 @@ void Initialize(){
 		DrawString(BOT_SCREEN,  " ERROR!        ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
 	}
 	LoadPack();
-	//Console Stuff
 
+	//Console Stuff
 	ConsoleSetXY(15, 1);
 	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
@@ -38,7 +38,7 @@ void Initialize(){
 	f_mkdir ("rxTools");
 	f_mkdir ("rxTools/nand");
 	InstallConfigData();
-	
+
 	for(int i = 0; i < 0x333333*6; i++){
 		u32 pad = GetInput();
 		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
@@ -77,9 +77,14 @@ int main(){
 
 	while (true) {
 		u32 pad_state = InputWait();
-		if (pad_state & BUTTON_DOWN || pad_state & BUTTON_RIGHT) 	MenuNextSelection();
-		if (pad_state & BUTTON_UP || pad_state & BUTTON_LEFT)   	MenuPrevSelection();
+		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
+		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
 		if(pad_state & BUTTON_A)    	MenuSelect();
+		if (MyMenu->Current == 0) //If we're in the boot screen
+		{
+			if (pad_state & BUTTON_Y) rxModeEmu();      //Boot emunand
+			else if (pad_state & BUTTON_X) rxModeSys(); //Boot sysnand
+		}
 		if(pad_state & BUTTON_SELECT)	returnHomeMenu();
 		if(pad_state & BUTTON_START)	ShutDown();
 		TryScreenShot();
