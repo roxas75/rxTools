@@ -119,7 +119,7 @@ void ConsoleShow(){
 			if(*point == '\n'){ point++; break; }
 			tmp[linelen++] = *point++;
 		}
-		DrawString(tmpscreen, tmp, ConsoleX + CHAR_WIDTH*Spacing, lines++ * CHAR_WIDTH + ConsoleY + 20 + CHAR_WIDTH*(Spacing - 1) + titley, TextColor, 0x00000000);
+		DrawString(tmpscreen, tmp, ConsoleX + CHAR_WIDTH*Spacing, lines++ * CHAR_WIDTH + ConsoleY + 15 + CHAR_WIDTH*(Spacing - 1) + titley, TextColor, 0x00000000);
 		if(!*point) break;
 		if(lines == MAXLINES) break;
 	}
