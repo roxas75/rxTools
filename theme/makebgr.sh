@@ -1,3 +1,4 @@
+#!/bin/sh
 convert -rotate 90 $1 $1.bgr
 if [ -f ${1%.*}.bin ]
 then
