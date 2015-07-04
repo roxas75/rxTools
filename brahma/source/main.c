@@ -33,7 +33,7 @@ s32 main(void) {
 	FS_path filePath = FS_makePath(PATH_CHAR, "/rxTools.dat");
 	Result ret = FSUSER_OpenFileDirectly(NULL, &fileHandle, sdmcArchive, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
 	if (ret) goto EXIT;
-	FSFILE_Read(fileHandle, &bytesRead, 0x20000, 0x14400000, 320 * 1024);
+	FSFILE_Read(fileHandle, &bytesRead, 0x22000, 0x14400000, 320 * 1024);
 	FSFILE_Close(fileHandle);
 
 
