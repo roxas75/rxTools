@@ -41,6 +41,7 @@ What is actually necessary is:
 - GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with mingw32-base will be fine)
 
 Just run the **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
+If you get the "make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)" error on Windows, add "SHELL=C:/Windows/System32/cmd.exe" at the beginning of each Makefile
 
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
