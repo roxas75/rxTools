@@ -13,6 +13,29 @@
 #include "cfw.h"
 #include "configuration.h"
 
+bool bootGUI;
+
+void LoadSettings(){
+	char settings[]="00"; 
+	char str[100];
+	File MyFile;
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
+		FileRead(&MyFile, settings, 2, 0);
+		if (settings[0] == '1')bootGUI = true;
+		sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
+		if (FileOpen(&MyFile, str, 0)) Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
+		else Theme = '0';
+		FileClose(&MyFile);
+	}
+	else
+	{
+		FileOpen(&MyFile, "/rxTools/data/system.txt", 1);
+		FileWrite(&MyFile, "00" , 2, 0);
+		Theme = '0';
+		FileClose(&MyFile);
+	}
+}
+
 void Initialize(){
 	char str[100];
 	
@@ -38,12 +61,16 @@ void Initialize(){
 	f_mkdir ("rxTools");
 	f_mkdir ("rxTools/nand");
 	InstallConfigData();
+	LoadSettings();
 
-	for(int i = 0; i < 0x333333*6; i++){
-		u32 pad = GetInput();
-		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+	if (!bootGUI)
+	{
+		for (int i = 0; i < 0x333333 * 6; i++){
+			u32 pad = GetInput();
+			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+		}
+		rxModeQuickBoot();
 	}
-	rxModeQuickBoot();
 rxTools_boot:
 
 	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
