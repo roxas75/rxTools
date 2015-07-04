@@ -15,6 +15,11 @@
 #include <unistd.h>
 #define MAX_PATCHES 100
 
+typedef struct {
+	char name[13];
+	unsigned int off;
+} file_info;
+
 typedef struct{
 	char* name;
         unsigned arm9_addr;
@@ -32,7 +37,7 @@ firm_info native_info = { "NATIVE_FIRM", 0x66000, 0x84A00, 0x08006800, 0x35000, 
 firm_info agb_info = { "AGB_FIRM", 0x8B800, 0x4CE00, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
 firm_info twl_info = { "TWL_FIRM", 0x153600, 0x4D200, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
 
-char patch_name[MAX_PATCHES][256];
+file_info files[MAX_PATCHES];
 int npatch = 0;
 
 unsigned int FirmAddr(unsigned int vaddr, firm_info info){
@@ -53,9 +58,16 @@ int listfiles(char* curDir){
 	struct dirent *ent;
 	if ((dir = opendir (curDir)) != NULL) {
 		while ((ent = readdir (dir)) != NULL) {
-			if(strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
-				strcpy(patch_name[npatch++], ent->d_name);
-				//printf("%s\n", ent->d_name);
+			char ext[4];
+
+			if (sscanf(ent->d_name, "%08x%4c", &files[npatch].off, ext) != 2)
+				continue;
+
+			if (memcmp(ext, ".bin", sizeof(ext)))
+				continue;
+
+			strcpy(files[npatch++].name, ent->d_name);
+			//printf("%s\n", ent->d_name);
 		}
 		closedir (dir);
 		printf("Patches folder : %s\nNumber of patches : %d\n", curDir, npatch);
@@ -92,20 +104,22 @@ int main(int argc, char** argv){
 	printf("cfwtool - generating : %s\n", info.name);
 	fwrite(&npatch, 1, 4, patch);
 	for(i = 0; i < npatch; i++){
-		unsigned int off = 0, size = 0;
-		sscanf(patch_name[i], "%08x.bin", &off);
-		sprintf(str, "%s/%s", argv[1], patch_name[i]);
+		unsigned int size = 0;
+
+		sprintf(str, "%s/%s", argv[1], files[i].name);
 		FILE* fp = fopen(str, "rb");
 		fseek(fp, 0, 2); size = ftell(fp); rewind(fp);
 		if(size > 0){
 			unsigned char* buf = (unsigned char*) malloc (size);
 			fread(buf, 1, size, fp); fclose(fp);
-			unsigned int pos = FirmAddr(off, info);
+			unsigned int pos = FirmAddr(files[i].off, info);
 			fwrite(&pos, 1, 4, patch);
 			fwrite(&size, 1, 4, patch);
 			fwrite(buf, 1, size, patch);
 			while((ftell(patch) % 4) != 0) fputc(0, patch);		//Aligned 4
-			if(print) printf("Addr : %08X		Size : %d\n", off, size);
+			if(print)
+				printf("Addr : %08X		Size : %d\n",
+					files[i].off, size);
 			free(buf);
 		} else {
 		    fclose(fp);
