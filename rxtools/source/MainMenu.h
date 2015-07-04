@@ -64,14 +64,15 @@ static Menu InjectMenu = {
 	0
 };
 
-static Menu ExploitMenu = {
+static Menu AdvancedMenu = {
 	"Other Options",
-	.Option = (MenuEntry[3]){
-		{ " Downgrade MSET on SysNAND", &downgradeMSET, "app.bin" },
-		{ " Install FBI over Health&Safety App", &installFBI, "app.bin" },
-		{ " Restore original Health&Safety App", &restoreHS, "app.bin" },
+	.Option = (MenuEntry[4]){
+		{ " Downgrade MSET on SysNAND", &downgradeMSET, "adv0.bin" },
+		{ " Install FBI over Health&Safety App", &installFBI, "adv1.bin" },
+		{ " Restore original Health&Safety App", &restoreHS, "adv2.bin" },
+		{ " Launch DevMode", &DevMode, "adv3.bin" },
 	},
-	3,
+	4,
 	0,
 	0
 };
@@ -129,8 +130,8 @@ void InjectMenuInit(){
     }
 }
 
-void ExploitMenuInit(){
-	MenuInit(&ExploitMenu);
+void AdvancedMenuInit(){
+	MenuInit(&AdvancedMenu);
 	MenuShow();
     while (true) {
         u32 pad_state = InputWait();
@@ -214,7 +215,7 @@ static Menu MainMenu = {
 			{ " Decryption Options", &DecryptMenuInit, "menu1.bin" },
 			{ " Dumping Options", &DumpMenuInit, "menu2.bin" },
 			{ " Injection Options", &InjectMenuInit, "menu3.bin" },
-			{ " Advanced Options", &InjectMenuInit, "menu4.bin" },
+			{ " Advanced Options", &AdvancedMenuInit, "menu4.bin" },
 			{ " Settings", &SettingsMenuInit, "menu5.bin" },
 			{ " Credits", NULL, "menu6.bin" },
 		},
