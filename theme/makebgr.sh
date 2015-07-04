@@ -6,3 +6,4 @@ then
 	rm ${1%.*}.bin
 fi
 mv $1.bgr ${1%.*}.bin
+
