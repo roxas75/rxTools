@@ -147,6 +147,14 @@ void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
 	bool autobootgui = false;
 	char str[100];
+
+	char settings[] = "00";
+	File MyFile;
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
+		FileRead(&MyFile, settings, 2, 0);
+		Theme = settings[1];
+		if (settings[0] == '1')autobootgui = true;
+	}
 	
 	while (true) {
 		u32 pad_state = InputWait();
@@ -177,12 +185,16 @@ void SettingsMenuInit(){
 				}
 			}
 		}
-		if (pad_state & BUTTON_A)
+		if (pad_state & BUTTON_B)
 		{
 			//Code to save settings
+			char tobewritten[] = "00";
+			tobewritten[0] = autobootgui ? '1' : '0';
+			tobewritten[1] = Theme;
+			FileWrite(&MyFile, tobewritten, 2, 0);
+			FileClose(&MyFile);
 			break;
 		}
-		if (pad_state & BUTTON_B) 	break;
 
 		TryScreenShot();
 
