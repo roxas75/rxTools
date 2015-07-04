@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
-
+#include "fs.h"
 #include "font.h"
 #include "draw.h"
 #include "filepack.h"
@@ -15,6 +15,7 @@ void ClearScreen(u8 *screen, u32 color)
 {
 	u32 i = SCREEN_SIZE/sizeof(u32);  //Surely this is an interger.
 	u32* tmpscr = (u32*)screen; //To avoid using array index which would decrease speed.
+	color &= COLOR_MASK; //Ignore aplha
 	//Prepared 3 u32, that includes 4 24-bits color, cached. 4x(BGR)
 	u32 color0 = (color) | (color << 24),
 		color1 = (color << 16) | (color >> 8),
@@ -26,85 +27,90 @@ void ClearScreen(u8 *screen, u32 color)
 	}
 }
 
-void ClearScreen2(u8 *screen, u32 color)
-{
-	u32 i = SCREEN_SIZE2/sizeof(u32);  //Surely this is an interger.
-	u32* tmpscr = (u32*)screen; //To avoid using array index which would decrease speed.
-	//Prepared 3 u32, that includes 4 24-bits color, cached. 4x(BGR)
-	u32 color0 = (color) | (color << 24),
-		color1 = (color << 16) | (color >> 8),
-		color2 = (color >> 16) | (color << 8);
-	while (i--) {
-		*(tmpscr++) = color0;
-		*(tmpscr++) = color1;
-		*(tmpscr++) = color2;
-	}
+void DrawClearScreenAll(void) {
+	ClearScreen(TOP_SCREEN, RGB(0, 0, 0));
+	ClearScreen(TOP_SCREEN2, RGB(0, 0, 0));
+	ClearScreen(BOT_SCREEN, RGB(0, 0, 0));
+	ClearScreen(BOT_SCREEN2, RGB(0, 0, 0));
+	current_y = 0;
 }
 
 void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgcolor)
 {
-	u32 yy, xx;
-	u32 xDisplacement = x * SCREEN_HEIGHT;
-	u32 yDisplacement = SCREEN_HEIGHT - y - 1;
-	u8 *screenPos = screen + (xDisplacement + yDisplacement) * BYTES_PER_PIXEL;
+	u32 yy;
+	u8 *screenPos, *screenStart = screen + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
 	//Use cached value, yep.
-	u8 foreR = color >> 16, foreG = color >> 8, foreB = color;
-	u8 backR = bgcolor >> 16, backG = bgcolor >> 8, backB = bgcolor;
-	for (yy = 0; yy < FONT_SIZE; yy++)
+	u8 foreA = color >> 24, foreR = color >> 16, foreG = color >> 8, foreB = color;
+	u8 backA = bgcolor >> 24, backR = bgcolor >> 16, backG = bgcolor >> 8, backB = bgcolor;
+	u32 charPos = character * FONT_SIZE;
+	u8 charVal;
+	for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL * FONT_SIZE; screenPos += (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL)
 	{
-		u8 charPos = font[character * FONT_SIZE + yy];
-		for (xx = 0; xx < FONT_SIZE; xx++)
+		charVal = font[charPos++];
+		for (yy = FONT_SIZE; yy--;)
 		{
-			if ((charPos << xx) & 0x80)
+			if (charVal & 1)
 			{
-				if(color & ALPHA_MASK){
+				if(foreA){
 					*(screenPos++) = foreB;
 					*(screenPos++) = foreG;
 					*(screenPos++) = foreR;
 				}
+				else
+				{
+					screenPos += 3;
+				}
 			}
 			else
 			{
-				if(bgcolor & ALPHA_MASK){
+				if(backA){
 					*(screenPos++) = backB;
 					*(screenPos++) = backG;
 					*(screenPos++) = backR;
 				}
+				else
+				{
+					screenPos += 3;
+				}
 			}
-			screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT - 3;
+			charVal >>= 1;
 		}
-		screenPos -= BYTES_PER_PIXEL * (SCREEN_HEIGHT * FONT_SIZE + 1);
 	}
 	//Still i don't know if we should draw the text twice.
 	if(screen == TOP_SCREEN && TOP_SCREEN2){
-		screen = TOP_SCREEN2;
-		u32 xDisplacement = x * SCREEN_HEIGHT;
-		u32 yDisplacement = SCREEN_HEIGHT - y - 1;
-		u8 *screenPos = screen + (xDisplacement + yDisplacement) * BYTES_PER_PIXEL;
-		for (yy = 0; yy < FONT_SIZE; yy++)
+		screenStart = TOP_SCREEN2 + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
+		charPos = character * FONT_SIZE;
+		for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL * FONT_SIZE; screenPos += (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL)
 		{
-			u8 charPos = font[character * FONT_SIZE + yy];
-			for (xx = 0; xx < FONT_SIZE; xx++)
+			charVal = font[charPos++];
+			for (yy = FONT_SIZE; yy--;)
 			{
-				if ((charPos << xx) & 0x80)
+				if (charVal & 1)
 				{
-					if(color & ALPHA_MASK){
+					if(foreA){
 						*(screenPos++) = foreB;
 						*(screenPos++) = foreG;
 						*(screenPos++) = foreR;
 					}
+					else
+					{
+						screenPos += 3;
+					}
 				}
 				else
 				{
-					if(bgcolor & ALPHA_MASK){
+					if(backA){
 						*(screenPos++) = backB;
 						*(screenPos++) = backG;
 						*(screenPos++) = backR;
 					}
+					else
+					{
+						screenPos += 3;
+					}
 				}
-			screenPos += BYTES_PER_PIXEL * SCREEN_HEIGHT - 3;
+				charVal >>= 1;
 			}
-		screenPos -= BYTES_PER_PIXEL * (SCREEN_HEIGHT * FONT_SIZE + 1);
 		}
 	}
 }
@@ -173,13 +179,44 @@ u32 GetPixel(u8 *screen, u32 x, u32 y){
 	return *(u32*)(screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL) & COLOR_MASK;
 }
 
+
 //----------------Some of my shit..........
 void SplashScreen(void){
 	memcpy(TOP_SCREEN, GetFilePack("top_bg.bin"), SCREEN_SIZE);
 	if(TOP_SCREEN2)
 		memcpy(TOP_SCREEN2, GetFilePack("top_bg.bin"), SCREEN_SIZE);
 }
-void SplashScreen2(void){
-	ClearScreen2(BOT_SCREEN, BLACK);
-	memcpy(BOT_SCREEN, GetFilePack("top_bg2.bin"), SCREEN_SIZE2);
+
+void DrawTopSplash(char splash_file[]) {
+	unsigned int n = 0, bin_size;
+	File Splash;
+	FileOpen(&Splash, splash_file, 0);
+	//Load the spash image
+	bin_size = 0;
+	while ((n = FileRead(&Splash, (void*)((u32)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+		bin_size += n;
+	}
+	u32 *fb1 = (u32*)TOP_SCREEN;
+	u32 *fb2 = (u32*)TOP_SCREEN2;
+	for (n = 0; n < bin_size; n += 4){
+		*fb2++ = *fb1++;
+	}
+	FileClose(&Splash);
+}
+
+void DrawBottomSplash(char splash_file[]) {
+	unsigned int n = 0, bin_size;
+	File Splash;
+	FileOpen(&Splash, splash_file, 0);
+	//Load the spash image
+	bin_size = 0;
+	while ((n = FileRead(&Splash, (void*)((u32)BOT_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+		bin_size += n;
+	}
+	u32 *fb1 = (u32*)BOT_SCREEN;
+	u32 *fb2 = (u32*)BOT_SCREEN2;
+	for (n = 0; n < bin_size; n += 4){
+		*fb2++ = *fb1++;
+	}
+	FileClose(&Splash);
 }
