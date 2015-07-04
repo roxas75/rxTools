@@ -51,13 +51,10 @@ Temporary Items
 *.exe
 *.dat
 *.nds
+*.bin
 *.o
 *.d
 *.map
 **/build
-*.bat
-**/rxToolsCakeROP
+**/data
 release.zip
-
-# Gimp Image Files
-*.xcf
