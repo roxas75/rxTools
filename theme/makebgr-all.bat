@@ -12,6 +12,7 @@ for %%f in (*.png) do call :convertfile "%%f"
 @echo --------------------------------------------
 @echo Press any key.
 pause >nul
+goto :end
 :convertfile
 set /a i=%i%+1
 echo File: %~nx1
