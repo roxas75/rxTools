@@ -1,3 +1,6 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "configuration.h"
 #include "common.h"
 #include "filepack.h"
@@ -13,6 +16,7 @@
 #include "cfw.h"
 #include "downgradeapp.h"
 #include "stdio.h"
+#include "menu.h"
 
 #define DATAFOLDER "rxtools/data"
 #define KEYFILENAME "slot0x25KeyX.bin"
@@ -22,6 +26,7 @@
 #define TWL_SIZE 0x1A1C00
 
 char tmpstr[256] = {0};
+char str[100];
 File tempfile;
 UINT tmpu32;
 
@@ -162,6 +167,8 @@ int CheckInstallationData(){
 
 void InstallConfigData(){
 	if(CheckInstallationData() == 0) return;
+	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	DrawBottomSplash(str);
 	ConsoleInit();
 	ConsoleSetTitle("Installation Data Suite");
 	
@@ -174,3 +181,5 @@ void InstallConfigData(){
 	print("\nPress A to exit\n"); ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
+
+

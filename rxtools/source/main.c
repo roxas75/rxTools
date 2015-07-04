@@ -13,6 +13,29 @@
 #include "cfw.h"
 #include "configuration.h"
 
+bool bootGUI;
+
+void LoadSettings(){
+	char settings[]="00"; 
+	char str[100];
+	File MyFile;
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
+		FileRead(&MyFile, settings, 2, 0);
+		if (settings[0] == '1')bootGUI = true;
+		sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
+		if (FileOpen(&MyFile, str, 0)) Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
+		else Theme = '0';
+		FileClose(&MyFile);
+	}
+	else
+	{
+		FileOpen(&MyFile, "/rxTools/data/system.txt", 1);
+		FileWrite(&MyFile, "00" , 2, 0);
+		Theme = '0';
+		FileClose(&MyFile);
+	}
+}
+
 void Initialize(){
 	char str[100];
 	
@@ -26,7 +49,7 @@ void Initialize(){
 	LoadPack();
 
 	//Console Stuff
-	ConsoleSetXY(15, 15);
+	ConsoleSetXY(15, 20);
 	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
 	ConsoleSetTextColor(RGB(0, 141, 197));
@@ -38,12 +61,16 @@ void Initialize(){
 	f_mkdir ("rxTools");
 	f_mkdir ("rxTools/nand");
 	InstallConfigData();
+	LoadSettings();
 
-	for(int i = 0; i < 0x333333*6; i++){
-		u32 pad = GetInput();
-		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+	if (!bootGUI)
+	{
+		for (int i = 0; i < 0x333333 * 6; i++){
+			u32 pad = GetInput();
+			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+		}
+		rxModeQuickBoot();
 	}
-	rxModeQuickBoot();
 rxTools_boot:
 
 	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
@@ -52,6 +79,7 @@ rxTools_boot:
 
 int main(){
 	Initialize();
+	char str[100];
 	//7.X Keys stuff
 	File KeyFile;
 	if(FileOpen(&KeyFile, "/slot0x25KeyX.bin", 0)){
@@ -59,17 +87,16 @@ int main(){
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
-		DrawString(BOT_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, GREEN, BLACK);
 	}else{
 		if(GetSystemVersion() < 3){
+			sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+			DrawBottomSplash(str);
 			ConsoleInit();
 			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some EmuNANDs will not boot.\n\nPress A to continue...\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
-		DrawString(BOT_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
 	}
-	DrawString(BOT_SCREEN, " EmuNAND ", 0, SCREEN_HEIGHT-FONT_SIZE*2, checkEmuNAND() ? GREEN : RED, BLACK);
 
 	//That's the Main Menu initialization, easy and cool
 	MenuInit(&MainMenu);
