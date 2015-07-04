@@ -49,7 +49,7 @@ void Initialize(){
 	LoadPack();
 
 	//Console Stuff
-	ConsoleSetXY(15, 15);
+	ConsoleSetXY(15, 20);
 	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
 	ConsoleSetTextColor(RGB(0, 141, 197));
@@ -79,6 +79,7 @@ rxTools_boot:
 
 int main(){
 	Initialize();
+	char str[100];
 	//7.X Keys stuff
 	File KeyFile;
 	if(FileOpen(&KeyFile, "/slot0x25KeyX.bin", 0)){
@@ -86,17 +87,16 @@ int main(){
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
-		DrawString(BOT_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, GREEN, BLACK);
 	}else{
 		if(GetSystemVersion() < 3){
+			sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+			DrawBottomSplash(str);
 			ConsoleInit();
 			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some EmuNANDs will not boot.\n\nPress A to continue...\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
-		DrawString(BOT_SCREEN, " NewKeyX ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
 	}
-	DrawString(BOT_SCREEN, " EmuNAND ", 0, SCREEN_HEIGHT-FONT_SIZE*2, checkEmuNAND() ? GREEN : RED, BLACK);
 
 	//That's the Main Menu initialization, easy and cool
 	MenuInit(&MainMenu);
