@@ -1,5 +1,3 @@
-PYTHON = python
-
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 
 tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor
