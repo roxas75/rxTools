@@ -56,8 +56,8 @@ static Menu DumpMenu = {
 static Menu InjectMenu = {
 	"Injection Options",
 	.Option = (MenuEntry[2]){
-		{ " Inject EmuNAND partitions", &RebuildNand, "app.bin" },
-		{ " Inject NAND Files", &restoreCoolFiles, "app.bin" },
+		{ " Inject EmuNAND partitions", &RebuildNand, "inj0.bin" },
+		{ " Inject NAND Files", &restoreCoolFiles, "inj1.bin" },
 	},
 	2,
 	0,

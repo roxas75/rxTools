@@ -80,8 +80,6 @@ void MenuClose(){
 
 void MenuRefresh(){
 	ConsoleInit();
-	sprintf(str, "/rxTools/Theme/%c/%s", Theme, MyMenu->Option[MyMenu->Current].gfx_splash);
-	DrawBottomSplash(str);
 	MyMenu->Showed = 0;
 	ConsoleSetTitle(MyMenu->Name);
 	for (int i = 0; i < MyMenu->nEntryes; i++){
