@@ -26,7 +26,6 @@
 #define TWL_SIZE 0x1A1C00
 
 char tmpstr[256] = {0};
-char str[100];
 File tempfile;
 UINT tmpu32;
 
@@ -167,11 +166,8 @@ int CheckInstallationData(){
 
 void InstallConfigData(){
 	if(CheckInstallationData() == 0) return;
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
-	DrawBottomSplash(str);
 	ConsoleInit();
 	ConsoleSetTitle("Installation Data Suite");
-	
 	print("rxTools is installing some data in\nyour SD Card; this is necessary in\norder to speed up many processes and\nto make some features work.\nThis will not take over a minute...\n"); 
 	ConsoleShow();
 	int res = InstallData("0");	//SD Card
