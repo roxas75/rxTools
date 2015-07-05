@@ -1,5 +1,6 @@
 @echo off
 REM This script was written by Lavanoid (WhoAmI?). Enjoy!
+mkdir UI
 @echo Converting...
 cd %~dp0
 set i=0
@@ -20,7 +21,9 @@ echo Bin: %~n1.bin
 if exist "%~n1.bin" @echo Removing "%~n1.bin"...
 if exist "%~n1.bin" del /f "%~n1.bin"
 if exist "%~n1.bin" @echo Failed to remove "%~n1.bin"! & goto :end
-convert -rotate 90 %~nx1 %~n1.bin
-if exist "%~n1.bin" @echo Successfully generated "%~n1.bin"!
+convert -rotate 90 %~nx1 %~n1.bgr
+if exist "%~n1.bgr" @echo Successfully generated "%~n1.bin"!
 Title = Converting images. Processed: %i%
 :end
+rename *.bgr *.bin
+Move *.bin UI/ >nul
