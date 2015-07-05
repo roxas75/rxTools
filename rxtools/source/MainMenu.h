@@ -44,9 +44,9 @@ static Menu DecryptMenu = {
 static Menu DumpMenu = {
 	"Dumping Options",
 	.Option = (MenuEntry[3]){
-		{ " Create NAND dump", &NandDumper, "app.bin" },
-		{ " Dump System Titles", &DumpNANDSystemTitles, "app.bin" },
-		{ " Dump NAND Files", &dumpCoolFiles, "app.bin" },
+		{ " Create NAND dump", &NandDumper, "dmp0.bin" },
+		{ " Dump System Titles", &DumpNANDSystemTitles, "dmp1.bin" },
+		{ " Dump NAND Files", &dumpCoolFiles, "dmp2.bin" },
 	},
 	3,
 	0,
