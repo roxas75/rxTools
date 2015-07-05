@@ -21,14 +21,14 @@ clean:
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 .PHONY: release
-release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh
+release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh all-target-mset
 	@mkdir -p release/mset release/ninjhax
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
 	@cp msethax/rxinstaller.nds release/mset/rxinstaller.nds
 
-rxTools.dat: payload.bin rxmode/*.bin data.bin msethax/mset.bin
+rxTools.dat: payload.bin data.bin all-target-mset
 	@dd if=spiderhax/Launcher.dat of=$@ bs=4M conv=sync
 	@dd if=msethax/mset.bin of=$@ conv=notrunc
 	@dd if=payload.bin of=$@ seek=256 conv=notrunc
@@ -38,18 +38,20 @@ rxTools.dat: payload.bin rxmode/*.bin data.bin msethax/mset.bin
 brahma/brahma.3dsx brahma/brahma.smdh:
 	$(MAKE) -C $(dir $@) all
 
-.PHONY: msethax/mset.bin
-msethax/mset.bin:
-	$(MAKE) -C $(dir $@) all
+.PHONY: all-target-mset
+all-target-mset:
+	$(MAKE) -C msethax all
 
-data.bin: tools/pack_tool tools/xor
-	@tools/pack_tool $(DATA_FILES) $@
+data.bin: $(DATA_FILES) tools/pack_tool tools/xor
+	@tools/pack_tool $< $@
 	@tools/xor $@ tools/xorpad/data.xor
 	@rm $@
 	@mv $@.out $@
 
-.PHONY: rxmode/*.bin
-rxmode/*.bin: tools/cfwtool
+.PHONY: rxmode/%.bin
+rxmode/%.bin: all-target-rxmode
+
+all-target-rxmode: tools/cfwtool
 	@cd rxmode && $(MAKE)
 
 payload.bin: rxtools/rxtools.bin tools/addxor_tool
