@@ -18,10 +18,11 @@ clean:
 	@make -C rxmode clean
 	@make -C brahma clean
 	@make -C msethax clean
+	@make -C theme clean
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 .PHONY: release
-release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh
+release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh theme
 	@mkdir -p release/mset release/ninjhax
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
@@ -59,6 +60,12 @@ payload.bin: rxtools/rxtools.bin tools/addxor_tool
 rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
 	@make -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
+
+.PHONY: theme
+theme:
+	@cd theme && make
+	@mkdir -p release/theme
+	@mv theme/*.bin release/theme
 
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
