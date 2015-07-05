@@ -26,6 +26,7 @@
 #define TWL_SIZE 0x1A1C00
 
 char tmpstr[256] = {0};
+char str[100];
 File tempfile;
 UINT tmpu32;
 
@@ -33,7 +34,7 @@ int InstallData(char* drive){
 	FIL firmfile;
 	char* progressbar = "[       ]";
 	char* progress = progressbar+1;
-	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	print("%s", progressbar);  ConsolePrevLine();
 	
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
@@ -44,7 +45,7 @@ int InstallData(char* drive){
 	if(f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK){
 		//... We'll see
 	}else return CONF_NOFIRMBIN;
-	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
 	
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
@@ -57,7 +58,7 @@ int InstallData(char* drive){
 		FileRead(&tempfile, &keyx[0], 16, 0);
 		FileClose(&tempfile);
 	}
-	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
 	for(int i = 0; i < NAT_SIZE; i+=0x4){
 		if(!strcmp((char*)n_firm + i, "Shit")){
 			if(1){
@@ -73,14 +74,14 @@ int InstallData(char* drive){
 			*((unsigned int*)(n_firm + i)) = (checkEmuNAND() / 0x200) - 1;
 		}
 	}
-	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
 		FileClose(&tempfile);
 		//FileCopy("0004013800000002.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
-	*progress++ = '.'; print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
 	
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
@@ -115,7 +116,7 @@ int InstallData(char* drive){
 			*progress++ = 'x'; //If we get here, then we'll play without AGB, lol
 		}
 	}
-	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	print("%s", progressbar);  ConsolePrevLine();
 	
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
@@ -133,7 +134,7 @@ int InstallData(char* drive){
 	}else{
 		*progress++ = 'x'; 
 	}
-	print("%s", progressbar); ConsoleShow(); ConsolePrevLine();
+	print("%s", progressbar);  ConsolePrevLine();
 	
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
@@ -141,7 +142,7 @@ int InstallData(char* drive){
 		FileWrite(&tempfile, __TIME__, 9, 12);
 		FileClose(&tempfile);
 	}else return CONF_CANTOPENFILE;
-	*progress++ = '.'; print("%s\n", progressbar); ConsoleShow();
+	*progress++ = '.'; print("%s\n", progressbar); 
 	
 	f_close(&firmfile);
 	return 0;
@@ -166,15 +167,25 @@ int CheckInstallationData(){
 
 void InstallConfigData(){
 	if(CheckInstallationData() == 0) return;
-	ConsoleInit();
-	ConsoleSetTitle("Installation Data Suite");
-	print("rxTools is installing some data in\nyour SD Card; this is necessary in\norder to speed up many processes and\nto make some features work.\nThis will not take over a minute...\n"); 
-	ConsoleShow();
-	int res = InstallData("0");	//SD Card
-	if(res == 0) print("DONE!\n");
-	else print("FAIL! ERR %d\n", res);
 	
-	print("\nPress A to exit\n"); ConsoleShow();
+	sprintf(str, "/rxTools/Theme/%c/cfg0TOP.bin", Theme);
+	DrawTopSplash(str);
+	sprintf(str, "/rxTools/Theme/%c/cfg0.bin", Theme);
+	DrawBottomSplash(str);
+
+	int res = InstallData("0");	//SD Card
+	if (res == 0)
+	{
+		sprintf(str, "/rxTools/Theme/%c/cfg1O.bin", Theme);
+		DrawBottomSplash(str);
+	}
+	else
+	{
+		sprintf(str, "/rxTools/Theme/%c/cfg1E.bin", Theme);
+		DrawBottomSplash(str);
+	}
+	
+	//print("\nPress A to exit\n"); 
 	WaitForButton(BUTTON_A);
 }
 
