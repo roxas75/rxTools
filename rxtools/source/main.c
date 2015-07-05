@@ -79,7 +79,6 @@ rxTools_boot:
 
 int main(){
 	Initialize();
-	char str[100];
 	//7.X Keys stuff
 	File KeyFile;
 	if(FileOpen(&KeyFile, "/slot0x25KeyX.bin", 0)){
@@ -89,9 +88,8 @@ int main(){
 		setup_aeskeyX(0x25, keyX);
 	}else{
 		if(GetSystemVersion() < 3){
-			sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
-			DrawBottomSplash(str);
 			ConsoleInit();
+			ConsoleSetTitle("          WARNING");
 			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some EmuNANDs will not boot.\n\nPress A to continue...\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
