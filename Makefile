@@ -55,8 +55,8 @@ rxmode/*.bin: tools/cfwtool
 payload.bin: rxtools/rxtools.bin tools/addxor_tool
 	@tools/addxor_tool $< $@ 0x67893421 0x12756342
 
-.PHONY: rxtools/rxtools.bin tools/font_tool
-rxtools/rxtools.bin: tools/addxor_tool
+.PHONY: rxtools/rxtools.bin 
+rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
 	@make -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
