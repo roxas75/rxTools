@@ -11,16 +11,12 @@ unsigned char handle[32];
 
 void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 	unsigned int br;
-	for(int i = 0; i < 0x600000; i++){
-		*(VRAM + i) = 0x77;			//Grey flush : Start Dumping
-	}
+	memset(VRAM, 0x77, 0x600000);			//Grey flush : Start Dumping
 	memset(&handle, 0, 32);
 	fopen9(&handle, filename, 6);
 	fwrite9(&handle, &br, buf, size);
 	fclose9(&handle);
-	for(int i = 0; i < 0x600000; i++){
-		*(VRAM + i) = 0xFF;			//White flush : Finished Dumping
-	}
+	memset(VRAM, 0xFF, 0x600000);			//White flush : Finished Dumping
 }
 static unsigned char originalcode[] = { 0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3, 0x11, 0x00, 0xA0, 0xE1, 0x03, 0x00, 0x00, 0x0A };
 static unsigned char patchcode[] = { 0x01, 0x00, 0xA0, 0xE3, 0x70, 0x80, 0xBD, 0xE8 };
