@@ -124,15 +124,15 @@ all: payload.bin $(BUILD)
 $(BUILD):
 	@echo $(SFILES)
 	@[ -d $@ ] || mkdir -p $@
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 payload.bin :
-	@cd data/payload && make
+	@cd data/payload && $(MAKE)
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf
-	@cd data/payload && make clean
+	@cd data/payload && $(MAKE) clean
 
 #---------------------------------------------------------------------------------
 else

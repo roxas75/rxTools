@@ -14,10 +14,10 @@ distclean: clean
 
 .PHONY: clean
 clean:
-	@make -C rxtools clean
-	@make -C rxmode clean
-	@make -C brahma clean
-	@make -C msethax clean
+	@$(MAKE) -C rxtools clean
+	@$(MAKE) -C rxmode clean
+	@$(MAKE) -C brahma clean
+	@$(MAKE) -C msethax clean
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 .PHONY: release
@@ -36,11 +36,11 @@ rxTools.dat: payload.bin rxmode/*.bin data.bin msethax/mset.bin
 
 .PHONY: brahma/brahma.3dsx brahma/brahma.smdh
 brahma/brahma.3dsx brahma/brahma.smdh:
-	make -C $(dir $@) all
+	$(MAKE) -C $(dir $@) all
 
 .PHONY: msethax/mset.bin
 msethax/mset.bin:
-	make -C $(dir $@) all
+	$(MAKE) -C $(dir $@) all
 
 data.bin: tools/pack_tool tools/xor
 	@tools/pack_tool $(DATA_FILES) $@
@@ -50,14 +50,14 @@ data.bin: tools/pack_tool tools/xor
 
 .PHONY: rxmode/*.bin
 rxmode/*.bin: tools/cfwtool
-	@cd rxmode && make
+	@cd rxmode && $(MAKE)
 
 payload.bin: rxtools/rxtools.bin tools/addxor_tool
 	@tools/addxor_tool $< $@ 0x67893421 0x12756342
 
 .PHONY: rxtools/rxtools.bin
 rxtools/rxtools.bin: tools/addxor_tool
-	@make -C $(dir $@) all
+	@$(MAKE) -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
 $(tools): tools/%: tools/toolsrc/%/main.c

@@ -22,7 +22,7 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	
 arm9payload.bin:
-	@cd source/arm9 && make
+	@cd source/arm9 && $(MAKE)
 	
 patch.bin:
 	@$(foreach sfile,$(SFILES), $(ARMIPS) $(sfile);)

@@ -21,11 +21,11 @@ KEY2   = 0160A0E14ADF4DE2EC109FE50250A0E1
 all: rxinstaller.nds arm9_code.bin mset.bin
 
 rxinstaller.nds:
-	@cd rxinstaller && make
+	@cd rxinstaller && $(MAKE)
 
 arm9_code.bin:
 	@mkdir -p $(BUILD)
-	@cd payload && make
+	@cd payload && $(MAKE)
 	@mv payload.bin build/arm9_code.bin
 
 mset.bin:
@@ -36,6 +36,6 @@ mset.bin:
 
 clean:
 	@echo clean ...
-	@cd rxinstaller && make clean
-	@cd payload && make clean
+	@cd rxinstaller && $(MAKE) clean
+	@cd payload && $(MAKE) clean
 	@rm -fr $(BUILD) *.nds *.bin
