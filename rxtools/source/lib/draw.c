@@ -180,12 +180,7 @@ u32 GetPixel(u8 *screen, u32 x, u32 y){
 }
 
 
-//----------------Some of my shit..........
-void SplashScreen(void){
-	memcpy(TOP_SCREEN, GetFilePack("top_bg.bin"), SCREEN_SIZE);
-	if(TOP_SCREEN2)
-		memcpy(TOP_SCREEN2, GetFilePack("top_bg.bin"), SCREEN_SIZE);
-}
+//----------------Splash Screens..........
 
 void DrawTopSplash(char splash_file[]) {
 	unsigned int n = 0, bin_size;
