@@ -96,26 +96,22 @@ int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
 }
 
 void rxModeSys(){
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
 	DrawBottomSplash(str);
-    ConsoleInit();
-    ConsoleSetTitle("RXMODE - BOOTING IN SYSNAND");
-    print("Loading...\n"); ConsoleShow();
 	rxMode(0);
-	print("Cannot boot in rxMode.\n\nPress A to exit\n"); ConsoleShow();
+	sprintf(str, "/rxTools/Theme/%c/bootE.bin", Theme);
+	DrawBottomSplash(str);
 	WaitForButton(BUTTON_A);
 }
 
 void rxModeEmu(){
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
-	DrawBottomSplash(str);
-	if(!checkEmuNAND()) rxModeSys();
+	if (!checkEmuNAND()) rxModeSys();
 	else{
-		ConsoleInit();
-		ConsoleSetTitle("RXMODE - BOOTING IN EMUNAND");
-		print("Loading...\n"); ConsoleShow();
+		sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
+		DrawBottomSplash(str);
 		rxMode(1);
-		print("Cannot boot in rxMode.\n\nPress A to exit\n"); ConsoleShow();
+		sprintf(str, "/rxTools/Theme/%c/bootE.bin", Theme);
+		DrawBottomSplash(str);
 		WaitForButton(BUTTON_A);
 	}
 }
