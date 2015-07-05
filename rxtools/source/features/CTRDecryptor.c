@@ -74,9 +74,7 @@ int ProcessCTR(char* path){
 	File myFile;
 	if(FileOpen(&myFile, path, 0)){
 		ConsoleInit();
-		sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
-		DrawBottomSplash(str);
-		ConsoleSetTitle("         CTR DECRYPTOR");
+		ConsoleSetTitle("           CTR DECRYPTOR");
 		unsigned int ncch_base = 0x100;
 		unsigned char magic[] = { 0, 0, 0, 0, 0};
 		FileRead(&myFile, magic, 4, ncch_base);
@@ -202,8 +200,6 @@ int ExploreFolders(char* folder){
 
 void CTRDecryptor(){
 	ConsoleInit();
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
-	DrawBottomSplash(str);
 	ConsoleSetTitle("     CTR DECRYPTOR");
 	ConsoleShow();
 
