@@ -97,7 +97,13 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
-all: $(BUILD)
+all: font.dat $(BUILD)
+
+font.dat: font.png
+	@../tools/font_tool $< $@
+	@raw2c $@
+	@rm font.h
+	@mv font.c source/lib/font.h
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
@@ -108,7 +114,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin
+	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin font.dat
 
 
 #---------------------------------------------------------------------------------

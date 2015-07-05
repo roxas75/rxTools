@@ -21,7 +21,7 @@ void LoadPack(){
 	File FilePack; FileOpen(&FilePack, "rxTools.dat", 0);
 	curSize = FileRead(&FilePack, FILEPACK_ADDR, FILEPACK_SIZE, FILEPACK_OFF);
 	FileClose(&FilePack);
-	
+
 	nEntry = *((unsigned int*)(FILEPACK_ADDR));
 	Entry = ((PackEntry*)(FILEPACK_ADDR + 0x10));
 	for (int i = 0; i < nEntry; i++){

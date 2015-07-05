@@ -3,7 +3,7 @@ PYTHON = python
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
-tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor
+tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/font_tool
 DATA_FILES := $(wildcard data/*.*) rxmode/nat_patch.bin rxmode/agb_patch.bin rxmode/twl_patch.bin
 
 .PHONY: all
@@ -51,8 +51,8 @@ data.bin: tools/pack_tool
 rxmode/*.bin: tools/cfwtool
 	@cd rxmode && make
 
-.PHONY: rxtools/rxtools.bin
-rxtools/rxtools.bin: tools/addxor_tool
+.PHONY: rxtools/rxtools.bin 
+rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
 	@make -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 

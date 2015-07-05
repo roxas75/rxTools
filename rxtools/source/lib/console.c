@@ -7,12 +7,14 @@
 #include "common.h"
 #include "console.h"
 #include "draw.h"
+#include "menu.h"
 
 #define CONSOLE_SIZE 0x4000
 #define MAXLINES 10
 
 char console[CONSOLE_SIZE];
 char consoletitle[100] = "Dummy Title";
+char str[100];
 
 int BackgroundColor = WHITE;
 int TextColor = BLACK;
@@ -79,10 +81,15 @@ int findCursorLine(){
 	return cont;
 }
 void ConsoleShow(){
-        void *tmpscreen = (void*)0x27000000;
+	
+	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	DrawBottomSplash(str);
+
+    void *tmpscreen = (void*)0x27000000;
 	memcpy(tmpscreen, BOT_SCREEN, 0x38400);
 	if(!consoleInited) return;
 	int titley = 2*CHAR_WIDTH;
+
 	//for(int y = ConsoleY; y < ConsoleH + ConsoleY + BorderWidth; y++){
 	//	for(int x = ConsoleX; x < ConsoleW + ConsoleX + BorderWidth; x++){
 	//		if(//(x >= ConsoleX && x <= ConsoleX + BorderWidth) || 
