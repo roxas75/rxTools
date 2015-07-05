@@ -10,7 +10,7 @@
 #ifdef MEMDUMP
 unsigned char handle[32];
 
-void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
+static void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 	unsigned int br;
 	memset(VRAM, 0x77, 0x600000);			//Grey flush : Start Dumping
 	memset(&handle, 0, 32);
@@ -24,11 +24,11 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 static unsigned char originalcode[] = { 0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3, 0x11, 0x00, 0xA0, 0xE1, 0x03, 0x00, 0x00, 0x0A };
 static unsigned char patchcode[] = { 0x01, 0x00, 0xA0, 0xE3, 0x70, 0x80, 0xBD, 0xE8 };
 static char* dest = (void*)0x20000400;
-void patchregion(){
+static void patchregion(){
 	for(int i = 0; i < 8; i++) *(dest + i) = patchcode[i];
 }	
 
-void patch_processes(){
+static void patch_processes(){
 	char* mset = (void*)0x24000000;
 	char* menu = (void*)0x26A00000;
 	for(int i = 0; i < 0x600000; i+=4){
