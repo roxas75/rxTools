@@ -2,7 +2,7 @@ PYTHON = python
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 
-tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor
+tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/font_tool
 DATA_FILES := $(wildcard data/*.*) rxmode/nat_patch.bin rxmode/agb_patch.bin rxmode/twl_patch.bin
 
 .PHONY: all
@@ -55,7 +55,7 @@ rxmode/*.bin: tools/cfwtool
 payload.bin: rxtools/rxtools.bin tools/addxor_tool
 	@tools/addxor_tool $< $@ 0x67893421 0x12756342
 
-.PHONY: rxtools/rxtools.bin
+.PHONY: rxtools/rxtools.bin tools/font_tool
 rxtools/rxtools.bin: tools/addxor_tool
 	@make -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
