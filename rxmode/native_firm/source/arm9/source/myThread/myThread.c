@@ -7,6 +7,7 @@
 #include <wchar.h>
 #include <stdio.h>
 
+#ifdef MEMDUMP
 unsigned char handle[32];
 
 void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
@@ -18,6 +19,8 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 	fclose9(&handle);
 	memset(VRAM, 0xFF, 0x600000);			//White flush : Finished Dumping
 }
+#endif
+
 static unsigned char originalcode[] = { 0x00, 0x00, 0x55, 0xE3, 0x01, 0x10, 0xA0, 0xE3, 0x11, 0x00, 0xA0, 0xE1, 0x03, 0x00, 0x00, 0x0A };
 static unsigned char patchcode[] = { 0x01, 0x00, 0xA0, 0xE3, 0x70, 0x80, 0xBD, 0xE8 };
 static char* dest = (void*)0x20000400;
@@ -48,9 +51,11 @@ void patch_processes(){
 
 void myThread(){
 	while(1){
-		/*if(getHID() & BUTTON_SELECT){
+#ifdef MEMDUMP
+		if(getHID() & BUTTON_SELECT){
 			memdump(L"sdmc:/FCRAM.bin", 0x20000000, 0x10000);
-		}*/
+		}
+#endif
 		patch_processes();
 		if(*((unsigned int*)dest) != *((unsigned int*)&patchcode[0]))
 			svc_Backdoor(&patchregion);		//Edit just if the code is not patched, or the arm9 will get mad
