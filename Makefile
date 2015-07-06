@@ -45,11 +45,8 @@ rxinstaller.nds:
 brahma/brahma.3dsx brahma/brahma.smdh:
 	make -C $(dir $@) all
 
-data.bin: tools/pack_tool tools/xor
+data.bin: tools/pack_tool
 	@tools/pack_tool $(DATA_FILES) $@
-	@tools/xor $@ tools/xorpad/data.xor
-	@rm $@
-	@mv $@.out $@
 
 .PHONY: rxmode/*.bin
 rxmode/*.bin: tools/cfwtool
