@@ -53,7 +53,7 @@ void Initialize(){
 	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
 	ConsoleSetTextColor(RGB(0, 141, 197));
-	ConsoleSetBackgroundColor(BLACK);
+	ConsoleSetBackgroundColor(TRANSPARENT);
 	ConsoleSetSpecialColor(BLUE);
 	ConsoleSetSpacing(2);
 	ConsoleSetBorderWidth(3);
