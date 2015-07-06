@@ -62,6 +62,7 @@ theme:
 	@cd theme && make
 	@mkdir -p release/theme
 	@mv theme/*.bin release/theme
+	@cp tools/themetool.sh release/theme
 
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
