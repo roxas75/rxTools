@@ -49,8 +49,8 @@ void NandDumper(){
 	if(FileOpen(&myFile, isEmuNand ? "rxTools/nand/EMUNAND.bin" : "rxTools/nand/NAND.bin", 1)){
 		print("Dumping...\n\n"); ConsoleShow();
 		int x, y; ConsoleGetXY(&x, &y); y += CHAR_WIDTH * 6; x += CHAR_WIDTH*2;
-		DrawString(TOP_SCREEN, ProgressBar, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-		DrawString(TOP_SCREEN, "Press B anytime to abort", x, y + CHAR_WIDTH*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+		DrawString(BOT_SCREEN, ProgressBar, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+		DrawString(BOT_SCREEN, "Press B anytime to abort", x, y + CHAR_WIDTH*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 		for(int count = 0; count < NAND_SIZE/NAND_SECTOR_SIZE/nsectors; count++){
 
@@ -60,7 +60,7 @@ void NandDumper(){
 			FileWrite(&myFile, buf, nsectors*NAND_SECTOR_SIZE, count*NAND_SECTOR_SIZE*nsectors);
 			TryScreenShot();
 			if((count % (int)(NAND_SIZE/NAND_SECTOR_SIZE/nsectors/25)) == 0 && count != 0){
-				DrawString(TOP_SCREEN, "-", x+(CHAR_WIDTH*(progress++)), y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+				DrawString(BOT_SCREEN, "-", x+(CHAR_WIDTH*(progress++)), y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 			}
 			unsigned int pad = GetInput();
 			if(pad & BUTTON_B) break;
@@ -100,7 +100,7 @@ void DumpNandPartitions(){
 		for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
 			sprintf(myString, "%08X / %08X", j*0x200, p_size[i]);
 			int x, y; ConsoleGetXY(&x, &y); y += CHAR_WIDTH * 3; x += CHAR_WIDTH*2;
-			DrawString(TOP_SCREEN, myString, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+			DrawString(BOT_SCREEN, myString, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 			if(isEmuNand) emunand_readsectors(j, sect_row, BUF1, p_addr[i]);
 			else nand_readsectors(j, sect_row, BUF1, p_addr[i]);
@@ -205,7 +205,7 @@ void RebuildNand(){
 			for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
 				sprintf(myString, "%08X / %08X", j*0x200, p_size[i]);
 				int x, y; ConsoleGetXY(&x, &y); y += CHAR_WIDTH * 3; x += CHAR_WIDTH*2;
-				DrawString(TOP_SCREEN, myString, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+				DrawString(BOT_SCREEN, myString, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 				FileRead(&out, BUF1, sect_row*0x200, j*0x200);
 				if(isEmuNand) emunand_writesectors(j, sect_row, BUF1, p_addr[i]);

@@ -77,8 +77,8 @@ void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgco
 		}
 	}
 	//Still i don't know if we should draw the text twice.
-	if(screen == TOP_SCREEN && TOP_SCREEN2){
-		screenStart = TOP_SCREEN2 + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
+	if(screen == BOT_SCREEN && BOT_SCREEN2){
+		screenStart = BOT_SCREEN2 + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
 		charPos = character * FONT_SIZE;
 		for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL * FONT_SIZE; screenPos += (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL)
 		{
