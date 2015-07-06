@@ -16,7 +16,7 @@
 bool bootGUI;
 
 void LoadSettings(){
-	char settings[]="00"; 
+	char settings[]="00";
 	char str[100];
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
@@ -38,7 +38,7 @@ void LoadSettings(){
 
 void Initialize(){
 	char str[100];
-	
+
 
 	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
@@ -90,7 +90,7 @@ int main(){
 		if(GetSystemVersion() < 3){
 			ConsoleInit();
 			ConsoleSetTitle("          WARNING");
-			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some EmuNANDs will not boot.\n\nPress A to continue...\n");
+			print("WARNING:\n\nCannot find slot0x25KeyX.bin. If\nyour firmware version is less than\n7.X, some titles decryption will\nfail, and some EmuNANDs will not\nboot.\n\nPress A to continue...\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
