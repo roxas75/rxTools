@@ -2,10 +2,9 @@
 // |      Copyright(c) 2015, Roxas75      | //
 // |         All rights reserved.         | //
 // ---------------------------------------- //
-.nds
-.create build/080282F8.bin, 0x080282F8
+@ p9 keyx spoof
 .thumb
-.align 4
+.align 2
 
 	ldr 	r2, =0x801A6D0 		//Here we'll put the keyX, this is a redirection
 	mov	    r1, #5
@@ -15,4 +14,3 @@
 	pop 	{r4-r6,pc}
 
 .pool
-.close
