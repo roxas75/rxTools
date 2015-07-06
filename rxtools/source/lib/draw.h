@@ -9,8 +9,8 @@
 #define FONT_SIZE	8
 #define TOP_SCREEN          (u8*)(*(u32*)0x080FFFC0)
 #define TOP_SCREEN2         (u8*)(*(u32*)0x080FFFC4)
-#define BOT_SCREEN          (u8*)(*(u32*)0x080FFFD0)
-#define BOT_SCREEN2         (u8*)(*(u32*)0x080FFFD4)
+#define BOT_SCREEN          (u8*)(*(u32*)0x080FFFD4)
+#define BOT_SCREEN2         (u8*)(*(u32*)0x080FFFD0)
 
 //Colors Macros
 #define ARGB(a,r,g,b)	(a<<24|r<<16|g<<8|b) //console asks for B,G,R in bytes
