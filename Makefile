@@ -3,7 +3,7 @@ PYTHON = python
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
-tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor
+tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/font_tool
 DATA_FILES := $(wildcard data/*.*) rxmode/nat_patch.bin rxmode/agb_patch.bin rxmode/twl_patch.bin
 
 .PHONY: all
@@ -18,12 +18,13 @@ clean:
 	@make -C rxtools clean
 	@make -C rxmode clean
 	@make -C brahma clean
+	@make -C theme clean
 	@make -C rxinstaller clean
 	@make $(CAKEFLAGS) -C CakeHax clean
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 .PHONY: release
-release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh rxinstaller.nds
+release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh theme rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
@@ -55,9 +56,15 @@ rxmode/*.bin: tools/cfwtool
 	@cd rxmode && make
 
 .PHONY: rxtools/rxtools.bin
-rxtools/rxtools.bin: tools/addxor_tool
+rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
 	@make -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
+
+.PHONY: theme
+theme:
+	@cd theme && make
+	@mkdir -p release/theme
+	@mv theme/*.bin release/theme
 
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
