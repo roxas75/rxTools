@@ -39,8 +39,10 @@ What is actually necessary is:
 - [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM option and suboptions installed (in case make.exe fails with stack trace dump, install [GnuWin Make](http://gnuwin32.sourceforge.net) and place it in path before devkitPRO/msys/bin)
 - [armips] (https://github.com/Kingcom/armips) (for Windows [Visual Studio 2013 Express for Windows](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or higher is required to build armips)
 - GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with mingw32-base will be fine)
+- [ImageMagik](http://www.imagemagick.org)
 
 Just run the **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
+If you get the "make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)" error on Windows, look at your PATH and move any path with parenthesis at the end of it
 
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
