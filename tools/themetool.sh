@@ -20,10 +20,10 @@ elif [ "$1" = "makepng-all" ]; then
 		if [ "$f" = "TOP.bin" -o "$f" = "cfg0TOP.bin" ]; then
 			continue;
 		fi
-		convert -size 240x320 -depth 8 "bgr:$f" -size 320x240 -rotate 270 "${f%.*}.png"
+		convert -size 240x320 -depth 8 "bgr:$f" -size 320x240 -rotate 270 -strip "${f%.*}.png"
 	done
-	convert -size 240x400 -depth 8 "bgr:TOP.bin" -size 400x240 -rotate 270 "TOP.png"
-	convert -size 240x400 -depth 8 "bgr:cfg0TOP.bin" -size 400x240 -rotate 270 "cfg0TOP.png"
+	convert -size 240x400 -depth 8 "bgr:TOP.bin" -size 400x240 -rotate 270 -strip "TOP.png"
+	convert -size 240x400 -depth 8 "bgr:cfg0TOP.bin" -size 400x240 -rotate 270 -strip "cfg0TOP.png"
 elif [ "$1" = "makeprev" ]; then
 		if [ $# -eq 1 ]; then
 		delay="100"
@@ -42,11 +42,11 @@ elif [ "$1" = "makeprev" ]; then
 	makep1()
 	{
 		if [ -f $2 ]; then
-			convert $1 -filter Lanczos -resize 264x158 Preview/temp1.png
-			convert ~/hero-new-3ds.png Preview/temp1.png -geometry +71+34 -composite Preview/temp2.png
+			convert $1 -filter Lanczos -resize 264x158 -strip Preview/temp1.png
+			convert ~/hero-new-3ds.png Preview/temp1.png -geometry +71+34 -composite -strip Preview/temp2.png
 			rm Preview/temp1.png
-			convert $2 -filter Lanczos -resize 213x160 Preview/temp1.png
-			convert Preview/temp2.png Preview/temp1.png -geometry +96+240 -composite Preview/$2
+			convert $2 -filter Lanczos -resize 213x160 -strip Preview/temp1.png
+			convert Preview/temp2.png Preview/temp1.png -geometry +96+240 -composite -strip Preview/$2
 			rm Preview/temp1.png Preview/temp2.png
 		else
 			echo "ERROR: Cannot find $2."
@@ -85,7 +85,7 @@ elif [ "$1" = "makeprev" ]; then
 		echo "ERROR: Cannot find TOP.png."
 	fi
 	
-	convert Preview/menu0.png Preview/boot.png Preview/adv2.png +append Preview/menuprev-aio.png
+	convert Preview/menu0.png Preview/boot.png Preview/adv2.png +append -strip Preview/menuprev-aio.png
 	convert -delay $delay -loop 0 menu?.png Preview/menuprev-0.gif
 	convert -delay $delay -loop 0 Preview/menu?.png Preview/menuprev-1.gif
 	convert -delay $delay -loop 0 boot.png bootE.png Preview/boot-0.gif
