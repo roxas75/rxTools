@@ -190,33 +190,39 @@ void SplashScreen(void){
 void DrawTopSplash(char splash_file[]) {
 	unsigned int n = 0, bin_size;
 	File Splash;
-	FileOpen(&Splash, splash_file, 0);
-	//Load the spash image
-	bin_size = 0;
-	while ((n = FileRead(&Splash, (void*)((u32)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
-		bin_size += n;
+	if (FileOpen(&Splash, splash_file, 0))
+	{
+		//Load the spash image
+		bin_size = 0;
+		while ((n = FileRead(&Splash, (void*)((u32)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+			bin_size += n;
+		}
+		u32 *fb1 = (u32*)TOP_SCREEN;
+		u32 *fb2 = (u32*)TOP_SCREEN2;
+		for (n = 0; n < bin_size; n += 4){
+			*fb2++ = *fb1++;
+		}
+		FileClose(&Splash);
 	}
-	u32 *fb1 = (u32*)TOP_SCREEN;
-	u32 *fb2 = (u32*)TOP_SCREEN2;
-	for (n = 0; n < bin_size; n += 4){
-		*fb2++ = *fb1++;
-	}
-	FileClose(&Splash);
+	else DrawString(BOT_SCREEN, " MISSING THEME FILES!   ", 0, SCREEN_HEIGHT - FONT_SIZE, RED, BLACK);
 }
 
 void DrawBottomSplash(char splash_file[]) {
 	unsigned int n = 0, bin_size;
 	File Splash;
-	FileOpen(&Splash, splash_file, 0);
-	//Load the spash image
-	bin_size = 0;
-	while ((n = FileRead(&Splash, (void*)((u32)BOT_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
-		bin_size += n;
+	if(FileOpen(&Splash, splash_file, 0))
+	{
+		//Load the spash image
+		bin_size = 0;
+		while ((n = FileRead(&Splash, (void*)((u32)BOT_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+			bin_size += n;
+		}
+		u32 *fb1 = (u32*)BOT_SCREEN;
+		u32 *fb2 = (u32*)BOT_SCREEN2;
+		for (n = 0; n < bin_size; n += 4){
+			*fb2++ = *fb1++;
+		}
+		FileClose(&Splash);
 	}
-	u32 *fb1 = (u32*)BOT_SCREEN;
-	u32 *fb2 = (u32*)BOT_SCREEN2;
-	for (n = 0; n < bin_size; n += 4){
-		*fb2++ = *fb1++;
-	}
-	FileClose(&Splash);
+	else DrawString(BOT_SCREEN, " MISSING THEME FILES!   ", 0, SCREEN_HEIGHT - FONT_SIZE, RED, BLACK);
 }
