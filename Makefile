@@ -1,6 +1,7 @@
 PYTHON = python
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
+CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
 tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/font_tool
 DATA_FILES := $(wildcard data/*.*) rxmode/nat_patch.bin rxmode/agb_patch.bin rxmode/twl_patch.bin
@@ -17,30 +18,31 @@ clean:
 	@make -C rxtools clean
 	@make -C rxmode clean
 	@make -C brahma clean
-	@make -C msethax clean
 	@make -C theme clean
+	@make -C rxinstaller clean
+	@make $(CAKEFLAGS) -C CakeHax clean
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 .PHONY: release
-release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh theme
+release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh theme rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
-	@cp msethax/rxinstaller.nds release/mset/rxinstaller.nds
+	@cp rxinstaller.nds release/mset/rxinstaller.nds
 
-rxTools.dat: payload.bin rxmode/*.bin data.bin msethax/mset.bin
-	@dd if=spiderhax/Launcher.dat of=$@ bs=4M conv=sync
-	@dd if=msethax/mset.bin of=$@ conv=notrunc
-	@dd if=payload.bin of=$@ seek=256 conv=notrunc
+.PHONY: rxTools.dat
+rxTools.dat: rxtools/rxtools.bin rxmode/*.bin data.bin
+	@make $(CAKEFLAGS) -C CakeHax bigpayload
+	@dd if=rxtools/rxtools.bin of=$@ seek=272 conv=notrunc
 	@dd if=data.bin of=$@ seek=2K conv=notrunc
+
+.PHONY: rxinstaller.nds
+rxinstaller.nds:
+	@make -C rxinstaller all
 
 .PHONY: brahma/brahma.3dsx brahma/brahma.smdh
 brahma/brahma.3dsx brahma/brahma.smdh:
-	make -C $(dir $@) all
-
-.PHONY: msethax/mset.bin
-msethax/mset.bin:
 	make -C $(dir $@) all
 
 data.bin: tools/pack_tool tools/xor
@@ -53,10 +55,7 @@ data.bin: tools/pack_tool tools/xor
 rxmode/*.bin: tools/cfwtool
 	@cd rxmode && make
 
-payload.bin: rxtools/rxtools.bin tools/addxor_tool
-	@tools/addxor_tool $< $@ 0x67893421 0x12756342
-
-.PHONY: rxtools/rxtools.bin 
+.PHONY: rxtools/rxtools.bin
 rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
 	@make -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
