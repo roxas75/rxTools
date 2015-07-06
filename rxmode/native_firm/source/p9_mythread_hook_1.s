@@ -2,10 +2,10 @@
 // |      Copyright(c) 2015, Roxas75      | //
 // |         All rights reserved.         | //
 // ---------------------------------------- //
-.thumb
+@ p9 mythread hook
+.arm
+.align 2
 
-	mov		r0, #0
-	add		sp, #0x138
-	pop 	{r4-r6,pc}
-	.hword	0 @padding was in armips
+	.word 0xE59FF02C	//ldr	pc, =0x0801A6E0
+
 .pool
