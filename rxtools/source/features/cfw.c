@@ -1,3 +1,6 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "cfw.h"
 #include "common.h"
 #include "hid.h"
@@ -7,6 +10,8 @@
 #include "sdmmc.h"
 #include "fs.h"
 #include "ncch.h"
+#include "draw.h"
+#include "menu.h"
 #include "CTRDecryptor.h"
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
@@ -15,6 +20,7 @@
 #define ARMBXR4	0x47204C00	
 
 char tmp[256];
+char str[100];
 unsigned int emuNandMounted = 0;
 void (*_softreset)() = (void*)0x080F0000;
 
@@ -90,22 +96,22 @@ int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
 }
 
 void rxModeSys(){
-    ConsoleInit();
-    ConsoleSetTitle("rxMode - Booting in SysNand");
-    print("Loading...\n"); ConsoleShow();
+	sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
+	DrawBottomSplash(str);
 	rxMode(0);
-	print("Cannot boot in rxMode.\n\nPress A to exit\n"); ConsoleShow();
+	sprintf(str, "/rxTools/Theme/%c/bootE.bin", Theme);
+	DrawBottomSplash(str);
 	WaitForButton(BUTTON_A);
 }
 
 void rxModeEmu(){
-	if(!checkEmuNAND()) rxModeSys();
+	if (!checkEmuNAND()) rxModeSys();
 	else{
-		ConsoleInit();
-		ConsoleSetTitle("rxMode - Booting in EmuNand");
-		print("Loading...\n"); ConsoleShow();
+		sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
+		DrawBottomSplash(str);
 		rxMode(1);
-		print("Cannot boot in rxMode.\n\nPress A to exit\n"); ConsoleShow();
+		sprintf(str, "/rxTools/Theme/%c/bootE.bin", Theme);
+		DrawBottomSplash(str);
 		WaitForButton(BUTTON_A);
 	}
 }

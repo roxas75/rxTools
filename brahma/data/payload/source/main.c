@@ -26,9 +26,11 @@ void main()
 		}
 	}
 	*/
-	*((unsigned int*)0x080FFFC0) = 0x20000000;
-	*((unsigned int*)0x080FFFC4) = 0x20046500;
-	*((unsigned int*)0x080FFFD8) = 0;
+	*((unsigned int*)0x080FFFC0) = 0x20000000; //TOP_SCREEN
+	*((unsigned int*)0x080FFFC4) = 0x20046500; //TOP_SCREEN2	
+	*((unsigned int*)0x080FFFD0) = 0x2008CA00; //BOT_SCREEN
+	*((unsigned int*)0x080FFFD4) = 0x200C4E00; //BOT_SCREEN2
+	*((unsigned int*)0x080FFFD8) = 0;          
 
 	unsigned int* buf = (void*)0x20400000;
 	unsigned int base = 0x67893421;
