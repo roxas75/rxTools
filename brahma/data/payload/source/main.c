@@ -32,14 +32,6 @@ void main()
 	*((unsigned int*)0x080FFFD4) = 0x200C4E00; //BOT_SCREEN2
 	*((unsigned int*)0x080FFFD8) = 0;          
 
-	unsigned int* buf = (void*)0x20400000;
-	unsigned int base = 0x67893421;
-	unsigned int seed = 0x12756342;
-	for(int i = 0; i < 400*1024/4; i++){
-		buf[i] ^= base;
-		base += seed;
-	}
-
 	unsigned char*src = (void*)0x20400000;
 	unsigned char*dst = (void*)0x08000000;
 	for(int i = 0; i < 320*1024; i++){
