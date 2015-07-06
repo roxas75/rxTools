@@ -51,6 +51,7 @@ If you get the "make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x42
 - Archshift, who wrote some useful libs i used : https://github.com/archshift
 - Many GbaTemp users, who helped in the testing process
 - patois, who developed BRAHMA : https://github.com/patois/Brahma
+- mid-kid and b1l1s, who developed CakeHax : https://github.com/mid-kid/CakeHax
 - Many other people who helped me in private
 - All the dudes who reversed and fucked up my project, who lost their time on making useless keeping the sources private
 
