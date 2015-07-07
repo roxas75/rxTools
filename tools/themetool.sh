@@ -1,12 +1,12 @@
 #!/bin/sh
-echo "rxTools AIO Theme Tool v1.0"
+echo "rxTools AIO Theme Tool v1.0.1"
 command -v convert >/dev/null 2>&1 || { echo "Please install ImageMagick in order to use this script." ; exit 1; }
 if [ "$1" = "help" ]; then
 	echo "This tool is meant for theme creators. Available commands:"
 	echo "     makebgr <file.png>: converts a .png file to .bin (BGR)."
 	echo "     makebgr-all: converts all .png files to .bin (BGR)."
 	echo "     makepng-all: converts all .bin (BGR) files to .png. If you are creating a theme and you need a template, this is the first command you should use."
-	echo "     makeprev: creates a preview (animated GIFs and static PNGs) of your theme in the \"Preview\" folder. An Internet connection is recommended the first time to download the New Nintendo 3DS XL frame, which will be saved as \"~/hero-new-3ds.png\"."
+	echo "     makeprev [gif-delay]: creates a preview (animated GIFs and static PNGs) of your theme in the \"Preview\" folder. An Internet connection is recommended the first time to download the New Nintendo 3DS XL frame, which will be saved as \"~/hero-new-3ds.png\"."
 elif [ "$1" = "makebgr" ]; then
 	convert -rotate 90 "$2" "bgr:${2%.*}.bin"
 elif [ "$1" = "makebgr-all" ]; then
@@ -62,8 +62,11 @@ elif [ "$1" = "makeprev" ]; then
 			makep1 TOP.png adv$i.png
 		done
 
-		for i in `seq 0 4`; do
+		for i in `seq 0 5`; do
 			makep1 TOP.png dec$i.png
+		done
+
+		for i in `seq 0 4`; do
 			makep1 TOP.png fil$i.png
 		done
 
