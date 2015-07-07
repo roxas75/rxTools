@@ -60,9 +60,9 @@ rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
 .PHONY: theme
 theme:
 	@cd theme && make
-	@mkdir -p release/theme
-	@mv theme/*.bin release/theme
-	@cp tools/themetool.sh release/theme
+	@mkdir -p release/theme/0
+	@mv theme/*.bin release/theme/0
+	@cp tools/themetool.sh tools/themetool.bat release/theme/0
 
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
