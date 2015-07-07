@@ -1,3 +1,6 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "CTRDecryptor.h"
 #include "common.h"
 #include "screenshot.h"
@@ -9,10 +12,12 @@
 #include "ncch.h"
 #include "crypto.h"
 #include "stdio.h"
+#include "menu.h"
 
 #define BUFFER_ADDR ((u8*)0x21000000)
 #define BLOCK_SIZE  (8*1024*1024)
 
+char str[100];
 
 u32 DecryptPartition(PartitionInfo* info){
 	if(info->keyY != NULL)
@@ -69,7 +74,7 @@ int ProcessCTR(char* path){
 	File myFile;
 	if(FileOpen(&myFile, path, 0)){
 		ConsoleInit();
-		ConsoleSetTitle("CTR Decryptor");
+		ConsoleSetTitle("           CTR DECRYPTOR");
 		unsigned int ncch_base = 0x100;
 		unsigned char magic[] = { 0, 0, 0, 0, 0};
 		FileRead(&myFile, magic, 4, ncch_base);
@@ -195,7 +200,7 @@ int ExploreFolders(char* folder){
 
 void CTRDecryptor(){
 	ConsoleInit();
-	ConsoleSetTitle("CTR Decryptor");
+	ConsoleSetTitle("     CTR DECRYPTOR");
 	ConsoleShow();
 
 	int nfiles = ExploreFolders("");

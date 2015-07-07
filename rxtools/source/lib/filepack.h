@@ -5,7 +5,6 @@ enum{
 	TITLE_KEY = 0,
 	REBOOT,
 	PATCH,
-	TOP_PIC,
 };
 
 typedef struct{

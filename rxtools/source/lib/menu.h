@@ -7,6 +7,7 @@
 typedef struct{
 	char* Str;
 	void(* Func)();
+	char* gfx_splash;
 }MenuEntry;
 
 typedef struct{
@@ -23,5 +24,9 @@ void MenuNextSelection();
 void MenuPrevSelection();
 void MenuSelect();
 void MenuClose();
+void MenuRefresh();
+
+extern char Theme;
+extern Menu* MyMenu;
 
 #endif

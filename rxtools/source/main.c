@@ -13,22 +13,47 @@
 #include "cfw.h"
 #include "configuration.h"
 
+bool bootGUI;
+
+void LoadSettings(){
+	char settings[]="00";
+	char str[100];
+	File MyFile;
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
+		FileRead(&MyFile, settings, 2, 0);
+		if (settings[0] == '1')bootGUI = true;
+		sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
+		if (FileOpen(&MyFile, str, 0)) Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
+		else Theme = '0';
+		FileClose(&MyFile);
+	}
+	else
+	{
+		FileOpen(&MyFile, "/rxTools/data/system.txt", 1);
+		FileWrite(&MyFile, "00" , 2, 0);
+		Theme = '0';
+		FileClose(&MyFile);
+	}
+}
+
 void Initialize(){
-	DrawString(TOP_SCREEN,  " INITIALIZE... ", 0, 240-8, WHITE, BLACK);
+	char str[100];
+
+
+	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
-		DrawString(TOP_SCREEN,  " LOADING...    ", 0, 240-8, WHITE, BLACK);
+		DrawString(BOT_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	}else{
-		DrawString(TOP_SCREEN,  " ERROR!        ", 0, 240-8, RED, BLACK);
+		DrawString(BOT_SCREEN,  " ERROR!        ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
 	}
 	LoadPack();
+
 	//Console Stuff
-	memset(TOP_SCREEN, 0x00, 0x46500);
-	memset(TOP_SCREEN2, 0x00, 0x46500);
-	ConsoleSetXY(15, 15);
-	ConsoleSetWH(370, 160);
+	ConsoleSetXY(15, 20);
+	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
-	ConsoleSetTextColor(WHITE);
-	ConsoleSetBackgroundColor(BLACK);
+	ConsoleSetTextColor(RGB(0, 141, 197));
+	ConsoleSetBackgroundColor(TRANSPARENT);
 	ConsoleSetSpecialColor(BLUE);
 	ConsoleSetSpacing(2);
 	ConsoleSetBorderWidth(3);
@@ -36,21 +61,24 @@ void Initialize(){
 	f_mkdir ("rxTools");
 	f_mkdir ("rxTools/nand");
 	InstallConfigData();
-	
-	SplashScreen();
-	for(int i = 0; i < 0x333333*6; i++){
-		u32 pad = GetInput();
-		if(pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+	LoadSettings();
+
+	if (!bootGUI)
+	{
+		for (int i = 0; i < 0x333333 * 6; i++){
+			u32 pad = GetInput();
+			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+		}
+		rxModeQuickBoot();
 	}
-    rxModeQuickBoot();
-	rxTools_boot:
-	memset(TOP_SCREEN, 0x00, 0x46500);
-	memset(TOP_SCREEN2, 0x00, 0x46500);
+rxTools_boot:
+
+	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
+	DrawTopSplash(str);
 }
 
 int main(){
 	Initialize();
-	DrawString(TOP_SCREEN, "SUPPORT THE ORIGINAL, NOT THE IMITATION!", 75, 240-10, GREY, BLACK);
 	//7.X Keys stuff
 	File KeyFile;
 	if(FileOpen(&KeyFile, "/slot0x25KeyX.bin", 0)){
@@ -58,35 +86,36 @@ int main(){
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
-		DrawString(TOP_SCREEN, " NewKeyX ", 0, 240-8, GREEN, BLACK);
 	}else{
 		if(GetSystemVersion() < 3){
 			ConsoleInit();
-			print("WARNING:\n\nCannot find slot0x25KeyX.bin.\nSome titles decryption will fail,\nand some some EmuNANDs will not boot.\n\nPress A to continue...\n");
+			ConsoleSetTitle("          WARNING");
+			print("WARNING:\n\nCannot find slot0x25KeyX.bin. If\nyour firmware version is less than\n7.X, some titles decryption will\nfail, and some EmuNANDs will not\nboot.\n\nPress A to continue...\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
-		DrawString(TOP_SCREEN, " NewKeyX ", 0, 240-8, RED, BLACK);
 	}
-	DrawString(TOP_SCREEN, " EmuNAND ", 0, 240-16, checkEmuNAND() ? GREEN : RED, BLACK);
 
 	//That's the Main Menu initialization, easy and cool
 	MenuInit(&MainMenu);
 	MenuShow();
 
-    while (true) {
-		DrawString(TOP_SCREEN,  "[SELECT] Reboot", 349-18*8, 181-24-8, RED, BLACK);
-		DrawString(TOP_SCREEN,  "[START]  Shutdown", 349-18*8, 181-24, RED, BLACK);
-        u32 pad_state = InputWait();
-		if(pad_state & BUTTON_DOWN) 	MenuNextSelection();
-		if(pad_state & BUTTON_UP)   	MenuPrevSelection();
+	while (true) {
+		u32 pad_state = InputWait();
+		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
+		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
 		if(pad_state & BUTTON_A)    	MenuSelect();
+		if (MyMenu->Current == 0) //If we're in the boot screen
+		{
+			if (pad_state & BUTTON_Y) rxModeEmu();      //Boot emunand
+			else if (pad_state & BUTTON_X) rxModeSys(); //Boot sysnand
+		}
 		if(pad_state & BUTTON_SELECT)	returnHomeMenu();
 		if(pad_state & BUTTON_START)	ShutDown();
 		TryScreenShot();
 		MenuShow();
-    }
+	}
 
-    FSDeInit();
-    return 0;
+	FSDeInit();
+	return 0;
 }
