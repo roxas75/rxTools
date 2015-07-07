@@ -44,7 +44,7 @@ int InstallData(char* drive){
 	
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
-	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002);
+	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
 	u8* n_firm_patch = GetFilePack("nat_patch.bin");
 	applyPatch(n_firm, n_firm_patch);
 	u8 keyx[16] = {0};
@@ -80,8 +80,14 @@ int InstallData(char* drive){
 	
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
-	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202);
+	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
 	u8* a_firm_patch = GetFilePack("agb_patch.bin");
+	if (!a_firm && checkEmuNAND())
+	{
+		/* Try to get the Title Key from the EmuNAND */
+		a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 2);
+	}
+	
 	if(a_firm){
 		applyPatch(a_firm, a_firm_patch);
 		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
@@ -90,12 +96,19 @@ int InstallData(char* drive){
 			FileClose(&tempfile);
 		}else return CONF_ERRNFIRM;
 		*progress++ = '.';
-	}else{	
+	}else{
 		//If we cannot decrypt it from firmware.bin becouse of titlekey messed up, it probably means that AGB has been modified in some way.
 		//So we read it from his installed ncch...
 		FindApp(0x00040138, 0x00000202, 1);
 		char* path = getContentAppPath();
-		FileOpen(&tempfile, path, 0);
+		if (!FileOpen(&tempfile, path, 0) && checkEmuNAND())
+		{
+			/* Try with EmuNAND */
+			FindApp(0x00040138, 0x00000202, 2);
+			path = getContentAppPath();
+			if (!FileOpen(&tempfile, path, 0)) return CONF_ERRNFIRM;
+		}
+		
 		FileRead(&tempfile, WORKBUF, AGB_SIZE, 0);
 		FileClose(&tempfile);
 		a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
@@ -115,7 +128,7 @@ int InstallData(char* drive){
 	
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
-	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102);
+	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	u8* t_firm_patch = GetFilePack("twl_patch.bin");
 	if(t_firm){
 		applyPatch(t_firm, t_firm_patch);

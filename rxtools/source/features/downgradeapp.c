@@ -257,7 +257,7 @@ void downgradeMSET()
 									u8 iv[0x10] = {0};
 									u8 Key[0x10] = {0};
 									
-									GetTitleKey(&Key[0], titleid_low, titleid_high[region]);
+									GetTitleKey(&Key[0], titleid_low, titleid_high[region], SYS_NAND);
 									
 									aes_context aes_ctxt;
 									aes_setkey_dec(&aes_ctxt, Key, 0x80);
