@@ -53,10 +53,10 @@ u8* decryptFirmTitleNcch(u8* title, unsigned int size){
 	return firm;
 }
 
-u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid){
+u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
 	u8 key[0x10] = {0};
 	u8 iv[0x10] = {0};
-	GetTitleKey(&key[0], 0x00040138, tid);
+	GetTitleKey(&key[0], 0x00040138, tid, drive);
 	aes_context aes_ctxt;
 	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
 	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
