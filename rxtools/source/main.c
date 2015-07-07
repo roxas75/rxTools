@@ -40,7 +40,7 @@ void LoadSettings(){
 				}
 			} else {
 				Theme = '0';
-				FileWrite(&MyFile, '0', 1, 1);
+				FileWrite(&MyFile, &Theme, 1, 1);
 			}
 			
 			FileClose(&MyFile);
