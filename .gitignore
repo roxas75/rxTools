@@ -57,5 +57,5 @@ Temporary Items
 *.map
 **/build
 **/data
-*.bat
 release.zip
+rxtools/source/font.h

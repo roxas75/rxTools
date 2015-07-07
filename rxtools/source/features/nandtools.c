@@ -31,11 +31,11 @@ static struct {
 static Menu CoolFilesMenu = {
 	"Choose the file to work on",
 	.Option = (MenuEntry[5]){
-        {" movable.sed", &SelectFile},
-        {" SecureInfo_A", &SelectFile},
-        {" LocalFriendCodeSeed_B", &SelectFile},
-        {" rand_seed", &SelectFile},
-        {" ticket.db", &SelectFile},
+		{ " movable.sed", &SelectFile, "fil0.bin" },
+		{ " SecureInfo_A", &SelectFile, "fil1.bin" },
+		{ " LocalFriendCodeSeed_B", &SelectFile, "fil2.bin" },
+		{ " rand_seed", &SelectFile, "fil3.bin" },
+		{ " ticket.db", &SelectFile, "fil4.bin" },
 	},
 	nCoolFiles,
 	0,

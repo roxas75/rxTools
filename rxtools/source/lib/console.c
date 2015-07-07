@@ -7,12 +7,14 @@
 #include "common.h"
 #include "console.h"
 #include "draw.h"
+#include "menu.h"
 
 #define CONSOLE_SIZE 0x4000
 #define MAXLINES 10
 
 char console[CONSOLE_SIZE];
 char consoletitle[100] = "Dummy Title";
+char str[100];
 
 int BackgroundColor = WHITE;
 int TextColor = BLACK;
@@ -79,25 +81,30 @@ int findCursorLine(){
 	return cont;
 }
 void ConsoleShow(){
-        void *tmpscreen = (void*)0x27000000;
-	memcpy(tmpscreen, TOP_SCREEN, 0x46500);
+	
+	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	DrawBottomSplash(str);
+
+    void *tmpscreen = (void*)0x27000000;
+	memcpy(tmpscreen, BOT_SCREEN, 0x38400);
 	if(!consoleInited) return;
 	int titley = 2*CHAR_WIDTH;
-	for(int y = ConsoleY; y < ConsoleH + ConsoleY + BorderWidth; y++){
-		for(int x = ConsoleX; x < ConsoleW + ConsoleX + BorderWidth; x++){
-			if(//(x >= ConsoleX && x <= ConsoleX + BorderWidth) || 
-			   //(x >= ConsoleW + ConsoleX - 1 && x <= ConsoleW + ConsoleX - 1 + BorderWidth) || 
-			   (y >= ConsoleY && y <= ConsoleY + BorderWidth) || 
-			   (y >= ConsoleH + ConsoleY - 1 && y <= ConsoleH + ConsoleY - 1 + BorderWidth) ||
-			   (y >= ConsoleY + titley - BorderWidth && y <= ConsoleY + titley)){
-				DrawPixel(x, y, BorderColor, (int)tmpscreen);
-			}else{
-				DrawPixel(x, y, BackgroundColor, (int)tmpscreen);
-			}
-		}
-	}
+
+	//for(int y = ConsoleY; y < ConsoleH + ConsoleY + BorderWidth; y++){
+	//	for(int x = ConsoleX; x < ConsoleW + ConsoleX + BorderWidth; x++){
+	//		if(//(x >= ConsoleX && x <= ConsoleX + BorderWidth) || 
+	//		   //(x >= ConsoleW + ConsoleX - 1 && x <= ConsoleW + ConsoleX - 1 + BorderWidth) || 
+	//		   (y >= ConsoleY && y <= ConsoleY + BorderWidth) || 
+	//		   (y >= ConsoleH + ConsoleY - 1 && y <= ConsoleH + ConsoleY - 1 + BorderWidth) ||
+	//		   (y >= ConsoleY + titley - BorderWidth && y <= ConsoleY + titley)){
+	//			DrawPixel(x, y, BorderColor, (int)tmpscreen);
+	//		}else{
+	//			DrawPixel(x, y, BackgroundColor, (int)tmpscreen);
+	//		}
+	//	}
+	//}
 	int titlespace = 2*CHAR_WIDTH-2*BorderWidth;
-	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2*CHAR_WIDTH, ConsoleY + (titlespace-CHAR_WIDTH)/2 + BorderWidth, TextColor, BackgroundColor);
+	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * CHAR_WIDTH, ConsoleY + (titlespace - CHAR_WIDTH) / 2 + BorderWidth, TextColor, ConsoleGetBackgroundColor());
 	
 	char tmp[256], *point;
         if(findCursorLine() < MAXLINES) point = &console[0];
@@ -119,12 +126,12 @@ void ConsoleShow(){
 			if(*point == '\n'){ point++; break; }
 			tmp[linelen++] = *point++;
 		}
-		DrawString(tmpscreen, tmp, ConsoleX + CHAR_WIDTH*Spacing, lines++ * CHAR_WIDTH + ConsoleY + CHAR_WIDTH*(Spacing-1) + titley, TextColor, BackgroundColor);
+		DrawString(tmpscreen, tmp, ConsoleX + CHAR_WIDTH*Spacing, lines++ * CHAR_WIDTH + ConsoleY + 15 + CHAR_WIDTH*(Spacing - 1) + titley, TextColor, ConsoleGetBackgroundColor());
 		if(!*point) break;
 		if(lines == MAXLINES) break;
 	}
-	memcpy(TOP_SCREEN, tmpscreen, 0x46500);
-	if(TOP_SCREEN2) memcpy(TOP_SCREEN2, tmpscreen, 0x46500);
+	memcpy(BOT_SCREEN, tmpscreen, 0x38400);
+	if (BOT_SCREEN2) memcpy(BOT_SCREEN2, tmpscreen, 0x38400);
 }
 
 void ConsoleFlush(){

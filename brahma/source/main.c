@@ -15,7 +15,7 @@ s32 quick_boot_firm (s32 load_from_disk) {
 	firm_reboot();	
 }
 
-s32 main (void) {
+s32 main(void) {
 	// Initialize services
 	srvInit();
 	aptInit();
@@ -25,27 +25,25 @@ s32 main (void) {
 	sdmcInit();
 	hbInit();
 	qtmInit();
-	
+	gfxSwapBuffers();
+
 	Handle fileHandle;
 	u32 bytesRead;
-    FS_archive sdmcArchive=(FS_archive){ARCH_SDMC, (FS_path){PATH_EMPTY, 1, (u8*)""}};
-    FS_path filePath=FS_makePath(PATH_CHAR, "/rxTools.dat");
-    Result ret=FSUSER_OpenFileDirectly(NULL, &fileHandle, sdmcArchive, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
-	if(ret) goto EXIT;
-    FSFILE_Read(fileHandle, &bytesRead, 0x20000, 0x14400000, 320*1024);
-    FSFILE_Close(fileHandle);
-	
-	consoleInit(GFX_BOTTOM, NULL);
-	if (brahma_init()) {
-		quick_boot_firm(1);
-		printf("[!] Quickload failed\n");
-		brahma_exit();
+	FS_archive sdmcArchive = (FS_archive){ ARCH_SDMC, (FS_path){ PATH_EMPTY, 1, (u8*)"" } };
+	FS_path filePath = FS_makePath(PATH_CHAR, "/rxTools.dat");
+	Result ret = FSUSER_OpenFileDirectly(NULL, &fileHandle, sdmcArchive, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+	if (ret) goto EXIT;
+	FSFILE_Read(fileHandle, &bytesRead, 0x22000, 0x14400000, 320 * 1024);
+	FSFILE_Close(fileHandle);
 
-	} else {
-		printf("* BRAHMA *\n\n[!]Not enough memory\n");
-		wait_any_key();
+
+	if (brahma_init())
+	{
+		quick_boot_firm(1);
+		brahma_exit();
 	}
-  EXIT:
+
+EXIT:
 	hbExit();
 	sdmcExit();
 	fsExit();
