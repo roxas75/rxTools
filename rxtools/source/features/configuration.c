@@ -45,7 +45,7 @@ int InstallData(char* drive){
 	if(f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK){
 		//... We'll see
 	}else return CONF_NOFIRMBIN;
-	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
+	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 100, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
@@ -58,7 +58,7 @@ int InstallData(char* drive){
 		FileRead(&tempfile, &keyx[0], 16, 0);
 		FileClose(&tempfile);
 	}
-	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
+	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 100, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	for(int i = 0; i < NAT_SIZE; i+=0x4){
 		if(!strcmp((char*)n_firm + i, "Shit")){
 			if(1){
@@ -74,14 +74,14 @@ int InstallData(char* drive){
 			*((unsigned int*)(n_firm + i)) = (checkEmuNAND() / 0x200) - 1;
 		}
 	}
-	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
+	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 100, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
 		FileClose(&tempfile);
 		//FileCopy("0004013800000002.bin", tmpstr);
 	}else return CONF_ERRNFIRM;
-	*progress++ = '.'; print("%s", progressbar);  ConsolePrevLine();
+	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 100, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
@@ -116,7 +116,7 @@ int InstallData(char* drive){
 			*progress++ = 'x'; //If we get here, then we'll play without AGB, lol
 		}
 	}
-	print("%s", progressbar);  ConsolePrevLine();
+	DrawString(BOT_SCREEN, progressbar, 100, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
@@ -134,7 +134,7 @@ int InstallData(char* drive){
 	}else{
 		*progress++ = 'x'; 
 	}
-	print("%s", progressbar);  ConsolePrevLine();
+	DrawString(BOT_SCREEN, progressbar, 100, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
@@ -142,7 +142,7 @@ int InstallData(char* drive){
 		FileWrite(&tempfile, __TIME__, 9, 12);
 		FileClose(&tempfile);
 	}else return CONF_CANTOPENFILE;
-	*progress++ = '.'; print("%s\n", progressbar); 
+	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 100, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	f_close(&firmfile);
 	return 0;
