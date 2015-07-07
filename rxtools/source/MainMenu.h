@@ -149,13 +149,14 @@ void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
 	char str[100];
 	char settings[] = "000";
+	unsigned char theme_num = 0;
 	
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
 		FileRead(&MyFile, settings, 3, 0);
 		bootGUI = (settings[0] == '1');
-		Theme = settings[1];
+		theme_num = (settings[1] - 0x30);
 		agb_bios = (settings[2] == '1');
 	}
 	
@@ -168,16 +169,44 @@ void SettingsMenuInit(){
 			if (MyMenu->Current == 0) bootGUI ^= 1; //bootGUI settings
 			else if (MyMenu->Current == 1) //theme selection
 			{
-				if (pad_state & BUTTON_LEFT && Theme != '0')
+				/* Jump to the next available theme */
+				File AppBin;
+				bool found = false;
+				unsigned char i;
+				
+				if (pad_state & BUTTON_LEFT && theme_num > 0)
 				{
-					Theme--;
-					sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
-					DrawTopSplash(str);
+					for (i = theme_num - 1; i > 0; i--)
+					{
+						sprintf(str, "/rxTools/Theme/%u/app.bin", i);
+						if (FileOpen(&AppBin, str, 0))
+						{
+							FileClose(&AppBin);
+							found = true;
+							break;
+						}
+					}
+					
+					if (i == 0) found = true;
+				} else
+				if (pad_state & BUTTON_RIGHT && theme_num < 9)
+				{
+					for (i = theme_num + 1; i <= 9; i++)
+					{
+						sprintf(str, "/rxTools/Theme/%u/app.bin", i);
+						if (FileOpen(&AppBin, str, 0))
+						{
+							FileClose(&AppBin);
+							found = true;
+							break;
+						}
+					}
 				}
-				else if (pad_state & BUTTON_RIGHT && Theme != '9')
+				
+				if (found)
 				{
-					Theme++;
-					sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
+					theme_num = i;
+					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);//DRAW TOP SCREEN TO SEE THE NEW THEME
 					DrawTopSplash(str);
 				}
 			}
@@ -186,6 +215,7 @@ void SettingsMenuInit(){
 		if (pad_state & BUTTON_B)
 		{
 			//Code to save settings
+			Theme = (theme_num + 0x30);
 			settings[0] = bootGUI ? '1' : '0';
 			settings[1] = Theme;
 			settings[2] = agb_bios ? '1' : '0';
@@ -198,7 +228,7 @@ void SettingsMenuInit(){
 		
 		//UPDATE SETTINGS GUI
 		sprintf(MyMenu->Option[0].Str, "Force UI boot:      < %s > ", bootGUI ? "Yes" : "No ");
-		sprintf(MyMenu->Option[1].Str, "Selected Theme:     < %c   > ", Theme);
+		sprintf(MyMenu->Option[1].Str, "Selected Theme:     <  %c  > ", Theme);
 		sprintf(MyMenu->Option[2].Str, "Show AGB_FIRM BIOS: < %s > ", agb_bios ? "Yes" : "No ");
 		MenuRefresh();
 	}
