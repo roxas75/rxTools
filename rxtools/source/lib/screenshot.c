@@ -30,7 +30,7 @@ void ScreenShot(){
 		int pos = 0x36;
 		for(int i = SCREEN_HEIGHT-1; i >= 0; i--){
 			for(int j = 0; j < SCREEN_WIDTH; j++){
-				int color = GetPixel(j, i, (int)TOP_SCREEN);
+				int color = GetPixel(TOP_SCREEN, j, i);
 				FileWrite(&myFile, &color, 0x4, pos);
 				pos += 3;
 			}

@@ -165,7 +165,7 @@ data/mset6x.bin: rop/mset6x.s
 	
 $(BUILD):
 	@mkdir -p $@
-	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
+	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 	@rm $(OUTPUT).elf
 
 #---------------------------------------------------------------------------------
