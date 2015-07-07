@@ -83,8 +83,20 @@ void setFirmMode(int mode){ //0 : SysNand, 1 : EmuNand
 	}
 }
 
+void setAgbBios()
+{
+	File agb_firm;
+	unsigned char svc = (agb_bios ? 0x26 : 0x01);
+	if (FileOpen(&agb_firm, "rxtools/data/0004013800000202.bin", 0))
+	{
+		FileWrite(&agb_firm, &svc, 1, 0xD7A12);
+		FileClose(&agb_firm);
+	}
+}
+
 int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
 	setFirmMode(mode);
+	setAgbBios();
 	File myFile;
 	u8* native_firm = (u8*)0x21000000;
 	if(FileOpen(&myFile, "rxtools/data/0004013800000002.bin", 0)){
