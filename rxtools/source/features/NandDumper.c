@@ -43,7 +43,7 @@ void NandDumper(){
 	ConsoleSetTitle(isEmuNand ? "EmuNAND Dumper" : "NAND Dumper");
 	unsigned char* buf = (void*)0x21000000;
 	unsigned int nsectors = 0x200;  //sectors in a row
-	char ProgressBar[] = "[                            ]";
+	char ProgressBar[] = "[                              ]";
 	unsigned int progress = 1;
 /*      int BACKCOLOR = */ConsoleGetBackgroundColor(); //can be removed, left only to keep binaries the same
 	if(FileOpen(&myFile, isEmuNand ? "rxTools/nand/EMUNAND.bin" : "rxTools/nand/NAND.bin", 1)){
