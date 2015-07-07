@@ -13,25 +13,51 @@
 #include "cfw.h"
 #include "configuration.h"
 
-bool bootGUI;
-
 void LoadSettings(){
-	char settings[]="00";
+	char settings[]="000";
 	char str[100];
 	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
-		FileRead(&MyFile, settings, 2, 0);
-		if (settings[0] == '1')bootGUI = true;
-		sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
-		if (FileOpen(&MyFile, str, 0)) Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
-		else Theme = '0';
-		FileClose(&MyFile);
-	}
-	else
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
-		FileOpen(&MyFile, "/rxTools/data/system.txt", 1);
-		FileWrite(&MyFile, "00" , 2, 0);
-		Theme = '0';
+		if (FileGetSize(&MyFile) == 3)
+		{
+			FileRead(&MyFile, settings, 3, 0);
+			bootGUI = (settings[0] == '1');
+			agb_bios = (settings[2] == '1');
+			
+			/* Check if the Theme Number is valid */
+			unsigned char theme_num = (settings[0] - 0x30);
+			if (theme_num >= 0 && theme_num <= 9)
+			{
+				File Menu0;
+				sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
+				if (FileOpen(&Menu0, str, 0))
+				{
+					Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
+					FileClose(&Menu0);
+				} else {
+					Theme = '0';
+				}
+			} else {
+				Theme = '0';
+				FileWrite(&MyFile, '0', 1, 1);
+			}
+			
+			FileClose(&MyFile);
+			return;
+		} else {
+			FileClose(&MyFile);
+		}
+	}
+	
+	bootGUI = false;
+	Theme = '0';
+	agb_bios = false;
+	
+	/* Create system.txt */
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 1))
+	{
+		FileWrite(&MyFile, settings, 3, 0);
 		FileClose(&MyFile);
 	}
 }
