@@ -1,12 +1,12 @@
 #!/bin/sh
-echo "rxTools AIO Theme Tool v1.0"
+echo "rxTools AIO Theme Tool v1.0.1"
 command -v convert >/dev/null 2>&1 || { echo "Please install ImageMagick in order to use this script." ; exit 1; }
 if [ "$1" = "help" ]; then
 	echo "This tool is meant for theme creators. Available commands:"
 	echo "     makebgr <file.png>: converts a .png file to .bin (BGR)."
 	echo "     makebgr-all: converts all .png files to .bin (BGR)."
 	echo "     makepng-all: converts all .bin (BGR) files to .png. If you are creating a theme and you need a template, this is the first command you should use."
-	echo "     makeprev: creates a preview (animated GIFs and static PNGs) of your theme in the \"Preview\" folder. An Internet connection is recommended the first time to download the New Nintendo 3DS XL frame, which will be saved as \"~/hero-new-3ds.png\"."
+	echo "     makeprev [gif-delay]: creates a preview (animated GIFs and static PNGs) of your theme in the \"Preview\" folder. An Internet connection is recommended the first time to download the New Nintendo 3DS XL frame, which will be saved as \"~/hero-new-3ds.png\"."
 elif [ "$1" = "makebgr" ]; then
 	convert -rotate 90 "$2" "bgr:${2%.*}.bin"
 elif [ "$1" = "makebgr-all" ]; then
@@ -20,10 +20,10 @@ elif [ "$1" = "makepng-all" ]; then
 		if [ "$f" = "TOP.bin" -o "$f" = "cfg0TOP.bin" ]; then
 			continue;
 		fi
-		convert -size 240x320 -depth 8 "bgr:$f" -size 320x240 -rotate 270 "${f%.*}.png"
+		convert -size 240x320 -depth 8 "bgr:$f" -size 320x240 -rotate 270 -strip "${f%.*}.png"
 	done
-	convert -size 240x400 -depth 8 "bgr:TOP.bin" -size 400x240 -rotate 270 "TOP.png"
-	convert -size 240x400 -depth 8 "bgr:cfg0TOP.bin" -size 400x240 -rotate 270 "cfg0TOP.png"
+	convert -size 240x400 -depth 8 "bgr:TOP.bin" -size 400x240 -rotate 270 -strip "TOP.png"
+	convert -size 240x400 -depth 8 "bgr:cfg0TOP.bin" -size 400x240 -rotate 270 -strip "cfg0TOP.png"
 elif [ "$1" = "makeprev" ]; then
 		if [ $# -eq 1 ]; then
 		delay="100"
@@ -42,11 +42,11 @@ elif [ "$1" = "makeprev" ]; then
 	makep1()
 	{
 		if [ -f $2 ]; then
-			convert $1 -filter Lanczos -resize 264x158 Preview/temp1.png
-			convert ~/hero-new-3ds.png Preview/temp1.png -geometry +71+34 -composite Preview/temp2.png
+			convert $1 -filter Lanczos -resize 264x158 -strip Preview/temp1.png
+			convert ~/hero-new-3ds.png Preview/temp1.png -geometry +71+34 -composite -strip Preview/temp2.png
 			rm Preview/temp1.png
-			convert $2 -filter Lanczos -resize 213x160 Preview/temp1.png
-			convert Preview/temp2.png Preview/temp1.png -geometry +96+240 -composite Preview/$2
+			convert $2 -filter Lanczos -resize 213x160 -strip Preview/temp1.png
+			convert Preview/temp2.png Preview/temp1.png -geometry +96+240 -composite -strip Preview/$2
 			rm Preview/temp1.png Preview/temp2.png
 		else
 			echo "ERROR: Cannot find $2."
@@ -62,8 +62,11 @@ elif [ "$1" = "makeprev" ]; then
 			makep1 TOP.png adv$i.png
 		done
 
-		for i in `seq 0 4`; do
+		for i in `seq 0 5`; do
 			makep1 TOP.png dec$i.png
+		done
+
+		for i in `seq 0 4`; do
 			makep1 TOP.png fil$i.png
 		done
 
@@ -85,7 +88,7 @@ elif [ "$1" = "makeprev" ]; then
 		echo "ERROR: Cannot find TOP.png."
 	fi
 	
-	convert Preview/menu0.png Preview/boot.png Preview/adv2.png +append Preview/menuprev-aio.png
+	convert Preview/menu0.png Preview/boot.png Preview/adv2.png +append -strip Preview/menuprev-aio.png
 	convert -delay $delay -loop 0 menu?.png Preview/menuprev-0.gif
 	convert -delay $delay -loop 0 Preview/menu?.png Preview/menuprev-1.gif
 	convert -delay $delay -loop 0 boot.png bootE.png Preview/boot-0.gif

@@ -27,11 +27,12 @@ I do not support piracy in any way, all the data and information in my software 
 - Signatures Checks disabled, which should allow just homebrew, but the world is cruel...
 - Support for installing FBI (a CIA Manager) in both emuNAND and sysNAND
 - Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND
-- Support for TWL (DS/DSi cardriges and Virtual Console) **only on sysNAND**
-- Dynamic RAM dumping (just for debug purpouses)
+- Support for TWL (DS/DSi cardriges and DSiWare) **only on sysNAND**
+- Dynamic RAM dumping (just for debug purposes)
 
 ## How to build
 Requirements for Windows:
+- git, clone this repository with the following command: *git  clone --recursive https://github.com/roxas75/rxTools.git*
 - [Python 2.7](https://www.python.org)
 - [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM option and suboptions installed (in case make.exe fails with stack trace dump, install [GnuWin Make](http://gnuwin32.sourceforge.net) and place it in path before devkitPRO/msys/bin)
 - [armips](https://github.com/Kingcom/armips) (for Windows [Visual Studio 2013 Express for Windows](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or higher is required to build armips)
