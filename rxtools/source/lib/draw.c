@@ -212,11 +212,6 @@ void DrawBottomSplash(char splash_file[]) {
 		while ((n = FileRead(&Splash, (void*)((u32)BOT_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
 			bin_size += n;
 		}
-		u32 *fb1 = (u32*)BOT_SCREEN;
-		u32 *fb2 = (u32*)BOT_SCREEN2;
-		for (n = 0; n < bin_size; n += 4){
-			*fb2++ = *fb1++;
-		}
 		FileClose(&Splash);
 	}
 	else DrawString(BOT_SCREEN, " MISSING THEME FILES!   ", 0, SCREEN_HEIGHT - FONT_SIZE, RED, BLACK);
