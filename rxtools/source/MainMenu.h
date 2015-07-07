@@ -208,16 +208,35 @@ void SettingsMenuInit(){
 	}
 }
 
+void BootMenuInit(){
+	char str[100];
+	sprintf(str, "/rxTools/Theme/%c/boot0.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
+	DrawBottomSplash(str);
+	while (true) {
+		u32 pad_state = InputWait();
+		if (pad_state & BUTTON_Y) rxModeEmu();      //Boot emunand
+		else if (pad_state & BUTTON_X) rxModeSys(); //Boot sysnand
+		else if (pad_state & BUTTON_B) break; //Boot sysnand
+	}
+}
+
+void CreditsMenuInit(){
+	char str[100];
+	sprintf(str, "/rxTools/Theme/%c/credits.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
+	DrawBottomSplash(str);
+	WaitForButton(BUTTON_B);
+}
+
 static Menu MainMenu = {
 		"rxTools - Roxas75 [v2.6]",
 		.Option = (MenuEntry[7]){
-			{ " Launch rxMode", NULL, "menu0.bin" },
+			{ " Launch rxMode", &BootMenuInit, "menu0.bin" },
 			{ " Decryption Options", &DecryptMenuInit, "menu1.bin" },
 			{ " Dumping Options", &DumpMenuInit, "menu2.bin" },
 			{ " Injection Options", &InjectMenuInit, "menu3.bin" },
 			{ " Advanced Options", &AdvancedMenuInit, "menu4.bin" },
 			{ " Settings", &SettingsMenuInit, "menu5.bin" },
-			{ " Credits", NULL, "menu6.bin" },
+			{ " Credits", &CreditsMenuInit, "menu6.bin" },
 		},
 		7,
 		0,
