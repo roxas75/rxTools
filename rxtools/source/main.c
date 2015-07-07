@@ -89,6 +89,9 @@ void Initialize(){
 	InstallConfigData();
 	LoadSettings();
 
+	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
+	DrawTopSplash(str);
+
 	if (!bootGUI)
 	{
 		for (int i = 0; i < 0x333333 * 6; i++){
@@ -131,11 +134,6 @@ int main(){
 		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
 		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
 		if(pad_state & BUTTON_A)    	MenuSelect();
-		if (MyMenu->Current == 0) //If we're in the boot screen
-		{
-			if (pad_state & BUTTON_Y) rxModeEmu();      //Boot emunand
-			else if (pad_state & BUTTON_X) rxModeSys(); //Boot sysnand
-		}
 		if(pad_state & BUTTON_SELECT)	returnHomeMenu();
 		if(pad_state & BUTTON_START)	ShutDown();
 		TryScreenShot();
