@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "configuration.h"
-#include "common.h"
 #include "filepack.h"
 #include "screenshot.h"
 #include "fs.h"
@@ -25,6 +24,7 @@
 #define AGB_SIZE 0xD9C00
 #define TWL_SIZE 0x1A1C00
 
+bool first_boot;
 char tmpstr[256] = {0};
 char str[100];
 File tempfile;
@@ -39,12 +39,9 @@ int InstallData(char* drive){
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
 	f_mkdir(tmpstr);
-	//f_chmod(tmpstr, AM_HID, AM_HID);
 	
 	//Read firmware data
-	if(f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) == FR_OK){
-		//... We'll see
-	}else return CONF_NOFIRMBIN;
+	if (f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
 	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create patched native_firm
@@ -54,19 +51,16 @@ int InstallData(char* drive){
 	applyPatch(n_firm, n_firm_patch);
 	u8 keyx[16] = {0};
 	if(GetSystemVersion() < 3){
-		FileOpen(&tempfile, KEYFILENAME, 0);
+		if (!FileOpen(&tempfile, KEYFILENAME, 0))
+		{
+			f_close(&firmfile);
+			return CONF_CANTOPENFILE;
+		}
 		FileRead(&tempfile, &keyx[0], 16, 0);
 		FileClose(&tempfile);
 	}
 	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	for(int i = 0; i < NAT_SIZE; i+=0x4){
-		if(!strcmp((char*)n_firm + i, "Shit")){
-			if(1){
-				memcpy((char*)n_firm + i, rxmode_emu_label, 4);
-			}else{
-				memcpy((char*)n_firm + i, rxmode_sys_label , 4);
-			}
-		}
 		if(!strcmp((char*)n_firm + i, "InsertKeyXHere!") && keyx[0] != 0){
 			memcpy(n_firm + i, keyx, 16);
 		}
@@ -79,8 +73,10 @@ int InstallData(char* drive){
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
 		FileClose(&tempfile);
-		//FileCopy("0004013800000002.bin", tmpstr);
-	}else return CONF_ERRNFIRM;
+	}else {
+		f_close(&firmfile);
+		return CONF_ERRNFIRM;
+	}
 	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create AGB patched firmware
@@ -99,10 +95,13 @@ int InstallData(char* drive){
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
 			FileClose(&tempfile);
-		}else return CONF_ERRNFIRM;
+		}else {
+			f_close(&firmfile);
+			return CONF_ERRNFIRM;
+		}
 		*progress++ = '.';
 	}else{
-		//If we cannot decrypt it from firmware.bin becouse of titlekey messed up, it probably means that AGB has been modified in some way.
+		//If we cannot decrypt it from firmware.bin because of titlekey messed up, it probably means that AGB has been modified in some way.
 		//So we read it from his installed ncch...
 		FindApp(0x00040138, 0x00000202, 1);
 		char* path = getContentAppPath();
@@ -111,7 +110,11 @@ int InstallData(char* drive){
 			/* Try with EmuNAND */
 			FindApp(0x00040138, 0x00000202, 2);
 			path = getContentAppPath();
-			if (!FileOpen(&tempfile, path, 0)) return CONF_ERRNFIRM;
+			if (!FileOpen(&tempfile, path, 0))
+			{
+				f_close(&firmfile);
+				return CONF_ERRNFIRM;
+			}
 		}
 		
 		FileRead(&tempfile, WORKBUF, AGB_SIZE, 0);
@@ -123,7 +126,10 @@ int InstallData(char* drive){
 			if(FileOpen(&tempfile, tmpstr, 1)){
 				FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
 				FileClose(&tempfile);
-			}else return CONF_ERRNFIRM;
+			}else {
+				f_close(&firmfile);
+				return CONF_ERRNFIRM;
+			}
 			*progress++ = '.';
 		}else{
 			*progress++ = 'x'; //If we get here, then we'll play without AGB, lol
@@ -142,7 +148,10 @@ int InstallData(char* drive){
 			FileWrite(&tempfile, t_firm, TWL_SIZE, 0);
 			FileClose(&tempfile);
 			//FileCopy("0004013800000102.bin", tmpstr);
-		}else return CONF_ERRNFIRM;
+		}else {
+			f_close(&firmfile);
+			return CONF_ERRNFIRM;
+		}
 		*progress++ = '.'; 
 	}else{
 		*progress++ = 'x'; 
@@ -154,7 +163,10 @@ int InstallData(char* drive){
 		FileWrite(&tempfile, __DATE__, 12, 0);
 		FileWrite(&tempfile, __TIME__, 9, 12);
 		FileClose(&tempfile);
-	}else return CONF_CANTOPENFILE;
+	}else {
+		f_close(&firmfile);
+		return CONF_CANTOPENFILE;
+	}
 	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	f_close(&firmfile);
@@ -179,7 +191,13 @@ int CheckInstallationData(){
 }
 
 void InstallConfigData(){
-	if(CheckInstallationData() == 0) return;
+	if(CheckInstallationData() == 0)
+	{
+		first_boot = false;
+		return;
+	}
+	
+	first_boot = true;
 	
 	sprintf(str, "/rxTools/Theme/%c/cfg0TOP.bin", Theme);
 	DrawTopSplash(str);
@@ -187,19 +205,8 @@ void InstallConfigData(){
 	DrawBottomSplash(str);
 
 	int res = InstallData("0");	//SD Card
-	if (res == 0)
-	{
-		sprintf(str, "/rxTools/Theme/%c/cfg1O.bin", Theme);
-		DrawBottomSplash(str);
-	}
-	else
-	{
-		sprintf(str, "/rxTools/Theme/%c/cfg1E.bin", Theme);
-		DrawBottomSplash(str);
-	}
+	sprintf(str, "/rxTools/Theme/%c/cfg1%c.bin", Theme, res == 0 ? 'O' : 'E');
+	DrawBottomSplash(str);
 	
-	//print("\nPress A to exit\n"); 
-	WaitForButton(BUTTON_A);
+	InputWait();
 }
-
-
