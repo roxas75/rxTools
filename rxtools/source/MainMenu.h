@@ -79,11 +79,12 @@ static Menu AdvancedMenu = {
 
 static Menu SettingsMenu = {
 	"           SETTINGS",
-	.Option = (MenuEntry[2]){
-		{ "Force UI boot       ", NULL, "app.bin" },
-		{ "Selected Theme:     ", NULL, "app.bin" },
+	.Option = (MenuEntry[3]){
+		{ "Force UI boot               ", NULL, "app.bin" },
+		{ "Selected Theme:             ", NULL, "app.bin" },
+		{ "Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
 	},
-	2,
+	3,
 	0,
 	0
 };
@@ -146,15 +147,17 @@ void AdvancedMenuInit(){
 
 void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
-	bool autobootgui = false;
 	char str[100];
-
-	char settings[] = "00";
+	char settings[] = "000";
+	unsigned char theme_num = 0;
+	
 	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
-		FileRead(&MyFile, settings, 2, 0);
-		Theme = settings[1];
-		if (settings[0] == '1')autobootgui = true;
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
+	{
+		FileRead(&MyFile, settings, 3, 0);
+		bootGUI = (settings[0] == '1');
+		theme_num = (settings[1] - 0x30);
+		agb_bios = (settings[2] == '1');
 	}
 	
 	while (true) {
@@ -163,47 +166,70 @@ void SettingsMenuInit(){
 		if (pad_state & BUTTON_UP)   MenuPrevSelection();
 		if (pad_state & BUTTON_LEFT || pad_state & BUTTON_RIGHT)
 		{
-			if (MyMenu->Current == 0) autobootgui = !autobootgui; //autobootgui settings
+			if (MyMenu->Current == 0) bootGUI ^= 1; //bootGUI settings
 			else if (MyMenu->Current == 1) //theme selection
 			{
-				if (pad_state & BUTTON_LEFT && Theme != '0')
+				/* Jump to the next available theme */
+				File AppBin;
+				bool found = false;
+				unsigned char i;
+				
+				if (pad_state & BUTTON_LEFT && theme_num > 0)
 				{
-					Theme--;
-					sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
-					DrawTopSplash(str);
-				}
-				else if (pad_state & BUTTON_RIGHT && Theme != '9')
-				{
-					sprintf(str, "/rxTools/Theme/%c/app.bin", Theme + 1);
-					File MyFile;
-					if (FileOpen(&MyFile, str, 0))
+					for (i = theme_num - 1; i > 0; i--)
 					{
-						FileClose(&MyFile);
-						Theme++;
-						sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
-						DrawTopSplash(str);
+						sprintf(str, "/rxTools/Theme/%u/app.bin", i);
+						if (FileOpen(&AppBin, str, 0))
+						{
+							FileClose(&AppBin);
+							found = true;
+							break;
+						}
+					}
+					
+					if (i == 0) found = true;
+				} else
+				if (pad_state & BUTTON_RIGHT && theme_num < 9)
+				{
+					for (i = theme_num + 1; i <= 9; i++)
+					{
+						sprintf(str, "/rxTools/Theme/%u/app.bin", i);
+						if (FileOpen(&AppBin, str, 0))
+						{
+							FileClose(&AppBin);
+							found = true;
+							break;
+						}
 					}
 				}
+				
+				if (found)
+				{
+					theme_num = i;
+					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);//DRAW TOP SCREEN TO SEE THE NEW THEME
+					DrawTopSplash(str);
+				}
 			}
+			else if (MyMenu->Current == 2) agb_bios ^= 1; //AGB_FIRM BIOS
 		}
 		if (pad_state & BUTTON_B)
 		{
 			//Code to save settings
-			char tobewritten[] = "00";
-			tobewritten[0] = autobootgui ? '1' : '0';
-			tobewritten[1] = Theme;
-			FileWrite(&MyFile, tobewritten, 2, 0);
+			Theme = (theme_num + 0x30);
+			settings[0] = bootGUI ? '1' : '0';
+			settings[1] = Theme;
+			settings[2] = agb_bios ? '1' : '0';
+			FileWrite(&MyFile, settings, 3, 0);
 			FileClose(&MyFile);
 			break;
 		}
-
+		
 		TryScreenShot();
-
+		
 		//UPDATE SETTINGS GUI
-		if (autobootgui)MyMenu->Option[0].Str = "Force UI boot           <Yes>";
-		else MyMenu->Option[0].Str =            "Force UI boot           <No >";
-	                               sprintf(str, "Selected Theme:         < %c > ", Theme);
-		MyMenu->Option[1].Str = str;
+		sprintf(MyMenu->Option[0].Str, "Force UI boot:      < %s > ", bootGUI ? "Yes" : "No ");
+		sprintf(MyMenu->Option[1].Str, "Selected Theme:     <  %c  > ", Theme);
+		sprintf(MyMenu->Option[2].Str, "Show AGB_FIRM BIOS: < %s > ", agb_bios ? "Yes" : "No ");
 		MenuRefresh();
 	}
 }

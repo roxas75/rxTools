@@ -26,7 +26,9 @@ void MenuSelect();
 void MenuClose();
 void MenuRefresh();
 
+extern bool bootGUI;
 extern char Theme;
+extern bool agb_bios;
 extern Menu* MyMenu;
 
 #endif
