@@ -6,6 +6,7 @@
 #include "sdmmc.h"
 #include "CTRDecryptor.h"
 #include "crypto.h"
+#include "stdio.h"
 
 #define BUF1 (u8*)0x21000000
 #define TITLES (u8*)0x22000000
@@ -199,12 +200,16 @@ ioerror:
 	return;
 }
 
-int GetTitleKey(u8 *TitleKey, u32 low, u32 high) {
+int GetTitleKey(u8 *TitleKey, u32 low, u32 high, int drive) {
 	File tick;
 	u32 tid_low = ((low >> 24) & 0xff) | ((low << 8) & 0xff0000) | ((low >> 8) & 0xff00) | ((low << 24) & 0xff000000);
 	u32 tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
 	u32 tick_size = 0x200;     //Chunk size
-	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
+	
+	char path[64] = {0};
+	sprintf(path, "%d:dbs/ticket.db", drive);
+	
+	if (FileOpen(&tick, path, 0)) {
 		u8 *buf = TITLES;
 		int pos = 0;
 		for (;;) {

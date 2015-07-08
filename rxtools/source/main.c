@@ -13,33 +13,61 @@
 #include "cfw.h"
 #include "configuration.h"
 
-bool bootGUI;
-
 void LoadSettings(){
-	char settings[]="00";
+	char settings[]="000";
 	char str[100];
 	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0)){
-		FileRead(&MyFile, settings, 2, 0);
-		if (settings[0] == '1')bootGUI = true;
-		sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
-		if (FileOpen(&MyFile, str, 0)) Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
-		else Theme = '0';
-		FileClose(&MyFile);
-	}
-	else
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
-		FileOpen(&MyFile, "/rxTools/data/system.txt", 1);
-		FileWrite(&MyFile, "00" , 2, 0);
-		Theme = '0';
+		if (FileGetSize(&MyFile) == 3)
+		{
+			FileRead(&MyFile, settings, 3, 0);
+			bootGUI = (settings[0] == '1');
+			agb_bios = (settings[2] == '1');
+			
+			/* Disable autostart after the first boot */
+			if (first_boot && !bootGUI) bootGUI = true;
+			
+			/* Check if the Theme Number is valid */
+			unsigned char theme_num = (settings[0] - 0x30);
+			if (theme_num >= 0 && theme_num <= 9)
+			{
+				File Menu0;
+				sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
+				if (FileOpen(&Menu0, str, 0))
+				{
+					Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
+					FileClose(&Menu0);
+				} else {
+					Theme = '0';
+				}
+			} else {
+				Theme = '0';
+				FileWrite(&MyFile, &Theme, 1, 1);
+			}
+			
+			FileClose(&MyFile);
+			return;
+		} else {
+			FileClose(&MyFile);
+		}
+	}
+	
+	/* Disable autostart after the first boot */
+	bootGUI = first_boot;
+	Theme = '0';
+	agb_bios = false;
+	
+	/* Create system.txt */
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 1))
+	{
+		FileWrite(&MyFile, settings, 3, 0);
 		FileClose(&MyFile);
 	}
 }
 
 void Initialize(){
 	char str[100];
-
-
 	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
 		DrawString(BOT_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
@@ -58,8 +86,8 @@ void Initialize(){
 	ConsoleSetSpacing(2);
 	ConsoleSetBorderWidth(3);
 	//Check that the data is installed
-	f_mkdir ("rxTools");
-	f_mkdir ("rxTools/nand");
+	f_mkdir("rxTools");
+	f_mkdir("rxTools/nand");
 	InstallConfigData();
 	LoadSettings();
 
@@ -68,6 +96,11 @@ void Initialize(){
 
 	if (!bootGUI)
 	{
+		ConsoleInit();
+		ConsoleSetTitle("           AUTOBOOT");
+		print("Hold R to go to the menu...");
+		ConsoleShow();
+		
 		for (int i = 0; i < 0x333333 * 6; i++){
 			u32 pad = GetInput();
 			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
