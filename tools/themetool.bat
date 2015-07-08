@@ -73,14 +73,6 @@ if not exist "cfg0TOP.bin" (
 ren TOP.bin TOP.bi_
 ren cfg0TOP.bin cfg0TOP.bi_
 for /r %%f in (*.bin) do call :topng %%f 320
-if not exist "TOP.bi_" (
-	echo Cannot find "TOP.bi_"! Aborted.
-	goto:EOF
-)
-if not exist "cfg0TOP.bi_" (
-	echo Cannot find "cfg0TOP.bi_"! Aborted.
-	goto:EOF
-)
 ren TOP.bi_ TOP.bin
 ren cfg0TOP.bi_ cfg0TOP.bin
 call :topng TOP.bin 400
@@ -98,8 +90,7 @@ if not exist "%USERPROFILE%\hero-new-3ds.png" (
 	bitsadmin /transfer "3DS-Template" /download /priority high http://www.nintendo.com/images/page/3ds/what-is-3ds/hero-new-3ds.png "%USERPROFILE%\hero-new-3ds.png"
 )
 if not exist "%USERPROFILE%\hero-new-3ds.png" (
-	echo Unable to locate "%USERPROFILE%\hero-new-3ds.png"! Aborted.
-	GOTO:EOF
+	echo Unable to locate "%USERPROFILE%\hero-new-3ds.png"! Continuing...
 )
 mkdir "Preview/Images/AIO" "Preview/Images/Menu" "Preview/Images/Advanced Options" "Preview/Images/Boot" "Preview/Images/Configuration" "Preview/Images/Decryption" "Preview/Images/Dumping" "Preview/Images/Injection" "Preview/Images/Dump Files" "Preview/Animations/AIO" "Preview/Animations/Menu" "Preview/Animations/Advanced Options" "Preview/Animations/Boot" "Preview/Animations/Configuration" "Preview/Animations/Decryption" "Preview/Animations/Dumping" "Preview/Animations/Injection" "Preview/Animations/Dump Files"
 if exist TOP.png (
