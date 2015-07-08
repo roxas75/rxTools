@@ -51,9 +51,9 @@ void print_sha256(unsigned char hash[32])
 	{
 		print("%02X", hash[i]);
 		
-		if (i == 19)
+		if (i == 16)
 		{
-			/* Continue printing the SHA-256 sum in a new line after 40 characters (20 bytes) */
+			/* Continue printing the SHA-256 sum in a new line after 34 characters (17 bytes) */
 			print("\n"); ConsoleShow();
 		}
 	}
@@ -77,6 +77,7 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 	
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
 	
+	char path[256];
 	unsigned short latest_ver = 0, cur_ver = 0;
 	bool is_v0 = false;
 	
@@ -87,11 +88,11 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 		
 		if (strstr(myInfo->fname, ".tmd") || strstr(myInfo->fname, ".TMD"))
 		{
-			memset(&tmdpath, 0, 256);
-			sprintf(tmdpath, "%s/%s", folder, myInfo->fname);
+			memset(&path, 0, 256);
+			sprintf(path, "%s/%s", folder, myInfo->fname);
 			
 			File tmp;
-			if (!FileOpen(&tmp, tmdpath, 0)) continue;
+			if (!FileOpen(&tmp, path, 0)) continue;
 			
 			unsigned int size = FileGetSize(&tmp);
 			if (size < 0xB34)
@@ -131,14 +132,18 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 				
 				if (b_read != 0x30) continue;
 				
-				memset(&cntpath, 0, 256);
-				sprintf(cntpath, "%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
+				memset(&path, 0, 256);
+				sprintf(path, "%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
 				
-				if (FileOpen(&tmp, cntpath, 0))
+				if (FileOpen(&tmp, path, 0))
 				{
 					FileClose(&tmp);
 					latest_ver = cur_ver;
 					if (cur_ver == 0) is_v0 = true;
+					
+					/* Save TMD and content paths */
+					sprintf(tmdpath, "%s/%s", folder, myInfo->fname);
+					sprintf(cntpath, "%s/%08x.app", folder, bswap_32(tmd_entry.id));
 				}
 			} else {
 				FileClose(&tmp);
@@ -215,7 +220,7 @@ void downgradeMSET()
 	unsigned short mset_ver[6] = { 3074, 3078, 3075, 8, 1026, 8 };
 	
 	ConsoleInit();
-	ConsoleSetTitle("MSET Downgrader");
+	ConsoleSetTitle("         MSET DOWNGRADER");
 	print("Opening MSET app...\n"); ConsoleShow();
 	
 	if (CheckRegion(SYS_NAND) == 0)
@@ -257,7 +262,7 @@ void downgradeMSET()
 									u8 iv[0x10] = {0};
 									u8 Key[0x10] = {0};
 									
-									GetTitleKey(&Key[0], titleid_low, titleid_high[region]);
+									GetTitleKey(&Key[0], titleid_low, titleid_high[region], SYS_NAND);
 									
 									aes_context aes_ctxt;
 									aes_setkey_dec(&aes_ctxt, Key, 0x80);
@@ -275,7 +280,7 @@ void downgradeMSET()
 											f_unlink(dgpath);
 											print("done.\n"); ConsoleShow();
 										} else {
-											print("\nError downgrading MSET content file.\nRemoving downgrade pack... "); ConsoleShow();
+											print("\nError downgrading MSET content.\nRemoving downgrade pack... "); ConsoleShow();
 											f_unlink(dgpath);
 											print("done.\n"); ConsoleShow();
 										}
@@ -289,19 +294,19 @@ void downgradeMSET()
 								print("Error: bad downgrade pack.\n"); ConsoleShow();
 							}
 						} else {
-							print("MSET is already in its exploitable version.\nThere's no need to downgrade.\n"); ConsoleShow();
+							print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
 						}
 					} else {
 						print("Error opening MSET content file.\n"); ConsoleShow();
 					}
 				} else {
-					print("MSET is already in its exploitable version.\nThere's no need to downgrade.\n"); ConsoleShow();
+					print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
 				}
 			} else {
 				print("Error opening MSET TMD.\n"); ConsoleShow();
 			}
 		} else {
-			print("Error: couldn't find the MSET TMD/content.\n"); ConsoleShow();
+			print("Error: couldn't find MSET data.\n"); ConsoleShow();
 		}
 	}
 	
@@ -337,7 +342,7 @@ void manageFBI(bool restore)
 	if ((drive = NandSwitch()) == UNK_NAND) return;
 	
 	ConsoleInit();
-	ConsoleSetTitle(restore ? "Restore Health & Safety" : "FBI Installation");
+	ConsoleSetTitle(restore ? "     RESTORE HEALTH & SAFETY" : "         FBI INSTALLATION");
 	
 	if (CheckRegion(drive) == 0)
 	{
@@ -414,7 +419,7 @@ void manageFBI(bool restore)
 				sprintf(path, "0:fbi_inject.tmd");
 				sprintf(path2, "0:fbi_inject.app");
 				
-				print("Editing Health & Safety Information... "); ConsoleShow();
+				print("Editing H&S Information... "); ConsoleShow();
 			} else {
 				/* Generate the H&S backup data paths */
 				memset(&tmpstr, 0, 256);
@@ -422,7 +427,7 @@ void manageFBI(bool restore)
 				sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
 				sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
 				
-				print("Restoring Health & Safety Information... "); ConsoleShow();
+				print("Restoring H&S Information... "); ConsoleShow();
 			}
 			
 			/* Open the SD TMD */
@@ -474,7 +479,7 @@ void manageFBI(bool restore)
 													print("OK!\nDeleting %s data... ", restore ? "backup" : "FBI injection"); ConsoleShow();
 													f_unlink(path);
 													f_unlink(path2);
-													print("done.\n"); ConsoleShow();
+													print("OK!\n"); ConsoleShow();
 												} else {
 													print("\nError %s content file.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
 												}
@@ -489,35 +494,35 @@ void manageFBI(bool restore)
 										}
 									} else {
 										FileClose(&tmp);
-										print("\nError: invalid %s size.\nGot: v%u / Expected: v%u\n", restore ? "H&S content file backup" : "FBI content file", size, sd_cntsize); ConsoleShow();
+										print("\nInvalid %s content size.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", size, sd_cntsize); ConsoleShow();
 									}
 								} else {
-									print("\nError opening %s.\n", restore ? "H&S content file backup" : "FBI content file");
+									print("\nError opening %s content.\n", restore ? "backup" : "FBI");
 								}
 							} else {
-								print("\nError: invalid Content Chunk Record hash.\nGot:\n"); ConsoleShow();
+								print("\nError: invalid Content Chunk hash.\nGot:\n"); ConsoleShow();
 								print_sha256(CntChnkRecSum);
 								print("\nExpected:\n"); ConsoleShow();
 								print_sha256(TmdCntChnkRecSum);
 							}
 						} else {
-							print("\nError: invalid Content Info Record hash.\nGot:\n"); ConsoleShow();
+							print("\nError: invalid Content Info hash.\nGot:\n"); ConsoleShow();
 							print_sha256(CntInfoRecSum);
 							print("\nExpected:\n"); ConsoleShow();
 							print_sha256(TmdCntInfoRecSum);
 						}
 					} else {
-						print("\nError: invalid %s version.\nGot: v%u / Expected: v%u\n", restore ? "H&S TMD backup" : "FBI TMD", sd_tmd_ver, tmd_ver); ConsoleShow();
+						print("\nError: invalid %s TMD version.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", sd_tmd_ver, tmd_ver); ConsoleShow();
 					}
 				} else {
 					FileClose(&tmp);
-					print("\nError: invalid %s size.\nGot: %u / Expected: %u\n", restore ? "H&S TMD backup" : "FBI TMD", size, 0xB34); ConsoleShow();
+					print("\nError: invalid %s TMD size.\nGot: %u / Expected: %u\n", restore ? "backup" : "FBI", size, 0xB34); ConsoleShow();
 				}
 			} else {
-				print("\nError opening %s.\n", restore ? "H&S TMD backup" : "FBI TMD"); ConsoleShow();
+				print("\nError opening %s TMD.\n", restore ? "backup" : "FBI"); ConsoleShow();
 			}
 		} else {
-			print("Error: couldn't find H&S TMD/content.\n"); ConsoleShow();
+			print("Error: couldn't find H&S data.\n"); ConsoleShow();
 		}
 	}
 	
