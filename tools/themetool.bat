@@ -15,6 +15,7 @@ if "%1"=="makebgr" goto :makebgr
 if "%1"=="makebgr-all" goto :makebgr-all
 if "%1"=="makepng-all" goto :makepng-all
 if "%1"=="makeprev" goto :makeprev
+if "%1"=="strippng-all" goto :strippng-all
 
 echo This tool is meant for theme creators. Available commands:
 echo.
@@ -30,6 +31,7 @@ echo      makeprev [gif delay]: creates a preview (animated GIFs and static PNGs
 echo                in the "Preview" folder. An Internet connection is recommended
 echo                the first time to download the New Nintendo 3DS XL frame, which
 echo                will be saved as "~/hero-new-3ds.png".
+echo      strippng-all: removes unnecessary data from all PNG files.
 echo.
 GOTO:EOF
 :makebgr
@@ -113,6 +115,7 @@ if exist TOP.png (
 
 	call :makep1 TOP.png boot.png
 	call :makep1 TOP.png bootE.png
+	call :makep1 TOP.png credits.png
 	call :makep1 cfg0TOP.png cfg0.png
 	call :makep1 cfg0TOP.png cfg1E.png
 	call :makep1 cfg0TOP.png cfg1O.png
@@ -138,8 +141,8 @@ convert -delay %delay% -loop 0 inj0.png inj1.png Preview/inj-0.gif
 convert -delay %delay% -loop 0 Preview/inj0.png Preview/inj1.png Preview/inj-1.gif
 convert -delay %delay% -loop 0 cfg0.png cfg1E.png cfg1O.png Preview/cfg-0.gif
 convert -delay %delay% -loop 0 Preview/cfg0.png Preview/cfg1E.png Preview/cfg1O.png Preview/cfg-1.gif
-convert -delay %delay% -loop 0 menu0.png boot.png bootE.png menu1.png dec0.png dec1.png dec2.png dec3.png dec4.png dec5.png menu2.png dmp0.png dmp1.png dmp2.png dec0.png dec1.png dec2.png dec3.png dec4.png menu3.png inj0.png inj1.png menu4.png adv0.png adv1.png adv2.png adv3.png menu5.png menu6.png Preview/menuprev-aio-0.gif
-convert -delay %delay% -loop 0 Preview/menu0.png Preview/boot.png Preview/bootE.png Preview/menu1.png Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/dec5.png Preview/menu2.png Preview/dmp0.png Preview/dmp1.png Preview/dmp2.png Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/menu3.png Preview/inj0.png Preview/inj1.png Preview/menu4.png Preview/adv0.png Preview/adv1.png Preview/adv2.png Preview/adv3.png Preview/menu5.png Preview/menu6.png Preview/menuprev-aio-1.gif
+convert -delay %delay% -loop 0 menu0.png boot.png bootE.png menu1.png dec0.png dec1.png dec2.png dec3.png dec4.png dec5.png menu2.png dmp0.png dmp1.png dmp2.png dec0.png dec1.png dec2.png dec3.png dec4.png menu3.png inj0.png inj1.png menu4.png adv0.png adv1.png adv2.png adv3.png menu5.png app.png menu6.png credits.png Preview/menuprev-aio-0.gif
+convert -delay %delay% -loop 0 Preview/menu0.png Preview/boot.png Preview/bootE.png Preview/menu1.png Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/dec5.png Preview/menu2.png Preview/dmp0.png Preview/dmp1.png Preview/dmp2.png Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/menu3.png Preview/inj0.png Preview/inj1.png Preview/menu4.png Preview/adv0.png Preview/adv1.png Preview/adv2.png Preview/adv3.png Preview/menu5.png Preview/app.png Preview/menu6.png Preview/credits.png Preview/menuprev-aio-1.gif
 	
 cd Preview
 
@@ -163,8 +166,23 @@ move dmp*.png Images/Dumping
 move inj*.png Images/Injection
 move fil*.png "Images/Dump Files"
 move app.png Images
+move credits.png Images
 
 cd..
+GOTO:EOF
+
+:strippng-all
+
+GOTO:EOF
+set cdorig=%CD%
+if not "%2"=="" CD %2
+set i=0
+for %%f in (*.png) do call :strippng-all_convert "%%f"
+CD "%cdorig%"
+GOTO:EOF
+:strippng-all_convert
+set /a i=%i%+1
+convert "%~nx1" -strip "%~nx1"
 GOTO:EOF
 
 :makep1
