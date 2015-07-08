@@ -25,6 +25,9 @@ void LoadSettings(){
 			bootGUI = (settings[0] == '1');
 			agb_bios = (settings[2] == '1');
 			
+			/* Disable autostart after the first boot */
+			if (first_boot && !bootGUI) bootGUI = true;
+			
 			/* Check if the Theme Number is valid */
 			unsigned char theme_num = (settings[0] - 0x30);
 			if (theme_num >= 0 && theme_num <= 9)
@@ -50,7 +53,8 @@ void LoadSettings(){
 		}
 	}
 	
-	bootGUI = false;
+	/* Disable autostart after the first boot */
+	bootGUI = first_boot;
 	Theme = '0';
 	agb_bios = false;
 	
@@ -64,8 +68,6 @@ void LoadSettings(){
 
 void Initialize(){
 	char str[100];
-
-
 	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
 		DrawString(BOT_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
@@ -84,8 +86,8 @@ void Initialize(){
 	ConsoleSetSpacing(2);
 	ConsoleSetBorderWidth(3);
 	//Check that the data is installed
-	f_mkdir ("rxTools");
-	f_mkdir ("rxTools/nand");
+	f_mkdir("rxTools");
+	f_mkdir("rxTools/nand");
 	InstallConfigData();
 	LoadSettings();
 
@@ -94,6 +96,11 @@ void Initialize(){
 
 	if (!bootGUI)
 	{
+		ConsoleInit();
+		ConsoleSetTitle("           AUTOBOOT");
+		print("Hold R to go to the menu...");
+		ConsoleShow();
+		
 		for (int i = 0; i < 0x333333 * 6; i++){
 			u32 pad = GetInput();
 			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
