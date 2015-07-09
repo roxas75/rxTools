@@ -35,14 +35,12 @@ Requirements for Windows:
 - git, clone this repository with the following command: *git  clone --recursive https://github.com/roxas75/rxTools.git*
 - [Python 2.7](https://www.python.org)
 - [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM option and suboptions installed (in case make.exe fails with stack trace dump, install [GnuWin Make](http://gnuwin32.sourceforge.net) and place it in path before devkitPRO/msys/bin)
-- [armips](https://github.com/Kingcom/armips) (for Windows [Visual Studio 2013 Express for Windows](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or higher is required to build armips)
 - GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with mingw32-base will be fine)
 - [ImageMagick](http://www.imagemagick.org)
 
 Requirements for GNU/Linux:
 - [git](https://apps.ubuntu.com/cat/applications/git/), clone this repository with the following command: *git  clone --recursive https://github.com/roxas75/rxTools.git*
 - [devkitPRO and devkitARM](http://3dbrew.org/wiki/Setting_up_Development_Environment) (follow the tutorial for Linux)
-- [armips](https://github.com/Kingcom/armips)
 - [ImageMagick](http://www.imagemagick.org) (on Debian/Ubuntu, [install it using apt](https://apps.ubuntu.com/cat/applications/imagemagick/))
 
 Just run **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.

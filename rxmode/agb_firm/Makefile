@@ -6,13 +6,13 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
-include $(DEVKITARM)/ds_rules
+include $(DEVKITARM)/base_rules
 
 TARGET 		:=  patch.bin
 BUILD		:=	build
+SOURCE		:=	source
 TOOLS		:=	../../tools
-ARMIPS    	:=  armips
-SFILES 		:=  $(wildcard source/*.s)
+LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
 
@@ -20,10 +20,21 @@ all: $(BUILD) patch.bin
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-
-patch.bin:
-	@$(foreach sfile,$(SFILES), $(ARMIPS) $(sfile);)
+	
+arm9payload.bin:
+	
+patch.bin: $(BUILD)/080238a8.bin
 	@$(TOOLS)/cfwtool $(BUILD) $(TARGET) a
+
+$(BUILD)/%.bin: $(BUILD)/%.elf
+	$(OBJCOPY) -O binary $< $@
+
+$(BUILD)/%.elf: $(BUILD)/%.o
+	$(LD) -e 0 -Ttext $(<:$(BUILD)/%.o=0x%) $< -o $@
+
+$(BUILD)/080238a8.o: $(SOURCE)/p9_signatures_spoof.s
+	$(AS) $< -o $@
+
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
