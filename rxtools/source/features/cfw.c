@@ -29,13 +29,7 @@ void (*_softreset)() = (void*)0x080F0000;
 // @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
 // @note   Maybe modified to support more platforms
 Platform_UnitType Platform_CheckUnit(void) {
-	switch (*PLATFORM_REG) {
-	case 7:
-		return PLATFORM_N3DS;
-	case 1:
-	default:
-		return PLATFORM_3DS;
-	}
+	return *PLATFORM_REG;
 }
 
 void firmlaunch(u8* firm){
@@ -152,24 +146,27 @@ void rxModeQuickBoot(){
 
 //Just patches signatures check, loads in sysnand
 void DevMode(){
-    u8* firm = (void*)0x24000000;
-    nand_readsectors(0, 0xF0000/0x200, firm, FIRM0);
-    if(strncmp((char*)firm, "FIRM", 4))
-    nand_readsectors(0, 0xF0000/0x200, firm, FIRM1);
+	if(Platform_CheckUnit() == PLATFORM_3DS)
+	{
+		u8* firm = (void*)0x24000000;
+		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
+		if (strncmp((char*)firm, "FIRM", 4))
+			nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
 
-    unsigned char sign1[] = {0xC1, 0x17, 0x49, 0x1C, 0x31, 0xD0, 0x68, 0x46, 0x01, 0x78, 0x40, 0x1C, 0x00, 0x29, 0x10, 0xD1};
-    unsigned char sign2[] = {0xC0, 0x1C, 0x76, 0xE7, 0x20, 0x00, 0x74, 0xE7, 0x22, 0xF8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F};
-    unsigned char patch1[] = { 0x00, 0x20, 0x4E, 0xB0, 0x70, 0xBD };
-    unsigned char patch2[] = { 0x00, 0x20};
+		unsigned char sign1[] = { 0xC1, 0x17, 0x49, 0x1C, 0x31, 0xD0, 0x68, 0x46, 0x01, 0x78, 0x40, 0x1C, 0x00, 0x29, 0x10, 0xD1 };
+		unsigned char sign2[] = { 0xC0, 0x1C, 0x76, 0xE7, 0x20, 0x00, 0x74, 0xE7, 0x22, 0xF8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F };
+		unsigned char patch1[] = { 0x00, 0x20, 0x4E, 0xB0, 0x70, 0xBD };
+		unsigned char patch2[] = { 0x00, 0x20 };
 
-    for(int i = 0; i < 0xF0000; i++){
-        if(!memcmp(firm + i, sign1, 16)){
-            memcpy(firm + i, patch1, 6);
-        }
-        if(!memcmp(firm + i, sign2, 16)){
-            memcpy(firm + i, patch2, 2);
-        }
-    }
-    memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
-	_softreset();
+		for (int i = 0; i < 0xF0000; i++){
+			if (!memcmp(firm + i, sign1, 16)){
+				memcpy(firm + i, patch1, 6);
+			}
+			if (!memcmp(firm + i, sign2, 16)){
+				memcpy(firm + i, patch2, 2);
+			}
+		}
+		memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
+		_softreset();
+	}
 }

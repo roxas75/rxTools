@@ -5,8 +5,8 @@
 
 
 typedef enum {
-	PLATFORM_3DS,
-	PLATFORM_N3DS,
+	PLATFORM_3DS=1,
+	PLATFORM_N3DS=7,
 } Platform_UnitType;
 
 void DevMode();
