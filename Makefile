@@ -66,7 +66,7 @@ theme:
 
 .PHONY: doc
 doc:
-	@cp doc/QuickStartGuide.pdf release/
+	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
 
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
