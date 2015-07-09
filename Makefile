@@ -64,5 +64,9 @@ theme:
 	@mv theme/*.bin release/theme/0
 	@cp tools/themetool.sh tools/themetool.bat release/theme/0
 
+.PHONY: doc
+doc:
+	@cp doc/QuickStartGuide.pdf release/
+
 $(tools): tools/%: tools/toolsrc/%/main.c
 	$(LINK.c) $(OUTPUT_OPTION) $^
