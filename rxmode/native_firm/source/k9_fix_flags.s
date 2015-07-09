@@ -2,8 +2,7 @@
 // |      Copyright(c) 2015, Roxas75      | //
 // |         All rights reserved.         | //
 // ---------------------------------------- //
-.nds
-.create build/0801B564.bin, 0x0801B564
+@ k9 fix flags
 .thumb
 
     .word 0x360003
@@ -17,5 +16,3 @@
     .word 0x1010101
     .word 0x1C0603
     .word 0x8020000
-	
-.close

@@ -1,94 +1,7 @@
-// ---------------------------------------- //
-// |      Copyright(c) 2015, Roxas75      | //
-// |         All rights reserved.         | //
-// ---------------------------------------- //
-//FIRM Reboot patch, which is necessary for the hi-ram using games to boot.
-//TODO : Do not exclude other FIRMS to be opened. Not important until we patch them for emunand
-
-//----------------- GLOBALS -----------------------
-//Taken From NATIVE_FIRM 9.6
-.definelabel fopen9,        0x0805B180
-.definelabel fread9,        0x0804D9B0
-.definelabel fwrite9,       0x0805C4D0
-.definelabel readpxi,       0x08055178
-.definelabel filehandle,    0x2000E000
-.definelabel byteswritten,  0x2000E100
-.definelabel buffer,        0x24000000
-
-//----------------- PROCESS9 ----------------------
-.nds
-.create build/080859EC.bin, 0x080859EC
-.arm
-.align 4
-	GetFileName:
-		ldr r2, =filename
-		mov r1, #0x30
-		add r0, sp, #0x3A8-0x70
-		blx 0x080282CE
-		
-    ClearWorkspace:
-        ldr r0, =filehandle
-        ldr r1, =0x200
-        mov r2, #0
-        add r1, r1, r0
-        CHL1:
-            str r2, [r0]
-            add r0, #4
-            cmp r0, r1
-            blt CHL1
-
-    OpenFirm:
-        ldr r0, =filehandle
-		add r1, sp, #0x3A8-0x70
-        mov r2, #1
-        blx fopen9
-
-    ReadFirm:
-        ldr r0, =filehandle
-        ldr r1, =byteswritten
-        ldr r2, =buffer
-        ldr r3, =0x200000
-        blx fread9
-
-    CheckFirm:
-        ldr r0, =buffer
-        ldr r0, [r0]
-        ldr r1, =0x4D524946
-        cmp r0, r1
-        bne InfiniteLoop
-
-    doPxi:
-        ldr r4, =0x44846
-        blx readpxi
-        cmp r0, r4
-        bne doPxi
-
-    KernelSetState:
-        mov r2, #0
-        mov r3, r2
-        mov r1, r2
-        mov r0, r2
-        .word 0xEF00007C    //SVC 0x7C
-
-    GoToReboot:
-        ldr r0, =0x80FF4FC
-        .word 0xEF00007B    //SVC 0x7B
-
-    InfiniteLoop:
-        b InfiniteLoop
-
-.pool
-filename:
-	//dcw "nand:/rxtools/%08x%08x.bin"
-	dcw "sdmc:/rxtools/data/%08x%08x.bin"
-.halfword 0
-.close
-
 //----------------- REBOOT FUNCTION ----------------
-.nds
-.create build/08094454.bin, 0x080FF600
+.equ buffer,        0x24000000
 .arm
-.align 4
+.align 2
 
     memoryPermission:
         STMFD   SP!, {R4-R11,LR}
@@ -176,7 +89,7 @@ filename:
         MCR     p15, 0, R1,c7,c6, 0
         MCR     p15, 0, R1,c7,c10, 4
         LDR     R0, =buffer
-        MOV     R1, 0x1FFFFFFC
+        MOV     R1, #0x1FFFFFFC
         LDR     R2, [R0,#8]
         STR     R2, [R1]
         LDR     R0, [R0,#0xC]
@@ -200,5 +113,3 @@ MemCopy:
                  MOV     LR, R12
                  BX      LR
 .pool
-
-.close
