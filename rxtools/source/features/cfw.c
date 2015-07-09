@@ -18,11 +18,25 @@
 
 #define FIRM_ADDR (void*)0x24000000
 #define ARMBXR4	0x47204C00	
+#define PLATFORM_REG ((volatile u32*)0x10140FFC)
 
 char tmp[256];
 char str[100];
 unsigned int emuNandMounted = 0;
 void (*_softreset)() = (void*)0x080F0000;
+
+// @breif  Determine platform of the console.
+// @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
+// @note   Maybe modified to support more platforms
+Platform_UnitType Platform_CheckUnit(void) {
+	switch (*PLATFORM_REG) {
+	case 7:
+		return PLATFORM_N3DS;
+	case 1:
+	default:
+		return PLATFORM_3DS;
+	}
+}
 
 void firmlaunch(u8* firm){
 	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
