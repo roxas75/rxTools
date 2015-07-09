@@ -228,7 +228,7 @@ void SettingsMenuInit(){
 		
 		//UPDATE SETTINGS GUI
 		sprintf(MyMenu->Option[0].Str, "Force UI boot:      < %s > ", bootGUI ? "Yes" : "No ");
-		sprintf(MyMenu->Option[1].Str, "Selected Theme:     <  %c  > ", Theme);
+		sprintf(MyMenu->Option[1].Str, "Selected Theme:     <  %c  > ", theme_num + 0x30);
 		sprintf(MyMenu->Option[2].Str, "Show AGB_FIRM BIOS: < %s > ", agb_bios ? "Yes" : "No ");
 		MenuRefresh();
 	}
