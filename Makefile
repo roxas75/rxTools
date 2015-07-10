@@ -24,7 +24,7 @@ clean:
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 .PHONY: release
-release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh theme rxinstaller.nds
+release: rxTools.dat brahma/brahma.3dsx brahma/brahma.smdh theme doc rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
@@ -39,7 +39,7 @@ rxTools.dat: rxtools/rxtools.bin rxmode/*.bin data.bin
 
 .PHONY: rxinstaller.nds
 rxinstaller.nds:
-	@make -C rxinstaller all
+	@make -C rxinstaller
 
 .PHONY: brahma/brahma.3dsx brahma/brahma.smdh
 brahma/brahma.3dsx brahma/brahma.smdh:

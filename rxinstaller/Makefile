@@ -22,9 +22,9 @@ include $(DEVKITARM)/ds_rules
 TARGET   := $(shell basename $(CURDIR))
 BUILD    := build
 SOURCES  := source
-INCLUDES := source
-DATA     := data
-GRAPHICS := gfx
+INCLUDES := include
+DATA     := 
+GRAPHICS := data
 AUDIO    :=
 ICON     := 
 
@@ -44,7 +44,7 @@ ARCH := -marm -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
 CFLAGS   := -Wno-multichar -g -Wall -O3\
             $(ARCH) $(INCLUDE) -DARM9
-CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions
+CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -O3
 ASFLAGS  := -g $(ARCH)
 LDFLAGS   = -specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
@@ -74,7 +74,7 @@ LIBDIRS := $(LIBNDS) $(PORTLIBS)
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
-export TOOLS := ../../tools
+
 export OUTPUT := $(CURDIR)
 
 export VPATH := $(CURDIR)/$(subst /,,$(dir $(ICON)))\
@@ -88,7 +88,7 @@ CFILES   := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
 CPPFILES := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 SFILES   := $(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
 PNGFILES := $(foreach dir,$(GRAPHICS),$(notdir $(wildcard $(dir)/*.png)))
-BINFILES := mset4x.bin mset6x.bin
+BINFILES := $(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
 # prepare NitroFS directory
 ifneq ($(strip $(NITRO)),)
@@ -110,7 +110,19 @@ ifneq ($(strip $(AUDIO)),)
   endif
 endif
 
-export LD := arm-none-eabi-ld
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+  export LD := $(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+  export LD := $(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
 
 export OFILES   := $(addsuffix .o,$(BINFILES))\
                    $(PNGFILES:.png=.o)\
@@ -138,58 +150,36 @@ else
   endif
 endif
 
-.PHONY: $(BUILD) clean all
+.PHONY: $(BUILD) clean
 
 #---------------------------------------------------------------------------------
-all: data/mset4x.bin data/mset6x.bin $(BUILD)
-	make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-	rm $(OUTPUT).elf
-
-data/%.bin: $(BUILD)/%.elf data
-	$(OBJCOPY) -O binary $< $@
-
-$(BUILD)/mset4x.elf: $(BUILD)/mset4x.o
-	$(LD) -e 0 -Ttext 0x00279400 $< -o $@
-
-$(BUILD)/mset6x.elf: $(BUILD)/mset6x.o
-	$(LD) -e 0 -Ttext 0x00279400 $< -o $@
-
-$(BUILD)/%.o: rop/%.s $(BUILD)
-	$(AS) $< -o $@
-
-$(DATA):
-	mkdir $@
-
-$(BUILD):
-	mkdir -p $@
+$(BUILD): include/patches.h
+	@mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(SOUNDBANK) data/*.bin
+	@rm -fr $(BUILD) ../$(TARGET).elf ../$(TARGET).nds $(SOUNDBANK) patches.elf patches
+
+include/patches.h: patches
+	xxd -i patches | sed -e "s/patches_len/fSIZE/g" -e "s/patches/rawData/g" -e "s/unsigned char/const unsigned char/g" > include/patches.h
+
+patches: patches.elf
+	$(OBJCOPY) -O binary $^ $@
+
+patches.elf: patches.S
+	$(CC) -nostartfiles -nostdlib -Ttext=0 patches.S -o $@
 
 #---------------------------------------------------------------------------------
 else
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-  export LD := $(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-  export LD := $(CXX)
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).nds: $(OUTPUT).elf $(GAME_ICON) 
+$(OUTPUT).nds: $(OUTPUT).elf $(GAME_ICON) patches
 $(OUTPUT).elf: $(OFILES)
+
 
 # need to build soundbank first
 $(OFILES): $(SOUNDBANK)
