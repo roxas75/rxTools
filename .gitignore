@@ -58,4 +58,5 @@ Temporary Items
 **/build
 **/data
 release.zip
-rxtools/source/font.h
+**/font.h
+**/patches.h
