@@ -160,9 +160,10 @@ $(BUILD): include/patches.h
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) ../$(TARGET).elf ../$(TARGET).nds $(SOUNDBANK) patches.elf patches
+	@rm -fr $(BUILD) ../$(TARGET).elf ../$(TARGET).nds $(SOUNDBANK) patches.elf patches include/
 
 include/patches.h: patches
+	mkdir include
 	xxd -i patches | sed -e "s/patches_len/fSIZE/g" -e "s/patches/rawData/g" -e "s/unsigned char/const unsigned char/g" > include/patches.h
 
 patches: patches.elf
