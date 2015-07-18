@@ -198,9 +198,37 @@ void InstallConfigData(){
 	}
 	
 	first_boot = true;
-	
+
+	char settings[]="00010";
+	File MyFile;
+	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
+	{
+		if (FileGetSize(&MyFile) == 5)
+		{
+			FileRead(&MyFile, settings, 5, 0);
+
+			/* Check if the Theme Number is valid */
+			unsigned char theme_num = (settings[0] - 0x30);
+			if (theme_num >= 0 && theme_num <= 9)
+			{
+				File Menu0;
+				sprintf(str, "/rxTools/Theme/%c/cfg0.bin", settings[1]);
+				if (FileOpen(&Menu0, str, 0))
+				{
+					Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
+					FileClose(&Menu0);
+				} else {
+					Theme = '0';
+				}
+			} else {
+				Theme = '0';
+				FileWrite(&MyFile, &Theme, 1, 1);
+			}
+		}
+	}
+
 	sprintf(str, "/rxTools/Theme/%c/cfg0TOP.bin", Theme);
-	DrawTopSplash(str);
+	DrawTopSplash(str, str, str);
 	sprintf(str, "/rxTools/Theme/%c/cfg0.bin", Theme);
 	DrawBottomSplash(str);
 

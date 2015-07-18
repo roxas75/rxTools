@@ -182,10 +182,24 @@ u32 GetPixel(u8 *screen, u32 x, u32 y){
 
 //----------------New Splash Screen Stuff------------------
 
-void DrawTopSplash(char splash_file[]) {
+void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[]) {
 	unsigned int n = 0, bin_size;
-	File Splash;
-	if (FileOpen(&Splash, splash_file, 0))
+	File Splash, SplashL, SplashR;
+	if (FileOpen(&SplashL, splash_fileL, 0)&&FileOpen(&SplashR, splash_fileR, 0))
+	{
+		//Load the spash image
+		bin_size = 0;
+		while ((n = FileRead(&SplashL, (void*)((u32)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+			bin_size += n;
+		}
+		FileClose(&SplashL);
+		bin_size = 0;
+		while ((n = FileRead(&SplashR, (void*)((u32)TOP_SCREEN2 + bin_size), 0x100000, bin_size)) > 0) {
+			bin_size += n;
+		}
+		FileClose(&SplashR);
+	}
+	else if (FileOpen(&Splash, splash_file, 0))
 	{
 		//Load the spash image
 		bin_size = 0;

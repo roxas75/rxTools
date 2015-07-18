@@ -9,7 +9,7 @@
 Menu* MyMenu;
 Menu *MenuChain[100];
 int openedMenus = 0;
-bool bootGUI, agb_bios;
+bool bootGUI, agb_bios, theme_3d, silent_boot;
 char Theme = '0';
 char str[100];
 
