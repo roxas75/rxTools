@@ -29,6 +29,8 @@ void MenuRefresh();
 extern bool bootGUI;
 extern char Theme;
 extern bool agb_bios;
+extern bool theme_3d;
+extern bool silent_boot;
 extern Menu* MyMenu;
 
 #endif

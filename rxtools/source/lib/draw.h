@@ -33,7 +33,7 @@ void DrawPixel(u8 *screen, u32 x, u32 y, u32 color);
 u32 GetPixel(u8 *screen, u32 x, u32 y);
 void Debug(const char *format, ...);
 
-void DrawTopSplash(char splash_file[]);
+void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[]);
 void DrawBottomSplash(char splash_file[]);
 void SplashScreen();
 //Unused functions.
