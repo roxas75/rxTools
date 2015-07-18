@@ -79,12 +79,14 @@ static Menu AdvancedMenu = {
 
 static Menu SettingsMenu = {
 	"           SETTINGS",
-	.Option = (MenuEntry[3]){
+	.Option = (MenuEntry[5]){
 		{ "Force UI boot               ", NULL, "app.bin" },
 		{ "Selected Theme:             ", NULL, "app.bin" },
 		{ "Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
+		{ "Enable 3D UI:               ", NULL, "app.bin" },
+		{ "Silent/quick boot:          ", NULL, "app.bin" },
 	},
-	3,
+	5,
 	0,
 	0
 };
@@ -148,16 +150,20 @@ void AdvancedMenuInit(){
 void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
 	char str[100];
-	char settings[] = "000";
+	char strl[100];
+	char strr[100];
+	char settings[] = "00010";
 	unsigned char theme_num = 0;
 	
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
-		FileRead(&MyFile, settings, 3, 0);
+		FileRead(&MyFile, settings, 5, 0);
 		bootGUI = (settings[0] == '1');
 		theme_num = (settings[1] - 0x30);
 		agb_bios = (settings[2] == '1');
+		theme_3d = (settings[3] == '1');
+		silent_boot = (settings[4] == '1');
 	}
 	
 	while (true) {
@@ -166,7 +172,12 @@ void SettingsMenuInit(){
 		if (pad_state & BUTTON_UP)   MenuPrevSelection();
 		if (pad_state & BUTTON_LEFT || pad_state & BUTTON_RIGHT)
 		{
-			if (MyMenu->Current == 0) bootGUI ^= 1; //bootGUI settings
+			if (MyMenu->Current == 0)
+			{
+				bootGUI ^= 1; //bootGUI settings
+				if(bootGUI)
+					silent_boot=0;
+			}
 			else if (MyMenu->Current == 1) //theme selection
 			{
 				/* Jump to the next available theme */
@@ -206,11 +217,45 @@ void SettingsMenuInit(){
 				if (found)
 				{
 					theme_num = i;
-					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);//DRAW TOP SCREEN TO SEE THE NEW THEME
-					DrawTopSplash(str);
+					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+					if(theme_3d)
+					{
+						sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", theme_num);
+						sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", theme_num);
+						DrawTopSplash(str, strl, strr);
+					}
+					else
+					{
+						sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+						DrawTopSplash(str, str, str);
+					}
+
+					Theme = (theme_num + 0x30);
 				}
 			}
 			else if (MyMenu->Current == 2) agb_bios ^= 1; //AGB_FIRM BIOS
+			else if (MyMenu->Current == 3)
+			{
+				theme_3d ^= 1; //3D UI
+				sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+				if(theme_3d)
+				{
+					sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", theme_num);
+					sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", theme_num);
+					DrawTopSplash(str, strl, strr);
+				}
+				else
+				{
+					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+					DrawTopSplash(str, str, str);
+				}
+			}
+			else if (MyMenu->Current == 4)
+			{
+				silent_boot ^= 1; //SILENT BOOT
+				if(silent_boot)
+					bootGUI = 0;
+			}
 		}
 		if (pad_state & BUTTON_B)
 		{
@@ -219,7 +264,9 @@ void SettingsMenuInit(){
 			settings[0] = bootGUI ? '1' : '0';
 			settings[1] = Theme;
 			settings[2] = agb_bios ? '1' : '0';
-			FileWrite(&MyFile, settings, 3, 0);
+			settings[3] = theme_3d ? '1' : '0';
+			settings[4] = silent_boot ? '1' : '0';
+			FileWrite(&MyFile, settings, 5, 0);
 			FileClose(&MyFile);
 			break;
 		}
@@ -230,6 +277,8 @@ void SettingsMenuInit(){
 		sprintf(MyMenu->Option[0].Str, "Force UI boot:      < %s > ", bootGUI ? "Yes" : "No ");
 		sprintf(MyMenu->Option[1].Str, "Selected Theme:     <  %c  > ", theme_num + 0x30);
 		sprintf(MyMenu->Option[2].Str, "Show AGB_FIRM BIOS: < %s > ", agb_bios ? "Yes" : "No ");
+		sprintf(MyMenu->Option[3].Str, "Enable 3D UI:       < %s > ", theme_3d ? "Yes" : "No ");
+		sprintf(MyMenu->Option[4].Str, "Silent/quick boot:  < %s > ", silent_boot ? "Yes" : "No ");
 		MenuRefresh();
 	}
 }
@@ -254,7 +303,7 @@ void CreditsMenuInit(){
 }
 
 static Menu MainMenu = {
-		"rxTools - Roxas75 [v2.6]",
+		"rxTools - Roxas75 [v3.0]",
 		.Option = (MenuEntry[7]){
 			{ " Launch rxMode", &BootMenuInit, "menu0.bin" },
 			{ " Decryption Options", &DecryptMenuInit, "menu1.bin" },

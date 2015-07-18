@@ -14,16 +14,18 @@
 #include "configuration.h"
 
 void LoadSettings(){
-	char settings[]="000";
+	char settings[]="00010";
 	char str[100];
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
-		if (FileGetSize(&MyFile) == 3)
+		if (FileGetSize(&MyFile) == 5)
 		{
-			FileRead(&MyFile, settings, 3, 0);
+			FileRead(&MyFile, settings, 5, 0);
 			bootGUI = (settings[0] == '1');
 			agb_bios = (settings[2] == '1');
+			theme_3d = (settings[3] == '1');
+			silent_boot = (settings[4] == '1');
 			
 			/* Disable autostart after the first boot */
 			if (first_boot && !bootGUI) bootGUI = true;
@@ -61,13 +63,15 @@ void LoadSettings(){
 	/* Create system.txt */
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 1))
 	{
-		FileWrite(&MyFile, settings, 3, 0);
+		FileWrite(&MyFile, settings, 5, 0);
 		FileClose(&MyFile);
 	}
 }
 
 void Initialize(){
 	char str[100];
+	char strl[100];
+	char strr[100];
 	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
 	if(FSInit()){
 		DrawString(BOT_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
@@ -92,25 +96,50 @@ void Initialize(){
 	LoadSettings();
 
 	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
-	DrawTopSplash(str);
+	sprintf(strl, "/rxTools/Theme/%c/TOPL.bin", Theme);
+	sprintf(strr, "/rxTools/Theme/%c/TOPR.bin", Theme);
+	if(theme_3d)
+		DrawTopSplash(str, strl, strr);
+	else
+		DrawTopSplash(str, str, str);
 
 	if (!bootGUI)
 	{
-		ConsoleInit();
-		ConsoleSetTitle("           AUTOBOOT");
-		print("Hold R to go to the menu...");
-		ConsoleShow();
-		
-		for (int i = 0; i < 0x333333 * 6; i++){
-			u32 pad = GetInput();
-			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+		if(silent_boot)
+		{
+			sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
+			DrawBottomSplash(str);
+
+			for (int i = 0; i < 0x333333 * 2; i++){
+				u32 pad = GetInput();
+				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+			}
 		}
+		else
+		{
+			ConsoleInit();
+			ConsoleSetTitle("           AUTOBOOT");
+			print("Hold R to go to the menu...");
+			ConsoleShow();
+
+			for (int i = 0; i < 0x333333 * 6; i++){
+				u32 pad = GetInput();
+				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+			}
+		}
+				
+
 		rxModeQuickBoot();
 	}
 rxTools_boot:
 
 	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
-	DrawTopSplash(str);
+	sprintf(strl, "/rxTools/Theme/%c/TOPL.bin", Theme);
+	sprintf(strr, "/rxTools/Theme/%c/TOPR.bin", Theme);
+	if(theme_3d)
+		DrawTopSplash(str, strl, strr);
+	else
+		DrawTopSplash(str, str, str);
 }
 
 int main(){
