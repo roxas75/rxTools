@@ -251,7 +251,7 @@ def parseNCCH(fh, offs=0, idx=0, titleId='', standAlone=1):
 	
     if useSeedCrypto:
         keyY = getNewkeyY(keyY,header,struct.pack('I',int(titleId[8:],16))+struct.pack('I',int(titleId[:8],16)))
-        print tab + 'Use Seed NCCH crypto'
+        print tab + 'Uses Seed NCCH crypto'
         print tab + 'Seed KeyY: %s' % hexlify(keyY).upper()
     
     print ''
@@ -266,6 +266,10 @@ def parseNCCH(fh, offs=0, idx=0, titleId='', standAlone=1):
         data = data + genOutName(titleId, ncsdPartitions[idx], b'exefs_norm')
         entries += 1
         if uses7xCrypto:
+            data = data + parseNCCHSection(header, ncchSection.exefs, uses7xCrypto, useSeedCrypto, 0, tab)
+            data = data + genOutName(titleId, ncsdPartitions[idx], b'exefs_7x')
+            entries += 1
+        elif useSeedCrypto and not uses7xCrypto:
             data = data + parseNCCHSection(header, ncchSection.exefs, uses7xCrypto, useSeedCrypto, 0, tab)
             data = data + genOutName(titleId, ncsdPartitions[idx], b'exefs_7x')
             entries += 1
