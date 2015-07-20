@@ -192,36 +192,6 @@ int CheckRegion(int drive)
 	return 0;
 }
 
-int CheckRegionSilent(int drive)
-{
-	File secureinfo;
-	sprintf(tmpstr, "%d:rw/sys/SecureInfo_A", drive);
-	if (!FileOpen(&secureinfo, tmpstr, 0))
-	{
-		memset(&tmpstr, 0, 256);
-		sprintf(tmpstr, "%d:rw/sys/SecureInfo_B", drive);
-		if (!FileOpen(&secureinfo, tmpstr, 0))
-		{
-			print("Error.\nProcess failed!\n"); ConsoleShow();
-			return -1;
-		}
-	}
-	
-	FileRead(&secureinfo, &region, 1, 0x100);
-	FileClose(&secureinfo);
-	
-	if (region > 0x06)
-	{
-		print("Error: unsupported region.\nProcess failed!\n"); ConsoleShow();
-		return -1;
-	} else {
-		/* Avoid problems with the unused "AUS" region code */
-		if (region >= 3) region--;
-	}
-	
-	return 0;
-}
-
 int checkDgFile(char* path, unsigned int hash)
 {
 	unsigned char* buf = (unsigned char*)0x21000000;
@@ -246,101 +216,11 @@ void downgradeMSET()
 	char *dgpath = "0:msetdg.bin";
 	unsigned int titleid_low = 0x00040010;
 	unsigned int titleid_high[6] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000 }; //JPN, USA, EUR, CHN, KOR, TWN
-	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0xAFD07166, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
-	unsigned short mset_ver[10] = { 3074, 5127, 3078, 5128, 3075, 5127, 8, 1026, 2049, 8 };
-	unsigned short mset_dg_ver = 0;
-
+	unsigned int mset_hash[6] = { 0x96AEC379, 0x3387F2CD, 0xACC1BE62, 0x565BCF20, 0xA04654C6, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
+	unsigned short mset_ver[6] = { 3074, 3078, 3075, 8, 1026, 8 };
+	
 	ConsoleInit();
 	ConsoleSetTitle("         MSET DOWNGRADER");
-
-	int checkLoop = 0;
-
-	CheckRegionSilent(SYS_NAND);
-
-	print("What would you like to\nDowngrade to?\n\n"); ConsoleShow();
-	print("[A] 4.x MSET\n[B] 5.x/6.x MSET\n"); ConsoleShow();
-
-	InputWait();
-
-	while( checkLoop < 1 )
-	{
-		InputWait();
-
-		char buttonInput = GetInput();
-
-		if (buttonInput == 1)
-		{
-			if (region == 0)
-			{
-				mset_dg_ver = 0;
-			}
-			else if (region == 1)
-			{
-				mset_dg_ver = 2;
-			}
-			else if (region == 2)
-			{
-				mset_dg_ver = 4;
-			}
-			else if (region == 3)
-			{
-				mset_dg_ver = 6;
-			}
-			else if (region == 4)
-			{
-				mset_dg_ver = 7;
-			}
-			else if (region == 5)
-			{
-				mset_dg_ver = 9;
-			}
-			else
-			{
-				print("region is:  %u\n", region); ConsoleShow();
-				print("Unsupported Region!\n"); ConsoleShow();
-				mset_dg_ver = 0;
-			}
-			checkLoop = 1;
-		}
-		else if (buttonInput == 2)
-		{
-			if (region == 0)
-			{
-				mset_dg_ver = 1;
-			}
-			else if (region == 1)
-			{
-				mset_dg_ver = 3;
-			}
-			else if (region == 2)
-			{
-				mset_dg_ver = 5;
-			}
-			else if (region == 3)
-			{
-				mset_dg_ver = 6;
-				print("CHN Region Detected!\nFalling back to 4.x MSET\n"); ConsoleShow();
-			}
-			else if (region == 4)
-			{
-				mset_dg_ver = 8;
-			}
-			else if (region == 5)
-			{
-				mset_dg_ver = 9;
-				print("TWN Region Detected!\nFalling back to 4.x MSET\n"); ConsoleShow();
-			}
-			else
-			{
-				print("Unsupported Region!\n"); ConsoleShow();
-				mset_dg_ver = 0;
-			}
-			checkLoop = 1;
-		}
-
-		buttonInput = '\0';
-	}
-
 	print("Opening MSET app...\n"); ConsoleShow();
 	
 	if (CheckRegion(SYS_NAND) == 0)
@@ -356,7 +236,7 @@ void downgradeMSET()
 				FileClose(&dg);
 				
 				/* Verify version number */
-				if (tmd_ver > mset_ver[mset_dg_ver])
+				if (tmd_ver > mset_ver[region])
 				{
 					/* Open MSET content file */
 					if (FileOpen(&dg, cntpath, 0))
@@ -367,7 +247,7 @@ void downgradeMSET()
 						
 						if (check_val != 0)
 						{
-							if (checkDgFile(dgpath, mset_hash[mset_dg_ver]))
+							if (checkDgFile(dgpath, mset_hash[region]))
 							{
 								print("Opening downgrade pack... "); ConsoleShow();
 								if (FileOpen(&dg, dgpath, 0))
