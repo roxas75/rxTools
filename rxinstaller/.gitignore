@@ -1,6 +1,0 @@
-## GIMP Template for new logos ##
-*.xcf
-## This file only updates after compile. Don't sync it.
-patches.h
-**/include
-**/release

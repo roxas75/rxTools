@@ -26,16 +26,16 @@ INCLUDES := include
 DATA     := 
 GRAPHICS := data
 AUDIO    :=
-ICON     :=
+ICON     := 
 
 # specify a directory which contains the nitro filesystem
 # this is relative to the Makefile
 NITRO    :=
 
 # These set the information text in the nds file
-GAME_TITLE     := 3DS ROP Installer
-GAME_SUBTITLE1 := built with devkitARM
-GAME_SUBTITLE2 := http://devitpro.org
+GAME_TITLE     := rxTools 
+GAME_SUBTITLE1 := MSET ROP Installer
+GAME_SUBTITLE2 := Roxas75
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -75,7 +75,7 @@ LIBDIRS := $(LIBNDS) $(PORTLIBS)
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
 
-export OUTPUT := $(CURDIR)/$(TARGET)
+export OUTPUT := $(CURDIR)
 
 export VPATH := $(CURDIR)/$(subst /,,$(dir $(ICON)))\
                 $(foreach dir,$(SOURCES),$(CURDIR)/$(dir))\
@@ -160,9 +160,10 @@ $(BUILD): include/patches.h
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).elf $(TARGET).nds $(SOUNDBANK) patches.elf patches
+	@rm -fr $(BUILD) ../$(TARGET).elf ../$(TARGET).nds $(SOUNDBANK) patches.elf patches include/
 
 include/patches.h: patches
+	mkdir include
 	xxd -i patches | sed -e "s/patches_len/fSIZE/g" -e "s/patches/rawData/g" -e "s/unsigned char/const unsigned char/g" > include/patches.h
 
 patches: patches.elf
