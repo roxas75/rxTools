@@ -1,7 +1,0 @@
-# Project files
-obj
-*.bin
-*.elf
-
-# Programming tools leftovers
-*.swp
