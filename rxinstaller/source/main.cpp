@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
 	int patchfile = 0;
 	int header;
 	rawDataOffset=0;
-	char cakes[]="YS:/rxTools.dat";
+	char rxTools[]="YS:/rxTools.dat";
     char custom[6][35];
 
 	aread(&header,1,4,patchfile);
@@ -179,15 +179,17 @@ int main(int argc, char **argv) {
 	}
 
 	int pressed,fwSelected=0,screenOffset=0;
-    int patch_count = patches.size() + 2;
+	// Default rxTools.dat + custom
+    int patch_count = patches.size() * 2;
 
-	showPatchList(patches,fwSelected);
+	showPatchList(patches, fwSelected);
 
-    // Custom filenames
-    iprintf ("\x1b[%d;6H", patches.size() + ITEMS_START_ROW);
-    iprintf ("%s", "4.x    ropCustom.txt");
-    iprintf ("\x1b[%d;6H", patches.size() + 1 + ITEMS_START_ROW);
-    iprintf ("%s", "9.x    ropCustom.txt");
+	// Custom filenames
+	for(unsigned int i = 0; i < patches.size(); i++) {
+		const patchEntry* patch = &patches.at(i);
+		iprintf ("\x1b[%d;6H", patches.size() + i + ITEMS_START_ROW);
+		iprintf ("%.7sropCustom.txt", patch->description.c_str());
+	}
 
 	while(1) {
 
@@ -264,7 +266,7 @@ int main(int argc, char **argv) {
 
     if (fwSelected < (int)patches.size()) {
         for(int i=0;i< 32;i+=2){
-            *(workbuffer+0x11C+i)=cakes[i/2];
+            *(workbuffer+0x11C+i)=rxTools[i/2];
             *(workbuffer+0x11C+i+1)=0;
         }
     } else {
