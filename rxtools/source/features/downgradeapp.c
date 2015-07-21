@@ -249,8 +249,8 @@ void downgradeMSET()
 	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0xAFD07166, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned short mset_ver[10] = { 3074, 5127, 3078, 5128, 3075, 5127, 8, 1026, 2049, 8 };
 	unsigned short mset_dg_ver = 0;
-	unsigned int buttonInput;
 	unsigned int checkLoop = 0;
+	bool noHalt = true;
 
 	ConsoleInit();
 	ConsoleSetTitle("         MSET DOWNGRADER");
@@ -262,10 +262,8 @@ void downgradeMSET()
 
 	while( checkLoop < 1 )
 	{
-		buttonInput = GetInput();
-		//print("buttonInput is:  %u\n", buttonInput); ConsoleShow(); //debug
-
-		if (buttonInput == 4294964224)
+		u32 pad_state = InputWait();
+		if (pad_state & BUTTON_X)
 		{
 			if (region == 0)
 			{
@@ -299,7 +297,7 @@ void downgradeMSET()
 			}
 			checkLoop = 1;
 		}
-		else if (buttonInput == 4294965248)
+		else if (pad_state & BUTTON_Y)
 		{
 			if (region == 0)
 			{
@@ -334,15 +332,16 @@ void downgradeMSET()
 			}
 			checkLoop = 1;
 		}
-		else if (buttonInput == 4294963202)
+		else if (pad_state & BUTTON_B)
 		{
 			checkLoop = 1;
+			noHalt = false;
 			print("Operation Canceled!\n"); ConsoleShow();
 		}
 	}
 
 
-	if(buttonInput != 4294963202)
+	if(noHalt)
 	{
 	
 		print("Opening MSET app...\n"); ConsoleShow();
@@ -464,215 +463,253 @@ void manageFBI(bool restore)
 	unsigned char TmdCntDataSum[32] = {0};
 	unsigned char CntDataSum[32] = {0};
 
-	unsigned int buttonInput;
 	unsigned short checkLoop;
+	bool noHalt = true;
 	
 	if ((drive = NandSwitch()) == UNK_NAND) return;
 	
 	ConsoleInit();
 	ConsoleSetTitle(restore ? "     RESTORE HEALTH & SAFETY" : "         FBI INSTALLATION");
 	
-	if (CheckRegion(drive) == 0)
+	if (!restore)
 	{
-		if (FindApp(titleid_low, titleid_high[region], drive))
+		print("\n\nDo you want to only\ncheck TMD Version?\n"); ConsoleShow();
+		print("[B] Check TMD Only\n[Y] Inject FBI\n\n"); ConsoleShow();
+		checkLoop = 0;
+
+		while(checkLoop < 1)
 		{
-			/* Open the NAND H&S TMD */
-			FileOpen(&tmp, tmdpath, 0);
-			FileRead(&tmp, buf, 0xB34, 0);
-			FileClose(&tmp);
-			
-			/* Get the title version from the TMD */
-			tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
-			print("TMD Version: v%u.\n", tmd_ver);
-			
-			if (!restore)
+			u32 pad_state = InputWait();
+			if (pad_state & BUTTON_Y)
 			{
-				/* Get the stored content size from the TMD */
-				unsigned int cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+				noHalt = true;
+				checkLoop = 1;
+			}
+			else if (pad_state & BUTTON_B)
+			{
+				noHalt = false;
+				checkLoop = 1;
+
+				CheckRegion(drive);
 				
-				/* Open the NAND H&S content file and read it to the memory buffer */
-				FileOpen(&tmp, cntpath, 0);
-				FileRead(&tmp, buf + 0x1000, cntsize, 0);
+				if (FindApp(titleid_low, titleid_high[region], drive))
+				{
+					/* Open the NAND H&S TMD */
+					FileOpen(&tmp, tmdpath, 0);
+					FileRead(&tmp, buf, 0xB34, 0);
+					FileClose(&tmp);
+			
+					/* Get the title version from the TMD */
+					tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+					print("TMD Version: v%u.\n\n", tmd_ver);
+				}
+			}
+		}
+	}
+
+	if(noHalt)
+	{
+
+		if (CheckRegion(drive) == 0)
+		{
+			if (FindApp(titleid_low, titleid_high[region], drive))
+			{
+				/* Open the NAND H&S TMD */
+				FileOpen(&tmp, tmdpath, 0);
+				FileRead(&tmp, buf, 0xB34, 0);
 				FileClose(&tmp);
 				
-				/* Create the Health & Safety data backup directory */
-				f_mkdir(backup_path);
+				/* Get the title version from the TMD */
+				tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+				print("TMD Version: v%u.\n", tmd_ver);
 				
-				memset(&tmpstr, 0, 256);
-				sprintf(tmpstr, "%s/%s", backup_path, regions[region]);
-				f_mkdir(tmpstr);
-				
-				memset(&tmpstr, 0, 256);
-				sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
-				f_mkdir(tmpstr);
-				
-				/* Backup the H&S TMD */
-				sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
-				if (FileOpen(&tmp, path, 1))
+				if (!restore)
 				{
-					size = FileWrite(&tmp, buf, 0xB34, 0);
+					/* Get the stored content size from the TMD */
+					unsigned int cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+					
+					/* Open the NAND H&S content file and read it to the memory buffer */
+					FileOpen(&tmp, cntpath, 0);
+					FileRead(&tmp, buf + 0x1000, cntsize, 0);
 					FileClose(&tmp);
-					if (size == 0xB34)
+					
+					/* Create the Health & Safety data backup directory */
+					f_mkdir(backup_path);
+					
+					memset(&tmpstr, 0, 256);
+					sprintf(tmpstr, "%s/%s", backup_path, regions[region]);
+					f_mkdir(tmpstr);
+					
+					memset(&tmpstr, 0, 256);
+					sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
+					f_mkdir(tmpstr);
+					
+					/* Backup the H&S TMD */
+					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
+					if (FileOpen(&tmp, path, 1))
 					{
-						print("NAND H&S TMD backup created.\n"); ConsoleShow();
-						
-						/* Backup the H&S content file */
-						memset(&path, 0, 256);
-						sprintf(path, "0:%s/%.12s", tmpstr, cntpath+34);
-						if (FileOpen(&tmp, path, 1))
+						size = FileWrite(&tmp, buf, 0xB34, 0);
+						FileClose(&tmp);
+						if (size == 0xB34)
 						{
-							size = FileWrite(&tmp, buf + 0x1000, cntsize, 0);
-							FileClose(&tmp);
-							if (size == cntsize)
+							print("NAND H&S TMD backup created.\n"); ConsoleShow();
+							
+							/* Backup the H&S content file */
+							memset(&path, 0, 256);
+							sprintf(path, "0:%s/%.12s", tmpstr, cntpath+34);
+							if (FileOpen(&tmp, path, 1))
 							{
-								print("NAND H&S content backup created.\n"); ConsoleShow();
+								size = FileWrite(&tmp, buf + 0x1000, cntsize, 0);
+								FileClose(&tmp);
+								if (size == cntsize)
+								{
+									print("NAND H&S content backup created.\n"); ConsoleShow();
+								} else {
+									print("Error writing H&S content backup.\n"); ConsoleShow();
+									goto out;
+								}
 							} else {
-								print("Error writing H&S content backup.\n"); ConsoleShow();
+								print("Error creating H&S content backup.\n"); ConsoleShow();
 								goto out;
 							}
 						} else {
-							print("Error creating H&S content backup.\n"); ConsoleShow();
+							print("Error writing H&S TMD backup.\n"); ConsoleShow();
 							goto out;
 						}
 					} else {
-						print("Error writing H&S TMD backup.\n"); ConsoleShow();
+						print("Error creating H&S TMD backup.\n"); ConsoleShow();
 						goto out;
 					}
+					
+					/* Generate the FBI data paths */
+					sprintf(path, "0:fbi_inject.tmd");
+					sprintf(path2, "0:fbi_inject.app");
+					
+					print("Editing H&S Information... "); ConsoleShow();
 				} else {
-					print("Error creating H&S TMD backup.\n"); ConsoleShow();
-					goto out;
+					/* Generate the H&S backup data paths */
+					memset(&tmpstr, 0, 256);
+					sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
+					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
+					sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
+					
+					print("Restoring H&S Information... "); ConsoleShow();
 				}
 				
-				/* Generate the FBI data paths */
-				sprintf(path, "0:fbi_inject.tmd");
-				sprintf(path2, "0:fbi_inject.app");
-				
-				print("Editing H&S Information... "); ConsoleShow();
-			} else {
-				/* Generate the H&S backup data paths */
-				memset(&tmpstr, 0, 256);
-				sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
-				sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
-				sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
-				
-				print("Restoring H&S Information... "); ConsoleShow();
-			}
-			
-			/* Open the SD TMD */
-			if (FileOpen(&tmp, path, 0))
-			{
-				size = FileGetSize(&tmp);
-				if (size == 0xB34)
+				/* Open the SD TMD */
+				if (FileOpen(&tmp, path, 0))
 				{
-					FileRead(&tmp, buf, 0xB34, 0);
-					FileClose(&tmp);
-					
-					/* Get the SD TMD version and stored content size */
-					sd_tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
-					sd_cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
-					
-					if (sd_tmd_ver == tmd_ver)
+					size = FileGetSize(&tmp);
+					if (size == 0xB34)
 					{
-						/* Get the SHA-256 hashes */
-						memcpy(TmdCntInfoRecSum, buf + 0x1E4, 32);
-						memcpy(TmdCntChnkRecSum, buf + 0x208, 32);
-						memcpy(TmdCntDataSum, buf + 0xB14, 32);
+						FileRead(&tmp, buf, 0xB34, 0);
+						FileClose(&tmp);
 						
-						/* Verify the Content Info Record hash */
-						sha2(buf + 0x204, 0x900, CntInfoRecSum, 0);
-						if (memcmp(CntInfoRecSum, TmdCntInfoRecSum, 32) == 0)
+						/* Get the SD TMD version and stored content size */
+						sd_tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
+						sd_cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
+						
+						if (sd_tmd_ver == tmd_ver)
 						{
-							/* Verify the Content Chunk Record hash */
-							sha2(buf + 0xB04, 0x30, CntChnkRecSum, 0);
-							if (memcmp(CntChnkRecSum, TmdCntChnkRecSum, 32) == 0)
+							/* Get the SHA-256 hashes */
+							memcpy(TmdCntInfoRecSum, buf + 0x1E4, 32);
+							memcpy(TmdCntChnkRecSum, buf + 0x208, 32);
+							memcpy(TmdCntDataSum, buf + 0xB14, 32);
+							
+							/* Verify the Content Info Record hash */
+							sha2(buf + 0x204, 0x900, CntInfoRecSum, 0);
+							if (memcmp(CntInfoRecSum, TmdCntInfoRecSum, 32) == 0)
 							{
-								/* Open the SD content file */
-								if (FileOpen(&tmp, path2, 0))
+								/* Verify the Content Chunk Record hash */
+								sha2(buf + 0xB04, 0x30, CntChnkRecSum, 0);
+								if (memcmp(CntChnkRecSum, TmdCntChnkRecSum, 32) == 0)
 								{
-									size = FileGetSize(&tmp);
-									if (size == sd_cntsize)
+									/* Open the SD content file */
+									if (FileOpen(&tmp, path2, 0))
 									{
-										FileRead(&tmp, buf + 0x1000, sd_cntsize, 0);
-										FileClose(&tmp);
-										
-										/* Verify the Content Data hash */
-										sha2(buf + 0x1000, sd_cntsize, CntDataSum, 0);
-										if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
+										size = FileGetSize(&tmp);
+										if (size == sd_cntsize)
 										{
-											/* Now we are ready to rock 'n roll */
-											if (FSFileCopy(tmdpath, path) == 0)
+											FileRead(&tmp, buf + 0x1000, sd_cntsize, 0);
+											FileClose(&tmp);
+											
+											/* Verify the Content Data hash */
+											sha2(buf + 0x1000, sd_cntsize, CntDataSum, 0);
+											if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
 											{
-												if (FSFileCopy(cntpath, path2) == 0)
+												/* Now we are ready to rock 'n roll */
+												if (FSFileCopy(tmdpath, path) == 0)
 												{
-													print("\n\nWhat would you like to do?\n"); ConsoleShow();
-													print("[B] Keep %s Data\n", restore ? "backup": "FBI injection"); ConsoleShow();
-													print("[X] Delete %s Data\n\n", restore ? "backup": "FBI injection"); ConsoleShow();
-													checkLoop = 0;
-
-													while (checkLoop < 1)
+													if (FSFileCopy(cntpath, path2) == 0)
 													{
-														buttonInput = GetInput();
-
-														if (buttonInput == 4294963202)
+														print("\n\nWhat would you like to do?\n"); ConsoleShow();
+														print("[B] Keep %s Data\n", restore ? "backup": "FBI injection"); ConsoleShow();
+														print("[X] Delete %s Data\n\n", restore ? "backup": "FBI injection"); ConsoleShow();
+														checkLoop = 0;
+	
+														while (checkLoop < 1)
 														{
-															print("OK!\n\nKeeping %s data.\n", restore ? "backup" : "FBI injection"); ConsoleShow();
-															checkLoop = 1;
+															u32 pad_state = InputWait();
+															if (pad_state & BUTTON_B)
+															{
+																print("OK!\n\nKeeping %s data.\n", restore ? "backup" : "FBI injection"); ConsoleShow();
+																checkLoop = 1;
+															}
+															else if (pad_state & BUTTON_X)
+															{
+																print("OK!\n\nDeleting %s data... ", restore ? "backup" : "FBI injection"); ConsoleShow();
+																f_unlink(path);
+																f_unlink(path2);
+																print("OK!\n"); ConsoleShow();
+																checkLoop = 1;
+															}
 														}
-														else if (buttonInput == 4294964224)
-														{
-															print("OK!\n\nDeleting %s data... ", restore ? "backup" : "FBI injection"); ConsoleShow();
-															f_unlink(path);
-															f_unlink(path2);
-															print("OK!\n"); ConsoleShow();
-															checkLoop = 1;
-														}
+													} else {
+														print("\nError %s content file.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
 													}
 												} else {
-													print("\nError %s content file.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
+													print("\nError %s TMD.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
 												}
 											} else {
-												print("\nError %s TMD.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
+												print("\nError: invalid Content Data hash.\nGot:\n"); ConsoleShow();
+												print_sha256(CntDataSum);
+												print("\nExpected:\n"); ConsoleShow();
+												print_sha256(TmdCntDataSum);
 											}
 										} else {
-											print("\nError: invalid Content Data hash.\nGot:\n"); ConsoleShow();
-											print_sha256(CntDataSum);
-											print("\nExpected:\n"); ConsoleShow();
-											print_sha256(TmdCntDataSum);
+											FileClose(&tmp);
+											print("\nInvalid %s content size.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", size, sd_cntsize); ConsoleShow();
 										}
 									} else {
-										FileClose(&tmp);
-										print("\nInvalid %s content size.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", size, sd_cntsize); ConsoleShow();
+										print("\nError opening %s content.\n", restore ? "backup" : "FBI");
 									}
 								} else {
-									print("\nError opening %s content.\n", restore ? "backup" : "FBI");
+									print("\nError: invalid Content Chunk hash.\nGot:\n"); ConsoleShow();
+									print_sha256(CntChnkRecSum);
+									print("\nExpected:\n"); ConsoleShow();
+									print_sha256(TmdCntChnkRecSum);
 								}
 							} else {
-								print("\nError: invalid Content Chunk hash.\nGot:\n"); ConsoleShow();
-								print_sha256(CntChnkRecSum);
+								print("\nError: invalid Content Info hash.\nGot:\n"); ConsoleShow();
+								print_sha256(CntInfoRecSum);
 								print("\nExpected:\n"); ConsoleShow();
-								print_sha256(TmdCntChnkRecSum);
+								print_sha256(TmdCntInfoRecSum);
 							}
 						} else {
-							print("\nError: invalid Content Info hash.\nGot:\n"); ConsoleShow();
-							print_sha256(CntInfoRecSum);
-							print("\nExpected:\n"); ConsoleShow();
-							print_sha256(TmdCntInfoRecSum);
+							print("\nError: invalid %s TMD version.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", sd_tmd_ver, tmd_ver); ConsoleShow();
 						}
 					} else {
-						print("\nError: invalid %s TMD version.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", sd_tmd_ver, tmd_ver); ConsoleShow();
+						FileClose(&tmp);
+						print("\nError: invalid %s TMD size.\nGot: %u / Expected: %u\n", restore ? "backup" : "FBI", size, 0xB34); ConsoleShow();
 					}
 				} else {
-					FileClose(&tmp);
-					print("\nError: invalid %s TMD size.\nGot: %u / Expected: %u\n", restore ? "backup" : "FBI", size, 0xB34); ConsoleShow();
+					print("\nError opening %s TMD.\n", restore ? "backup" : "FBI"); ConsoleShow();
 				}
 			} else {
-				print("\nError opening %s TMD.\n", restore ? "backup" : "FBI"); ConsoleShow();
+				print("Error: couldn't find H&S data.\n"); ConsoleShow();
 			}
-		} else {
-			print("Error: couldn't find H&S data.\n"); ConsoleShow();
 		}
-	}
-	
+	}	
 out:
 	print("\nPress A to exit.\n\n\n");
 	ConsoleShow();
