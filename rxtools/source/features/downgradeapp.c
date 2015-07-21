@@ -249,26 +249,23 @@ void downgradeMSET()
 	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0xAFD07166, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned short mset_ver[10] = { 3074, 5127, 3078, 5128, 3075, 5127, 8, 1026, 2049, 8 };
 	unsigned short mset_dg_ver = 0;
+	unsigned int buttonInput;
+	unsigned int checkLoop = 0;
 
 	ConsoleInit();
 	ConsoleSetTitle("         MSET DOWNGRADER");
 
-	int checkLoop = 0;
-
 	CheckRegionSilent(SYS_NAND);
 
 	print("What would you like to\nDowngrade to?\n\n"); ConsoleShow();
-	print("[A] 4.x MSET\n[B] 5.x/6.x MSET\n"); ConsoleShow();
-
-	InputWait();
+	print("[X] 4.x MSET\n[Y] 5.x/6.x MSET\n[B] Cancel\n\n"); ConsoleShow();
 
 	while( checkLoop < 1 )
 	{
-		InputWait();
+		buttonInput = GetInput();
+		//print("buttonInput is:  %u\n", buttonInput); ConsoleShow(); //debug
 
-		char buttonInput = GetInput();
-
-		if (buttonInput == 1)
+		if (buttonInput == 4294964224)
 		{
 			if (region == 0)
 			{
@@ -302,7 +299,7 @@ void downgradeMSET()
 			}
 			checkLoop = 1;
 		}
-		else if (buttonInput == 2)
+		else if (buttonInput == 4294965248)
 		{
 			if (region == 0)
 			{
@@ -337,100 +334,108 @@ void downgradeMSET()
 			}
 			checkLoop = 1;
 		}
-
-		buttonInput = '\0';
+		else if (buttonInput == 4294963202)
+		{
+			checkLoop = 1;
+			print("Operation Canceled!\n"); ConsoleShow();
+		}
 	}
 
-	print("Opening MSET app...\n"); ConsoleShow();
-	
-	if (CheckRegion(SYS_NAND) == 0)
+
+	if(buttonInput != 4294963202)
 	{
-		if (FindApp(titleid_low, titleid_high[region], SYS_NAND)) // SysNAND only
+	
+		print("Opening MSET app...\n"); ConsoleShow();
+		
+		if (CheckRegion(SYS_NAND) == 0)
 		{
-			if (FileOpen(&dg, tmdpath, 0))
+			if (FindApp(titleid_low, titleid_high[region], SYS_NAND)) // SysNAND only
 			{
-				/* Get the MSET TMD version */
-				unsigned short tmd_ver;
-				FileRead(&dg, &tmd_ver, 2, 0x1DC);
-				tmd_ver = bswap_16(tmd_ver);
-				FileClose(&dg);
-				
-				/* Verify version number */
-				if (tmd_ver > mset_ver[mset_dg_ver])
+				if (FileOpen(&dg, tmdpath, 0))
 				{
-					/* Open MSET content file */
-					if (FileOpen(&dg, cntpath, 0))
+					/* Get the MSET TMD version */
+					unsigned short tmd_ver;
+					FileRead(&dg, &tmd_ver, 2, 0x1DC);
+					tmd_ver = bswap_16(tmd_ver);
+					FileClose(&dg);
+					
+					/* Verify version number */
+					if (tmd_ver != mset_ver[mset_dg_ver])
 					{
-						unsigned int check_val;
-						FileRead(&dg, &check_val, 4, 0x130);
-						FileClose(&dg);
-						
-						if (check_val != 0)
+						/* Open MSET content file */
+						if (FileOpen(&dg, cntpath, 0))
 						{
-							if (checkDgFile(dgpath, mset_hash[mset_dg_ver]))
+							unsigned int check_val;
+							FileRead(&dg, &check_val, 4, 0x130);
+							FileClose(&dg);
+							
+							if (check_val != 0)
 							{
-								print("Opening downgrade pack... "); ConsoleShow();
-								if (FileOpen(&dg, dgpath, 0))
+								if (checkDgFile(dgpath, mset_hash[mset_dg_ver]))
 								{
-									print("OK!\n"); ConsoleShow();
-									
-									unsigned int dgsize = FileGetSize(&dg);
-									unsigned char *buf = (unsigned char*)0x21000000;
-									FileRead(&dg, buf, dgsize, 0);
-									
-									/* Downgrade pack decryption */
-									u8 iv[0x10] = {0};
-									u8 Key[0x10] = {0};
-									
-									GetTitleKey(&Key[0], titleid_low, titleid_high[region], SYS_NAND);
-									
-									aes_context aes_ctxt;
-									aes_setkey_dec(&aes_ctxt, Key, 0x80);
-									aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, dgsize, iv, buf, buf);
-									
-									FileWrite(&dg, buf, dgsize, 0);
-									FileClose(&dg);
-									
-									if (*((unsigned int*)(buf + 0x100)) == 0x4843434E) // "NCCH" magic word
+									print("Opening downgrade pack... "); ConsoleShow();
+									if (FileOpen(&dg, dgpath, 0))
 									{
-										print("Downgrading... "); ConsoleShow();
-										if (FSFileCopy(cntpath, dgpath) == 0)
+										print("OK!\n"); ConsoleShow();
+										
+										unsigned int dgsize = FileGetSize(&dg);
+										unsigned char *buf = (unsigned char*)0x21000000;
+										FileRead(&dg, buf, dgsize, 0);
+										
+										/* Downgrade pack decryption */
+										u8 iv[0x10] = {0};
+										u8 Key[0x10] = {0};
+										
+										GetTitleKey(&Key[0], titleid_low, titleid_high[region], SYS_NAND);
+										
+										aes_context aes_ctxt;
+										aes_setkey_dec(&aes_ctxt, Key, 0x80);
+										aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, dgsize, iv, buf, buf);
+										
+										FileWrite(&dg, buf, dgsize, 0);
+										FileClose(&dg);
+										
+										if (*((unsigned int*)(buf + 0x100)) == 0x4843434E) // "NCCH" magic word
 										{
-											print("done!\nRemoving downgrade pack... "); ConsoleShow();
-											f_unlink(dgpath);
-											print("done.\n"); ConsoleShow();
+											print("Downgrading... "); ConsoleShow();
+											if (FSFileCopy(cntpath, dgpath) == 0)
+											{
+												print("done!\nRemoving downgrade pack... "); ConsoleShow();
+												f_unlink(dgpath);
+												print("done.\n"); ConsoleShow();
+											} else {
+												print("\nError downgrading MSET content.\nRemoving downgrade pack... "); ConsoleShow();
+												f_unlink(dgpath);
+												print("done.\n"); ConsoleShow();
+											}
 										} else {
-											print("\nError downgrading MSET content.\nRemoving downgrade pack... "); ConsoleShow();
-											f_unlink(dgpath);
-											print("done.\n"); ConsoleShow();
+											print("Error: bad downgrade pack.\n"); ConsoleShow();
 										}
 									} else {
-										print("Error: bad downgrade pack.\n"); ConsoleShow();
+										print("Error.\n"); ConsoleShow();
 									}
 								} else {
-									print("Error.\n"); ConsoleShow();
+									print("Error: bad downgrade pack.\n"); ConsoleShow();
 								}
 							} else {
-								print("Error: bad downgrade pack.\n"); ConsoleShow();
+								print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
 							}
 						} else {
-							print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
+							print("Error opening MSET content file.\n"); ConsoleShow();
 						}
 					} else {
-						print("Error opening MSET content file.\n"); ConsoleShow();
+						print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
 					}
 				} else {
-					print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
+					print("Error opening MSET TMD.\n"); ConsoleShow();
 				}
 			} else {
-				print("Error opening MSET TMD.\n"); ConsoleShow();
+				print("Error: couldn't find MSET data.\n"); ConsoleShow();
 			}
-		} else {
-			print("Error: couldn't find MSET data.\n"); ConsoleShow();
 		}
 	}
 	
-	print("\nPress A to exit\n");
+	print("\nPress A to exit\n\n\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -458,6 +463,9 @@ void manageFBI(bool restore)
 	unsigned char CntChnkRecSum[32] = {0};
 	unsigned char TmdCntDataSum[32] = {0};
 	unsigned char CntDataSum[32] = {0};
+
+	unsigned int buttonInput;
+	unsigned short checkLoop;
 	
 	if ((drive = NandSwitch()) == UNK_NAND) return;
 	
@@ -596,10 +604,29 @@ void manageFBI(bool restore)
 											{
 												if (FSFileCopy(cntpath, path2) == 0)
 												{
-													print("OK!\nDeleting %s data... ", restore ? "backup" : "FBI injection"); ConsoleShow();
-													f_unlink(path);
-													f_unlink(path2);
-													print("OK!\n"); ConsoleShow();
+													print("\n\nWhat would you like to do?\n"); ConsoleShow();
+													print("[B] Keep %s Data\n", restore ? "backup": "FBI injection"); ConsoleShow();
+													print("[X] Delete %s Data\n\n", restore ? "backup": "FBI injection"); ConsoleShow();
+													checkLoop = 0;
+
+													while (checkLoop < 1)
+													{
+														buttonInput = GetInput();
+
+														if (buttonInput == 4294963202)
+														{
+															print("OK!\n\nKeeping %s data.\n", restore ? "backup" : "FBI injection"); ConsoleShow();
+															checkLoop = 1;
+														}
+														else if (buttonInput == 4294964224)
+														{
+															print("OK!\n\nDeleting %s data... ", restore ? "backup" : "FBI injection"); ConsoleShow();
+															f_unlink(path);
+															f_unlink(path2);
+															print("OK!\n"); ConsoleShow();
+															checkLoop = 1;
+														}
+													}
 												} else {
 													print("\nError %s content file.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
 												}
@@ -647,7 +674,7 @@ void manageFBI(bool restore)
 	}
 	
 out:
-	print("\nPress A to exit.");
+	print("\nPress A to exit.\n\n\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
