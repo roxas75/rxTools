@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "menu.h"
 //Screen Macros
 #define BYTES_PER_PIXEL	3  //Our color buffer accepts 24-bits color.
 #define SCREEN_WIDTH	320
