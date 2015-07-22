@@ -21,10 +21,16 @@ char myString[256];		//for showing percentages
 int NandSwitch(){
 	if(!checkEmuNAND()) return  0; //If No EmuNAND, we force to work on SysNAND
 	ConsoleInit();
+	/* freezes
+	ConsoleSetTitle(STR_CHOOSE_NAND[language]);
+	print(STR_PRESS_X_SYSNAND[language]);
+	print(STR_PRESS_Y_EMUNAND[language]);
+	print(STR_PRESS_B_BACK[language]);
+	*/
 	ConsoleSetTitle("Choose the NAND you want to use");
-	print("Press X : SysNAND\n");
-	print("Press Y : EmuNAND\n");
-	print("Press B : Back\n");
+	print("Press X: sysNAND\n");
+	print("Press Y: emuNAND\n");
+	print("Press B: Back\n");
 	ConsoleShow();
 	while (true) {
         u32 pad_state = InputWait();

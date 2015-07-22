@@ -27,6 +27,8 @@
 bool first_boot;
 char tmpstr[256] = {0};
 char str[100];
+char strl[100];
+char strr[100];
 File tempfile;
 UINT tmpu32;
 
@@ -199,13 +201,13 @@ void InstallConfigData(){
 	
 	first_boot = true;
 
-	char settings[]="00010";
+	char settings[]="000100";
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
-		if (FileGetSize(&MyFile) == 5)
+		if (FileGetSize(&MyFile) == 6)
 		{
-			FileRead(&MyFile, settings, 5, 0);
+			FileRead(&MyFile, settings, 6, 0);
 
 			/* Check if the Theme Number is valid */
 			unsigned char theme_num = (settings[0] - 0x30);
@@ -235,6 +237,10 @@ void InstallConfigData(){
 	int res = InstallData("0");	//SD Card
 	sprintf(str, "/rxTools/Theme/%c/cfg1%c.bin", Theme, res == 0 ? 'O' : 'E');
 	DrawBottomSplash(str);
+	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
+	sprintf(strl, "/rxTools/Theme/%c/TOPL.bin", Theme);
+	sprintf(strr, "/rxTools/Theme/%c/TOPR.bin", Theme);
+	DrawTopSplash(str, strl, strr);
 	
 	InputWait();
 }
