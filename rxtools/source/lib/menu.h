@@ -38,7 +38,7 @@ extern Menu* MyMenu;
 // Translations and corrections by: nastys, Crusard, Pikawil, DjoeN, VinsCool, R4ndom, guitarheroknight, Asia81.
 static int N_LANG=6;
 
-static char* STR_LANGUAGES[]={"Eng", "Ita", "Esp", "Fra", "Vla", "Nor", "Hrv"};
+static char* STR_LANGUAGES[]={"Eng", "Ita", "Esp", "Fra", "NLD", "Nor", "Hrv"};
 static char* STR_FORCE_UI_BOOT[]={"Force UI boot:      < %s > ", "Forza avvio UI:     < %s > ", "Iniciar en UI:      < %s > ", "Forcer demarrage UI < %s > ", "Start in UI:        < %s >", "Tving oppstart av UI< %s >", "Forsiraj ulazak u UI< %s >"};
 static char* STR_SELECTED_THEME[]={"Selected theme:     <  %c  > ", "Tema selezionato:   <  %c  > ", "Tema seleccionado:  <  %c  > ", "Theme choisi :      <  %c  > ", "Selecteer thema:    <  %c  >", "Valgt tema:         <  %c  > ", "Izabrana tema:      <  %c  > "};
 static char* STR_SHOW_AGB[]={"Show AGB_FIRM BIOS: < %s > ", "Mostra BIOS AGB_FIRM< %s > ", "Ver AGB_FIRM BIOS:  < %s > ", "Activer AGB_FIRM :  < %s > ", "Toon AGB_FIRM BIOS: < %s > ", "Vis AGB_FIRM BIOS:  < %s > ", "Prikazi AGB_FIRM:   < %s > "};
