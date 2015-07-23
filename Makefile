@@ -62,7 +62,7 @@ theme:
 	@cd theme && make
 	@mkdir -p release/rxTools/theme/0
 	@mv theme/*.bin release/rxTools/theme/0
-	@cp tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
+	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
 
 .PHONY: doc
 doc:

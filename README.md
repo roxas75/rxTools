@@ -27,7 +27,7 @@ I do not support piracy in any way, all the data and information in my software 
 - Signatures Checks disabled, which should allow just homebrew, but the world is cruel...
 - Support for installing FBI (a CIA Manager) in both emuNAND and sysNAND
 - Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND
-- Support for TWL (DS/DSi cardriges and DSiWare) **only on sysNAND**
+- Support for TWL (DS/DSi cartridges and DSiWare) **only on sysNAND**
 - Dynamic RAM dumping (just for debug purposes)
 
 ## How to build
