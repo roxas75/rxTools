@@ -79,14 +79,15 @@ static Menu AdvancedMenu = {
 
 static Menu SettingsMenu = {
 	"           SETTINGS",
-	.Option = (MenuEntry[5]){
+	.Option = (MenuEntry[6]){
 		{ "Force UI boot               ", NULL, "app.bin" },
-		{ "Selected Theme:             ", NULL, "app.bin" },
+		{ "Selected theme:             ", NULL, "app.bin" },
 		{ "Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
 		{ "Enable 3D UI:               ", NULL, "app.bin" },
-		{ "Silent/quick boot:          ", NULL, "app.bin" },
+		{ "Quick boot:                 ", NULL, "app.bin" },
+		{ "Console language:           ", NULL, "app.bin" },
 	},
-	5,
+	6,
 	0,
 	0
 };
@@ -152,18 +153,19 @@ void SettingsMenuInit(){
 	char str[100];
 	char strl[100];
 	char strr[100];
-	char settings[] = "00010";
+	char settings[] = "000100";
 	unsigned char theme_num = 0;
 	
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
-		FileRead(&MyFile, settings, 5, 0);
+		FileRead(&MyFile, settings, 6, 0);
 		bootGUI = (settings[0] == '1');
 		theme_num = (settings[1] - 0x30);
 		agb_bios = (settings[2] == '1');
 		theme_3d = (settings[3] == '1');
 		silent_boot = (settings[4] == '1');
+		language = (settings[5] - 0x30);
 	}
 	
 	while (true) {
@@ -231,6 +233,18 @@ void SettingsMenuInit(){
 					}
 
 					Theme = (theme_num + 0x30);
+					File MyFile;
+					sprintf(str, "/rxTools/Theme/%u/LANG.txt", theme_num);
+					if (FileOpen(&MyFile, str, 0))
+					{
+						if (FileGetSize(&MyFile) > 0)
+						{
+							char tl[]="00";
+							FileRead(&MyFile, tl, 1, 0);
+							if(tl[0] - 0x30 >= 0 && tl[0] - 0x30 <= N_LANG)
+								language = tl[0] - 0x30;
+						}
+					}
 				}
 			}
 			else if (MyMenu->Current == 2) agb_bios ^= 1; //AGB_FIRM BIOS
@@ -256,6 +270,18 @@ void SettingsMenuInit(){
 				if(silent_boot)
 					bootGUI = 0;
 			}
+			else if (MyMenu->Current == 5) //language selection
+			{
+				if (pad_state & BUTTON_LEFT && language > 0)
+				{
+					language--;
+				} else
+
+				if (pad_state & BUTTON_RIGHT && language < N_LANG)
+				{
+					language++;
+				}
+			}
 		}
 		if (pad_state & BUTTON_B)
 		{
@@ -266,7 +292,8 @@ void SettingsMenuInit(){
 			settings[2] = agb_bios ? '1' : '0';
 			settings[3] = theme_3d ? '1' : '0';
 			settings[4] = silent_boot ? '1' : '0';
-			FileWrite(&MyFile, settings, 5, 0);
+			settings[5] = language + 0x30;
+			FileWrite(&MyFile, settings, 6, 0);
 			FileClose(&MyFile);
 			break;
 		}
@@ -274,11 +301,12 @@ void SettingsMenuInit(){
 		TryScreenShot();
 		
 		//UPDATE SETTINGS GUI
-		sprintf(MyMenu->Option[0].Str, "Force UI boot:      < %s > ", bootGUI ? "Yes" : "No ");
-		sprintf(MyMenu->Option[1].Str, "Selected Theme:     <  %c  > ", theme_num + 0x30);
-		sprintf(MyMenu->Option[2].Str, "Show AGB_FIRM BIOS: < %s > ", agb_bios ? "Yes" : "No ");
-		sprintf(MyMenu->Option[3].Str, "Enable 3D UI:       < %s > ", theme_3d ? "Yes" : "No ");
-		sprintf(MyMenu->Option[4].Str, "Silent/quick boot:  < %s > ", silent_boot ? "Yes" : "No ");
+		sprintf(MyMenu->Option[0].Str, STR_FORCE_UI_BOOT[language], bootGUI ? STR_YES[language] : STR_NO[language]);
+		sprintf(MyMenu->Option[1].Str, STR_SELECTED_THEME[language], theme_num + 0x30);
+		sprintf(MyMenu->Option[2].Str, STR_SHOW_AGB[language], agb_bios ? STR_YES[language] : STR_NO[language]);
+		sprintf(MyMenu->Option[3].Str, STR_ENABLE_3D_UI[language], theme_3d ? STR_YES[language] : STR_NO[language]);
+		sprintf(MyMenu->Option[4].Str, STR_QUICK_BOOT[language], silent_boot ? STR_YES[language] : STR_NO[language]);
+		sprintf(MyMenu->Option[5].Str, STR_CONSOLE_LANGUAGE[language], STR_LANGUAGES[language]);
 		MenuRefresh();
 	}
 }

@@ -14,14 +14,14 @@
 #include "configuration.h"
 
 void LoadSettings(){
-	char settings[]="00010";
+	char settings[]="000100";
 	char str[100];
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
-		if (FileGetSize(&MyFile) == 5)
+		if (FileGetSize(&MyFile) == 6)
 		{
-			FileRead(&MyFile, settings, 5, 0);
+			FileRead(&MyFile, settings, 6, 0);
 			bootGUI = (settings[0] == '1');
 			agb_bios = (settings[2] == '1');
 			theme_3d = (settings[3] == '1');
@@ -40,14 +40,19 @@ void LoadSettings(){
 				{
 					Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
 					FileClose(&Menu0);
-				} else {
+				} else
 					Theme = '0';
-				}
 			} else {
 				Theme = '0';
 				FileWrite(&MyFile, &Theme, 1, 1);
 			}
-			
+
+			/* Check if the Language Number is valid */
+			if(settings[5] - 0x30 >= 0 && settings[5] - 0x30 <= N_LANG)
+				language = settings[5] - 0x30;
+			else
+				language = 0;
+
 			FileClose(&MyFile);
 			return;
 		} else {
@@ -63,7 +68,7 @@ void LoadSettings(){
 	/* Create system.txt */
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 1))
 	{
-		FileWrite(&MyFile, settings, 5, 0);
+		FileWrite(&MyFile, settings, 6, 0);
 		FileClose(&MyFile);
 	}
 }
@@ -118,8 +123,8 @@ void Initialize(){
 		else
 		{
 			ConsoleInit();
-			ConsoleSetTitle("           AUTOBOOT");
-			print("Hold R to go to the menu...");
+			ConsoleSetTitle(STR_AUTOBOOT[language]);
+			print(STR_HOLD_R[language]);
 			ConsoleShow();
 
 			for (int i = 0; i < 0x333333 * 6; i++){
