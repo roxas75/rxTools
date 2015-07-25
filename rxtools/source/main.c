@@ -175,8 +175,8 @@ int main(){
 		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
 		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
 		if(pad_state & BUTTON_A)    	MenuSelect();
-		if(pad_state & BUTTON_SELECT)	returnHomeMenu();
-		if(pad_state & BUTTON_START)	ShutDown();
+		if(pad_state & BUTTON_SELECT)	ShutDown();
+		if(pad_state & BUTTON_START)	returnHomeMenu();
 		TryScreenShot();
 		MenuShow();
 	}
