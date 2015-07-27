@@ -22,22 +22,22 @@ char str[100];
 u32 DecryptPartition(PartitionInfo* info){
 	if(info->keyY != NULL)
 		setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
-    use_aeskey(info->keyslot);
+	use_aeskey(info->keyslot);
 
-    u8 ctr[16] __attribute__((aligned(32)));
-    memcpy(ctr, info->ctr, 16);
+	u8 ctr[16] __attribute__((aligned(32)));
+	memcpy(ctr, info->ctr, 16);
 
-    u32 size_bytes = info->size;
-    for (u32 i = 0; i < size_bytes; i += BLOCK_SIZE) {
-        u32 j;
-        for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
-            set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
-            aes_decrypt((void*)info->buffer+j, (void*)info->buffer+j, ctr, 1, AES_CTR_MODE);
-            add_ctr(ctr, 1);
+	u32 size_bytes = info->size;
+	for (u32 i = 0; i < size_bytes; i += BLOCK_SIZE) {
+		u32 j;
+		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
+			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
+			aes_decrypt((void*)info->buffer+j, (void*)info->buffer+j, ctr, 1, AES_CTR_MODE);
+			add_ctr(ctr, 1);
 			TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this
-        }
-    }
-    return 0;
+		}
+	}
+	return 0;
 }
 
 void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. Why? No exefs right now reached 8MB.
@@ -74,7 +74,7 @@ int ProcessCTR(char* path){
 	File myFile;
 	if(FileOpen(&myFile, path, 0)){
 		ConsoleInit();
-		ConsoleSetTitle("           CTR DECRYPTOR");
+		ConsoleSetTitle(L"%24ls",L"CTR DECRYPTOR");
 		unsigned int ncch_base = 0x100;
 		unsigned char magic[] = { 0, 0, 0, 0, 0};
 		FileRead(&myFile, magic, 4, ncch_base);
@@ -95,17 +95,16 @@ int ProcessCTR(char* path){
 		FileRead(&myFile, &NCCH, 0x200, ncch_base);
 
 		//print(path); print("\n"); 
-		print((char*)NCCH.productcode); print("\n"); 
+		print(L"%s\n", (char*)NCCH.productcode);
 		unsigned int NEWCRYPTO = 0, CRYPTO = 1;
 		if(NCCH.flags[3] != 0) NEWCRYPTO = 1;
 		if(NCCH.flags[7] & 4) CRYPTO = 0;
 		if(NEWCRYPTO){
-			print("\nCryptoType : 7.X Key security\n");
+			print(L"\nCryptoType : 7.X Key security\n");
 		}else if(CRYPTO){
-			print("\nCryptoType : Secure\n");
+			print(L"\nCryptoType : Secure\n");
 		}else{
-			print("\nCryptoType : None\n");
-			print("Decryption completed!\n");
+			print(L"\nCryptoType : None\nDecryption completed!\n");
 			FileClose(&myFile);
 			ConsoleShow();
 			return 3;
@@ -114,7 +113,8 @@ int ProcessCTR(char* path){
 		ConsoleShow();
 		u8 CTR[16];
 		if(getle32(NCCH.extendedheadersize) > 0){
-			print("Decrypting ExHeader...\n"); ConsoleShow();
+			print(L"Decrypting ExHeader...\n");
+			ConsoleShow();
 			ncch_get_counter(NCCH, CTR, 1);
 			FileRead(&myFile, BUFFER_ADDR, 0x800, ncch_base + 0x200);
 			myInfo.buffer = BUFFER_ADDR;
@@ -126,7 +126,8 @@ int ProcessCTR(char* path){
 			FileWrite(&myFile, BUFFER_ADDR, 0x800, ncch_base + 0x200);
 		}
 		if(getle32(NCCH.exefssize) > 0){
-			print("Decrypting ExeFS...\n"); ConsoleShow();
+			print(L"Decrypting ExeFS...\n");
+			ConsoleShow();
 			ncch_get_counter(NCCH, CTR, 2);
 			myInfo.buffer = BUFFER_ADDR;
 			myInfo.keyslot = NEWCRYPTO ? 0x25 : 0x2C;
@@ -139,14 +140,15 @@ int ProcessCTR(char* path){
 			FileWrite(&myFile, BUFFER_ADDR, getle32(NCCH.exefssize) * mediaunitsize, ncch_base + getle32(NCCH.exefsoffset) * mediaunitsize);
 		}
 		if(getle32(NCCH.romfssize) > 0){
-			print("Decrypting RomFS... "); ConsoleShow();
+			print(L"Decrypting RomFS... ");
+			ConsoleShow();
 			ncch_get_counter(NCCH, CTR, 3);
 			myInfo.buffer = BUFFER_ADDR;
 			myInfo.keyslot = NEWCRYPTO ? 0x25 : 0x2C;
 			myInfo.ctr = CTR;
 			myInfo.keyY = NCCH.signature;
 			for(int i = 0; i < getle32(NCCH.romfssize) * mediaunitsize / BLOCK_SIZE; i++){
-				print("%3d%%", (int)((i*BLOCK_SIZE)/(getle32(NCCH.romfssize) * mediaunitsize/ 100)));
+				print(L"%3d%%", (int)((i*BLOCK_SIZE)/(getle32(NCCH.romfssize) * mediaunitsize/ 100)));
 				for(int j = 0; j < 4; j++) ConsolePrev();
 				ConsoleShow();
 				size_t bytesRead = FileRead(&myFile, BUFFER_ADDR, BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
@@ -155,14 +157,15 @@ int ProcessCTR(char* path){
 				add_ctr(myInfo.ctr, bytesRead/16);
 				FileWrite(&myFile, BUFFER_ADDR, BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
 			}
-			print("\n");
+			print(L"\n");
 		}
 		NCCH.flags[7] |= 4; //Disable encryption
 		NCCH.flags[3] = 0;  //Disable 7.XKey usage
 		FileWrite(&myFile, &NCCH, 0x200, ncch_base);
 		if(ncch_base == 0x4000) FileWrite(&myFile, ((u8*)&NCCH) + 0x100, 0x100, 0x1100);   //Only for NCSD
 		FileClose(&myFile);
-		print("Decryption completed!\n"); ConsoleShow();
+		print(L"Decryption completed!\n");
+		ConsoleShow();
 		return 0;
 	}else return 1;
 }
@@ -171,8 +174,8 @@ int ExploreFolders(char* folder){
 	int nfiles = 0;
 	DIR myDir;
 	FILINFO curInfo;
-    memset(&myDir, 0, sizeof(DIR));
-    memset(&curInfo, 0, sizeof(FILINFO));
+	memset(&myDir, 0, sizeof(DIR));
+	memset(&curInfo, 0, sizeof(FILINFO));
 	FILINFO *myInfo = &curInfo;
 
 	myInfo->fname[0] = 'A';
@@ -200,14 +203,13 @@ int ExploreFolders(char* folder){
 
 void CTRDecryptor(){
 	ConsoleInit();
-	ConsoleSetTitle("     CTR DECRYPTOR");
+	ConsoleSetTitle(L"%24ls",L"CTR DECRYPTOR");
 	ConsoleShow();
 
 	int nfiles = ExploreFolders("");
 	
 	ConsoleInit();
-	print("Decrypted %d files\n\n", nfiles);
-	print("Press A to exit\n");
+	print(L"Decrypted %d files\n\nPress Ⓐ to exit\n", nfiles);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }

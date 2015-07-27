@@ -97,15 +97,30 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
-all: font.dat $(BUILD)
+all: font.bin $(BUILD)
 
-font.dat: font.png
-	@../tools/font_tool $< $@
-	@raw2c $@
-	@rm font.h
-	@mv font.c source/lib/font.h
+source/lib/font.h: font.bin
+	@dd if=$< of=font.tmp count=8
+	@raw2c font.tmp
+	@mv font.c $@
+	@rm font.h font.tmp
 
-$(BUILD):
+font.bin: unifont-8.0.01.bmp
+	@convert -crop 4096x4096+32+64 -depth 1 -negate $< gray:font.tmp;
+	@../tools/font_tool font.tmp $@
+	@rm font.tmp
+	
+unifont-8.0.01.bmp:
+	@echo open mirrorcatalogs.com >ftp.txt
+	@echo anonymous >>ftp.txt
+	@echo >>ftp.txt
+	@echo cd /gnu/unifont/unifont-8.0.01 >>ftp.txt
+	@echo get $@ >>ftp.txt
+	@echo bye >>ftp.txt
+	@ftp -s:ftp.txt
+	@rm ftp.txt
+
+$(BUILD): source/lib/font.h
 	@[ -d $@ ] || mkdir -p $@
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 	
@@ -114,7 +129,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin font.dat
+	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin source/lib/font.h font.bin
 
 
 #---------------------------------------------------------------------------------

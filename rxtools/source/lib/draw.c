@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <wchar.h>
 #include "fs.h"
 #include "font.h"
 #include "draw.h"
@@ -10,6 +11,7 @@
 u32 current_y = 1;
 
 u8 *tmpscreen = (u8*)0x26000000;
+const u8 *fontaddr = font;
 
 void ClearScreen(u8 *screen, u32 color)
 {
@@ -35,19 +37,20 @@ void DrawClearScreenAll(void) {
 	current_y = 0;
 }
 
-void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgcolor)
+void DrawCharacter(u8 *screen, wchar_t character, u32 x, u32 y, u32 color, u32 bgcolor)
 {
 	u32 yy;
 	u8 *screenPos, *screenStart = screen + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
 	//Use cached value, yep.
 	u8 foreA = color >> 24, foreR = color >> 16, foreG = color >> 8, foreB = color;
 	u8 backA = bgcolor >> 24, backR = bgcolor >> 16, backG = bgcolor >> 8, backB = bgcolor;
-	u32 charPos = character * FONT_SIZE;
-	u8 charVal;
-	for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL * FONT_SIZE; screenPos += (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL)
+	u32 charPos = character * FONT_WIDTH * FONT_HEIGHT / 8;
+	u16 charVal;
+	for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL * (character<FONT_CJK_START?FONT_HWIDTH:FONT_WIDTH); screenPos += (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL)
 	{
-		charVal = font[charPos++];
-		for (yy = FONT_SIZE; yy--;)
+		charVal = *(u16*)(fontaddr+charPos);
+		charPos+=2;
+		for (yy = FONT_HEIGHT; yy--;)
 		{
 			if (charVal & 1)
 			{
@@ -79,11 +82,12 @@ void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgco
 	//Still i don't know if we should draw the text twice.
 	if(screen == BOT_SCREEN && BOT_SCREEN2){
 		screenStart = BOT_SCREEN2 + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
-		charPos = character * FONT_SIZE;
-		for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL * FONT_SIZE; screenPos += (SCREEN_HEIGHT - FONT_SIZE) * BYTES_PER_PIXEL)
+		u32 charPos = character * FONT_WIDTH * FONT_HEIGHT / 8;
+		for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL * (character<FONT_CJK_START?FONT_HWIDTH:FONT_WIDTH); screenPos += (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL)
 		{
-			charVal = font[charPos++];
-			for (yy = FONT_SIZE; yy--;)
+			charVal = *(u16*)(fontaddr+charPos);
+			charPos+=2;
+			for (yy = FONT_HEIGHT; yy--;)
 			{
 				if (charVal & 1)
 				{
@@ -114,40 +118,43 @@ void DrawCharacter(u8 *screen, char character, u32 x, u32 y, u32 color, u32 bgco
 		}
 	}
 }
-
-void DrawString(u8 *screen, const char *str, u32 x, u32 y, u32 color, u32 bgcolor)
+void DrawString(u8 *screen, const wchar_t *str, u32 x, u32 y, u32 color, u32 bgcolor)
 {
-	for (u32 i = 0; i < strlen(str); i++){
-		DrawCharacter(screen, str[i], x + i * FONT_SIZE, y, color, bgcolor);
+	unsigned int dx = 0;
+	for (u32 i = 0; i < wcslen(str); i++){
+		DrawCharacter(screen, str[i], x + dx, y, color, bgcolor);
+		dx+=str[i]<FONT_CJK_START?FONT_HWIDTH:FONT_WIDTH;
 	}
 }
 //[Unused]
 void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor)
 {
-	char HexStr[4+1] = {0,}, i = sizeof(hex);
+	wchar_t HexStr[4+1] = {0,}, i = sizeof(hex);
 	while (i){
-		HexStr[(i--)-1] = 0x30 + (hex & 0xF); hex = hex >> 4;
+		HexStr[(i--)-1] = '0' + (hex & 0xF);
+		hex >>= 4;
 	}
-	DrawString(screen, HexStr, x + i * FONT_SIZE, y, color, bgcolor);
+	DrawString(screen, HexStr, x, y, color, bgcolor);
 }
 //[Unused]
-void DrawHexWithName(u8 *screen, const char *str, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor)
+void DrawHexWithName(u8 *screen, const wchar_t *str, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor)
 {
 	DrawString(screen, str, x, y, color, bgcolor);
-	DrawHex(screen, hex, x + strlen(str) * FONT_SIZE, y, color, bgcolor);
+	DrawHex(screen, hex, x + wcslen(str) * FONT_HWIDTH, y, color, bgcolor);
 }
 
 void Debug(const char *format, ...)
 {
-	char* str;
+	char *str;
 	va_list va;
 
 	va_start(va, format);
 	vasprintf(&str, format, va);
 	va_end(va);
-
-	DrawString(TOP_SCREEN, str, 10, current_y, RGB(255, 255, 255), RGB(0, 0, 0));
+	wchar_t wstr[strlen(str)+1];
+	mbstowcs(wstr, str, strlen(str)+1);
 	free(str);
+	DrawString(TOP_SCREEN, wstr, 10, current_y, RGB(255, 255, 255), RGB(0, 0, 0));
 
 	current_y += 10;
 }
@@ -213,7 +220,10 @@ void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[])
 		}
 		FileClose(&Splash);
 	}
-	else DrawString(BOT_SCREEN, " MISSING THEME FILES!   ", 0, SCREEN_HEIGHT - FONT_SIZE, RED, BLACK);
+	else
+	{
+		DrawString(BOT_SCREEN, L"MISSING THEME FILES!", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+	}
 }
 
 void DrawBottomSplash(char splash_file[]) {
@@ -228,5 +238,8 @@ void DrawBottomSplash(char splash_file[]) {
 		}
 		FileClose(&Splash);
 	}
-	else DrawString(BOT_SCREEN, " MISSING THEME FILES!   ", 0, SCREEN_HEIGHT - FONT_SIZE, RED, BLACK);
+	else
+	{
+		DrawString(BOT_SCREEN, L"MISSING THEME FILES!", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+	}
 }

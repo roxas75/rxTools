@@ -29,13 +29,13 @@ static struct {
 };
 
 static Menu CoolFilesMenu = {
-	"Choose the file to work on",
-	.Option = (MenuEntry[5]){
-		{ " movable.sed", &SelectFile, "fil0.bin" },
-		{ " SecureInfo_A", &SelectFile, "fil1.bin" },
-		{ " LocalFriendCodeSeed_B", &SelectFile, "fil2.bin" },
-		{ " rand_seed", &SelectFile, "fil3.bin" },
-		{ " ticket.db", &SelectFile, "fil4.bin" },
+	L"Choose the file to work on",
+	.Option = (MenuEntry[nCoolFiles]){
+		{ L" movable.sed", &SelectFile, "fil0.bin" },
+		{ L" SecureInfo_A", &SelectFile, "fil1.bin" },
+		{ L" LocalFriendCodeSeed_B", &SelectFile, "fil2.bin" },
+		{ L" rand_seed", &SelectFile, "fil3.bin" },
+		{ L" ticket.db", &SelectFile, "fil4.bin" },
 	},
 	nCoolFiles,
 	0,
@@ -45,8 +45,6 @@ static Menu CoolFilesMenu = {
 void SelectFile(){
     selectedFile = CoolFilesMenu.Current;
 }
-
-char tmpstr[256];
 
 void dumpCoolFiles()
 {
@@ -70,19 +68,19 @@ void dumpCoolFiles()
 
 	if (selectedFile == -1) return;
 	ConsoleInit();
-	ConsoleSetTitle("File Dumper: %s", CoolFiles[selectedFile].name);
+	ConsoleSetTitle(L"File Dumper: %s", CoolFiles[selectedFile].name);
 
-	char dest[256];
+	char dest[256], tmpstr[256];
 	sprintf(dest, "rxTools/%s", CoolFiles[selectedFile].name);
 	sprintf(tmpstr, "%d:%s", nandtype, CoolFiles[selectedFile].path);
-	print("Dumping...\n"); ConsoleShow();
+	print(L"Dumping...\n");
+	ConsoleShow();
 
-	char *showres;
 	unsigned int res = FSFileCopy(dest, tmpstr);
 	if (res != 0 && selectedFile == 1)
 	{
 		/* Fix for SecureInfo_B */
-		print("Error. Trying with SecureInfo_B...\n");
+		print(L"Error. Trying with SecureInfo_B...\n");
 		sprintf(dest, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
 		sprintf(tmpstr, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
 		res = FSFileCopy(dest, tmpstr);
@@ -90,38 +88,38 @@ void dumpCoolFiles()
 	if (res != 0 && selectedFile == 2)
 	{
 		/* Fix for LocalFriendCodeSeed_A */
-		print("Error. Trying with LocalFriendCodeSeed_A...\n");
+		print(L"Error. Trying with LocalFriendCodeSeed_A...\n");
 		sprintf(dest, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
 		sprintf(tmpstr, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
 		res = FSFileCopy(dest, tmpstr);
 	}
 
+	wchar_t *showres;
 	switch ((res >> 8) & 0xFF)
 	{
 		case 0:
-			showres = "Success!";
+			showres = L"Success!";
 			break;
 		case 1:
-			showres = "Error opening input file.";
+			showres = L"Error opening input file.";
 			break;
 		case 2:
-			showres = "Error creating output file.";
+			showres = L"Error creating output file.";
 			break;
 		case 3:
 		case 4:
-			showres = "Error reading input file.";
+			showres = L"Error reading input file.";
 			break;
 		case 5:
 		case 6:
-			showres = "Error writing output file.";
+			showres = L"Error writing output file.";
 			break;
 		default:
-			showres = "Failure!";
+			showres = L"Failure!";
 			break;
 	}
 
-	print(showres);
-	print("\n\nPress A to exit\n");
+	print(L"%ls\n\nPress Ⓐ to exit\n", showres);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -147,19 +145,19 @@ void restoreCoolFiles()
 
 	if (selectedFile == -1) return;
 	ConsoleInit();
-	ConsoleSetTitle("File Inject: %s", CoolFiles[selectedFile].name);
+	ConsoleSetTitle(L"File Inject: %s", CoolFiles[selectedFile].name);
 
-	char dest[256];
+	char dest[256], tmpstr[256];
 	sprintf(tmpstr, "rxTools/%s", CoolFiles[selectedFile].name);
 	sprintf(dest, "%d:%s", nandtype, CoolFiles[selectedFile].path);
-	print("Injecting...\n"); ConsoleShow();
+	print(L"Injecting...\n");
+	ConsoleShow();
 
-	char *showres;
 	unsigned int res = FSFileCopy(dest, tmpstr);
 	if (res != 0 && selectedFile == 1)
 	{
 		/* Fix for SecureInfo_B */
-		print("Error. Trying with SecureInfo_B...\n");
+		print(L"Error. Trying with SecureInfo_B...\n");
 		sprintf(tmpstr, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
 		sprintf(dest, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
 		res = FSFileCopy(dest, tmpstr);
@@ -167,38 +165,38 @@ void restoreCoolFiles()
 	if (res != 0 && selectedFile == 2)
 	{
 		/* Fix for LocalFriendCodeSeed_A */
-		print("Error. Trying with LocalFriendCodeSeed_A...\n");
+		print(L"Error. Trying with LocalFriendCodeSeed_A...\n");
 		sprintf(tmpstr, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
 		sprintf(dest, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
 		res = FSFileCopy(dest, tmpstr);
 	}
 
+	wchar_t *showres;
 	switch ((res >> 8) & 0xFF)
 	{
 		case 0:
-			showres = "Success!";
+			showres = L"Success!";
 			break;
 		case 1:
-			showres = "Error opening input file.";
+			showres = L"Error opening input file.";
 			break;
 		case 2:
-			showres = "Error creating output file.";
+			showres = L"Error creating output file.";
 			break;
 		case 3:
 		case 4:
-			showres = "Error reading input file.";
+			showres = L"Error reading input file.";
 			break;
 		case 5:
 		case 6:
-			showres = "Error writing output file.";
+			showres = L"Error writing output file.";
 			break;
 		default:
-			showres = "Failure!";
+			showres = L"Failure!";
 			break;
 	}
 
-	print(showres);
-	print("\n\nPress A to exit\n");
+	print(L"%ls\n\nPress Ⓐ to exit\n", showres);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }

@@ -1,18 +1,17 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#define CONSOLE_WIDTH 300
-#define CONSOLE_HEIGHT 200
-#define CHAR_WIDTH 10
-#define MAX_LINES (int) (CONSOLE_HEIGHT / CHAR_WIDTH - 4)
-#define MAX_LINE_LENGTH 36//(int) (CONSOLE_WIDTH / CHAR_WIDTH - 4)
-#define CONSOLE_X (400 - CONSOLE_WIDTH) / 2
-#define CONSOLE_Y (240 - CONSOLE_HEIGHT) / 2
+#define CONSOLE_WIDTH	280
+#define CONSOLE_HEIGHT	200
+#define MAX_LINES (int)	(CONSOLE_HEIGHT / FONT_HEIGHT - 4)
+#define MAX_LINE_LENGTH	(CONSOLE_WIDTH / FONT_HWIDTH - 4)
+#define CONSOLE_X	(SCREEN_WIDTH - CONSOLE_WIDTH) / 2
+#define CONSOLE_Y	(SCREEN_HEIGHT - CONSOLE_HEIGHT) / 2
 
 void ConsoleInit();
 void ConsoleShow();
 void ConsoleFlush();
-void ConsoleAddText(char* str);
+void ConsoleAddText(wchar_t* str);
 void ConsoleSetBackgroundColor(int color);
 int ConsoleGetBackgroundColor();
 void ConsoleSetBorderColor(int color);
@@ -22,7 +21,7 @@ int ConsoleGetTextColor();
 void ConsoleSetXY(int x, int y);
 void ConsoleGetXY(int *x, int *y);
 void ConsoleSetWH(int width, int height);
-void ConsoleSetTitle(const char *format, ...);
+void ConsoleSetTitle(const wchar_t *format, ...);
 void ConsoleNextLine();
 void ConsolePrevLine();
 void ConsoleNext();
@@ -34,5 +33,5 @@ int ConsoleGetSpecialColor();
 void ConsoleSetSpacing(int space);
 int ConsoleGetSpacing();
 
-void print(const char *format, ...);
+void print(const wchar_t *format, ...);
 #endif

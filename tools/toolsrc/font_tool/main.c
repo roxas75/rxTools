@@ -1,38 +1,49 @@
 #include <stdio.h>
-#define fontsize 256 * 8
+#include <malloc.h>
+#ifndef NON_UNICODE
+	#define FONT_WIDTH	16
+	#define FONT_HEIGHT	16
+	#define CHAR_COLUMNS	256
+	#define CHAR_ROWS	256
+#else
+	#define FONT_WIDTH	8
+	#define FONT_HEIGHT	8
+	#define CHAR_COLUMNS	16
+	#define CHAR_ROWS	16
+#endif
+#define fontsize	CHAR_COLUMNS*CHAR_ROWS*FONT_WIDTH*FONT_HEIGHT/FONT_WIDTH
 int main(int argc, char** argv){
 	if(argc < 3){
-		printf("Usage : font_tool.exe <font(128x128x1bpp).png> <font.bin>\n");
+		printf("Usage : font_tool.exe <font(%dx%dx1bpp).bin> <font(%dx%dx1bpp).bin>\n",FONT_WIDTH*CHAR_COLUMNS,FONT_HEIGHT*CHAR_ROWS,FONT_WIDTH,CHAR_COLUMNS*FONT_HEIGHT*CHAR_ROWS);
 		return -1;
 	}
-	unsigned char font[fontsize];
+#if FONT_WIDTH <= 8
+	unsigned char *font = malloc(fontsize);
+#elif FONT_WIDTH <= 16
+	unsigned short *font = malloc(fontsize*2);
+#endif
 	FILE * pFile;	
-	int i,j,k;
+	int i,j,k,l;
 	pFile=fopen(argv[1],"rb");
-	fseek(pFile,0x43,SEEK_SET);
-	for(k=0; k<16; k++){
-		for(j=0; j<8; j++){
-			for(i=0; i<16; i++){
-				fread(&font[i*8+j+k*8*16],1,1,pFile);
+	for(k=0; k<CHAR_ROWS; k++){
+		for(j=0; j<FONT_HEIGHT; j++){
+			for(i=0; i<CHAR_COLUMNS; i++){
+				fread(&font[i*FONT_HEIGHT+j+k*FONT_HEIGHT*CHAR_COLUMNS],1,sizeof(*font),pFile);
 			}
-			fseek(pFile,1,SEEK_CUR);
 		}
 	}
 	fclose(pFile);
 	pFile=fopen(argv[2],"wb");
-	for(i=0; i<fontsize; i+=8){
-		for(j=7; j>=0; j--){
-			k=(((font[i+0] >> j) & 1) << 7) |
-				(((font[i+1] >> j) & 1) << 6) |
-				(((font[i+2] >> j) & 1) << 5) |
-				(((font[i+3] >> j) & 1) << 4) |
-				(((font[i+4] >> j) & 1) << 3) |
-				(((font[i+5] >> j) & 1) << 2) |
-				(((font[i+6] >> j) & 1) << 1) |
-				(((font[i+7] >> j) & 1) << 0);
-			fwrite(&k,1,1,pFile);
+	for(i=0; i<fontsize; i+=FONT_WIDTH){
+		for(j=FONT_WIDTH-1; j>=0; j--){
+			for(l=0,k=0; k<FONT_WIDTH; k++){
+//				l|=(((font[i+k] >> ((j+8)&(FONT_WIDTH-1))) & 1) << ((FONT_WIDTH-1-k+8)&(FONT_WIDTH-1)));
+				l|=(((font[i+k] >> ((j+8)&(FONT_WIDTH-1))) & 1) << (FONT_WIDTH-1-k));
+			}
+			fwrite(&l,1,sizeof(*font),pFile);
 		}
 	}
 	fclose(pFile);
+	free(font);
 	return 0;
 }
