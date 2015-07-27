@@ -49,31 +49,31 @@ void print_sha256(unsigned char hash[32])
 	int i;
 	for (i = 0; i < 32; i++)
 	{
-		print("%02X", hash[i]);
+		print(L"%02X", hash[i]);
 		
 		if (i == 16)
 		{
 			/* Continue printing the SHA-256 sum in a new line after 34 characters (17 bytes) */
-			print("\n"); ConsoleShow();
+			print(L"\n");
+			ConsoleShow();
 		}
 	}
-	
 	ConsoleShow();
 }
 
 int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 {
-    char *folder = (char*)&tmpstr;
-    memset(folder, 0, 256);
+	char *folder = (char*)&tmpstr;
+	memset(folder, 0, 256);
 	
-    DIR* curDir = &myDir;
+	DIR* curDir = &myDir;
 	memset((unsigned char*)curDir, 0, sizeof(DIR));
 	
 	FILINFO *myInfo = &curInfo;
-    memset((unsigned char*)myInfo, 0, sizeof(FILINFO));
+	memset((unsigned char*)myInfo, 0, sizeof(FILINFO));
 	myInfo->fname[0] = 'A';
 	
-    sprintf(folder, "%d:title/%08x/%08x/content", drive, tid_low, tid_high);
+	sprintf(folder, "%d:title/%08x/%08x/content", drive, tid_low, tid_high);
 	
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
 	
@@ -161,32 +161,38 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 int CheckRegion(int drive)
 {
 	File secureinfo;
-	print("Opening SecureInfo_A... "); ConsoleShow();
+	print(L"Opening SecureInfo_A... ");
+	ConsoleShow();
 	sprintf(tmpstr, "%d:rw/sys/SecureInfo_A", drive);
 	if (!FileOpen(&secureinfo, tmpstr, 0))
 	{
-		print("Error.\nTrying with SecureInfo_B... "); ConsoleShow();
+		print(L"Error.\nTrying with SecureInfo_B... ");
+		ConsoleShow();
 		memset(&tmpstr, 0, 256);
 		sprintf(tmpstr, "%d:rw/sys/SecureInfo_B", drive);
 		if (!FileOpen(&secureinfo, tmpstr, 0))
 		{
-			print("Error.\nProcess failed!\n"); ConsoleShow();
+			print(L"Error.\nProcess failed!\n");
+			ConsoleShow();
 			return -1;
 		}
 	}
 	
-	print("OK!\n"); ConsoleShow();
+	print(L"OK!\n");
+	ConsoleShow();
 	FileRead(&secureinfo, &region, 1, 0x100);
 	FileClose(&secureinfo);
 	
 	if (region > 0x06)
 	{
-		print("Error: unsupported region.\nProcess failed!\n"); ConsoleShow();
+		print(L"Error: unsupported region.\nProcess failed!\n");
+		ConsoleShow();
 		return -1;
 	} else {
 		/* Avoid problems with the unused "AUS" region code */
 		if (region >= 3) region--;
-		print("Region: %s\n", regions[region]); ConsoleShow();
+		print(L"Region: %s\n", regions[region]);
+		ConsoleShow();
 	}
 	
 	return 0;
@@ -202,7 +208,8 @@ int CheckRegionSilent(int drive)
 		sprintf(tmpstr, "%d:rw/sys/SecureInfo_B", drive);
 		if (!FileOpen(&secureinfo, tmpstr, 0))
 		{
-			print("Error.\nProcess failed!\n"); ConsoleShow();
+			print(L"Error.\nProcess failed!\n");
+			ConsoleShow();
 			return -1;
 		}
 	}
@@ -212,7 +219,8 @@ int CheckRegionSilent(int drive)
 	
 	if (region > 0x06)
 	{
-		print("Error: unsupported region.\nProcess failed!\n"); ConsoleShow();
+		print(L"Error: unsupported region.\nProcess failed!\n");
+		ConsoleShow();
 		return -1;
 	} else {
 		/* Avoid problems with the unused "AUS" region code */
@@ -253,12 +261,14 @@ void downgradeMSET()
 	bool noHalt = true;
 
 	ConsoleInit();
-	ConsoleSetTitle("         MSET DOWNGRADER");
+	ConsoleSetTitle(L"%24ls",L"MSET DOWNGRADER");
 
 	CheckRegionSilent(SYS_NAND);
 
-	print("What would you like to\nDowngrade to?\n\n"); ConsoleShow();
-	print("[X] 4.x MSET\n[Y] 5.x/6.x MSET\n[B] Cancel\n\n"); ConsoleShow();
+	print(L"What would you like to\nDowngrade to?\n\n");
+	ConsoleShow();
+	print(L"Ⓧ 4.x MSET\nⓎ 5.x/6.x MSET\nⒷ Cancel\n\n");
+	ConsoleShow();
 
 	while( checkLoop < 1 )
 	{
@@ -291,8 +301,8 @@ void downgradeMSET()
 			}
 			else
 			{
-				print("region is:  %u\n", region); ConsoleShow();
-				print("Unsupported Region!\n"); ConsoleShow();
+				print(L"region is:  %u\nUnsupported Region!\n", region);
+				ConsoleShow();
 				mset_dg_ver = 0;
 			}
 			checkLoop = 1;
@@ -314,7 +324,8 @@ void downgradeMSET()
 			else if (region == 3)
 			{
 				mset_dg_ver = 6;
-				print("CHN Region Detected!\nFalling back to 4.x MSET\n"); ConsoleShow();
+				print(L"CHN Region Detected!\nFalling back to 4.x MSET\n");
+				ConsoleShow();
 			}
 			else if (region == 4)
 			{
@@ -323,11 +334,13 @@ void downgradeMSET()
 			else if (region == 5)
 			{
 				mset_dg_ver = 9;
-				print("TWN Region Detected!\nFalling back to 4.x MSET\n"); ConsoleShow();
+				print(L"TWN Region Detected!\nFalling back to 4.x MSET\n");
+				ConsoleShow();
 			}
 			else
 			{
-				print("Unsupported Region!\n"); ConsoleShow();
+				print(L"Unsupported Region!\n");
+				ConsoleShow();
 				mset_dg_ver = 0;
 			}
 			checkLoop = 1;
@@ -336,7 +349,8 @@ void downgradeMSET()
 		{
 			checkLoop = 1;
 			noHalt = false;
-			print("Operation Canceled!\n"); ConsoleShow();
+			print(L"Operation Cancelled!\n");
+			ConsoleShow();
 		}
 	}
 
@@ -344,7 +358,8 @@ void downgradeMSET()
 	if(noHalt)
 	{
 	
-		print("Opening MSET app...\n"); ConsoleShow();
+		print(L"Opening MSET app...\n");
+		ConsoleShow();
 		
 		if (CheckRegion(SYS_NAND) == 0)
 		{
@@ -372,10 +387,12 @@ void downgradeMSET()
 							{
 								if (checkDgFile(dgpath, mset_hash[mset_dg_ver]))
 								{
-									print("Opening downgrade pack... "); ConsoleShow();
+									print(L"Opening downgrade pack... ");
+									ConsoleShow();
 									if (FileOpen(&dg, dgpath, 0))
 									{
-										print("OK!\n"); ConsoleShow();
+										print(L"OK!\n");
+										ConsoleShow();
 										
 										unsigned int dgsize = FileGetSize(&dg);
 										unsigned char *buf = (unsigned char*)0x21000000;
@@ -396,45 +413,58 @@ void downgradeMSET()
 										
 										if (*((unsigned int*)(buf + 0x100)) == 0x4843434E) // "NCCH" magic word
 										{
-											print("Downgrading... "); ConsoleShow();
+											print(L"Downgrading... ");
+											ConsoleShow();
 											if (FSFileCopy(cntpath, dgpath) == 0)
 											{
-												print("done!\nRemoving downgrade pack... "); ConsoleShow();
+												print(L"done!\nRemoving downgrade pack... ");
+												ConsoleShow();
 												f_unlink(dgpath);
-												print("done.\n"); ConsoleShow();
+												print(L"done.\n");
+												ConsoleShow();
 											} else {
-												print("\nError downgrading MSET content.\nRemoving downgrade pack... "); ConsoleShow();
+												print(L"\nError downgrading MSET content.\nRemoving downgrade pack... ");
+												ConsoleShow();
 												f_unlink(dgpath);
-												print("done.\n"); ConsoleShow();
+												print(L"done.\n");
+												ConsoleShow();
 											}
 										} else {
-											print("Error: bad downgrade pack.\n"); ConsoleShow();
+											print(L"Error: bad downgrade pack.\n");
+											ConsoleShow();
 										}
 									} else {
-										print("Error.\n"); ConsoleShow();
+										print(L"Error.\n");
+										ConsoleShow();
 									}
 								} else {
-									print("Error: bad downgrade pack.\n"); ConsoleShow();
+									print(L"Error: bad downgrade pack.\n");
+									ConsoleShow();
 								}
 							} else {
-								print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
+								print(L"Your MSET version is exploitable.\nDowngrade isn't necessary.\n");
+								ConsoleShow();
 							}
 						} else {
-							print("Error opening MSET content file.\n"); ConsoleShow();
+							print(L"Error opening MSET content file.\n");
+							ConsoleShow();
 						}
 					} else {
-						print("Your MSET version is exploitable.\nDowngrade isn't necessary.\n"); ConsoleShow();
+						print(L"Your MSET version is exploitable.\nDowngrade isn't necessary.\n");
+						ConsoleShow();
 					}
 				} else {
-					print("Error opening MSET TMD.\n"); ConsoleShow();
+					print(L"Error opening MSET TMD.\n");
+					ConsoleShow();
 				}
 			} else {
-				print("Error: couldn't find MSET data.\n"); ConsoleShow();
+				print(L"Error: couldn't find MSET data.\n");
+				ConsoleShow();
 			}
 		}
 	}
 	
-	print("\nPress A to exit\n\n\n");
+	print(L"\nPress Ⓐ to exit\n\n\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -469,12 +499,14 @@ void manageFBI(bool restore)
 	if ((drive = NandSwitch()) == UNK_NAND) return;
 	
 	ConsoleInit();
-	ConsoleSetTitle(restore ? "     RESTORE HEALTH & SAFETY" : "         FBI INSTALLATION");
+	ConsoleSetTitle(L"%25ls", restore ? L"RESTORE HEALTH & SAFETY" : L"FBI INSTALLATION");
 	
 	if (!restore)
 	{
-		print("\n\nDo you want to only\ncheck TMD Version?\n"); ConsoleShow();
-		print("[B] Check TMD Only\n[Y] Inject FBI\n\n"); ConsoleShow();
+		print(L"\n\nDo you want to only\ncheck TMD Version?\n");
+		ConsoleShow();
+		print(L"Ⓑ Check TMD Only\nⓎ Inject FBI\n\n");
+		ConsoleShow();
 		checkLoop = 0;
 
 		while(checkLoop < 1)
@@ -501,7 +533,7 @@ void manageFBI(bool restore)
 			
 					/* Get the title version from the TMD */
 					tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
-					print("TMD Version: v%u.\n\n", tmd_ver);
+					print(L"TMD Version: v%u.\n\n", tmd_ver);
 				}
 			}
 		}
@@ -521,7 +553,7 @@ void manageFBI(bool restore)
 				
 				/* Get the title version from the TMD */
 				tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
-				print("TMD Version: v%u.\n", tmd_ver);
+				print(L"TMD Version: v%u.\n", tmd_ver);
 				
 				if (!restore)
 				{
@@ -552,7 +584,8 @@ void manageFBI(bool restore)
 						FileClose(&tmp);
 						if (size == 0xB34)
 						{
-							print("NAND H&S TMD backup created.\n"); ConsoleShow();
+							print(L"NAND H&S TMD backup created.\n");
+							ConsoleShow();
 							
 							/* Backup the H&S content file */
 							memset(&path, 0, 256);
@@ -563,21 +596,26 @@ void manageFBI(bool restore)
 								FileClose(&tmp);
 								if (size == cntsize)
 								{
-									print("NAND H&S content backup created.\n"); ConsoleShow();
+									print(L"NAND H&S content backup created.\n");
+									ConsoleShow();
 								} else {
-									print("Error writing H&S content backup.\n"); ConsoleShow();
+									print(L"Error writing H&S content backup.\n");
+									ConsoleShow();
 									goto out;
 								}
 							} else {
-								print("Error creating H&S content backup.\n"); ConsoleShow();
+								print(L"Error creating H&S content backup.\n");
+								ConsoleShow();
 								goto out;
 							}
 						} else {
-							print("Error writing H&S TMD backup.\n"); ConsoleShow();
+							print(L"Error writing H&S TMD backup.\n");
+							ConsoleShow();
 							goto out;
 						}
 					} else {
-						print("Error creating H&S TMD backup.\n"); ConsoleShow();
+						print(L"Error creating H&S TMD backup.\n");
+						ConsoleShow();
 						goto out;
 					}
 					
@@ -585,7 +623,8 @@ void manageFBI(bool restore)
 					sprintf(path, "0:fbi_inject.tmd");
 					sprintf(path2, "0:fbi_inject.app");
 					
-					print("Editing H&S Information... "); ConsoleShow();
+					print(L"Editing H&S Information...");
+					ConsoleShow();
 				} else {
 					/* Generate the H&S backup data paths */
 					memset(&tmpstr, 0, 256);
@@ -593,7 +632,8 @@ void manageFBI(bool restore)
 					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
 					sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
 					
-					print("Restoring H&S Information... "); ConsoleShow();
+					print(L"Restoring H&S Information...");
+					ConsoleShow();
 				}
 				
 				/* Open the SD TMD */
@@ -642,9 +682,12 @@ void manageFBI(bool restore)
 												{
 													if (FSFileCopy(cntpath, path2) == 0)
 													{
-														print("\n\nWhat would you like to do?\n"); ConsoleShow();
-														print("[B] Keep %s Data\n", restore ? "backup": "FBI injection"); ConsoleShow();
-														print("[X] Delete %s Data\n\n", restore ? "backup": "FBI injection"); ConsoleShow();
+														print(L"\n\nWhat would you like to do?\n");
+														ConsoleShow();
+														print(L"Ⓑ Keep %ls Data\n", restore ? L"backup": L"FBI injection");
+														ConsoleShow();
+														print(L"Ⓧ Delete %ls Data\n\n", restore ? L"backup": L"FBI injection");
+														ConsoleShow();
 														checkLoop = 0;
 	
 														while (checkLoop < 1)
@@ -652,66 +695,82 @@ void manageFBI(bool restore)
 															u32 pad_state = InputWait();
 															if (pad_state & BUTTON_B)
 															{
-																print("OK!\n\nKeeping %s data.\n", restore ? "backup" : "FBI injection"); ConsoleShow();
+																print(L"OK!\n\nKeeping %ls data.\n", restore ? L"backup" : L"FBI injection");
+																ConsoleShow();
 																checkLoop = 1;
 															}
 															else if (pad_state & BUTTON_X)
 															{
-																print("OK!\n\nDeleting %s data... ", restore ? "backup" : "FBI injection"); ConsoleShow();
+																print(L"OK!\n\nDeleting %ls data... ", restore ? L"backup" : L"FBI injection");
+																ConsoleShow();
 																f_unlink(path);
 																f_unlink(path2);
-																print("OK!\n"); ConsoleShow();
+																print(L"OK!\n");
+																ConsoleShow();
 																checkLoop = 1;
 															}
 														}
 													} else {
-														print("\nError %s content file.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
+														print(L"\nError %ls content file.\n", restore ? L"restoring H&S" : L"injecting FBI");
+														ConsoleShow();
 													}
 												} else {
-													print("\nError %s TMD.\n", restore ? "restoring H&S" : "injecting FBI"); ConsoleShow();
+													print(L"\nError %ls TMD.\n", restore ? L"restoring H&S" : L"injecting FBI");
+													ConsoleShow();
 												}
 											} else {
-												print("\nError: invalid Content Data hash.\nGot:\n"); ConsoleShow();
+												print(L"\nError: invalid Content Data hash.\nGot:\n");
+												ConsoleShow();
 												print_sha256(CntDataSum);
-												print("\nExpected:\n"); ConsoleShow();
+												print(L"\nExpected:\n");
+												ConsoleShow();
 												print_sha256(TmdCntDataSum);
 											}
 										} else {
 											FileClose(&tmp);
-											print("\nInvalid %s content size.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", size, sd_cntsize); ConsoleShow();
+											print(L"\nInvalid %ls content size.\nGot: v%u / Expected: v%u\n", restore ? L"backup" : L"FBI", size, sd_cntsize);
+											ConsoleShow();
 										}
 									} else {
-										print("\nError opening %s content.\n", restore ? "backup" : "FBI");
+										print(L"\nError opening %ls content.\n", restore ? L"backup" : L"FBI");
 									}
 								} else {
-									print("\nError: invalid Content Chunk hash.\nGot:\n"); ConsoleShow();
+									print(L"\nError: invalid Content Chunk hash.\nGot:\n");
+									ConsoleShow();
 									print_sha256(CntChnkRecSum);
-									print("\nExpected:\n"); ConsoleShow();
+									print(L"\nExpected:\n");
+									ConsoleShow();
 									print_sha256(TmdCntChnkRecSum);
 								}
 							} else {
-								print("\nError: invalid Content Info hash.\nGot:\n"); ConsoleShow();
+								print(L"\nError: invalid Content Info hash.\nGot:\n");
+								ConsoleShow();
 								print_sha256(CntInfoRecSum);
-								print("\nExpected:\n"); ConsoleShow();
+								print(L"\nExpected:\n");
+								ConsoleShow();
 								print_sha256(TmdCntInfoRecSum);
 							}
 						} else {
-							print("\nError: invalid %s TMD version.\nGot: v%u / Expected: v%u\n", restore ? "backup" : "FBI", sd_tmd_ver, tmd_ver); ConsoleShow();
+							print(L"\nError: invalid %ls TMD version.\nGot: v%u / Expected: v%u\n", restore ? L"backup" : L"FBI", sd_tmd_ver, tmd_ver);
+							ConsoleShow();
 						}
 					} else {
 						FileClose(&tmp);
-						print("\nError: invalid %s TMD size.\nGot: %u / Expected: %u\n", restore ? "backup" : "FBI", size, 0xB34); ConsoleShow();
+						print(L"\nError: invalid %ls TMD size.\nGot: %u / Expected: %u\n", restore ? L"backup" : L"FBI", size, 0xB34);
+						ConsoleShow();
 					}
 				} else {
-					print("\nError opening %s TMD.\n", restore ? "backup" : "FBI"); ConsoleShow();
+					print(L"\nError opening %ls TMD.\n", restore ? L"backup" : L"FBI");
+					ConsoleShow();
 				}
 			} else {
-				print("Error: couldn't find H&S data.\n"); ConsoleShow();
+				print(L"Error: couldn't find H&S data.\n");
+				ConsoleShow();
 			}
 		}
 	}	
 out:
-	print("\nPress A to exit.\n\n\n");
+	print(L"\nPress Ⓐ to exit.\n\n\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
