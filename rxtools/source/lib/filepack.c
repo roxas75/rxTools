@@ -27,7 +27,7 @@ void LoadPack(){
 	for (int i = 0; i < nEntry; i++){
 		Entry[i].off += (int)FILEPACK_ADDR;
 		if (!CheckHash((void*)Entry[i].off, Entry[i].size, Entry[i].hash)){
-			DrawString(TOP_SCREEN, " rxTools.dat is corrupted!", 0, 240 - 8, BLACK, WHITE); 		//Who knows, if there is any corruption in our files, we need to stop
+			DrawString(TOP_SCREEN, L"rxTools.dat is corrupted!", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, BLACK, WHITE); 		//Who knows, if there is any corruption in our files, we need to stop
 			while (1);
 		}
 	}
