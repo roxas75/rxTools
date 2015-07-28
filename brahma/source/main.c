@@ -21,6 +21,7 @@ s32 main(void) {
 	aptInit();
 	hidInit(NULL);
 	gfxInitDefault();
+	gfxSet3D(true);
 	fsInit();
 	sdmcInit();
 	hbInit();
