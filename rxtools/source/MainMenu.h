@@ -16,6 +16,12 @@
 #include "cfw.h"
 #include "i2c.h"
 #include "configuration.h"
+#include "lang.h"
+
+#define ENABLED		L"✔"
+#define DISABLED	L"✘"
+//#define ENABLED		L"⦿"
+//#define DISABLED	L"⦾"
 
 static void returnHomeMenu(){
 	i2cWriteRegister(I2C_DEV_MCU, 0x20, (unsigned char)(1<<2));
@@ -27,14 +33,14 @@ static void ShutDown(){
 }
 
 static Menu DecryptMenu = {
-	"Decryption Options",
+	L"Decryption Options",
 	.Option = (MenuEntry[6]){
-		{ " Decrypt CTR Titles", &CTRDecryptor, "dec0.bin" },
-		{ " Decrypt Title Keys", &DecryptTitleKeys, "dec1.bin" },
-		{ " Decrypt encTitleKeys.bin", &DecryptTitleKeyFile, "dec2.bin" },
-		{ " Generate Xorpads", &PadGen, "dec3.bin" },
-		{ " Decrypt partitions", &DumpNandPartitions, "dec4.bin" },
-		{ " Generate fat16 Xorpad", &GenerateNandXorpads, "dec5.bin" },
+		{ L" Decrypt CTR Titles", &CTRDecryptor, "dec0.bin" },
+		{ L" Decrypt Title Keys", &DecryptTitleKeys, "dec1.bin" },
+		{ L" Decrypt encTitleKeys.bin", &DecryptTitleKeyFile, "dec2.bin" },
+		{ L" Generate Xorpads", &PadGen, "dec3.bin" },
+		{ L" Decrypt partitions", &DumpNandPartitions, "dec4.bin" },
+		{ L" Generate fat16 Xorpad", &GenerateNandXorpads, "dec5.bin" },
 	},
 	6,
 	0,
@@ -42,11 +48,11 @@ static Menu DecryptMenu = {
 };
 
 static Menu DumpMenu = {
-	"Dumping Options",
+	L"Dumping Options",
 	.Option = (MenuEntry[3]){
-		{ " Create NAND dump", &NandDumper, "dmp0.bin" },
-		{ " Dump System Titles", &DumpNANDSystemTitles, "dmp1.bin" },
-		{ " Dump NAND Files", &dumpCoolFiles, "dmp2.bin" },
+		{ L" Create NAND dump", &NandDumper, "dmp0.bin" },
+		{ L" Dump System Titles", &DumpNANDSystemTitles, "dmp1.bin" },
+		{ L" Dump NAND Files", &dumpCoolFiles, "dmp2.bin" },
 	},
 	3,
 	0,
@@ -54,10 +60,10 @@ static Menu DumpMenu = {
 };
 
 static Menu InjectMenu = {
-	"Injection Options",
+	L"Injection Options",
 	.Option = (MenuEntry[2]){
-		{ " Inject EmuNAND partitions", &RebuildNand, "inj0.bin" },
-		{ " Inject NAND Files", &restoreCoolFiles, "inj1.bin" },
+		{ L" Inject EmuNAND partitions", &RebuildNand, "inj0.bin" },
+		{ L" Inject NAND Files", &restoreCoolFiles, "inj1.bin" },
 	},
 	2,
 	0,
@@ -65,12 +71,12 @@ static Menu InjectMenu = {
 };
 
 static Menu AdvancedMenu = {
-	"Other Options",
+	L"Other Options",
 	.Option = (MenuEntry[4]){
-		{ " Downgrade MSET on SysNAND", &downgradeMSET, "adv0.bin" },
-		{ " Install FBI over Health&Safety App", &installFBI, "adv1.bin" },
-		{ " Restore original Health&Safety App", &restoreHS, "adv2.bin" },
-		{ " Launch DevMode", &DevMode, "adv3.bin" },
+		{ L" Downgrade MSET on SysNAND", &downgradeMSET, "adv0.bin" },
+		{ L" Install FBI over Health&Safety App", &installFBI, "adv1.bin" },
+		{ L" Restore original Health&Safety App", &restoreHS, "adv2.bin" },
+		{ L" Launch DevMode", &DevMode, "adv3.bin" },
 	},
 	4,
 	0,
@@ -78,14 +84,14 @@ static Menu AdvancedMenu = {
 };
 
 static Menu SettingsMenu = {
-	"           SETTINGS",
+	L"           SETTINGS",
 	.Option = (MenuEntry[6]){
-		{ "Force UI boot               ", NULL, "app.bin" },
-		{ "Selected theme:             ", NULL, "app.bin" },
-		{ "Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
-		{ "Enable 3D UI:               ", NULL, "app.bin" },
-		{ "Quick boot:                 ", NULL, "app.bin" },
-		{ "Console language:           ", NULL, "app.bin" },
+		{ L"Force UI boot               ", NULL, "app.bin" },
+		{ L"Selected theme:             ", NULL, "app.bin" },
+		{ L"Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
+		{ L"Enable 3D UI:               ", NULL, "app.bin" },
+		{ L"Quick boot:                 ", NULL, "app.bin" },
+		{ L"Console language:           ", NULL, "app.bin" },
 	},
 	6,
 	0,
@@ -161,11 +167,11 @@ void SettingsMenuInit(){
 	{
 		FileRead(&MyFile, settings, 6, 0);
 		bootGUI = (settings[0] == '1');
-		theme_num = (settings[1] - 0x30);
+		theme_num = (settings[1] - '0');
 		agb_bios = (settings[2] == '1');
 		theme_3d = (settings[3] == '1');
 		silent_boot = (settings[4] == '1');
-		language = (settings[5] - 0x30);
+		language = (settings[5] - '0');
 	}
 	
 	while (true) {
@@ -232,7 +238,7 @@ void SettingsMenuInit(){
 						DrawTopSplash(str, str, str);
 					}
 
-					Theme = (theme_num + 0x30);
+					Theme = (theme_num + '0');
 					File MyFile;
 					sprintf(str, "/rxTools/Theme/%u/LANG.txt", theme_num);
 					if (FileOpen(&MyFile, str, 0))
@@ -241,8 +247,8 @@ void SettingsMenuInit(){
 						{
 							char tl[]="00";
 							FileRead(&MyFile, tl, 1, 0);
-							if(tl[0] - 0x30 >= 0 && tl[0] - 0x30 <= N_LANG)
-								language = tl[0] - 0x30;
+							if(tl[0] - '0' >= 0 && tl[0] - '0' <= N_LANG)
+								language = tl[0] - '0';
 						}
 					}
 				}
@@ -286,13 +292,13 @@ void SettingsMenuInit(){
 		if (pad_state & BUTTON_B)
 		{
 			//Code to save settings
-			Theme = (theme_num + 0x30);
+			Theme = (theme_num + '0');
 			settings[0] = bootGUI ? '1' : '0';
 			settings[1] = Theme;
 			settings[2] = agb_bios ? '1' : '0';
 			settings[3] = theme_3d ? '1' : '0';
 			settings[4] = silent_boot ? '1' : '0';
-			settings[5] = language + 0x30;
+			settings[5] = language + '0';
 			FileWrite(&MyFile, settings, 6, 0);
 			FileClose(&MyFile);
 			break;
@@ -301,12 +307,12 @@ void SettingsMenuInit(){
 		TryScreenShot();
 		
 		//UPDATE SETTINGS GUI
-		sprintf(MyMenu->Option[0].Str, STR_FORCE_UI_BOOT[language], bootGUI ? STR_YES[language] : STR_NO[language]);
-		sprintf(MyMenu->Option[1].Str, STR_SELECTED_THEME[language], theme_num + 0x30);
-		sprintf(MyMenu->Option[2].Str, STR_SHOW_AGB[language], agb_bios ? STR_YES[language] : STR_NO[language]);
-		sprintf(MyMenu->Option[3].Str, STR_ENABLE_3D_UI[language], theme_3d ? STR_YES[language] : STR_NO[language]);
-		sprintf(MyMenu->Option[4].Str, STR_QUICK_BOOT[language], silent_boot ? STR_YES[language] : STR_NO[language]);
-		sprintf(MyMenu->Option[5].Str, STR_CONSOLE_LANGUAGE[language], STR_LANGUAGES[language]);
+		swprintf(MyMenu->Option[0].Str, 100, STR_FORCE_UI_BOOT[language], bootGUI ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[1].Str, 100, STR_SELECTED_THEME[language], theme_num + '0');
+		swprintf(MyMenu->Option[2].Str, 100, STR_SHOW_AGB[language], agb_bios ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[3].Str, 100, STR_ENABLE_3D_UI[language], theme_3d ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[4].Str, 100, STR_QUICK_BOOT[language], silent_boot ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[5].Str, 100, STR_CONSOLE_LANGUAGE[language], STR_LANGUAGES[language]);
 		MenuRefresh();
 	}
 }
@@ -331,15 +337,15 @@ void CreditsMenuInit(){
 }
 
 static Menu MainMenu = {
-		"rxTools - Roxas75 [v3.0]",
+		L"rxTools - Roxas75 [v3.0]",
 		.Option = (MenuEntry[7]){
-			{ " Launch rxMode", &BootMenuInit, "menu0.bin" },
-			{ " Decryption Options", &DecryptMenuInit, "menu1.bin" },
-			{ " Dumping Options", &DumpMenuInit, "menu2.bin" },
-			{ " Injection Options", &InjectMenuInit, "menu3.bin" },
-			{ " Advanced Options", &AdvancedMenuInit, "menu4.bin" },
-			{ " Settings", &SettingsMenuInit, "menu5.bin" },
-			{ " Credits", &CreditsMenuInit, "menu6.bin" },
+			{ L" Launch rxMode", &BootMenuInit, "menu0.bin" },
+			{ L" Decryption Options", &DecryptMenuInit, "menu1.bin" },
+			{ L" Dumping Options", &DumpMenuInit, "menu2.bin" },
+			{ L" Injection Options", &InjectMenuInit, "menu3.bin" },
+			{ L" Advanced Options", &AdvancedMenuInit, "menu4.bin" },
+			{ L" Settings", &SettingsMenuInit, "menu5.bin" },
+			{ L" Credits", &CreditsMenuInit, "menu6.bin" },
 		},
 		7,
 		0,
