@@ -51,7 +51,7 @@ patch_m4x_4x_1:
 m4x_4x_1_start: @ 0x279400
 @---------------------------------------------------------------------------------
 	.word 0x0010F2B9  @ pop_r0_r2
-	.word 0x00272BAE  @ r0 "YS:"
+	.word P4_LOAD_ADDRESS + (m4x_4x_1_YS - m4x_4x_1_start)
 	.word 0xBADC0DED  @ r2
 	.word 0x0018F19C  @ mount_sd("YS:") -> LDMFD           SP!, {R3-R5,PC}
 	.word 0x0010B690  @ r3
@@ -68,23 +68,34 @@ m4x_4x_1_start: @ 0x279400
 	.word 0x00100200  @ r6
 	.word 0x000048CC  @ r7
 	.word 0x00143D60  @ r8
+	.word 0x001549E1  @ pop_r1
+	.word 0x00004000  @ r1 2nd stage offset in file
+	.word 0x00143D8C  @ pop_r0
+	.word 0x00279004  @ r0 handle.offset
+	.word 0x0010CCBC  @ str r1, [r0] -> LDMFD   SP!, {R4,PC}
+	.word 0x44444444  @ r4
 	.word 0x0010F2B9  @ pop_r0_r2
 	.word 0x00279000  @ r0
 	.word P4_S2_LOAD_ADDRESS
 	.word 0x0010538C  @ pop_r3
-	.word 0x00009000  @ r3
+	.word 0xDEADBEEF  @ r3 this(or similar junk pops) has to be here for patch_count1
+	.word 0x0010538C  @ pop_r3
+	.word 0x00000400  @ r3
 	.word 0x001549E1  @ pop_r1
 	.word 0x00279020  @ r1
-	.word 0x001B3958  @ ifile_read(0x00279000, 0x00279020, 0x002B0000, 0x00009000) -> LDMFD   SP!, {R4-R9,PC}
-	.word 0xDEADBEEF  @ r4
-	.word 0xDEADBEEF  @ r5
-	.word 0xDEADBEEF  @ r6
-	.word 0xDEADBEEF  @ r7
-	.word 0xDEADBEEF  @ r8
-	.word 0xDEADBEEF  @ r9
+	.word 0x001B3958  @ ifile_read(0x00279000, 0x00279020, 0x002B0000, 0x00000400) -> LDMFD   SP!, {R4-R9,PC}
+	.word 0x002104E5  @ r4
+	.word 0x0019DA00  @ r5
+	.word 0x00017500  @ r6
+	.word 0x0021DF86  @ r7
+	.word 0x001AC100  @ r8
+	.word 0x001DDA22  @ r9
 	.word 0x0010538C  @ pop_r3
-	.word (P4_S2_LOAD_ADDRESS - (P4_LOAD_ADDRESS + m4x_4x_1_end - m4x_4x_1_start))
+	.word (P4_S2_LOAD_ADDRESS - (P4_LOAD_ADDRESS + m4x_4x_1_post_pivot - m4x_4x_1_start))
 	.word 0x00143D60  @ pivot -> ADD SP, SP, R3        LDR PC, [SP],#4
+m4x_4x_1_post_pivot:
+m4x_4x_1_YS:
+	.word 0x003A5359  @ YS:
 @---------------------------------------------------------------------------------
 m4x_4x_1_end:
 @---------------------------------------------------------------------------------
@@ -105,7 +116,7 @@ patch_m4x_dg_1:
 m4x_dg_1_start: @ 0x279400
 @---------------------------------------------------------------------------------
 	.word 0x0010F2B9  @ pop_r0_r2
-	.word 0x00272BAE  @ r0 "YS:"
+	.word P4_LOAD_ADDRESS + (m4x_dg_1_YS - m4x_dg_1_start)
 	.word 0xBADC0DED  @ r2
 	.word 0x0018F19C  @ mount_sd("YS:") -> LDMFD           SP!, {R3-R5,PC}
 	.word 0x0010B690  @ r3
@@ -123,7 +134,7 @@ m4x_dg_1_start: @ 0x279400
 	.word 0x000048CC  @ r7
 	.word 0x00143D60  @ r8
 	.word 0x001549E1  @ pop_r1
-	.word 0x0000A000  @ r1 2nd stage offset in file
+	.word 0x00004400  @ r1 2nd stage offset in file
 	.word 0x00143D8C  @ pop_r0
 	.word 0x00279004  @ r0 handle.offset
 	.word 0x0010CCBC  @ str r1, [r0] -> LDMFD   SP!, {R4,PC}
@@ -134,10 +145,10 @@ m4x_dg_1_start: @ 0x279400
 	.word 0x0010538C  @ pop_r3
 	.word 0xDEADBEEF  @ r3 this(or similar junk pops) has to be here for patch_count1
 	.word 0x0010538C  @ pop_r3
-	.word 0x00009000  @ r3
+	.word 0x00000400  @ r3
 	.word 0x001549E1  @ pop_r1
 	.word 0x00279020  @ r1
-	.word 0x001B3958  @ ifile_read(0x00279000, 0x00279020, 0x002B0000, 0x00009000) -> LDMFD   SP!, {R4-R9,PC}
+	.word 0x001B3958  @ ifile_read(0x00279000, 0x00279020, 0x002B0000, 0x00000400) -> LDMFD   SP!, {R4-R9,PC}
 	.word 0x002104E5  @ r4
 	.word 0x0019DA00  @ r5
 	.word 0x00017500  @ r6
@@ -145,8 +156,11 @@ m4x_dg_1_start: @ 0x279400
 	.word 0x001AC100  @ r8
 	.word 0x001DDA22  @ r9
 	.word 0x0010538C  @ pop_r3
-	.word (P4_S2_LOAD_ADDRESS - (P4_LOAD_ADDRESS + m4x_dg_1_end - m4x_dg_1_start))
+	.word (P4_S2_LOAD_ADDRESS - (P4_LOAD_ADDRESS + m4x_dg_1_post_pivot - m4x_dg_1_start))
 	.word 0x00143D60  @ pivot -> ADD SP, SP, R3        LDR PC, [SP],#4
+m4x_dg_1_post_pivot:
+m4x_dg_1_YS:
+	.word 0x003A5359  @ YS:
 @---------------------------------------------------------------------------------
 m4x_dg_1_end:
 @---------------------------------------------------------------------------------
@@ -210,7 +224,7 @@ m6x_6x_start:
 	.word 0xDEADDEAD 		@ r7 (garbage)
 	.word 0xDEADDEAD 		@ r8 (garbage)
 	.word 0x001CD804		@ pop_r1 *****************************
-	.word 0x0000E000		@ r1 2nd stage offset in file
+	.word 0x00005000		@ r1 2nd stage offset in file
 	.word 0x001A9349		@ pop_r0
 	.word P6_DATAADR + 4	@ r0 handle.offset
 	.word 0x0010CF5C		@ str r1, [r0] -> LDMFD   SP!, {R4,PC}
@@ -224,7 +238,7 @@ m6x_6x_start:
 	.word 0x0011BE4D 		@ pop {r1, r2, r3, pc}
 	.word P6_DATAADR + 32	@ r1 (&readbytes)
 	.word P6_S2_LOAD_ADDRESS@ r2 (dst)
-	.word 0x00007000 		@ r3 (size)
+	.word 0x00000400 		@ r3 (size)
 	.word 0x001A9349 		@ pop	{r0, pc}
 	.word P6_DATAADR		@ r0 (_this)
 	.word 0x001BC18C 		@ IFile_Read(_this, &readbytes, dst, size)
