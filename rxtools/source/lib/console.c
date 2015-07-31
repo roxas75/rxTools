@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <wchar.h>
 #include "common.h"
 #include "console.h"
 #include "draw.h"
@@ -12,9 +13,8 @@
 #define CONSOLE_SIZE 0x4000
 #define MAXLINES 10
 
-char console[CONSOLE_SIZE];
-char consoletitle[100] = "Dummy Title";
-char str[100];
+wchar_t console[CONSOLE_SIZE];
+wchar_t consoletitle[100] = L"Dummy Title";
 
 int BackgroundColor = WHITE;
 int TextColor = BLACK;
@@ -55,20 +55,17 @@ int ConsoleGetBorderWidth(int width){
 	return BorderWidth;
 }
 
-void ConsoleSetTitle(const char* format, ...){
-	char str[256];
-    va_list va;
-
-    va_start(va, format);
-    vsnprintf(str, 256, format, va);
-    va_end(va);
-	strncpy(consoletitle, str, 100);
+void ConsoleSetTitle(const wchar_t* format, ...){
+	va_list va;
+	va_start(va, format);
+	vswprintf(consoletitle, sizeof(consoletitle)/sizeof(consoletitle[0]), format, va);
+	va_end(va);
 }
 
 int countLines(){
 	int cont = 0;
 	for(int i = 0; i < CONSOLE_SIZE; i++){
-		if(console[i] == '\n'); cont++;
+		if(console[i] == L'\n'); cont++;
 	}
 	return cont;
 }
@@ -76,19 +73,20 @@ int countLines(){
 int findCursorLine(){
 	int cont = 0;
 	for(int i = 0; i < cursor; i++){
-		if(console[i] == '\n'); cont++;
+		if(console[i] == L'\n'); cont++;
 	}
 	return cont;
 }
 void ConsoleShow(){
+	char str[100];
 	
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme); //Need to load directly to tmpscreen to eliminate flicker
 	DrawBottomSplash(str);
 
-    void *tmpscreen = (void*)0x27000000;
-	memcpy(tmpscreen, BOT_SCREEN, 0x38400);
+	void *tmpscreen = (void*)0x27000000;
+	memcpy(tmpscreen, BOT_SCREEN, SCREEN_SIZE);
 	if(!consoleInited) return;
-	int titley = 2*CHAR_WIDTH;
+	int titley = 2*FONT_HEIGHT;
 
 	//for(int y = ConsoleY; y < ConsoleH + ConsoleY + BorderWidth; y++){
 	//	for(int x = ConsoleX; x < ConsoleW + ConsoleX + BorderWidth; x++){
@@ -103,69 +101,68 @@ void ConsoleShow(){
 	//		}
 	//	}
 	//}
-	int titlespace = 2*CHAR_WIDTH-2*BorderWidth;
-	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * CHAR_WIDTH, ConsoleY + (titlespace - CHAR_WIDTH) / 2 + BorderWidth, TextColor, ConsoleGetBackgroundColor());
+	int titlespace = 2*FONT_WIDTH-2*BorderWidth;
+	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * FONT_WIDTH, ConsoleY + (titlespace - FONT_HEIGHT) / 2 + BorderWidth, TextColor, ConsoleGetBackgroundColor());
 	
-	char tmp[256], *point;
+	wchar_t tmp[256], *point;
         if(findCursorLine() < MAXLINES) point = &console[0];
 	else{
 		int cont = 0;
 		int tmp1;
 		for(tmp1 = cursor; tmp1 >= 0 && cont <= MAXLINES + 1; tmp1--){
-			if(console[tmp1] == '\n') cont++;
+			if(console[tmp1] == L'\n') cont++;
 		}
-		while(console[tmp1] != 0x00 && console[tmp1] != '\n') tmp1--;
+		while(console[tmp1] != 0x00 && console[tmp1] != L'\n') tmp1--;
 		point = &console[tmp1+1];
 	}
 	int lines = 0;
 	for(int i = 0; i < CONSOLE_SIZE; i++){
 		int linelen = 0;
-		memset(tmp, 0, 256);
+		memset(tmp, 0, sizeof(tmp));
 		while(1){
 			if(*point == 0x00)  break;
-			if(*point == '\n'){ point++; break; }
+			if(*point == L'\n'){ point++; break; }
 			tmp[linelen++] = *point++;
 		}
-		DrawString(tmpscreen, tmp, ConsoleX + CHAR_WIDTH*Spacing, lines++ * CHAR_WIDTH + ConsoleY + 15 + CHAR_WIDTH*(Spacing - 1) + titley, TextColor, ConsoleGetBackgroundColor());
+		DrawString(tmpscreen, tmp, ConsoleX + FONT_WIDTH*Spacing, lines++ * FONT_HEIGHT + ConsoleY + 15 + FONT_HEIGHT*(Spacing - 1) + titley, TextColor, ConsoleGetBackgroundColor());
 		if(!*point) break;
 		if(lines == MAXLINES) break;
 	}
-	memcpy(BOT_SCREEN, tmpscreen, 0x38400);
-	if (BOT_SCREEN2) memcpy(BOT_SCREEN2, tmpscreen, 0x38400);
+	memcpy(BOT_SCREEN, tmpscreen, SCREEN_SIZE);
+	if (BOT_SCREEN2) memcpy(BOT_SCREEN2, tmpscreen, SCREEN_SIZE);
 }
 
 void ConsoleFlush(){
-	memset(console, 0, CONSOLE_SIZE);
+	memset(console, 0, CONSOLE_SIZE*sizeof(console[0]));
 	cursor = 0;
 	linecursor = 0;
 }
 
-void ConsoleAddText(char* str){
-//    int linel = ((int)((float)(ConsoleW)/(float)CHAR_WIDTH))-5;
+void ConsoleAddText(wchar_t* str){
     for(int i = 0; *str != 0x00; i++){
-		if(!(*str == '\\' && *(str+1) == 'n')){	//we just handle the '\n' case, who cares of the rest
+		if(!(*str == L'\\' && *(str+1) == L'n')){	//we just handle the '\n' case, who cares of the rest
 			console[cursor++] = *str++;
 			linecursor++;
 		}else{
 			linecursor = 0;
-			console[cursor++] = '\n';
+			console[cursor++] = L'\n';
 			str += 2;
 		}
     }
 }
 
-void print(const char *format, ...){
-    char str[256];
-    va_list va;
+void print(const wchar_t *format, ...){
+	wchar_t str[256];
+	va_list va;
 
-    va_start(va, format);
-    vsnprintf(str, 256, format, va);
-    va_end(va);
+	va_start(va, format);
+	vswprintf(str, sizeof(str)/sizeof(str[0]), format, va);
+	va_end(va);
 	ConsoleAddText(str);
 }
 
 void ConsoleNextLine(){
-	while(console[cursor] != '\n'){
+	while(console[cursor] != L'\n'){
 		if(console[cursor] == 0x00){
 			cursor-=2;
 			break;
@@ -176,8 +173,8 @@ void ConsoleNextLine(){
 }
 
 void ConsolePrevLine(){ 
-	if(console[cursor-1] == '\n') cursor-=2;
-	while(console[cursor] != '\n'){
+	if(console[cursor-1] == L'\n') cursor-=2;
+	while(console[cursor] != L'\n'){
 		if(cursor == 0){
 			break;
 		}

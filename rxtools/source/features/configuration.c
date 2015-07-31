@@ -17,12 +17,15 @@
 #include "stdio.h"
 #include "menu.h"
 
-#define DATAFOLDER "rxtools/data"
-#define KEYFILENAME "slot0x25KeyX.bin"
-#define WORKBUF (u8*)0x21000000
-#define NAT_SIZE 0xEBC00
-#define AGB_SIZE 0xD9C00
-#define TWL_SIZE 0x1A1C00
+#define DATAFOLDER	"rxtools/data"
+#define KEYFILENAME	"slot0x25KeyX.bin"
+#define WORKBUF		(u8*)0x21000000
+#define NAT_SIZE	0xEBC00
+#define AGB_SIZE	0xD9C00
+#define TWL_SIZE	0x1A1C00
+#define PROGRESS_OK	L'⬛'
+#define PROGRESS_FAIL	L'✖'
+#define PROGRESS_X	(SCREEN_WIDTH-7*FONT_WIDTH)/2
 
 bool first_boot;
 char tmpstr[256] = {0};
@@ -34,9 +37,10 @@ UINT tmpu32;
 
 int InstallData(char* drive){
 	FIL firmfile;
-	char* progressbar = "[       ]";
-	char* progress = progressbar+1;
-	print("%s", progressbar);  ConsolePrevLine();
+	wchar_t *progressbar = L"⬜⬜⬜⬜⬜⬜⬜";
+	wchar_t *progress = progressbar+0;
+	print(L"%ls", progressbar);
+	ConsolePrevLine();
 	
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
@@ -44,7 +48,8 @@ int InstallData(char* drive){
 	
 	//Read firmware data
 	if (f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
-	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	*progress++ = PROGRESS_OK;
+	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
@@ -61,7 +66,8 @@ int InstallData(char* drive){
 		FileRead(&tempfile, &keyx[0], 16, 0);
 		FileClose(&tempfile);
 	}
-	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	*progress++ = PROGRESS_OK;
+	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	for(int i = 0; i < NAT_SIZE; i+=0x4){
 		if(!strcmp((char*)n_firm + i, "InsertKeyXHere!") && keyx[0] != 0){
 			memcpy(n_firm + i, keyx, 16);
@@ -70,7 +76,8 @@ int InstallData(char* drive){
 			*((unsigned int*)(n_firm + i)) = (checkEmuNAND() / 0x200) - 1;
 		}
 	}
-	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	*progress++ = PROGRESS_OK;
+	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
@@ -79,7 +86,8 @@ int InstallData(char* drive){
 		f_close(&firmfile);
 		return CONF_ERRNFIRM;
 	}
-	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	*progress++ = PROGRESS_OK;
+	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
@@ -101,7 +109,7 @@ int InstallData(char* drive){
 			f_close(&firmfile);
 			return CONF_ERRNFIRM;
 		}
-		*progress++ = '.';
+		*progress++ = PROGRESS_OK;
 	}else{
 		//If we cannot decrypt it from firmware.bin because of titlekey messed up, it probably means that AGB has been modified in some way.
 		//So we read it from his installed ncch...
@@ -132,12 +140,12 @@ int InstallData(char* drive){
 				f_close(&firmfile);
 				return CONF_ERRNFIRM;
 			}
-			*progress++ = '.';
+			*progress++ = PROGRESS_OK;
 		}else{
-			*progress++ = 'x'; //If we get here, then we'll play without AGB, lol
+			*progress++ = PROGRESS_FAIL; //If we get here, then we'll play without AGB, lol
 		}
 	}
-	DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
@@ -154,11 +162,11 @@ int InstallData(char* drive){
 			f_close(&firmfile);
 			return CONF_ERRNFIRM;
 		}
-		*progress++ = '.'; 
+		*progress++ = PROGRESS_OK; 
 	}else{
-		*progress++ = 'x'; 
+		*progress++ = PROGRESS_FAIL; 
 	}
-	DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
@@ -169,7 +177,8 @@ int InstallData(char* drive){
 		f_close(&firmfile);
 		return CONF_CANTOPENFILE;
 	}
-	*progress++ = '.'; DrawString(BOT_SCREEN, progressbar, 130, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	*progress++ = PROGRESS_OK;
+	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	
 	f_close(&firmfile);
 	return 0;
@@ -210,7 +219,7 @@ void InstallConfigData(){
 			FileRead(&MyFile, settings, 6, 0);
 
 			/* Check if the Theme Number is valid */
-			unsigned char theme_num = (settings[0] - 0x30);
+			unsigned char theme_num = (settings[0] - '0');
 			if (theme_num >= 0 && theme_num <= 9)
 			{
 				File Menu0;

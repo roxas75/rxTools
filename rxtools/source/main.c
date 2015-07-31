@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <wchar.h>
 #include "common.h"
 #include "MainMenu.h"
 #include "crypto.h"
@@ -12,6 +13,9 @@
 #include "filepack.h"
 #include "cfw.h"
 #include "configuration.h"
+
+#define FONT_ADDRESS	(void*)0x27E00000
+extern unsigned char *fontaddr;
 
 void LoadSettings(){
 	char settings[]="000100";
@@ -31,7 +35,7 @@ void LoadSettings(){
 			if (first_boot && !bootGUI) bootGUI = true;
 			
 			/* Check if the Theme Number is valid */
-			unsigned char theme_num = (settings[0] - 0x30);
+			unsigned char theme_num = (settings[1] - '0');
 			if (theme_num >= 0 && theme_num <= 9)
 			{
 				File Menu0;
@@ -48,8 +52,8 @@ void LoadSettings(){
 			}
 
 			/* Check if the Language Number is valid */
-			if(settings[5] - 0x30 >= 0 && settings[5] - 0x30 <= N_LANG)
-				language = settings[5] - 0x30;
+			if(settings[5] - '0' >= 0 && settings[5] - '0' <= N_LANG)
+				language = settings[5] - '0';
 			else
 				language = 0;
 
@@ -77,12 +81,22 @@ void Initialize(){
 	char str[100];
 	char strl[100];
 	char strr[100];
-	DrawString(BOT_SCREEN,  " INITIALIZE... ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
+	DrawString(BOT_SCREEN, L"INITIALIZE...", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 	if(FSInit()){
-		DrawString(BOT_SCREEN,  " LOADING...    ", 0, SCREEN_HEIGHT-FONT_SIZE, WHITE, BLACK);
+		DrawString(BOT_SCREEN, L"LOADING...   ", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 	}else{
-		DrawString(BOT_SCREEN,  " ERROR!        ", 0, SCREEN_HEIGHT-FONT_SIZE, RED, BLACK);
+		DrawString(BOT_SCREEN, L"ERROR!       ", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
 	}
+	File MyFile;
+	if (FileOpen(&MyFile, "/rxTools/font.bin", 0))
+	{
+		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
+		fontaddr = FONT_ADDRESS;
+	}else{
+		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+//		language = 0;
+	}
+
 	LoadPack();
 
 	//Console Stuff
@@ -123,7 +137,7 @@ void Initialize(){
 		else
 		{
 			ConsoleInit();
-			ConsoleSetTitle(STR_AUTOBOOT[language]);
+			ConsoleSetTitle(L"%24ls",STR_AUTOBOOT[language]);
 			print(STR_HOLD_R[language]);
 			ConsoleShow();
 
@@ -159,8 +173,8 @@ int main(){
 	}else{
 		if(GetSystemVersion() < 3){
 			ConsoleInit();
-			ConsoleSetTitle("          WARNING");
-			print("WARNING:\n\nCannot find slot0x25KeyX.bin. If\nyour firmware version is less than\n7.X, some titles decryption will\nfail, and some EmuNANDs will not\nboot.\n\nPress A to continue...\n");
+			ConsoleSetTitle(L"%17ls", L"WARNING");
+			print(L"WARNING:\n\nCannot find slot0x25KeyX.bin. If\nyour firmware version is less than\n7.X, some titles decryption will\nfail, and some EmuNANDs will not\nboot.\n\nPress Ⓐ to continue...\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
