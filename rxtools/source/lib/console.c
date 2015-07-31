@@ -80,11 +80,9 @@ int findCursorLine(){
 void ConsoleShow(){
 	char str[100];
 	
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme); //Need to load directly to tmpscreen to eliminate flicker
-	DrawBottomSplash(str);
-
 	void *tmpscreen = (void*)0x27000000;
-	memcpy(tmpscreen, BOT_SCREEN, SCREEN_SIZE);
+	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	DrawSplash(tmpscreen, str);
 	if(!consoleInited) return;
 	int titley = 2*FONT_HEIGHT;
 
