@@ -503,9 +503,7 @@ void manageFBI(bool restore)
 	
 	if (!restore)
 	{
-		print(L"\n\nDo you want to only\ncheck TMD Version?\n");
-		ConsoleShow();
-		print(L"Ⓑ Check TMD Only\nⓎ Inject FBI\n\n");
+		print(L"\n\nDo you want to only\ncheck TMD Version?\nⒷ Check TMD Only\nⓎ Inject FBI\n\n");
 		ConsoleShow();
 		checkLoop = 0;
 
@@ -585,7 +583,6 @@ void manageFBI(bool restore)
 						if (size == 0xB34)
 						{
 							print(L"NAND H&S TMD backup created.\n");
-							ConsoleShow();
 							
 							/* Backup the H&S content file */
 							memset(&path, 0, 256);
@@ -597,25 +594,20 @@ void manageFBI(bool restore)
 								if (size == cntsize)
 								{
 									print(L"NAND H&S content backup created.\n");
-									ConsoleShow();
 								} else {
 									print(L"Error writing H&S content backup.\n");
-									ConsoleShow();
 									goto out;
 								}
 							} else {
 								print(L"Error creating H&S content backup.\n");
-								ConsoleShow();
 								goto out;
 							}
 						} else {
 							print(L"Error writing H&S TMD backup.\n");
-							ConsoleShow();
 							goto out;
 						}
 					} else {
 						print(L"Error creating H&S TMD backup.\n");
-						ConsoleShow();
 						goto out;
 					}
 					
@@ -624,7 +616,6 @@ void manageFBI(bool restore)
 					sprintf(path2, "0:fbi_inject.app");
 					
 					print(L"Editing H&S Information...");
-					ConsoleShow();
 				} else {
 					/* Generate the H&S backup data paths */
 					memset(&tmpstr, 0, 256);
@@ -633,8 +624,8 @@ void manageFBI(bool restore)
 					sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
 					
 					print(L"Restoring H&S Information...");
-					ConsoleShow();
 				}
+				ConsoleShow();
 				
 				/* Open the SD TMD */
 				if (FileOpen(&tmp, path, 0))
@@ -682,11 +673,7 @@ void manageFBI(bool restore)
 												{
 													if (FSFileCopy(cntpath, path2) == 0)
 													{
-														print(L"\n\nWhat would you like to do?\n");
-														ConsoleShow();
-														print(L"Ⓑ Keep %ls Data\n", restore ? L"backup": L"FBI injection");
-														ConsoleShow();
-														print(L"Ⓧ Delete %ls Data\n\n", restore ? L"backup": L"FBI injection");
+														print(L"\n\nWhat would you like to do?\nⒷ Keep %ls Data\nⓍ Delete %ls Data\n\n", restore ? L"backup": L"FBI injection", restore ? L"backup": L"FBI injection");
 														ConsoleShow();
 														checkLoop = 0;
 	
@@ -696,7 +683,6 @@ void manageFBI(bool restore)
 															if (pad_state & BUTTON_B)
 															{
 																print(L"OK!\n\nKeeping %ls data.\n", restore ? L"backup" : L"FBI injection");
-																ConsoleShow();
 																checkLoop = 1;
 															}
 															else if (pad_state & BUTTON_X)
@@ -706,66 +692,52 @@ void manageFBI(bool restore)
 																f_unlink(path);
 																f_unlink(path2);
 																print(L"OK!\n");
-																ConsoleShow();
 																checkLoop = 1;
 															}
 														}
 													} else {
 														print(L"\nError %ls content file.\n", restore ? L"restoring H&S" : L"injecting FBI");
-														ConsoleShow();
 													}
 												} else {
 													print(L"\nError %ls TMD.\n", restore ? L"restoring H&S" : L"injecting FBI");
-													ConsoleShow();
 												}
 											} else {
 												print(L"\nError: invalid Content Data hash.\nGot:\n");
-												ConsoleShow();
 												print_sha256(CntDataSum);
 												print(L"\nExpected:\n");
-												ConsoleShow();
 												print_sha256(TmdCntDataSum);
 											}
 										} else {
 											FileClose(&tmp);
 											print(L"\nInvalid %ls content size.\nGot: v%u / Expected: v%u\n", restore ? L"backup" : L"FBI", size, sd_cntsize);
-											ConsoleShow();
 										}
 									} else {
 										print(L"\nError opening %ls content.\n", restore ? L"backup" : L"FBI");
 									}
 								} else {
 									print(L"\nError: invalid Content Chunk hash.\nGot:\n");
-									ConsoleShow();
 									print_sha256(CntChnkRecSum);
 									print(L"\nExpected:\n");
-									ConsoleShow();
 									print_sha256(TmdCntChnkRecSum);
 								}
 							} else {
 								print(L"\nError: invalid Content Info hash.\nGot:\n");
-								ConsoleShow();
 								print_sha256(CntInfoRecSum);
 								print(L"\nExpected:\n");
-								ConsoleShow();
 								print_sha256(TmdCntInfoRecSum);
 							}
 						} else {
 							print(L"\nError: invalid %ls TMD version.\nGot: v%u / Expected: v%u\n", restore ? L"backup" : L"FBI", sd_tmd_ver, tmd_ver);
-							ConsoleShow();
 						}
 					} else {
 						FileClose(&tmp);
 						print(L"\nError: invalid %ls TMD size.\nGot: %u / Expected: %u\n", restore ? L"backup" : L"FBI", size, 0xB34);
-						ConsoleShow();
 					}
 				} else {
 					print(L"\nError opening %ls TMD.\n", restore ? L"backup" : L"FBI");
-					ConsoleShow();
 				}
 			} else {
 				print(L"Error: couldn't find H&S data.\n");
-				ConsoleShow();
 			}
 		}
 	}	

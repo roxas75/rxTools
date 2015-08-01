@@ -13,8 +13,8 @@
 #define CONSOLE_SIZE 0x4000
 #define MAXLINES 10
 
-wchar_t console[CONSOLE_SIZE];
 wchar_t consoletitle[100] = L"Dummy Title";
+wchar_t console[CONSOLE_SIZE];
 
 int BackgroundColor = WHITE;
 int TextColor = BLACK;
@@ -80,11 +80,9 @@ int findCursorLine(){
 void ConsoleShow(){
 	char str[100];
 	
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme); //Need to load directly to tmpscreen to eliminate flicker
-	DrawBottomSplash(str);
-
 	void *tmpscreen = (void*)0x27000000;
-	memcpy(tmpscreen, BOT_SCREEN, SCREEN_SIZE);
+	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	DrawSplash(tmpscreen, str);
 	if(!consoleInited) return;
 	int titley = 2*FONT_HEIGHT;
 
@@ -121,6 +119,7 @@ void ConsoleShow(){
 		memset(tmp, 0, sizeof(tmp));
 		while(1){
 			if(*point == 0x00)  break;
+			if(*point < 0x20) { point++; break; }
 			if(*point == L'\n'){ point++; break; }
 			tmp[linelen++] = *point++;
 		}
@@ -139,7 +138,7 @@ void ConsoleFlush(){
 }
 
 void ConsoleAddText(wchar_t* str){
-    for(int i = 0; *str != 0x00; i++){
+	for(int i = 0; *str != 0x00; i++){
 		if(!(*str == L'\\' && *(str+1) == L'n')){	//we just handle the '\n' case, who cares of the rest
 			console[cursor++] = *str++;
 			linecursor++;
@@ -148,7 +147,7 @@ void ConsoleAddText(wchar_t* str){
 			console[cursor++] = L'\n';
 			str += 2;
 		}
-    }
+	}
 }
 
 void print(const wchar_t *format, ...){
