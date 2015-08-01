@@ -19,12 +19,28 @@
 #define FCRAM (unsigned char*)0x20000000
 #define VRAM (unsigned char*)0x18000000
 
-//The basic functions we will need
-void* memset(void * ptr, int value, unsigned int num);
-int rx_strcmp(char* s1, char*s2, unsigned int size, unsigned int w1, unsigned int w2);    // w1 = size of string1 letters
-void rx_strcpy(char* dest, char* source, unsigned int size, unsigned int w1, unsigned int w2);
-void rx_hextostr(unsigned int num, char* str);
-int memcmp(void* buf1, void* buf2, int size);
+static int rx_strcmp(char* s1, char* s2, unsigned int size, unsigned int w1, unsigned int w2){
+	int i;
+
+	for(i = 0; i < size; i++){
+		if(s1[i*w1] != s2[i*w2]) return 0;
+	}
+	return 1;
+}
+
+static void rx_strcpy(char* dest, char* source, unsigned int size, unsigned int w1, unsigned int w2){
+	int i;
+
+	for(i = 0; i < size; i++){
+		dest[i*w1] = source[i*w2];
+	}
+}
+
+static inline unsigned int getHID()
+{
+	return ~*(unsigned int *)0x10146000;
+}
+
 static inline void svc_Backdoor(void *addr)
 {
     register void *_r0 __asm ("r0") = addr;
@@ -44,5 +60,3 @@ static inline void svc_Backdoor(void *addr)
 #define BUTTON_L1     (1 << 9)
 #define BUTTON_X      (1 << 10)
 #define BUTTON_Y      (1 << 11)
-
-unsigned int getHID();
