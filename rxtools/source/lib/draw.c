@@ -82,7 +82,7 @@ void DrawCharacter(u8 *screen, wchar_t character, u32 x, u32 y, u32 color, u32 b
 	//Still i don't know if we should draw the text twice.
 	if(screen == BOT_SCREEN && BOT_SCREEN2){
 		screenStart = BOT_SCREEN2 + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
-		u32 charPos = character * FONT_WIDTH * FONT_HEIGHT / 8;
+		charPos = character * FONT_WIDTH * FONT_HEIGHT / 8;
 		for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL * (character<FONT_CJK_START?FONT_HWIDTH:FONT_WIDTH); screenPos += (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL)
 		{
 			charVal = *(u16*)(fontaddr+charPos);
@@ -129,9 +129,11 @@ void DrawString(u8 *screen, const wchar_t *str, u32 x, u32 y, u32 color, u32 bgc
 //[Unused]
 void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor)
 {
-	wchar_t HexStr[4+1] = {0,}, i = sizeof(hex);
+	u32 i = sizeof(hex)*2;
+	wchar_t HexStr[sizeof(hex)*2+1] = {0,};
 	while (i){
-		HexStr[(i--)-1] = '0' + (hex & 0xF);
+		HexStr[--i] = hex & 0x0F;
+		HexStr[i] += HexStr[i] > 9 ? '7' : '0';
 		hex >>= 4;
 	}
 	DrawString(screen, HexStr, x, y, color, bgcolor);
