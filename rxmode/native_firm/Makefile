@@ -37,7 +37,7 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
 arm9payload.bin:
-	@cd source/arm9 && make
+	@cd source/payload && make
 
 patch.bin: $(BUILD)/0801b564.bin $(BUILD)/0807882c.bin $(BUILD)/0807886c.bin	\
 	$(BUILD)/080282f8.bin $(BUILD)/08086140.bin $(BUILD)/08086174.bin	\

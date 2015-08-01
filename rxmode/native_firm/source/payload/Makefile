@@ -20,17 +20,18 @@ endif
 include $(DEVKITARM)/ds_rules
 
 OD=arm-none-eabi-objdump
-PATCHES= source/EmuNAND.s source/CreateThread.s source/myThread/FS.S
-CFLAGS=-c -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -std=c99
+PATCHES= arm9/EmuNAND.s arm9/CreateThread.s arm9/myThread/FS.S
+CFLAGS=-c -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss -Os
 SFLAGS=-c -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar
 # No linker flags yet, but here if you need it
 LDFLAGS=
 
 all:
-	$(CC) -g -Wall source/myThread/myThread.c source/myThread/lib.c $(CFLAGS)
-	$(CC) -g $(PATCHES) -I source/myThread $(SFLAGS)
-	$(CC) -nostdlib -T 3ds.ld EmuNAND.o CreateThread.o myThread.o lib.o FS.o
-	$(OBJCOPY) -O binary a.out arm9.bin
-#	$(OD) -t a.out
+	$(CC) -g -Wall arm9/myThread/myThread.c arm9/myThread/handlers.s $(CFLAGS) -Iinclude
+	$(CC) -c arm11/hookswi.s
+	$(CC) -g $(PATCHES) -I arm9/myThread $(SFLAGS)
+	$(CC) -nostdlib -T 3ds.ld EmuNAND.o CreateThread.o myThread.o handlers.o hookswi.o FS.o
+	$(OBJCOPY) -O binary a.out code.bin
+	$(OD) -t a.out
 	rm -f *.o *.out
-	mv arm9.bin ../../build/0801a4c0.bin
+	mv code.bin ../../build/0801a4c0.bin
