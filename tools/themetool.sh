@@ -1,4 +1,19 @@
 #!/bin/sh
+# Copyright (C) 2015 The PASTA Team
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 echo "rxTools AIO Theme Tool v1.0.1"
 command -v convert >/dev/null 2>&1 || { echo "Please install ImageMagick in order to use this script." ; exit 1; }
 if [ "$1" = "help" ]; then
@@ -8,6 +23,10 @@ if [ "$1" = "help" ]; then
 	echo "     makepng-all: converts all .bin (BGR) files to .png. If you are creating a theme and you need a template, this is the first command you should use."
 	echo "     makeprev [gif-delay]: creates a preview (animated GIFs and static PNGs) of your theme in the \"Preview\" folder. An Internet connection is recommended the first time to download the New Nintendo 3DS XL frame, which will be saved as \"~/hero-new-3ds.png\"."
 	echo "     strippng-all: removes unnecessary data from all PNG files."
+	echo ""
+	echo "This program is free software; you can redistribute it and/or"
+	echo "modify it under the terms of the GNU General Public License"
+	echo "version 2 as published by the Free Software Foundation"
 elif [ "$1" = "makebgr" ]; then
 	convert -rotate 90 "$2" "bgr:${2%.*}.bin"
 elif [ "$1" = "makebgr-all" ]; then
@@ -31,15 +50,15 @@ elif [ "$1" = "makeprev" ]; then
 	else
 		delay=$2
 	fi
-	
+
 	if [ ! -f ~/hero-new-3ds.png ]; then
 		(cd ~ ; curl -O "http://www.nintendo.com/images/page/3ds/what-is-3ds/hero-new-3ds.png")
 	fi
-	
+
 	for w in Images Animations; do
 		mkdir -p "Preview/$w/AIO" "Preview/$w/Menu" "Preview/$w/Advanced Options" "Preview/$w/Boot" "Preview/$w/Configuration" "Preview/$w/Decryption" "Preview/$w/Dumping" "Preview/$w/Injection" "Preview/$w/Dump Files"
 	done
-	
+
 	makep1()
 	{
 		if [ -f $2 ]; then
@@ -53,7 +72,7 @@ elif [ "$1" = "makeprev" ]; then
 			echo "ERROR: Cannot find $2."
 		fi
 	}
-	
+
 	if [ -f TOP.png ]; then
 		for i in `seq 0 6`; do
 			makep1 TOP.png menu$i.png
@@ -89,7 +108,7 @@ elif [ "$1" = "makeprev" ]; then
 	else
 		echo "ERROR: Cannot find TOP.png."
 	fi
-	
+
 	convert Preview/menu0.png Preview/boot.png Preview/adv2.png +append -strip Preview/menuprev-aio.png
 	convert -delay $delay -loop 0 menu?.png Preview/menuprev-0.gif
 	convert -delay $delay -loop 0 Preview/menu?.png Preview/menuprev-1.gif
@@ -109,9 +128,9 @@ elif [ "$1" = "makeprev" ]; then
 	convert -delay $delay -loop 0 Preview/cfg0.png Preview/cfg1?.png Preview/cfg-1.gif
 	convert -delay $delay -loop 0 menu0.png boot.png bootE.png menu1.png dec?.png menu2.png dmp?.png fil?.png menu3.png inj?.png menu4.png adv?.png menu5.png app.png menu6.png credits.png Preview/menuprev-aio-0.gif
 	convert -delay $delay -loop 0 Preview/menu0.png Preview/boot.png Preview/bootE.png Preview/menu1.png Preview/dec?.png Preview/menu2.png Preview/dmp?.png Preview/fil?.png Preview/menu3.png Preview/inj?.png Preview/menu4.png Preview/adv?.png Preview/menu5.png Preview/app.png Preview/menu6.png Preview/credits.png Preview/menuprev-aio-1.gif
-	
+
 	cd Preview
-	
+
 	mv menuprev-aio*.gif Animations/AIO
 	mv menuprev-?.gif Animations/Menu
 	mv boot*.gif Animations/Boot
@@ -121,7 +140,7 @@ elif [ "$1" = "makeprev" ]; then
 	mv dmp*.gif Animations/Dumping
 	mv inj*.gif Animations/Injection
 	mv fil*.gif Animations/Dump\ Files
-	
+
 	mv menuprev-aio.png Images/AIO
 	mv menu*.png Images/Menu
 	mv boot*.png Images/Boot

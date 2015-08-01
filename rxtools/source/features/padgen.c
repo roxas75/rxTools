@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <string.h>
 
 #include "fs.h"
@@ -14,8 +31,8 @@ void PadGen(){
 	ConsoleShow();
 	SdPadgen();
 	ConsoleShow();
-	
-	print(L"\nPress Ⓐ to exit\n"); 
+
+	print(L"\nPress Ⓐ to exit\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -38,20 +55,20 @@ u32 NcchPadgen()
 	}
 	FileRead(&pf, info->entries, info->n_entries * sizeof(NcchInfoEntry), 16);
 	FileClose(&pf);
-	
+
 	print(L"Working on ncchinfo.bin ...\n");
 	ConsoleShow();
-	for(u32 i = 0; i < info->n_entries; i++) {		
+	for(u32 i = 0; i < info->n_entries; i++) {
 		PadInfo padInfo = {.setKeyY = 1, .size_mb = info->entries[i].size_mb};
 		memcpy(padInfo.CTR, info->entries[i].CTR, 16);
 		memcpy(padInfo.keyY, info->entries[i].keyY, 16);
 		memcpy(padInfo.filename, info->entries[i].filename, 112);
-	
+
 		if(info->entries[i].uses7xCrypto)
 			padInfo.keyslot = 0x25;
 		else
 			padInfo.keyslot = 0x2C;
-	
+
 		result = CreatePad(&padInfo, i);
 		if (result) return 1;
 	}
@@ -143,7 +160,7 @@ u32 CreatePad(PadInfo *info, int index)
 			aes_decrypt((void*)zero_buf, (void*)BUFFER_ADDR+j, ctr, 1, AES_CTR_MODE);
 			add_ctr(ctr, 1);
 		}
-		
+
 		print(L"Creating Pad %i : %i%%", index, (i+j)/size_100);
 		ConsolePrevLine();
 		ConsolePrevLine();

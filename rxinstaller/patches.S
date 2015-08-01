@@ -1,3 +1,18 @@
+@ Copyright (C) 2015 The PASTA Team
+@
+@ This program is free software; you can redistribute it and/or
+@ modify it under the terms of the GNU General Public License
+@ version 2 as published by the Free Software Foundation
+@
+@ This program is distributed in the hope that it will be useful,
+@ but WITHOUT ANY WARRANTY; without even the implied warranty of
+@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@ GNU General Public License for more details.
+@
+@ You should have received a copy of the GNU General Public License
+@ along with this program; if not, write to the Free Software
+@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 @---------------------------------------------------------------------------------
 @	Patch file format
 @
@@ -180,10 +195,10 @@ m4x_2_start:
 
 	.word 0x001C4FC4  @ pop_r1
 	.word P4_LOAD_ADDRESS
-	
+
 	.word 0x001334FC  @ eeprom_read(0x0001FE00, 0x00279400, 0x00000100) -> LDMFD           SP!, {R4,PC}
 	.word 0xFFFFFFFE  @ r4
-	
+
 	.word 0x0010538C  @ pop_r3
 	.word P4_LOAD_ADDRESS - 0x0FFFFF64
 	.word 0x00143D60 @ add sp,sp,r3 | ldr pc,[sp],#4

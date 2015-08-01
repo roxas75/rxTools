@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef __APPLE__
@@ -59,8 +76,8 @@ int main(int argc, char** argv){
 	if(nfiles == 0){
 		printf("No files specified to pack!");
 	}
-	fwrite(&nfiles, 1, 4, out); 
-	for(i = 0; i < 12; i++) 
+	fwrite(&nfiles, 1, 4, out);
+	for(i = 0; i < 12; i++)
 		fputc(0x00, out);
 	for(i = 0; i < nfiles*sizeof(PackEntry); i++) fputc(0x00, out);
 	for(i = 0; i < nfiles; i++){
@@ -78,7 +95,7 @@ int main(int argc, char** argv){
 		unsigned int off = ftell(out);
 		fwrite(buf, 1, size, out);
 		PackEntry Entry;
-		
+
 		Entry.size = size; Entry.off = off;
 		Entry.hash = HashGen(buf, size); Entry.edited = 0;
 		memset(Entry.name, 0, 16); strncpy(Entry.name, getFileName(argv[1 + i]), 16);
