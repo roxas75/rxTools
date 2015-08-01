@@ -1,3 +1,18 @@
+# Copyright (C) 2015 The PASTA Team
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 #---------------------------------------------------------------------------------
 .SUFFIXES:
 #---------------------------------------------------------------------------------
@@ -20,10 +35,10 @@ all: $(BUILD) arm9payload.bin patch.bin
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	
+
 arm9payload.bin:
 	@cd source/arm9 && make
-	
+
 patch.bin: $(BUILD)/0801b564.bin $(BUILD)/0807882c.bin $(BUILD)/0807886c.bin	\
 	$(BUILD)/080282f8.bin $(BUILD)/08086140.bin $(BUILD)/08086174.bin	\
 	$(BUILD)/080859ec.bin $(BUILD)/08094454.bin	\
@@ -69,4 +84,3 @@ $(BUILD)/080632b8.o: $(SOURCE)/p9_signatures_spoof_2.s $(BUILD)
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET) *.bin
- 

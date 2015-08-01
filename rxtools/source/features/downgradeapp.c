@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include "downgradeapp.h"
 #include "common.h"
 #include "screenshot.h"
@@ -50,7 +67,7 @@ void print_sha256(unsigned char hash[32])
 	for (i = 0; i < 32; i++)
 	{
 		print(L"%02X", hash[i]);
-		
+
 		if (i == 16)
 		{
 			/* Continue printing the SHA-256 sum in a new line after 34 characters (17 bytes) */
@@ -65,42 +82,42 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 {
 	char *folder = (char*)&tmpstr;
 	memset(folder, 0, 256);
-	
+
 	DIR* curDir = &myDir;
 	memset((unsigned char*)curDir, 0, sizeof(DIR));
-	
+
 	FILINFO *myInfo = &curInfo;
 	memset((unsigned char*)myInfo, 0, sizeof(FILINFO));
 	myInfo->fname[0] = 'A';
-	
+
 	sprintf(folder, "%d:title/%08x/%08x/content", drive, tid_low, tid_high);
-	
+
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
-	
+
 	char path[256];
 	unsigned short latest_ver = 0, cur_ver = 0;
 	bool is_v0 = false;
-	
+
 	for (int i = 0; myInfo->fname[0] != 0; i++)
 	{
 		if (f_readdir(curDir, myInfo)) break;
 		if (myInfo->fname[0] == '.') continue;
-		
+
 		if (strstr(myInfo->fname, ".tmd") || strstr(myInfo->fname, ".TMD"))
 		{
 			memset(&path, 0, 256);
 			sprintf(path, "%s/%s", folder, myInfo->fname);
-			
+
 			File tmp;
 			if (!FileOpen(&tmp, path, 0)) continue;
-			
+
 			unsigned int size = FileGetSize(&tmp);
 			if (size < 0xB34)
 			{
 				FileClose(&tmp);
 				continue;
 			}
-			
+
 			/* Get the TMD version */
 			/* There can be some instances in which more than one TMD/content file is available */
 			/* Of course, we want to use the latest one */
@@ -109,16 +126,16 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 				FileClose(&tmp);
 				continue;
 			}
-			
+
 			/* Change Endianness */
 			cur_ver = bswap_16(cur_ver);
-			
+
 			/* Verify the version number */
 			if ((latest_ver == 0 && !is_v0) || cur_ver > latest_ver)
 			{
 				tmd_chunk_struct tmd_entry;
 				memset(&tmd_entry, 0xFF, 0x30);
-				
+
 				int cont = 0;
 				unsigned int b_read = 0;
 				while (tmd_entry.index != 0)
@@ -127,20 +144,20 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 					b_read = FileRead(&tmp, &tmd_entry, 0x30, size - (cont * 0x30));
 					if (b_read != 0x30) break;
 				}
-				
+
 				FileClose(&tmp);
-				
+
 				if (b_read != 0x30) continue;
-				
+
 				memset(&path, 0, 256);
 				sprintf(path, "%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
-				
+
 				if (FileOpen(&tmp, path, 0))
 				{
 					FileClose(&tmp);
 					latest_ver = cur_ver;
 					if (cur_ver == 0) is_v0 = true;
-					
+
 					/* Save TMD and content paths */
 					sprintf(tmdpath, "%s/%s", folder, myInfo->fname);
 					sprintf(cntpath, "%s/%08x.app", folder, bswap_32(tmd_entry.id));
@@ -152,7 +169,7 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 			continue;
 		}
 	}
-	
+
 	f_closedir(curDir);
 	if (latest_ver == 0 && !is_v0) return 0;
 	return 1;
@@ -177,12 +194,12 @@ int CheckRegion(int drive)
 			return -1;
 		}
 	}
-	
+
 	print(L"OK!\n");
 	ConsoleShow();
 	FileRead(&secureinfo, &region, 1, 0x100);
 	FileClose(&secureinfo);
-	
+
 	if (region > 0x06)
 	{
 		print(L"Error: unsupported region.\nProcess failed!\n");
@@ -194,7 +211,7 @@ int CheckRegion(int drive)
 		print(L"Region: %s\n", regions[region]);
 		ConsoleShow();
 	}
-	
+
 	return 0;
 }
 
@@ -213,10 +230,10 @@ int CheckRegionSilent(int drive)
 			return -1;
 		}
 	}
-	
+
 	FileRead(&secureinfo, &region, 1, 0x100);
 	FileClose(&secureinfo);
-	
+
 	if (region > 0x06)
 	{
 		print(L"Error: unsupported region.\nProcess failed!\n");
@@ -226,7 +243,7 @@ int CheckRegionSilent(int drive)
 		/* Avoid problems with the unused "AUS" region code */
 		if (region >= 3) region--;
 	}
-	
+
 	return 0;
 }
 
@@ -357,10 +374,10 @@ void downgradeMSET()
 
 	if(noHalt)
 	{
-	
+
 		print(L"Opening MSET app...\n");
 		ConsoleShow();
-		
+
 		if (CheckRegion(SYS_NAND) == 0)
 		{
 			if (FindApp(titleid_low, titleid_high[region], SYS_NAND)) // SysNAND only
@@ -372,7 +389,7 @@ void downgradeMSET()
 					FileRead(&dg, &tmd_ver, 2, 0x1DC);
 					tmd_ver = bswap_16(tmd_ver);
 					FileClose(&dg);
-					
+
 					/* Verify version number */
 					if (tmd_ver != mset_ver[mset_dg_ver])
 					{
@@ -382,7 +399,7 @@ void downgradeMSET()
 							unsigned int check_val;
 							FileRead(&dg, &check_val, 4, 0x130);
 							FileClose(&dg);
-							
+
 							if (check_val != 0)
 							{
 								if (checkDgFile(dgpath, mset_hash[mset_dg_ver]))
@@ -393,24 +410,24 @@ void downgradeMSET()
 									{
 										print(L"OK!\n");
 										ConsoleShow();
-										
+
 										unsigned int dgsize = FileGetSize(&dg);
 										unsigned char *buf = (unsigned char*)0x21000000;
 										FileRead(&dg, buf, dgsize, 0);
-										
+
 										/* Downgrade pack decryption */
 										u8 iv[0x10] = {0};
 										u8 Key[0x10] = {0};
-										
+
 										GetTitleKey(&Key[0], titleid_low, titleid_high[region], SYS_NAND);
-										
+
 										aes_context aes_ctxt;
 										aes_setkey_dec(&aes_ctxt, Key, 0x80);
 										aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, dgsize, iv, buf, buf);
-										
+
 										FileWrite(&dg, buf, dgsize, 0);
 										FileClose(&dg);
-										
+
 										if (*((unsigned int*)(buf + 0x100)) == 0x4843434E) // "NCCH" magic word
 										{
 											print(L"Downgrading... ");
@@ -463,7 +480,7 @@ void downgradeMSET()
 			}
 		}
 	}
-	
+
 	print(L"\nPress Ⓐ to exit\n\n\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
@@ -475,17 +492,17 @@ void manageFBI(bool restore)
 	unsigned int titleid_low = 0x00040010;
 	unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
 	char *backup_path = "rxTools/h&s_backup";
-	
+
 	File tmp;
 	char path[256] = {0};
 	char path2[256] = {0};
 	unsigned char *buf = (unsigned char *)0x21000000;
-	
+
 	unsigned int size;
 	unsigned short tmd_ver;
 	unsigned int sd_cntsize;
 	unsigned short sd_tmd_ver;
-	
+
 	unsigned char TmdCntInfoRecSum[32] = {0};
 	unsigned char CntInfoRecSum[32] = {0};
 	unsigned char TmdCntChnkRecSum[32] = {0};
@@ -495,12 +512,12 @@ void manageFBI(bool restore)
 
 	unsigned short checkLoop;
 	bool noHalt = true;
-	
+
 	if ((drive = NandSwitch()) == UNK_NAND) return;
-	
+
 	ConsoleInit();
 	ConsoleSetTitle(L"%25ls", restore ? L"RESTORE HEALTH & SAFETY" : L"FBI INSTALLATION");
-	
+
 	if (!restore)
 	{
 		print(L"\n\nDo you want to only\ncheck TMD Version?\nⒷ Check TMD Only\nⓎ Inject FBI\n\n");
@@ -521,14 +538,14 @@ void manageFBI(bool restore)
 				checkLoop = 1;
 
 				CheckRegion(drive);
-				
+
 				if (FindApp(titleid_low, titleid_high[region], drive))
 				{
 					/* Open the NAND H&S TMD */
 					FileOpen(&tmp, tmdpath, 0);
 					FileRead(&tmp, buf, 0xB34, 0);
 					FileClose(&tmp);
-			
+
 					/* Get the title version from the TMD */
 					tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
 					print(L"TMD Version: v%u.\n\n", tmd_ver);
@@ -548,32 +565,32 @@ void manageFBI(bool restore)
 				FileOpen(&tmp, tmdpath, 0);
 				FileRead(&tmp, buf, 0xB34, 0);
 				FileClose(&tmp);
-				
+
 				/* Get the title version from the TMD */
 				tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
 				print(L"TMD Version: v%u.\n", tmd_ver);
-				
+
 				if (!restore)
 				{
 					/* Get the stored content size from the TMD */
 					unsigned int cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
-					
+
 					/* Open the NAND H&S content file and read it to the memory buffer */
 					FileOpen(&tmp, cntpath, 0);
 					FileRead(&tmp, buf + 0x1000, cntsize, 0);
 					FileClose(&tmp);
-					
+
 					/* Create the Health & Safety data backup directory */
 					f_mkdir(backup_path);
-					
+
 					memset(&tmpstr, 0, 256);
 					sprintf(tmpstr, "%s/%s", backup_path, regions[region]);
 					f_mkdir(tmpstr);
-					
+
 					memset(&tmpstr, 0, 256);
 					sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
 					f_mkdir(tmpstr);
-					
+
 					/* Backup the H&S TMD */
 					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
 					if (FileOpen(&tmp, path, 1))
@@ -583,7 +600,7 @@ void manageFBI(bool restore)
 						if (size == 0xB34)
 						{
 							print(L"NAND H&S TMD backup created.\n");
-							
+
 							/* Backup the H&S content file */
 							memset(&path, 0, 256);
 							sprintf(path, "0:%s/%.12s", tmpstr, cntpath+34);
@@ -610,11 +627,11 @@ void manageFBI(bool restore)
 						print(L"Error creating H&S TMD backup.\n");
 						goto out;
 					}
-					
+
 					/* Generate the FBI data paths */
 					sprintf(path, "0:fbi_inject.tmd");
 					sprintf(path2, "0:fbi_inject.app");
-					
+
 					print(L"Editing H&S Information...");
 				} else {
 					/* Generate the H&S backup data paths */
@@ -622,11 +639,11 @@ void manageFBI(bool restore)
 					sprintf(tmpstr, "%s/%s/v%u", backup_path, regions[region], tmd_ver);
 					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
 					sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
-					
+
 					print(L"Restoring H&S Information...");
 				}
 				ConsoleShow();
-				
+
 				/* Open the SD TMD */
 				if (FileOpen(&tmp, path, 0))
 				{
@@ -635,18 +652,18 @@ void manageFBI(bool restore)
 					{
 						FileRead(&tmp, buf, 0xB34, 0);
 						FileClose(&tmp);
-						
+
 						/* Get the SD TMD version and stored content size */
 						sd_tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
 						sd_cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
-						
+
 						if (sd_tmd_ver == tmd_ver)
 						{
 							/* Get the SHA-256 hashes */
 							memcpy(TmdCntInfoRecSum, buf + 0x1E4, 32);
 							memcpy(TmdCntChnkRecSum, buf + 0x208, 32);
 							memcpy(TmdCntDataSum, buf + 0xB14, 32);
-							
+
 							/* Verify the Content Info Record hash */
 							sha2(buf + 0x204, 0x900, CntInfoRecSum, 0);
 							if (memcmp(CntInfoRecSum, TmdCntInfoRecSum, 32) == 0)
@@ -663,7 +680,7 @@ void manageFBI(bool restore)
 										{
 											FileRead(&tmp, buf + 0x1000, sd_cntsize, 0);
 											FileClose(&tmp);
-											
+
 											/* Verify the Content Data hash */
 											sha2(buf + 0x1000, sd_cntsize, CntDataSum, 0);
 											if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
@@ -676,7 +693,7 @@ void manageFBI(bool restore)
 														print(L"\n\nWhat would you like to do?\nⒷ Keep %ls Data\nⓍ Delete %ls Data\n\n", restore ? L"backup": L"FBI injection", restore ? L"backup": L"FBI injection");
 														ConsoleShow();
 														checkLoop = 0;
-	
+
 														while (checkLoop < 1)
 														{
 															u32 pad_state = InputWait();
@@ -740,7 +757,7 @@ void manageFBI(bool restore)
 				print(L"Error: couldn't find H&S data.\n");
 			}
 		}
-	}	
+	}
 out:
 	print(L"\nPress Ⓐ to exit.\n\n\n");
 	ConsoleShow();

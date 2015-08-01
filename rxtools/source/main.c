@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -30,10 +47,10 @@ void LoadSettings(){
 			agb_bios = (settings[2] == '1');
 			theme_3d = (settings[3] == '1');
 			silent_boot = (settings[4] == '1');
-			
+
 			/* Disable autostart after the first boot */
 			if (first_boot && !bootGUI) bootGUI = true;
-			
+
 			/* Check if the Theme Number is valid */
 			unsigned char theme_num = (settings[1] - '0');
 			if (theme_num >= 0 && theme_num <= 9)
@@ -63,12 +80,12 @@ void LoadSettings(){
 			FileClose(&MyFile);
 		}
 	}
-	
+
 	/* Disable autostart after the first boot */
 	bootGUI = first_boot;
 	Theme = '0';
 	agb_bios = false;
-	
+
 	/* Create system.txt */
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 1))
 	{
@@ -146,7 +163,7 @@ void Initialize(){
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
-				
+
 
 		rxModeQuickBoot();
 	}

@@ -1,9 +1,26 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <nds.h>
 #include <stdio.h>
 #include <fat.h>
 #include <vector>
 #include <string>
-#include "patches.h" 
+#include "patches.h"
 #include "drunkenlogo.h"
 
 unsigned int rawDataOffset=0;
@@ -83,7 +100,7 @@ void aread( void * ptr, size_t size, size_t count, int stream ){  // 'array read
 }
 
 int aseek( int stream, int offset, int origin ){                  // 'array seek' drop in substitute for fseek
-    
+
 	origin=0;
 	stream=0;
 	rawDataOffset=offset;
@@ -91,7 +108,7 @@ int aseek( int stream, int offset, int origin ){                  // 'array seek
 }
 
 int aeof(int stream){
-	
+
 	stream=0;
 	int result=0;
 	if(rawDataOffset >= fSIZE)result=1;
@@ -113,10 +130,10 @@ char * agets( char * str, int num, int stream ){
 int main(int argc, char **argv) {
 //---------------------------------------------------------------------------------
 	videoSetMode(MODE_5_2D);                         //shamlessly ripped from the libnds examples :p
-	videoSetModeSub(MODE_0_2D); 
+	videoSetModeSub(MODE_0_2D);
 	vramSetBankA(VRAM_A_MAIN_BG);
 	bgInit(3, BgType_Bmp16, BgSize_B16_256x256, 0,0);
-	decompress(drunkenlogoBitmap, BG_GFX,  LZ77Vram); 
+	decompress(drunkenlogoBitmap, BG_GFX,  LZ77Vram);
 
 	consoleDemoInit();
 
@@ -275,27 +292,27 @@ int main(int argc, char **argv) {
 		int customLinesTotal=6;
 		int i=0;
 		char pathBegin[]="YS:/";
-		
-		
+
+
 		if(!fatInitDefault()){
 			iprintf("      fat init error\n");
 			halt();
 		}
-		
+
 		FILE *text=fopen("ropCustom.txt","r");
-		
+
 		if(!text){
 			iprintf("      ropCustom.txt load error\n      Does it exist?\n\n");
 			halt();
 		}
-		
+
 		for(i=0;i<customLinesTotal;i++){
 			fgets(custom[i],30,text);
 			if(!custom[i] || (custom[i][0] < 0x21) )break;
-			
+
 			for(int j=0; j < 30 ;j++){  //strip newline junk
 				if(custom[i][j]==0x0D || custom[i][j]==0x0A)
-					custom[i][j]=0;	
+					custom[i][j]=0;
 			}
 			custom[i][25]=0;    //make damn sure it terminates
 		}
@@ -304,20 +321,20 @@ int main(int argc, char **argv) {
 			iprintf("      invalid first line path\n");
 			halt();
 		}
-		
+
 		customLinesTotal=i;
-		
+
 		fclose(text);
-		
+
 		iprintf("\x1b[2J"); //clear console
 		iprintf("Custom filename list:");
-		
+
 		for(i=0;i<customLinesTotal;i++){
 			iprintf ("\x1b[%d;3H", i + ITEMS_START_ROW -8);
 			iprintf ("%s", custom[i]);
 		}
-		
-		
+
+
 		while(1) {
 
 			// Show cursor
@@ -342,17 +359,17 @@ int main(int argc, char **argv) {
 
 
 		}
-		
+
 		for(int i=0; i < 4*2 ;i+=2){
 			*(workbuffer+0x11C+i)=pathBegin[i/2];
 			*(workbuffer+0x11C+i+1)=0;
 		}
-		
+
 		for(int i=0; i < 32 ;i+=2){
 			*(workbuffer+0x124+i)=custom[csSelected][i/2];
 			*(workbuffer+0x124+i+1)=0;
 		}
-		
+
 		*(workbuffer+0x142)=0; //ensure terminated string (again)
 		*(workbuffer+0x143)=0;
     }

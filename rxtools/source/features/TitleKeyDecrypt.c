@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include "TitleKeyDecrypt.h"
 #include "console.h"
 #include "draw.h"
@@ -134,7 +151,7 @@ void DecryptTitleKeyFile(void) {
 		WaitForButton(BUTTON_A);
 		return;
 	}
-	
+
 	u32 line[4] = {0,};
 	u32 keycount = 0, i = 0;
 	u32 kindex = 0, nkeys = 0;
@@ -144,7 +161,7 @@ void DecryptTitleKeyFile(void) {
 	wchar_t* progress = progressbar+1;
 	u8 percent = 0;
 	step = 1;
-	
+
 	rr = f_read(&tick, line, sizeof(line), &br);
 	if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
 	keycount = line[0];
@@ -152,11 +169,11 @@ void DecryptTitleKeyFile(void) {
 		print(L"encrypted keys binary size mismatch. Retry later?\nkeys count: %04X\n length: E@%08X, A@%08X\n", keycount, 0x10 + 0x20*keycount, f_size(&tick));
 		goto ioerror;
 	}
-	
+
 	print(L"%d encrypted keys found.\n%s%04X/%04X\n", keycount, progressbar, i, keycount);
 	ConsoleShow();
 	ConsolePrevLine();
-	
+
 	f_lseek(&dump, 0x10);
 	for (i = 0; i < keycount; i ++) {
 		rr = f_read(&tick, line, sizeof(line), &br);
@@ -166,7 +183,7 @@ void DecryptTitleKeyFile(void) {
 		rr = f_read(&tick, line, sizeof(line), &br);
 		if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
 		memcpy(key, line, 16);
-		
+
 		memcpy(TITLES + nkeys * 8, titleid, 8);
 		//Craft one line per time.
 		line[0] = kindex;
@@ -178,7 +195,7 @@ void DecryptTitleKeyFile(void) {
 		rr = f_write(&dump, key, sizeof(key), &br);
 		if ((rr != FR_OK)||(br != sizeof(key))) goto ioerror;
 		nkeys ++;
-		
+
 		if (percent < i*10/keycount) {
 			percent++;
 			*(progress++) = L'=';
@@ -212,10 +229,10 @@ int GetTitleKey(u8 *TitleKey, u32 low, u32 high, int drive) {
 	u32 tid_low = ((low >> 24) & 0xff) | ((low << 8) & 0xff0000) | ((low >> 8) & 0xff00) | ((low << 24) & 0xff000000);
 	u32 tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
 	u32 tick_size = 0x200;     //Chunk size
-	
+
 	char path[64] = {0};
 	sprintf(path, "%d:dbs/ticket.db", drive);
-	
+
 	if (FileOpen(&tick, path, 0)) {
 		u8 *buf = TITLES;
 		int pos = 0;
