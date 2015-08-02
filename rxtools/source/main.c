@@ -34,6 +34,17 @@
 #define FONT_ADDRESS	(void*)0x27E00000
 extern unsigned char *fontaddr;
 
+void LoadFont(){
+	File MyFile;
+	if (FileOpen(&MyFile, "/rxTools/font.bin", 0))
+	{
+		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
+		fontaddr = FONT_ADDRESS;
+	}else{
+		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+	}
+}
+
 void Initialize(){
 	char str[100];
 	char strl[100];
@@ -44,16 +55,7 @@ void Initialize(){
 	}else{
 		DrawString(BOT_SCREEN, L"ERROR!       ", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
 	}
-	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/font.bin", 0))
-	{
-		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
-		fontaddr = FONT_ADDRESS;
-	}else{
-		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
-//		language = 0;
-	}
-
+	LoadFont();
 	LoadPack();
 
 	//Console Stuff
@@ -104,12 +106,9 @@ void Initialize(){
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
-
-
 		rxModeQuickBoot();
 	}
 rxTools_boot:
-
 	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
 	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
 	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
