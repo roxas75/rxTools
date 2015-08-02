@@ -27,11 +27,8 @@
 #include "draw.h"
 #include "menu.h"
 
-#define CONSOLE_SIZE 0x4000
-#define MAXLINES 10
-
-wchar_t consoletitle[100] = L"Dummy Title";
 wchar_t console[CONSOLE_SIZE];
+wchar_t consoletitle[CONSOLE_MAX_TITLE_LENGTH+1] = L"";
 
 int BackgroundColor = WHITE;
 int TextColor = BLACK;
@@ -116,15 +113,15 @@ void ConsoleShow(){
 	//		}
 	//	}
 	//}
-	int titlespace = 2*FONT_WIDTH-2*BorderWidth;
-	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * FONT_WIDTH, ConsoleY + (titlespace - FONT_HEIGHT) / 2 + BorderWidth, TextColor, ConsoleGetBackgroundColor());
+	int titlespace = 2*FONT_HEIGHT-2*BorderWidth;
+	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * FONT_HWIDTH, ConsoleY + (titlespace - FONT_HEIGHT) / 2 + BorderWidth, TextColor, ConsoleGetBackgroundColor());
 
 	wchar_t tmp[256], *point;
-        if(findCursorLine() < MAXLINES) point = &console[0];
+        if(findCursorLine() < CONSOLE_MAX_LINES) point = &console[0];
 	else{
 		int cont = 0;
 		int tmp1;
-		for(tmp1 = cursor; tmp1 >= 0 && cont <= MAXLINES + 1; tmp1--){
+		for(tmp1 = cursor; tmp1 >= 0 && cont <= CONSOLE_MAX_LINES + 1; tmp1--){
 			if(console[tmp1] == L'\n') cont++;
 		}
 		while(console[tmp1] != 0x00 && console[tmp1] != L'\n') tmp1--;
@@ -136,13 +133,12 @@ void ConsoleShow(){
 		memset(tmp, 0, sizeof(tmp));
 		while(1){
 			if(*point == 0x00)  break;
-			if(*point < 0x20) { point++; break; }
 			if(*point == L'\n'){ point++; break; }
 			tmp[linelen++] = *point++;
 		}
-		DrawString(tmpscreen, tmp, ConsoleX + FONT_WIDTH*Spacing, lines++ * FONT_HEIGHT + ConsoleY + 15 + FONT_HEIGHT*(Spacing - 1) + titley, TextColor, ConsoleGetBackgroundColor());
+		DrawString(tmpscreen, tmp, ConsoleX + FONT_HWIDTH*Spacing, lines++ * FONT_HEIGHT + ConsoleY + 15 + FONT_HEIGHT*(Spacing - 1) + titley, TextColor, ConsoleGetBackgroundColor());
 		if(!*point) break;
-		if(lines == MAXLINES) break;
+		if(lines == CONSOLE_MAX_LINES) break;
 	}
 	memcpy(BOT_SCREEN, tmpscreen, SCREEN_SIZE);
 	if (BOT_SCREEN2) memcpy(BOT_SCREEN2, tmpscreen, SCREEN_SIZE);

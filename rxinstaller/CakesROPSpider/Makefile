@@ -14,7 +14,6 @@ OCFLAGS=-R .compat
 
 OBJS=$(patsubst src/%.c, obj/%.o, $(wildcard src/*.c))
 OBJS+=$(patsubst src/%.s, obj/%.o, $(wildcard src/*.s))
-OBJS+=$(patsubst src/%.S, obj/%.o, $(wildcard src/*.S))
 
 OUT_DIR=obj
 
