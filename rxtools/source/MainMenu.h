@@ -324,12 +324,12 @@ void SettingsMenuInit(){
 		TryScreenShot();
 
 		//UPDATE SETTINGS GUI
-		swprintf(MyMenu->Option[0].Str, 100, STR_FORCE_UI_BOOT[language], bootGUI ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[1].Str, 100, STR_SELECTED_THEME[language], theme_num + '0');
-		swprintf(MyMenu->Option[2].Str, 100, STR_SHOW_AGB[language], agb_bios ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[3].Str, 100, STR_ENABLE_3D_UI[language], theme_3d ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[4].Str, 100, STR_QUICK_BOOT[language], silent_boot ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[5].Str, 100, STR_CONSOLE_LANGUAGE[language], STR_LANGUAGES[language]);
+		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_FORCE_UI_BOOT[language], bootGUI ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_SELECTED_THEME[language], theme_num + '0');
+		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_SHOW_AGB[language], agb_bios ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_ENABLE_3D_UI[language], theme_3d ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_QUICK_BOOT[language], silent_boot ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_CONSOLE_LANGUAGE[language], STR_LANGUAGES[language]);
 		MenuRefresh();
 	}
 }

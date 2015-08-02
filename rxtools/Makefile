@@ -132,7 +132,7 @@ unifont-8.0.01.bmp:
 	@echo cd /gnu/unifont/unifont-8.0.01 >>ftp.txt
 	@echo get $@ >>ftp.txt
 	@echo bye >>ftp.txt
-	@ftp -s:ftp.txt
+	@(test -s $(DEVKITPRO)/msys/bin/ftp.exe && (cat ftp.txt | ftp.exe)) || (cat ftp.txt | ftp)
 	@rm ftp.txt
 
 $(BUILD): source/lib/font.h
