@@ -271,7 +271,7 @@ void downgradeMSET()
 	char *dgpath = "0:msetdg.bin";
 	unsigned int titleid_low = 0x00040010;
 	unsigned int titleid_high[6] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000 }; //JPN, USA, EUR, CHN, KOR, TWN
-	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0xAFD07166, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
+	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0x2164C3C0, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned short mset_ver[10] = { 3074, 5127, 3078, 5128, 3075, 5127, 8, 1026, 2049, 8 };
 	unsigned short mset_dg_ver = 0;
 	unsigned int checkLoop = 0;
