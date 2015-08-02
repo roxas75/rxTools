@@ -40,11 +40,11 @@ void setLang(unsigned int i){
 	strings = mlStrings[langIndex].strings;
 }
 
-void setLangByCode(const char *code){
+void setLangByCode(const wchar_t *code){
 	unsigned int i;
 
 	for (i = 0; i < STR_LANG_NUM; i++)
-		if (!strcmp(code, mlStrings[i].code)) {
+		if (!wcscmp(code, mlStrings[i].code)) {
 			setLang(i);
 			return;
 		}
@@ -56,7 +56,7 @@ unsigned int getLang(){
 	return langIndex;
 }
 
-const char *getLangCode(){
+const wchar_t *getLangCode(){
 	return mlStrings[langIndex].code;
 }
 

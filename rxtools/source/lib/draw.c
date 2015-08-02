@@ -24,11 +24,13 @@
 #include "font.h"
 #include "draw.h"
 #include "filepack.h"
+#include "lang.h"
 
 u32 current_y = 1;
 
 u8 *tmpscreen = (u8*)0x26000000;
 const u8 *fontaddr = font;
+extern wchar_t * const *strings;
 
 void ClearScreen(u8 *screen, u32 color)
 {
@@ -237,7 +239,7 @@ void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[])
 	}
 	else
 	{
-		DrawString(BOT_SCREEN, L"MISSING THEME FILES!", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_MISSING_THEME_FILES], FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
 	}
 }
 
@@ -259,6 +261,6 @@ void DrawSplash(u8 *screen, char splash_file[]) {
 	}
 	else
 	{
-		DrawString(BOT_SCREEN, L"MISSING THEME FILES!", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_MISSING_THEME_FILES], FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
 	}
 }
