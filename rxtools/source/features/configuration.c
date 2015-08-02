@@ -33,6 +33,7 @@
 #include "downgradeapp.h"
 #include "stdio.h"
 #include "menu.h"
+#include "jsmn.h"
 
 #define DATAFOLDER	"rxtools/data"
 #define KEYFILENAME	"slot0x25KeyX.bin"
@@ -51,6 +52,197 @@ char strl[100];
 char strr[100];
 File tempfile;
 UINT tmpu32;
+
+static char cfgLang[CFG_STR_MAX_LEN] = "en";
+
+Cfg cfgs[] = {
+	[CFG_GUI] = { "GUI", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_THEME] = { "Theme", CFG_TYPE_INT, { .i = 0 } },
+	[CFG_AGB] = { "AGB", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_3D] = { "3D", CFG_TYPE_BOOLEAN, { .i = 1 } },
+	[CFG_SILENT] = { "Silent", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_LANG] = { "Language", CFG_TYPE_STRING, { .s = cfgLang } }
+};
+
+static const char jsonPath[] = "/rxTools/data/system.json";
+
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+		return 0;
+	}
+	return -1;
+}
+
+int writeCfg()
+{
+	File fd;
+	char buf[128];
+	const char *p;
+	char *jsonCur;
+	unsigned int i;
+	size_t len;
+	int left, res;
+
+	left = sizeof(buf);
+	jsonCur = buf;
+
+	*jsonCur = '{';
+
+	left--;
+	jsonCur++;
+
+	i = 0;
+	for (i = 0; i < CFG_NUM; i++) {
+		if (i > 0) {
+			if (left < 1)
+				return 1;
+
+			*jsonCur = ',';
+			left--;
+			jsonCur++;
+		}
+
+		res = snprintf(jsonCur, left, "\n\t\"%s\": ", cfgs[i].key);
+		if (res < 0 || res >= left)
+			return 1;
+
+		left -= res;
+		jsonCur += res;
+
+		switch (cfgs[i].type) {
+			case CFG_TYPE_INT:
+				res = snprintf(jsonCur, left,
+					"%d", cfgs[i].val.i);
+				if (res < 0 || res >= left)
+					return 1;
+
+				len = res;
+				break;
+
+			case CFG_TYPE_BOOLEAN:
+				if (cfgs[i].val.i) {
+					len = sizeof("true");
+					p = "true";
+				} else {
+					len = sizeof("false");
+					p = "false";
+				}
+
+				if (len >= left)
+					return -1;
+
+				strcpy(jsonCur, p);
+				len--;
+				break;
+
+			case CFG_TYPE_STRING:
+				res = snprintf(jsonCur, left,
+					"\"%s\"", cfgs[i].val.s);
+				if (res < 0 || res >= left)
+					return 1;
+
+				len = res;
+				break;
+
+			default:
+				return -1;
+		}
+
+		left -= len;
+		jsonCur += len;
+	}
+
+	left -= 3;
+	if (left < 0)
+		return 1;
+
+	*jsonCur = '\n';
+	jsonCur++;
+	*jsonCur = '}';
+	jsonCur++;
+	*jsonCur = '\n';
+	jsonCur++;
+
+	if (!FileOpen(&fd, jsonPath, 1))
+		return 1;
+
+	FileWrite(&fd, buf, (uintptr_t)jsonCur - (uintptr_t)buf, 0);
+	FileClose(&fd);
+
+	return 0;
+}
+
+int readCfg()
+{
+	const size_t tokenNum = 1 + CFG_NUM * 2;
+	jsmntok_t t[tokenNum];
+	char buf[128];
+	jsmn_parser parser;
+	File fd;
+	unsigned int i, j, k;
+	int r;
+	size_t len;
+
+	if (!FileOpen(&fd, jsonPath, 0))
+		return 1;
+
+	len = FileGetSize(&fd);
+	if (len > sizeof(buf))
+		return 1;
+
+	FileRead(&fd, buf, len, 0);
+	FileClose(&fd);
+
+	jsmn_init(&parser);
+	r = jsmn_parse(&parser, buf, len, t, tokenNum);
+	if (r < 0)
+		return r;
+
+	if (r < 1)
+		return 1;
+
+	/* Loop over all keys of the root object */
+	for (i = 1; i < r; i++) {
+		for (j = 0; jsoneq(buf, &t[i], cfgs[j].key) != 0; j++)
+			if (j >= CFG_NUM)
+				return 1;
+
+		i++;
+		switch (cfgs[j].type) {
+			case CFG_TYPE_INT:
+				cfgs[j].val.i = 0;
+				for (k = t[i].start; k < t[i].end; k++) {
+					cfgs[j].val.i *= 10;
+					cfgs[j].val.i += buf[k] - 48;
+				}
+
+				break;
+
+			case CFG_TYPE_BOOLEAN:
+				len = t[i].end - t[i].start;
+				cfgs[j].val.i = buf[t[i].start] == 't';
+
+				break;
+
+			case CFG_TYPE_STRING:
+				len = t[i].end - t[i].start;
+
+				if (len + 1 > CFG_STR_MAX_LEN)
+					break;
+
+#ifdef DEBUG
+				if (cfgs[j].val.s == NULL)
+					break;
+#endif
+
+				memcpy(cfgs[j].val.s, buf + t[i].start, len);
+				cfgs[j].val.s[len] = 0;
+		}
+	}
+
+	return 0;
+}
 
 int InstallData(char* drive){
 	FIL firmfile;
@@ -226,46 +418,19 @@ void InstallConfigData(){
 	}
 
 	first_boot = true;
+	writeCfg();
 
-	char settings[]="000100";
-	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
-	{
-		if (FileGetSize(&MyFile) == 6)
-		{
-			FileRead(&MyFile, settings, 6, 0);
-
-			/* Check if the Theme Number is valid */
-			unsigned char theme_num = (settings[0] - '0');
-			if (theme_num >= 0 && theme_num <= 9)
-			{
-				File Menu0;
-				sprintf(str, "/rxTools/Theme/%c/cfg0.bin", settings[1]);
-				if (FileOpen(&Menu0, str, 0))
-				{
-					Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
-					FileClose(&Menu0);
-				} else {
-					Theme = '0';
-				}
-			} else {
-				Theme = '0';
-				FileWrite(&MyFile, &Theme, 1, 1);
-			}
-		}
-	}
-
-	sprintf(str, "/rxTools/Theme/%c/cfg0TOP.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%u/cfg0TOP.bin", cfgs[CFG_THEME].val.i);
 	DrawTopSplash(str, str, str);
-	sprintf(str, "/rxTools/Theme/%c/cfg0.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%u/cfg0.bin", cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(str);
 
 	int res = InstallData("0");	//SD Card
-	sprintf(str, "/rxTools/Theme/%c/cfg1%c.bin", Theme, res == 0 ? 'O' : 'E');
+	sprintf(str, "/rxTools/Theme/%u/cfg1%c.bin", cfgs[CFG_THEME].val.i, res == 0 ? 'O' : 'E');
 	DrawBottomSplash(str);
-	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
-	sprintf(strl, "/rxTools/Theme/%c/TOPL.bin", Theme);
-	sprintf(strr, "/rxTools/Theme/%c/TOPR.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
+	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
+	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
 	DrawTopSplash(str, strl, strr);
 
 	InputWait();
