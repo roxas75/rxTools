@@ -23,13 +23,13 @@
 #include "console.h"
 
 typedef struct{
-	wchar_t* Str;
+	wchar_t Str[CONSOLE_MAX_LINE_LENGTH+1];
 	void(* Func)();
 	char* gfx_splash;
 }MenuEntry;
 
 typedef struct{
-	wchar_t* Name;
+	wchar_t Name[CONSOLE_MAX_LINE_LENGTH+1];
 	MenuEntry* Option;
 	int nEntryes;
 	int Current;    //The current selected option
