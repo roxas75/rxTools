@@ -46,6 +46,8 @@ Requirements for GNU/Linux:
 Just run **make** and rxTools.dat should be generated in the **release** folder, along with all the other packets.
 If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)* error on Windows, look at your PATH and move any path with parenthesis to the end of it
 
+Make sure that the path to rxTools doesn't include space (' ').
+
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
 - Roxas75, myself, as the creator of rxTools
