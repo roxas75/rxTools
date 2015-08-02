@@ -61,140 +61,140 @@ static const struct {
 	[STR_LANG_EN] = {
 		.code = "en",
 		.strings = {
-			[STR_LANG_NAME] = L"Eng",
+			[STR_LANG_NAME] = L"English",
 
-			[STR_FORCE_UI_BOOT] = L"Force UI boot:         %ls",
-			[STR_SELECTED_THEME] = L"Selected theme:     <%3c  >",
-			[STR_SHOW_AGB] = L"Show AGB_FIRM BIOS:    %ls",
-			[STR_ENABLE_3D_UI] = L"Enable 3D UI:          %ls",
-			[STR_QUICK_BOOT] = L"Quick boot:            %ls",
-			[STR_CONSOLE_LANGUAGE] = L"Language:           < %-4ls>",
+			[STR_FORCE_UI_BOOT] = L"Force UI boot          %ls",
+			[STR_SELECTED_THEME] = L"Selected theme      <%3c  >",
+			[STR_SHOW_AGB] = L"Show AGB_FIRM BIOS     %ls",
+			[STR_ENABLE_3D_UI] = L"Enable 3D UI           %ls",
+			[STR_QUICK_BOOT] = L"Quick boot             %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Language  %16ls",
 			[STR_AUTOBOOT] = L"AUTOBOOT",
 			[STR_HOLD_R] = L"Hold R to go to the menu"
 		}
 	}, [STR_LANG_IT] = {
 		.code = "it",
 		.strings = {
-			[STR_LANG_NAME] = L"Ita",
+			[STR_LANG_NAME] = L"Italian",
 
-			[STR_FORCE_UI_BOOT] = L"Forza avvio UI:        %ls",
-			[STR_SELECTED_THEME] = L"Tema selezionato:   <%3c  >",
+			[STR_FORCE_UI_BOOT] = L"Forza avvio UI         %ls",
+			[STR_SELECTED_THEME] = L"Tema selezionato    <%3c  >",
 			[STR_SHOW_AGB] = L"Mostra BIOS AGB_FIRM   %ls",
-			[STR_ENABLE_3D_UI] = L"Attiva UI 3D:          %ls",
-			[STR_QUICK_BOOT] = L"Avvio rapido:          %ls",
-			[STR_CONSOLE_LANGUAGE] = L"Lingua:             < %-4ls>",
+			[STR_ENABLE_3D_UI] = L"Attiva UI 3D           %ls",
+			[STR_QUICK_BOOT] = L"Avvio rapido           %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Lingua    %16ls",
 			[STR_AUTOBOOT] = L"AVVIO AUTOMATICO",
 			[STR_HOLD_R] = L"Tieni premuto R per andare al menu"
 		}
 	}, [STR_LANG_ES] = {
 		.code = "es",
 		.strings = {
-			[STR_LANG_NAME] = L"Esp",
+			[STR_LANG_NAME] = L"Spanish",
 
-			[STR_FORCE_UI_BOOT] = L"Iniciar en UI:         %ls",
-			[STR_SELECTED_THEME] = L"Tema seleccionado:  <%3c  >",
-			[STR_SHOW_AGB] = L"Ver AGB_FIRM BIOS:     %ls",
-			[STR_ENABLE_3D_UI] = L"Habilitar 3D UI:       %ls",
-			[STR_QUICK_BOOT] = L"Inicio rapido:      < %s >",
-			[STR_CONSOLE_LANGUAGE] = L"Lenguaje:           < %-4ls>",
+			[STR_FORCE_UI_BOOT] = L"Iniciar en UI          %ls",
+			[STR_SELECTED_THEME] = L"Tema seleccionado   <%3c  >",
+			[STR_SHOW_AGB] = L"Ver AGB_FIRM BIOS      %ls",
+			[STR_ENABLE_3D_UI] = L"Habilitar 3D UI        %ls",
+			[STR_QUICK_BOOT] = L"Inicio rapido          %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Lenguaje  %16ls",
 			[STR_AUTOBOOT] = L"INICIO AUTOMATICO",
 			[STR_HOLD_R] = L"Manten pulsado R para ir al menu"
 		}
 	}, [STR_LANG_FR] = {
 		.code = "fr",
 		.strings = {
-			[STR_LANG_NAME] = L"Fra",
+			[STR_LANG_NAME] = L"French",
 
 			[STR_FORCE_UI_BOOT] = L"Forcer demarrage UI    %ls",
-			[STR_SELECTED_THEME] = L"Theme choisi :      <%3c  >",
-			[STR_SHOW_AGB] = L"Activer AGB_FIRM :     %ls",
-			[STR_ENABLE_3D_UI] = L"Activer UI 3D :        %ls",
-			[STR_QUICK_BOOT] = L"Demarrage rapide :  < %s >",
-			[STR_CONSOLE_LANGUAGE] = L"Langage :           < %-4ls>",
+			[STR_SELECTED_THEME] = L"Theme choisi        <%3c  >",
+			[STR_SHOW_AGB] = L"Activer AGB_FIRM       %ls",
+			[STR_ENABLE_3D_UI] = L"Activer UI 3D          %ls",
+			[STR_QUICK_BOOT] = L"Demarrage rapide       %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Langage   %16ls",
 			[STR_AUTOBOOT] = L"DÉMARRAGE AUTOMATIQUE",
 			[STR_HOLD_R] = L"Maintenir le bouton R pour accéder au menu"
 		}
 	}, [STR_LANG_NL] = {
 		.code = "nl",
 		.strings = {
-			[STR_LANG_NAME] = L"NLD",
+			[STR_LANG_NAME] = L"Dutch",
 
-			[STR_FORCE_UI_BOOT] = L"Start in UI:        < %s >",
-			[STR_SELECTED_THEME] = L"Selecteer thema:    <  %c  >",
-			[STR_SHOW_AGB] = L"Toon AGB_FIRM BIOS:    %ls",
-			[STR_ENABLE_3D_UI] = L"Gebruik 3D UI:         %ls",
-			[STR_QUICK_BOOT] = L"Snel starten:          %ls",
-			[STR_CONSOLE_LANGUAGE] = L"Taal:               < %-4ls>",
+			[STR_FORCE_UI_BOOT] = L"Start in UI            %ls",
+			[STR_SELECTED_THEME] = L"Selecteer thema     <%3c  >",
+			[STR_SHOW_AGB] = L"Toon AGB_FIRM BIOS     %ls",
+			[STR_ENABLE_3D_UI] = L"Gebruik 3D UI          %ls",
+			[STR_QUICK_BOOT] = L"Snel starten           %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Taal      %16ls",
 			[STR_AUTOBOOT] = L"AUTOSTART",
 			[STR_HOLD_R] = L"R ingedrukt houden voor menu"
 		}
 	}, [STR_LANG_NO] = {
 		.code = "no",
 		.strings = {
-			[STR_LANG_NAME] = L"Nor",
+			[STR_LANG_NAME] = L"Norwegian",
 
-			[STR_FORCE_UI_BOOT] = L"Tving oppstart av UI< %s >",
-			[STR_SELECTED_THEME] = L"Valgt tema:         <%3c  >",
-			[STR_SHOW_AGB] = L"Vis AGB_FIRM BIOS:     %ls",
-			[STR_ENABLE_3D_UI] = L"Aktiver UI i 3D:       %ls",
-			[STR_QUICK_BOOT] = L"Rask oppstart:         %ls",
-			[STR_CONSOLE_LANGUAGE] = L"Sprak:              < %-4ls>",
+			[STR_FORCE_UI_BOOT] = L"Tving oppstart av UI   %ls",
+			[STR_SELECTED_THEME] = L"Valgt tema          <%3c  >",
+			[STR_SHOW_AGB] = L"Vis AGB_FIRM BIOS      %ls",
+			[STR_ENABLE_3D_UI] = L"Aktiver UI i 3D        %ls",
+			[STR_QUICK_BOOT] = L"Rask oppstart          %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Sprak     %16ls",
 			[STR_AUTOBOOT] = L"AUTOMATISK OPPSTART",
 			[STR_HOLD_R] = L"Hold R for å gå til menyen"
 		}
 	}, [STR_LANG_HR] = {
 		.code = "hr",
 		.strings = {
-			[STR_LANG_NAME] = L"Hrv",
+			[STR_LANG_NAME] = L"Croatian",
 
-			[STR_FORCE_UI_BOOT] = L"Forsiraj ulazak u UI< %s >",
-			[STR_SELECTED_THEME] = L"Izabrana tema:      <%3c  >",
-			[STR_SHOW_AGB] = L"Prikazi AGB_FIRM:      %ls",
-			[STR_ENABLE_3D_UI] = L"Ukljuci 3D UI:         %ls",
-			[STR_QUICK_BOOT] = L"Brzo Paljenje:         %ls",
-			[STR_CONSOLE_LANGUAGE] = L"Jezik:              < %-4ls>",
+			[STR_FORCE_UI_BOOT] = L"Forsiraj ulazak u UI   %ls",
+			[STR_SELECTED_THEME] = L"Izabrana tema       <%3c  >",
+			[STR_SHOW_AGB] = L"Prikazi AGB_FIRM       %ls",
+			[STR_ENABLE_3D_UI] = L"Ukljuci 3D UI          %ls",
+			[STR_QUICK_BOOT] = L"Brzo Paljenje          %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Jezik     %16ls",
 			[STR_AUTOBOOT] = L"Automatsko pokretanje",
 			[STR_HOLD_R] = L"Pridrzite tipku R da bi ste usli u meni"
 		}
 	}, [STR_LANG_RU] = {
 		.code = "ru",
 		.strings = {
-			[STR_LANG_NAME] = L"Rus",
+			[STR_LANG_NAME] = L"Russian",
 
-			[STR_FORCE_UI_BOOT] = L"Загружать UI:          %ls",
-			[STR_SELECTED_THEME] = L"Выбранная тема:     <%3c  >",
+			[STR_FORCE_UI_BOOT] = L"Загружать UI           %ls",
+			[STR_SELECTED_THEME] = L"Выбранная тема      <%3c  >",
 			[STR_SHOW_AGB] = L"Показывать AGB_FIRM    %ls",
-			[STR_ENABLE_3D_UI] = L"Включить 3D UI:        %ls",
-			[STR_QUICK_BOOT] = L"Быстрая загрузка:      %ls",
-			[STR_CONSOLE_LANGUAGE] = L"Язык:               < %-4ls>",
+			[STR_ENABLE_3D_UI] = L"Включить 3D UI         %ls",
+			[STR_QUICK_BOOT] = L"Быстрая загрузка       %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Язык      %16ls",
 			[STR_AUTOBOOT] = L"АВТОЗАГРУЗКА",
 			[STR_HOLD_R] = L"Удерживайте R для перехода в меню"
 		}
 	}, [STR_LANG_ZH_CN] = {
 		.code = "zh-CN",
 		.strings = {
-			[STR_LANG_NAME] = L"Chs",
+			[STR_LANG_NAME] = L"Chinese simp.",
 
-			[STR_FORCE_UI_BOOT] = L"启动时强制进菜单:      %ls",
-			[STR_SELECTED_THEME] = L"选择主题:           <%3c  >",
-			[STR_SHOW_AGB] = L"显示AGB_FIRM BIOS:     %ls",
-			[STR_ENABLE_3D_UI] = L"启用3D界面:            %ls",
-			[STR_QUICK_BOOT] = L"快速启动:              %ls",
-			[STR_CONSOLE_LANGUAGE] = L"界面语言:           < %-4ls>",
+			[STR_FORCE_UI_BOOT] = L"启动时强制进菜单       %ls",
+			[STR_SELECTED_THEME] = L"选择主题            <%3c  >",
+			[STR_SHOW_AGB] = L"显示AGB_FIRM BIOS      %ls",
+			[STR_ENABLE_3D_UI] = L"启用3D界面             %ls",
+			[STR_QUICK_BOOT] = L"快速启动               %ls",
+			[STR_CONSOLE_LANGUAGE] = L"界面语言  %16ls",
 			[STR_AUTOBOOT] = L"自动启动",
 			[STR_HOLD_R] = L"按住R键进入菜单"
 		}
 	}, [STR_LANG_ZH_TW] = {
 		.code = "zh-TW",
 		.strings = {
-			[STR_LANG_NAME] = L"Cht",
+			[STR_LANG_NAME] = L"Chinese trad.",
 
-			[STR_FORCE_UI_BOOT] = L"引導時強制進菜單:      %ls",
-			[STR_SELECTED_THEME] = L"選擇主題:           <%3c  >",
-			[STR_SHOW_AGB] = L"顯示AGB_FIRM BIOS:     %ls",
-			[STR_ENABLE_3D_UI] = L"啟用3D介面:            %ls",
-			[STR_QUICK_BOOT] = L"快速引導:              %ls",
-			[STR_CONSOLE_LANGUAGE] = L"介面語言:           < %-4ls>",
+			[STR_FORCE_UI_BOOT] = L"引導時強制進菜單       %ls",
+			[STR_SELECTED_THEME] = L"選擇主題            <%3c  >",
+			[STR_SHOW_AGB] = L"顯示AGB_FIRM BIOS      %ls",
+			[STR_ENABLE_3D_UI] = L"啟用3D介面             %ls",
+			[STR_QUICK_BOOT] = L"快速引導               %ls",
+			[STR_CONSOLE_LANGUAGE] = L"介面語言  %16ls",
 			[STR_AUTOBOOT] = L"自動引導",
 			[STR_HOLD_R] = L"按住R鈕進入菜單"
 		}
