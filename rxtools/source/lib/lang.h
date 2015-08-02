@@ -15,22 +15,195 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-// Translations and corrections by: nastys, Crusard, Pikawil, DjoeN, VinsCool, R4ndom, guitarheroknight, Asia81, Syphurith, soarqin.
-static int N_LANG=9;
+#include "configuration.h"
 
-static wchar_t* STR_LANGUAGES[]={L"Eng", L"Ita", L"Esp", L"Fra", L"Nld", L"Nor", L"Hrv", L"Rus", L"Chs", L"Cht"};
-static wchar_t* STR_FORCE_UI_BOOT[]={L"Force UI boot:         %ls", L"Forza avvio UI:        %ls", L"Iniciar en UI:         %ls", L"Forcer demarrage UI    %ls", L"Start in UI:           %ls", L"Tving oppstart av UI   %ls", L"Forsiraj ulazak u UI   %ls", L"Загружать UI:          %ls", L"启动时强制进菜单:      %ls", L"引導時強制進菜單:      %ls"};
-static wchar_t* STR_SELECTED_THEME[]={L"Selected theme:     <%3c  >", L"Tema selezionato:   <%3c  >", L"Tema seleccionado:  <%3c  >", L"Theme choisi :      <%3c  >", L"Selecteer thema:    <%3c  >", L"Valgt tema:         <%3c  >", L"Izabrana tema:      <%3c  >", L"Выбранная тема:     <%3c  >", L"选择主题:           <%3c  >", L"選擇主題:           <%3c  >"};
-static wchar_t* STR_SHOW_AGB[]={L"Show AGB_FIRM BIOS:    %ls", L"Mostra BIOS AGB_FIRM   %ls", L"Ver AGB_FIRM BIOS:     %ls", L"Activer AGB_FIRM :     %ls", L"Toon AGB_FIRM BIOS:    %ls", L"Vis AGB_FIRM BIOS:     %ls", L"Prikazi AGB_FIRM:      %ls", L"Показывать AGB_FIRM    %ls", L"显示AGB_FIRM BIOS:     %ls", L"顯示AGB_FIRM BIOS:     %ls"};
-static wchar_t* STR_ENABLE_3D_UI[]={L"Enable 3D UI:          %ls", L"Attiva UI 3D:          %ls", L"Habilitar 3D UI:       %ls", L"Activer UI 3D :        %ls", L"Gebruik 3D UI:         %ls", L"Aktiver UI i 3D:       %ls", L"Ukljuci 3D UI:         %ls", L"Включить 3D UI:        %ls", L"启用3D界面:            %ls", L"啟用3D介面:            %ls"};
-static wchar_t* STR_QUICK_BOOT[]={L"Quick boot:            %ls", L"Avvio rapido:          %ls", L"Inicio rapido:         %ls", L"Demarrage rapide :     %ls", L"Snel starten:          %ls", L"Rask oppstart:         %ls", L"Brzo Paljenje:         %ls", L"Быстрая загрузка:      %ls", L"快速启动:              %ls", L"快速引導:              %ls"};
-static wchar_t* STR_CONSOLE_LANGUAGE[]={L"Language:           < %-4ls>", L"Lingua:             < %-4ls>", L"Lenguaje:           < %-4ls>", L"Langage :           < %-4ls>", L"Taal:               < %-4ls>", L"Sprak:              < %-4ls>", L"Jezik:              < %-4ls>", L"Язык:               < %-4ls>", L"界面语言:           < %-4ls>", L"介面語言:           < %-4ls>"};
+enum {
+	STR_LANG_EN,
+	STR_LANG_IT,
+	STR_LANG_ES,
+	STR_LANG_FR,
+	STR_LANG_NL,
+	STR_LANG_NO,
+	STR_LANG_HR,
+	STR_LANG_RU,
+	STR_LANG_ZH_CN,
+	STR_LANG_ZH_TW,
+
+	STR_LANG_NUM
+};
+
+enum {
+	STR_LANG_NAME,
+
+	STR_FORCE_UI_BOOT,
+	STR_SELECTED_THEME,
+	STR_SHOW_AGB,
+	STR_ENABLE_3D_UI,
+	STR_QUICK_BOOT,
+	STR_CONSOLE_LANGUAGE,
+	STR_AUTOBOOT,
+	STR_HOLD_R,
+
+	STR_NUM
+};
+
+#define LANG_CODE_LEN 5
+
+#if LANG_CODE_NUM > CFG_STR_MAX_LEN
+#error "LANG_CODE_LEN > CFG_STR_MAX_LEN"
+#endif
+
+// Translations and corrections by: nastys, Crusard, Pikawil, DjoeN, VinsCool, R4ndom, guitarheroknight, Asia81, Syphurith, soarqin.
+static const struct {
+	char code[LANG_CODE_LEN];
+	const wchar_t *strings[STR_NUM];
+} mlStrings[STR_LANG_NUM] = {
+	[STR_LANG_EN] = {
+		.code = "en",
+		.strings = {
+			[STR_LANG_NAME] = L"Eng",
+
+			[STR_FORCE_UI_BOOT] = L"Force UI boot:         %ls",
+			[STR_SELECTED_THEME] = L"Selected theme:     <%3c  >",
+			[STR_SHOW_AGB] = L"Show AGB_FIRM BIOS:    %ls",
+			[STR_ENABLE_3D_UI] = L"Enable 3D UI:          %ls",
+			[STR_QUICK_BOOT] = L"Quick boot:            %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Language:           < %-4ls>",
+			[STR_AUTOBOOT] = L"AUTOBOOT",
+			[STR_HOLD_R] = L"Hold R to go to the menu"
+		}
+	}, [STR_LANG_IT] = {
+		.code = "it",
+		.strings = {
+			[STR_LANG_NAME] = L"Ita",
+
+			[STR_FORCE_UI_BOOT] = L"Forza avvio UI:        %ls",
+			[STR_SELECTED_THEME] = L"Tema selezionato:   <%3c  >",
+			[STR_SHOW_AGB] = L"Mostra BIOS AGB_FIRM   %ls",
+			[STR_ENABLE_3D_UI] = L"Attiva UI 3D:          %ls",
+			[STR_QUICK_BOOT] = L"Avvio rapido:          %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Lingua:             < %-4ls>",
+			[STR_AUTOBOOT] = L"AVVIO AUTOMATICO",
+			[STR_HOLD_R] = L"Tieni premuto R per andare al menu"
+		}
+	}, [STR_LANG_ES] = {
+		.code = "es",
+		.strings = {
+			[STR_LANG_NAME] = L"Esp",
+
+			[STR_FORCE_UI_BOOT] = L"Iniciar en UI:         %ls",
+			[STR_SELECTED_THEME] = L"Tema seleccionado:  <%3c  >",
+			[STR_SHOW_AGB] = L"Ver AGB_FIRM BIOS:     %ls",
+			[STR_ENABLE_3D_UI] = L"Habilitar 3D UI:       %ls",
+			[STR_QUICK_BOOT] = L"Inicio rapido:      < %s >",
+			[STR_CONSOLE_LANGUAGE] = L"Lenguaje:           < %-4ls>",
+			[STR_AUTOBOOT] = L"INICIO AUTOMATICO",
+			[STR_HOLD_R] = L"Manten pulsado R para ir al menu"
+		}
+	}, [STR_LANG_FR] = {
+		.code = "fr",
+		.strings = {
+			[STR_LANG_NAME] = L"Fra",
+
+			[STR_FORCE_UI_BOOT] = L"Forcer demarrage UI    %ls",
+			[STR_SELECTED_THEME] = L"Theme choisi :      <%3c  >",
+			[STR_SHOW_AGB] = L"Activer AGB_FIRM :     %ls",
+			[STR_ENABLE_3D_UI] = L"Activer UI 3D :        %ls",
+			[STR_QUICK_BOOT] = L"Demarrage rapide :  < %s >",
+			[STR_CONSOLE_LANGUAGE] = L"Langage :           < %-4ls>",
+			[STR_AUTOBOOT] = L"DÉMARRAGE AUTOMATIQUE",
+			[STR_HOLD_R] = L"Maintenir le bouton R pour accéder au menu"
+		}
+	}, [STR_LANG_NL] = {
+		.code = "nl",
+		.strings = {
+			[STR_LANG_NAME] = L"NLD",
+
+			[STR_FORCE_UI_BOOT] = L"Start in UI:        < %s >",
+			[STR_SELECTED_THEME] = L"Selecteer thema:    <  %c  >",
+			[STR_SHOW_AGB] = L"Toon AGB_FIRM BIOS:    %ls",
+			[STR_ENABLE_3D_UI] = L"Gebruik 3D UI:         %ls",
+			[STR_QUICK_BOOT] = L"Snel starten:          %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Taal:               < %-4ls>",
+			[STR_AUTOBOOT] = L"AUTOSTART",
+			[STR_HOLD_R] = L"R ingedrukt houden voor menu"
+		}
+	}, [STR_LANG_NO] = {
+		.code = "no",
+		.strings = {
+			[STR_LANG_NAME] = L"Nor",
+
+			[STR_FORCE_UI_BOOT] = L"Tving oppstart av UI< %s >",
+			[STR_SELECTED_THEME] = L"Valgt tema:         <%3c  >",
+			[STR_SHOW_AGB] = L"Vis AGB_FIRM BIOS:     %ls",
+			[STR_ENABLE_3D_UI] = L"Aktiver UI i 3D:       %ls",
+			[STR_QUICK_BOOT] = L"Rask oppstart:         %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Sprak:              < %-4ls>",
+			[STR_AUTOBOOT] = L"AUTOMATISK OPPSTART",
+			[STR_HOLD_R] = L"Hold R for å gå til menyen"
+		}
+	}, [STR_LANG_HR] = {
+		.code = "hr",
+		.strings = {
+			[STR_LANG_NAME] = L"Hrv",
+
+			[STR_FORCE_UI_BOOT] = L"Forsiraj ulazak u UI< %s >",
+			[STR_SELECTED_THEME] = L"Izabrana tema:      <%3c  >",
+			[STR_SHOW_AGB] = L"Prikazi AGB_FIRM:      %ls",
+			[STR_ENABLE_3D_UI] = L"Ukljuci 3D UI:         %ls",
+			[STR_QUICK_BOOT] = L"Brzo Paljenje:         %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Jezik:              < %-4ls>",
+			[STR_AUTOBOOT] = L"Automatsko pokretanje",
+			[STR_HOLD_R] = L"Pridrzite tipku R da bi ste usli u meni"
+		}
+	}, [STR_LANG_RU] = {
+		.code = "ru",
+		.strings = {
+			[STR_LANG_NAME] = L"Rus",
+
+			[STR_FORCE_UI_BOOT] = L"Загружать UI:          %ls",
+			[STR_SELECTED_THEME] = L"Выбранная тема:     <%3c  >",
+			[STR_SHOW_AGB] = L"Показывать AGB_FIRM    %ls",
+			[STR_ENABLE_3D_UI] = L"Включить 3D UI:        %ls",
+			[STR_QUICK_BOOT] = L"Быстрая загрузка:      %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Язык:               < %-4ls>",
+			[STR_AUTOBOOT] = L"АВТОЗАГРУЗКА",
+			[STR_HOLD_R] = L"Удерживайте R для перехода в меню"
+		}
+	}, [STR_LANG_ZH_CN] = {
+		.code = "zh-CN",
+		.strings = {
+			[STR_LANG_NAME] = L"Chs",
+
+			[STR_FORCE_UI_BOOT] = L"启动时强制进菜单:      %ls",
+			[STR_SELECTED_THEME] = L"选择主题:           <%3c  >",
+			[STR_SHOW_AGB] = L"显示AGB_FIRM BIOS:     %ls",
+			[STR_ENABLE_3D_UI] = L"启用3D界面:            %ls",
+			[STR_QUICK_BOOT] = L"快速启动:              %ls",
+			[STR_CONSOLE_LANGUAGE] = L"界面语言:           < %-4ls>",
+			[STR_AUTOBOOT] = L"自动启动",
+			[STR_HOLD_R] = L"按住R键进入菜单"
+		}
+	}, [STR_LANG_ZH_TW] = {
+		.code = "zh-TW",
+		.strings = {
+			[STR_LANG_NAME] = L"Cht",
+
+			[STR_FORCE_UI_BOOT] = L"引導時強制進菜單:      %ls",
+			[STR_SELECTED_THEME] = L"選擇主題:           <%3c  >",
+			[STR_SHOW_AGB] = L"顯示AGB_FIRM BIOS:     %ls",
+			[STR_ENABLE_3D_UI] = L"啟用3D介面:            %ls",
+			[STR_QUICK_BOOT] = L"快速引導:              %ls",
+			[STR_CONSOLE_LANGUAGE] = L"介面語言:           < %-4ls>",
+			[STR_AUTOBOOT] = L"自動引導",
+			[STR_HOLD_R] = L"按住R鈕進入菜單"
+		}
+	}
+};
 
 //static wchar_t* STR_YES[]={L"Yes", L"Si", L"Si", L"Oui", L"Ja", L"Ja", L"Da", L"Да", L"是", L"是"};
 //static wchar_t* STR_NO[]={L"No", L"No", L"No", L"Non", L"Nee", L"Nei", L"Ne", L"Нет", L"否", L"否"};
 //static wchar_t* STR_SETTINGS[]={L"           SETTINGS", L"          IMPOSTAZIONI", L"            AJUSTES", L"            OPTIONS", L"          INSTELLINGEN", L"         INNSTILLINGER", L"           Postavke", L"           НАСТРОЙКИ", L"            设置选项", L"            設定選項"};
-static wchar_t* STR_AUTOBOOT[]={L"AUTOBOOT", L"AVVIO AUTOMATICO", L"INICIO AUTOMATICO", L"DEMARRAGE AUTOMATIQUE", L"AUTOSTART", L"AUTOMATISK OPPSTART", L"Automatsko pokretanje", L"АВТОЗАГРУЗКА", L"自动启动", L"自動引導"};
-static wchar_t* STR_HOLD_R[]={L"Hold R to go to the menu", L"Tieni premuto R per andare al menu", L"Manten pulsado R para ir al menu", L"Maintenir le bouton R pour acceder au menu", L"R ingedrukt houden voor menu", L"Hold R for a ga til menyen", L"Pridrzite tipku R da bi ste usli u meni", L"Удерживайте R для перехода в меню", L"按住R键进入菜单", L"按住R鈕進入菜單"};
 //static wchar_t* STR_MISSING_THEME_FILES={L" MISSING THEME FILES!   ", L" FILE DEL TEMA MANCANTI!   ", L" NO SE ENCUENTRAN LOS ARCHIVOS DEL TEMA!   ", L" FICHIERS DE THEME MANQUANTS !   ", L" THEMA BESTANDEN ONTBREKEN!   ", L" MANGLER TEMAFILER!   ", L" NEDOSTAJU DATOTEKE TEME!   ", L" ОТСУТСТВУЮТ ФАЙЛЫ ТЕМЫ!   ", L" 找不到主题文件!  ", L" 主題檔案缺失!  "};
 //static wchar_t* STR_CHOOSE_NAND={L"Choose the NAND you want to use", L"Seleziona la NAND da usare", L"Selecciona una NAND para usar:", L"Choissisez la NAND que vous voulez utiliser :", L"Kies een NAND voor gebruik:", L"Velg hvilken NAND du vil bruke:", L"Izaberi NAND datoteku koju zelite koristiti:", L"Выберите NAND, который хотите использовать", L"请选择要使用的NAND", L"請選擇要使用的NAND"};
 //static wchar_t* STR_PRESS_X_SYSNAND={L"Press Ⓧ: sysNAND\n", L"Premi Ⓧ: sysNAND\n", L"Pulsa Ⓧ: sysNAND\n", L"Bouton X : sysNAND\n", L"Druk Ⓧ: sysNAND\n", L"Trykk Ⓧ: sysNAND\n", L"Stisni Ⓧ: sysNAND\n", L"Нажмите Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n"};

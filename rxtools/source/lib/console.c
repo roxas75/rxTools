@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <wchar.h>
 #include "common.h"
+#include "configuration.h"
 #include "console.h"
 #include "draw.h"
 #include "menu.h"
@@ -95,7 +96,7 @@ void ConsoleShow(){
 	char str[100];
 
 	void *tmpscreen = (void*)0x27000000;
-	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%u/app.bin", cfgs[CFG_THEME].val.i);
 	DrawSplash(tmpscreen, str);
 	if(!consoleInited) return;
 	int titley = 2*FONT_HEIGHT;
