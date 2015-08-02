@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,7 +34,7 @@
 #include "configuration.h"
 
 #define FIRM_ADDR (void*)0x24000000
-#define ARMBXR4	0x47204C00	
+#define ARMBXR4	0x47204C00
 #define PLATFORM_REG ((volatile u32*)0x10140FFC)
 
 char tmp[256];
@@ -55,10 +72,10 @@ void applyPatch(unsigned char* file, unsigned char* patch){
 }
 
 u8* decryptFirmTitleNcch(u8* title, unsigned int size){
-	ctr_ncchheader NCCH; 
-	u8 CTR[16]; 
+	ctr_ncchheader NCCH;
+	u8 CTR[16];
 	PartitionInfo INFO;
-	NCCH = *((ctr_ncchheader*)title); 
+	NCCH = *((ctr_ncchheader*)title);
 	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
 	ncch_get_counter(NCCH, CTR, 2);
 	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*0x200; INFO.keyY = NCCH.signature; INFO.size = size; INFO.keyslot = 0x2C;

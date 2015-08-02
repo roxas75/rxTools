@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 //This is actually some basic code, i do not expect anyone to like it, i'm the first to say that's messed up.
 //The fact there is that rxtools doesn't really need any specific console code for now, so i've written something simple.
 #include <stdlib.h>
@@ -79,7 +96,7 @@ int findCursorLine(){
 }
 void ConsoleShow(){
 	char str[100];
-	
+
 	void *tmpscreen = (void*)0x27000000;
 	sprintf(str, "/rxTools/Theme/%c/app.bin", Theme);
 	DrawSplash(tmpscreen, str);
@@ -88,9 +105,9 @@ void ConsoleShow(){
 
 	//for(int y = ConsoleY; y < ConsoleH + ConsoleY + BorderWidth; y++){
 	//	for(int x = ConsoleX; x < ConsoleW + ConsoleX + BorderWidth; x++){
-	//		if(//(x >= ConsoleX && x <= ConsoleX + BorderWidth) || 
-	//		   //(x >= ConsoleW + ConsoleX - 1 && x <= ConsoleW + ConsoleX - 1 + BorderWidth) || 
-	//		   (y >= ConsoleY && y <= ConsoleY + BorderWidth) || 
+	//		if(//(x >= ConsoleX && x <= ConsoleX + BorderWidth) ||
+	//		   //(x >= ConsoleW + ConsoleX - 1 && x <= ConsoleW + ConsoleX - 1 + BorderWidth) ||
+	//		   (y >= ConsoleY && y <= ConsoleY + BorderWidth) ||
 	//		   (y >= ConsoleH + ConsoleY - 1 && y <= ConsoleH + ConsoleY - 1 + BorderWidth) ||
 	//		   (y >= ConsoleY + titley - BorderWidth && y <= ConsoleY + titley)){
 	//			DrawPixel(x, y, BorderColor, (int)tmpscreen);
@@ -101,7 +118,7 @@ void ConsoleShow(){
 	//}
 	int titlespace = 2*FONT_WIDTH-2*BorderWidth;
 	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * FONT_WIDTH, ConsoleY + (titlespace - FONT_HEIGHT) / 2 + BorderWidth, TextColor, ConsoleGetBackgroundColor());
-	
+
 	wchar_t tmp[256], *point;
         if(findCursorLine() < MAXLINES) point = &console[0];
 	else{
@@ -171,7 +188,7 @@ void ConsoleNextLine(){
 	cursor++;
 }
 
-void ConsolePrevLine(){ 
+void ConsolePrevLine(){
 	if(console[cursor-1] == L'\n') cursor-=2;
 	while(console[cursor] != L'\n'){
 		if(cursor == 0){

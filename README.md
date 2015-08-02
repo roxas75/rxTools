@@ -4,7 +4,7 @@
 
 rxTools is a collection of hacking tools for Nintendo 3DS/3DSXL/2DS, compatible with all the system versions from 4.1 to 9.2.
 
-rxMode is a free custom firmware which works through rxTools, not meant to replace any existing software, but just my personal 
+rxMode is a free custom firmware which works through rxTools, not meant to replace any existing software, but just my personal
 work made public and easy for the end-user.
 
 It was not meant, at the beginning, to be open-source, so you can expect some messed up code here.
@@ -49,12 +49,29 @@ If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x42
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
 - Roxas75, myself, as the creator of rxTools
-- Gateway team, for their work 
+- Gateway team, for their work
 - Archshift, who wrote some useful libs I used: https://github.com/archshift
 - Many GBATemp users, who helped in the testing process
 - patois, who developed BRAHMA: https://github.com/patois/Brahma
 - mid-kid and b1l1s, who developed CakeHax: https://github.com/mid-kid/CakeHax
 - Many other people who helped me in private
 - All the dudes who reversed and fucked up my project, who wasted their time on making useless keeping the sources private
+
+
+##License
+Copyright (C) 2015 The PASTA Team
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ### Support the original, not the imitation!

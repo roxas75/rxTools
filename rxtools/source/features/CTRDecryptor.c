@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -94,7 +111,7 @@ int ProcessCTR(char* path){
 		ctr_ncchheader NCCH; unsigned int mediaunitsize = 0x200;
 		FileRead(&myFile, &NCCH, 0x200, ncch_base);
 
-		//print(path); print("\n"); 
+		//print(path); print("\n");
 		print(L"%s\n", (char*)NCCH.productcode);
 		unsigned int NEWCRYPTO = 0, CRYPTO = 1;
 		if(NCCH.flags[3] != 0) NEWCRYPTO = 1;
@@ -207,7 +224,7 @@ void CTRDecryptor(){
 	ConsoleShow();
 
 	int nfiles = ExploreFolders("");
-	
+
 	ConsoleInit();
 	print(L"Decrypted %d files\n\nPress Ⓐ to exit\n", nfiles);
 	ConsoleShow();
