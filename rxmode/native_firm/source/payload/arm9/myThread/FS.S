@@ -38,19 +38,10 @@
 .thumb
 .global fread9
 .type fread9, %function
-	fread9:
-		push {r4, lr}
-		ldr r4, =0x0804D9B1
-		blx r4
-		pop {r4, pc}
+fread9 = 0x0804D9B1
 .pool
 
 .thumb
 .global fclose9
 .type fclose9, %function
-	fclose9:
-		push {r4, lr}
-		ldr r4, =0x0805B26D
-		blx r4
-		pop {r4, pc}
-.pool
+fclose9 = 0x0805B26D

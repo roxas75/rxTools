@@ -176,21 +176,11 @@ void SettingsMenuInit(){
 	char str[100];
 	char strl[100];
 	char strr[100];
-	char settings[] = "000100";
 	unsigned char theme_num = 0;
+	unsigned int lang;
 
-	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
-	{
-		FileRead(&MyFile, settings, 6, 0);
-		bootGUI = (settings[0] == '1');
-		theme_num = (settings[1] - '0');
-		agb_bios = (settings[2] == '1');
-		theme_3d = (settings[3] == '1');
-		silent_boot = (settings[4] == '1');
-		language = (settings[5] - '0');
-	}
-
+	lang = getLang();
+	
 	while (true) {
 		u32 pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
@@ -199,9 +189,9 @@ void SettingsMenuInit(){
 		{
 			if (MyMenu->Current == 0)
 			{
-				bootGUI ^= 1; //bootGUI settings
-				if(bootGUI)
-					silent_boot=0;
+				cfgs[CFG_GUI].val.i ^= 1;
+				if (cfgs[CFG_GUI].val.i)
+					cfgs[CFG_SILENT].val.i = 0;
 			}
 			else if (MyMenu->Current == 1) //theme selection
 			{
@@ -243,7 +233,7 @@ void SettingsMenuInit(){
 				{
 					theme_num = i;
 					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
-					if(theme_3d)
+					if (cfgs[CFG_3D].val.i)
 					{
 						sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", theme_num);
 						sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", theme_num);
@@ -255,7 +245,7 @@ void SettingsMenuInit(){
 						DrawTopSplash(str, str, str);
 					}
 
-					Theme = (theme_num + '0');
+					cfgs[CFG_THEME].val.i = theme_num;
 					File MyFile;
 					sprintf(str, "/rxTools/Theme/%u/LANG.txt", theme_num);
 					if (FileOpen(&MyFile, str, 0))
@@ -264,18 +254,18 @@ void SettingsMenuInit(){
 						{
 							char tl[]="00";
 							FileRead(&MyFile, tl, 1, 0);
-							if(tl[0] - '0' >= 0 && tl[0] - '0' <= N_LANG)
-								language = tl[0] - '0';
+							if(tl[0] - 0x30 >= 0 && tl[0] - 0x30 <= STR_LANG_NUM)
+								setLang(tl[0] - 0x30);
 						}
 					}
 				}
 			}
-			else if (MyMenu->Current == 2) agb_bios ^= 1; //AGB_FIRM BIOS
+			else if (MyMenu->Current == 2) cfgs[CFG_AGB].val.i ^= 1;
 			else if (MyMenu->Current == 3)
 			{
-				theme_3d ^= 1; //3D UI
+				cfgs[CFG_3D].val.i ^= 1;
 				sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
-				if(theme_3d)
+				if(cfgs[CFG_3D].val.i)
 				{
 					sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", theme_num);
 					sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", theme_num);
@@ -289,54 +279,48 @@ void SettingsMenuInit(){
 			}
 			else if (MyMenu->Current == 4)
 			{
-				silent_boot ^= 1; //SILENT BOOT
-				if(silent_boot)
-					bootGUI = 0;
+				cfgs[CFG_SILENT].val.i ^= 1;
+				if (cfgs[CFG_SILENT].val.i)
+					cfgs[CFG_GUI].val.i = 0;
 			}
-			else if (MyMenu->Current == 5) //language selection
+			else if (MyMenu->Current == 5)
 			{
-				if (pad_state & BUTTON_LEFT && language > 0)
+				if (pad_state & BUTTON_LEFT && lang > 0)
 				{
-					language--;
+					lang--;
 				} else
-
-				if (pad_state & BUTTON_RIGHT && language < N_LANG)
+				if (pad_state & BUTTON_RIGHT && lang + 1 < STR_LANG_NUM)
 				{
-					language++;
+					lang++;
 				}
+
+				setLang(lang);
 			}
 		}
 		if (pad_state & BUTTON_B)
 		{
 			//Code to save settings
-			Theme = (theme_num + '0');
-			settings[0] = bootGUI ? '1' : '0';
-			settings[1] = Theme;
-			settings[2] = agb_bios ? '1' : '0';
-			settings[3] = theme_3d ? '1' : '0';
-			settings[4] = silent_boot ? '1' : '0';
-			settings[5] = language + '0';
-			FileWrite(&MyFile, settings, 6, 0);
-			FileClose(&MyFile);
+			strcpy(cfgs[CFG_LANG].val.s, getLangCode());
+			writeCfg();
 			break;
 		}
-
+		
 		TryScreenShot();
-
+		
 		//UPDATE SETTINGS GUI
-		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_FORCE_UI_BOOT[language], bootGUI ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_SELECTED_THEME[language], theme_num + '0');
-		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_SHOW_AGB[language], agb_bios ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_ENABLE_3D_UI[language], theme_3d ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_QUICK_BOOT[language], silent_boot ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, STR_CONSOLE_LANGUAGE[language], STR_LANGUAGES[language]);
+		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SELECTED_THEME], theme_num + 0x30);
+		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? ENABLED : DISABLED);
+		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_CONSOLE_LANGUAGE], strings[STR_LANG_NAME]);
 		MenuRefresh();
 	}
 }
 
 void BootMenuInit(){
 	char str[100];
-	sprintf(str, "/rxTools/Theme/%c/boot0.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
+	sprintf(str, "/rxTools/Theme/%u/boot0.bin", cfgs[CFG_THEME].val.i);//DRAW TOP SCREEN TO SEE THE NEW THEME
 	DrawBottomSplash(str);
 	while (true) {
 		u32 pad_state = InputWait();
@@ -348,7 +332,7 @@ void BootMenuInit(){
 
 void CreditsMenuInit(){
 	char str[100];
-	sprintf(str, "/rxTools/Theme/%c/credits.bin", Theme);//DRAW TOP SCREEN TO SEE THE NEW THEME
+	sprintf(str, "/rxTools/Theme/%u/credits.bin", cfgs[CFG_THEME].val.i);//DRAW TOP SCREEN TO SEE THE NEW THEME
 	DrawBottomSplash(str);
 	WaitForButton(BUTTON_B);
 }

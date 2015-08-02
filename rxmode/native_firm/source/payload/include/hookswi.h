@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2015 The PASTA Team
- * Originally written by Roxas75
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,4 +15,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-void myThread();
+#ifndef HOOKSWI_H
+#define HOOKSWI_H
+
+extern unsigned int hookSwi[];
+extern unsigned int hookSwiBtm[];
+
+#endif
