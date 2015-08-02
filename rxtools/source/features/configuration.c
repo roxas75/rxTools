@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -41,16 +58,16 @@ int InstallData(char* drive){
 	wchar_t *progress = progressbar+0;
 	print(L"%ls", progressbar);
 	ConsolePrevLine();
-	
+
 	//Create the workdir
 	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
 	f_mkdir(tmpstr);
-	
+
 	//Read firmware data
 	if (f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
 	*progress++ = PROGRESS_OK;
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-	
+
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
@@ -88,7 +105,7 @@ int InstallData(char* drive){
 	}
 	*progress++ = PROGRESS_OK;
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-	
+
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
 	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
@@ -98,7 +115,7 @@ int InstallData(char* drive){
 		/* Try to get the Title Key from the EmuNAND */
 		a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 2);
 	}
-	
+
 	if(a_firm){
 		applyPatch(a_firm, a_firm_patch);
 		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
@@ -126,7 +143,7 @@ int InstallData(char* drive){
 				return CONF_ERRNFIRM;
 			}
 		}
-		
+
 		FileRead(&tempfile, WORKBUF, AGB_SIZE, 0);
 		FileClose(&tempfile);
 		a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
@@ -146,7 +163,7 @@ int InstallData(char* drive){
 		}
 	}
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-	
+
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
 	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
@@ -162,12 +179,12 @@ int InstallData(char* drive){
 			f_close(&firmfile);
 			return CONF_ERRNFIRM;
 		}
-		*progress++ = PROGRESS_OK; 
+		*progress++ = PROGRESS_OK;
 	}else{
-		*progress++ = PROGRESS_FAIL; 
+		*progress++ = PROGRESS_FAIL;
 	}
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-	
+
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, __DATE__, 12, 0);
@@ -179,7 +196,7 @@ int InstallData(char* drive){
 	}
 	*progress++ = PROGRESS_OK;
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-	
+
 	f_close(&firmfile);
 	return 0;
 }
@@ -207,7 +224,7 @@ void InstallConfigData(){
 		first_boot = false;
 		return;
 	}
-	
+
 	first_boot = true;
 
 	char settings[]="000100";
@@ -250,6 +267,6 @@ void InstallConfigData(){
 	sprintf(strl, "/rxTools/Theme/%c/TOPL.bin", Theme);
 	sprintf(strr, "/rxTools/Theme/%c/TOPR.bin", Theme);
 	DrawTopSplash(str, strl, strr);
-	
+
 	InputWait();
 }

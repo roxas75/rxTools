@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #ifndef MY_MENU
 #define MY_MENU
 
@@ -161,7 +178,7 @@ void SettingsMenuInit(){
 	char strr[100];
 	char settings[] = "000100";
 	unsigned char theme_num = 0;
-	
+
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
 	{
@@ -173,7 +190,7 @@ void SettingsMenuInit(){
 		silent_boot = (settings[4] == '1');
 		language = (settings[5] - '0');
 	}
-	
+
 	while (true) {
 		u32 pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
@@ -192,7 +209,7 @@ void SettingsMenuInit(){
 				File AppBin;
 				bool found = false;
 				unsigned char i;
-				
+
 				if (pad_state & BUTTON_LEFT && theme_num > 0)
 				{
 					for (i = theme_num - 1; i > 0; i--)
@@ -205,7 +222,7 @@ void SettingsMenuInit(){
 							break;
 						}
 					}
-					
+
 					if (i == 0) found = true;
 				} else
 				if (pad_state & BUTTON_RIGHT && theme_num < 9)
@@ -221,7 +238,7 @@ void SettingsMenuInit(){
 						}
 					}
 				}
-				
+
 				if (found)
 				{
 					theme_num = i;
@@ -303,9 +320,9 @@ void SettingsMenuInit(){
 			FileClose(&MyFile);
 			break;
 		}
-		
+
 		TryScreenShot();
-		
+
 		//UPDATE SETTINGS GUI
 		swprintf(MyMenu->Option[0].Str, 100, STR_FORCE_UI_BOOT[language], bootGUI ? ENABLED : DISABLED);
 		swprintf(MyMenu->Option[1].Str, 100, STR_SELECTED_THEME[language], theme_num + '0');

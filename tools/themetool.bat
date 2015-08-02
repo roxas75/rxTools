@@ -1,3 +1,18 @@
+REM Copyright (C) 2015 The PASTA Team
+REM
+REM This program is free software; you can redistribute it and/or
+REM modify it under the terms of the GNU General Public License
+REM version 2 as published by the Free Software Foundation
+REM
+REM This program is distributed in the hope that it will be useful,
+REM but WITHOUT ANY WARRANTY; without even the implied warranty of
+REM MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+REM GNU General Public License for more details.
+REM
+REM You should have received a copy of the GNU General Public License
+REM along with this program; if not, write to the Free Software
+REM Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 @echo off
 
 echo.
@@ -23,7 +38,7 @@ echo                          be in the same directory as the input file.
 echo      makebgr-all: converts all .png files to .bin (BGR). If no directory is
 echo                   specified, the current one will be used.
 echo      makepng-all: converts all .bin (BGR) files to .png. If you are creating a
-echo                   theme and you need a template, this is the first command you 
+echo                   theme and you need a template, this is the first command you
 echo                   should use. If no directory is specified, the current one
 echo                   will be used.
 echo      makeprev [gif delay]: creates a preview (animated GIFs and static PNGs) of your theme
@@ -32,6 +47,9 @@ echo                the first time to download the New Nintendo 3DS XL frame, wh
 echo                will be saved as "~/hero-new-3ds.png".
 echo      strippng-all: removes unnecessary data from all PNG files.
 echo.
+echo This program is free software; you can redistribute it and/or
+echo modify it under the terms of the GNU General Public License
+echo version 2 as published by the Free Software Foundation
 GOTO:EOF
 :makebgr
 if %2=="" (
