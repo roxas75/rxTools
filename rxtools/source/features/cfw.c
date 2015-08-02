@@ -111,7 +111,7 @@ void setFirmMode(int mode){ //0 : SysNand, 1 : EmuNand
 void setAgbBios()
 {
 	File agb_firm;
-	unsigned char svc = (agb_bios ? 0x26 : 0x01);
+	unsigned char svc = (cfgs[CFG_AGB].val.i ? 0x26 : 0x01);
 	if (FileOpen(&agb_firm, "rxtools/data/0004013800000202.bin", 0))
 	{
 		FileWrite(&agb_firm, &svc, 1, 0xD7A12);
@@ -133,10 +133,10 @@ int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
 }
 
 void rxModeSys(){
-	sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(str);
 	rxMode(0);
-	sprintf(str, "/rxTools/Theme/%c/bootE.bin", Theme);
+	sprintf(str, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(str);
 	WaitForButton(BUTTON_A);
 }
@@ -144,10 +144,10 @@ void rxModeSys(){
 void rxModeEmu(){
 	if (!checkEmuNAND()) rxModeSys();
 	else{
-		sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
+		sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
 		DrawBottomSplash(str);
 		rxMode(1);
-		sprintf(str, "/rxTools/Theme/%c/bootE.bin", Theme);
+		sprintf(str, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
 		DrawBottomSplash(str);
 		WaitForButton(BUTTON_A);
 	}
