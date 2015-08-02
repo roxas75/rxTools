@@ -39,7 +39,6 @@ clean:
 release: rxTools.dat rxtools/font.bin all-target-brahma all-target-theme rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax
 	@cp rxTools.dat release
-	@cp rxtools/font.bin release/rxTools
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
 	@cp rxinstaller.nds release/mset/rxinstaller.nds
@@ -47,6 +46,7 @@ release: rxTools.dat rxtools/font.bin all-target-brahma all-target-theme rxinsta
 	@mkdir -p release/rxTools/theme/0
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
+	@cp rxtools/font.bin release/rxTools
 
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
 
