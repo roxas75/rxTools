@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 #include <stdio.h>
 #include <malloc.h>
 #ifndef NON_UNICODE
@@ -14,7 +31,11 @@
 #define fontsize	CHAR_COLUMNS*CHAR_ROWS*FONT_WIDTH*FONT_HEIGHT/FONT_WIDTH
 int main(int argc, char** argv){
 	if(argc < 3){
-		printf("Usage : font_tool.exe <font(%dx%dx1bpp).bin> <font(%dx%dx1bpp).bin>\n",FONT_WIDTH*CHAR_COLUMNS,FONT_HEIGHT*CHAR_ROWS,FONT_WIDTH,CHAR_COLUMNS*FONT_HEIGHT*CHAR_ROWS);
+		printf("Usage : font_tool.exe <font(%dx%dx1bpp).bin> <font(%dx%dx1bpp).bin>\n\n"
+		       "This program is free software; you can redistribute it and/or\n"
+	         "modify it under the terms of the GNU General Public License\n"
+	         "version 2 as published by the Free Software Foundation\n",
+					 FONT_WIDTH*CHAR_COLUMNS,FONT_HEIGHT*CHAR_ROWS,FONT_WIDTH,CHAR_COLUMNS*FONT_HEIGHT*CHAR_ROWS);
 		return -1;
 	}
 #if FONT_WIDTH <= 8
@@ -22,7 +43,7 @@ int main(int argc, char** argv){
 #elif FONT_WIDTH <= 16
 	unsigned short *font = malloc(fontsize*2);
 #endif
-	FILE * pFile;	
+	FILE * pFile;
 	int i,j,k,l;
 	pFile=fopen(argv[1],"rb");
 	for(k=0; k<CHAR_ROWS; k++){

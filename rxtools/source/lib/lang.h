@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2015 The PASTA Team
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 // Translations and corrections by: nastys, Crusard, Pikawil, DjoeN, VinsCool, R4ndom, guitarheroknight, Asia81, Syphurith, soarqin.
 static int N_LANG=9;
 
@@ -19,4 +36,3 @@ static wchar_t* STR_HOLD_R[]={L"Hold R to go to the menu", L"Tieni premuto R per
 //static wchar_t* STR_PRESS_X_SYSNAND={L"Press Ⓧ: sysNAND\n", L"Premi Ⓧ: sysNAND\n", L"Pulsa Ⓧ: sysNAND\n", L"Bouton X : sysNAND\n", L"Druk Ⓧ: sysNAND\n", L"Trykk Ⓧ: sysNAND\n", L"Stisni Ⓧ: sysNAND\n", L"Нажмите Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n"};
 //static wchar_t* STR_PRESS_Y_EMUNAND={L"Press Ⓨ: emuNAND\n", L"Press Ⓨ: emuNAND\n", L"Pulsa Ⓨ: emuNAND\n", L"Bouton Y : emuNAND\n", L"Druk Ⓨ: emuNAND\n", L"Trykk Ⓨ: emuNAND\n", L"Stisni Ⓨ: emuNAND\n", L"Нажмите Ⓨ: emuNAND\n", L"按 Ⓨ: emuNAND\n", L"按 Ⓨ: emuNAND\n"};
 //static wchar_t* STR_PRESS_B_BACK={L"Press Ⓑ: Back\n", L"Premi Ⓑ: Indietro", L"Pulsa Ⓑ: Volver al menu", L"Bouton B : Retour\n", L"Druk Ⓑ: Terug naar menu\n", L"Trykk Ⓑ: Tilbake\n", L"Stisni Ⓑ: Povratak\n", L"Нажмите Ⓑ: Назад\n", L"按 Ⓑ: 返回\n", L"按 Ⓑ: 返回\n"};
-

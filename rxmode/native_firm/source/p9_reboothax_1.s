@@ -1,7 +1,19 @@
-// ---------------------------------------- //
-// |      Copyright(c) 2015, Roxas75      | //
-// |         All rights reserved.         | //
-// ---------------------------------------- //
+@ Copyright (C) 2015 The PASTA Team
+@ Originally written by Roxas75
+@
+@ This program is free software; you can redistribute it and/or
+@ modify it under the terms of the GNU General Public License
+@ version 2 as published by the Free Software Foundation
+@
+@ This program is distributed in the hope that it will be useful,
+@ but WITHOUT ANY WARRANTY; without even the implied warranty of
+@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@ GNU General Public License for more details.
+@
+@ You should have received a copy of the GNU General Public License
+@ along with this program; if not, write to the Free Software
+@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 //FIRM Reboot patch, which is necessary for the hi-ram using games to boot.
 //TODO : Do not exclude other FIRMS to be opened. Not important until we patch them for emunand
 
@@ -24,7 +36,7 @@
 		add r0, sp, #0x3A8-0x70
 		ldr r4, =0x080282CF @blx 0x080282CE
 		blx r4
-		
+
     ClearWorkspace:
         ldr r0, =filehandle
         ldr r1, =0x200
