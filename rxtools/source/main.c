@@ -34,66 +34,6 @@
 #define FONT_ADDRESS	(void*)0x27E00000
 extern unsigned char *fontaddr;
 
-void LoadSettings(){
-	char settings[]="000100";
-	char str[100];
-	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 0))
-	{
-		if (FileGetSize(&MyFile) == 6)
-		{
-			FileRead(&MyFile, settings, 6, 0);
-			bootGUI = (settings[0] == '1');
-			agb_bios = (settings[2] == '1');
-			theme_3d = (settings[3] == '1');
-			silent_boot = (settings[4] == '1');
-
-			/* Disable autostart after the first boot */
-			if (first_boot && !bootGUI) bootGUI = true;
-
-			/* Check if the Theme Number is valid */
-			unsigned char theme_num = (settings[1] - '0');
-			if (theme_num >= 0 && theme_num <= 9)
-			{
-				File Menu0;
-				sprintf(str, "/rxTools/Theme/%c/menu0.bin", settings[1]);
-				if (FileOpen(&Menu0, str, 0))
-				{
-					Theme = settings[1]; //check if the theme exists, else load theme 0 (default)
-					FileClose(&Menu0);
-				} else
-					Theme = '0';
-			} else {
-				Theme = '0';
-				FileWrite(&MyFile, &Theme, 1, 1);
-			}
-
-			/* Check if the Language Number is valid */
-			if(settings[5] - '0' >= 0 && settings[5] - '0' <= N_LANG)
-				language = settings[5] - '0';
-			else
-				language = 0;
-
-			FileClose(&MyFile);
-			return;
-		} else {
-			FileClose(&MyFile);
-		}
-	}
-
-	/* Disable autostart after the first boot */
-	bootGUI = first_boot;
-	Theme = '0';
-	agb_bios = false;
-
-	/* Create system.txt */
-	if (FileOpen(&MyFile, "/rxTools/data/system.txt", 1))
-	{
-		FileWrite(&MyFile, settings, 6, 0);
-		FileClose(&MyFile);
-	}
-}
-
 void Initialize(){
 	char str[100];
 	char strl[100];
@@ -129,21 +69,22 @@ void Initialize(){
 	f_mkdir("rxTools");
 	f_mkdir("rxTools/nand");
 	InstallConfigData();
-	LoadSettings();
+	readCfg();
+	setLangByCode(cfgs[CFG_LANG].val.s);
 
-	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
-	sprintf(strl, "/rxTools/Theme/%c/TOPL.bin", Theme);
-	sprintf(strr, "/rxTools/Theme/%c/TOPR.bin", Theme);
-	if(theme_3d)
+	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
+	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
+	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
+	if (cfgs[CFG_3D].val.i)
 		DrawTopSplash(str, strl, strr);
 	else
 		DrawTopSplash(str, str, str);
 
-	if (!bootGUI)
+	if (!cfgs[CFG_GUI].val.i)
 	{
-		if(silent_boot)
+		if(cfgs[CFG_SILENT].val.i)
 		{
-			sprintf(str, "/rxTools/Theme/%c/boot.bin", Theme);
+			sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
 			DrawBottomSplash(str);
 
 			for (int i = 0; i < 0x333333 * 2; i++){
@@ -154,8 +95,8 @@ void Initialize(){
 		else
 		{
 			ConsoleInit();
-			ConsoleSetTitle(L"%24ls",STR_AUTOBOOT[language]);
-			print(STR_HOLD_R[language]);
+			ConsoleSetTitle(L"%24ls",strings[STR_AUTOBOOT]);
+			print(strings[STR_HOLD_R]);
 			ConsoleShow();
 
 			for (int i = 0; i < 0x333333 * 6; i++){
@@ -169,10 +110,10 @@ void Initialize(){
 	}
 rxTools_boot:
 
-	sprintf(str, "/rxTools/Theme/%c/TOP.bin", Theme);
-	sprintf(strl, "/rxTools/Theme/%c/TOPL.bin", Theme);
-	sprintf(strr, "/rxTools/Theme/%c/TOPR.bin", Theme);
-	if(theme_3d)
+	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
+	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
+	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
+	if (cfgs[CFG_3D].val.i)
 		DrawTopSplash(str, strl, strr);
 	else
 		DrawTopSplash(str, str, str);

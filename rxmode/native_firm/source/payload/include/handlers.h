@@ -15,58 +15,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef HANDLERS_H
+#define HANDLERS_H
 
-#define CFG_STR_MAX_LEN 5
-
-#define rxmode_emu_label "RX3D"
-#define rxmode_sys_label "Ver."
-
-#include "common.h"
-
-typedef enum {
-	CFG_TYPE_INT,
-	CFG_TYPE_BOOLEAN,
-	CFG_TYPE_STRING
-} CfgType;
-
-typedef struct {
-	const char *key;
-	CfgType type;
-	union {
-		int i;
-		int b;
-		char *s;
-	} val;
-} Cfg;
-
-enum {
-	CONF_NOKEYX = -1,
-	CONF_NOFIRMBIN = -2,
-	CONF_ERRNFIRM = -3,
-	CONF_CANTOPENFILE = -4,
-};
-
-enum {
-	CFG_GUI,
-	CFG_THEME,
-	CFG_AGB,
-	CFG_3D,
-	CFG_SILENT,
-	CFG_LANG,
-
-	CFG_NUM
-};
-
-extern Cfg cfgs[];
-
-extern bool first_boot;
-
-int InstallData(char* drive);
-void InstallConfigData();
-
-int writeCfg();
-int readCfg();
+void handleFiq();
+void handleInstr();
+void handleData();
+void handlePrefetch();
 
 #endif
