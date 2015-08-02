@@ -1,0 +1,19 @@
+{
+	"STR_LANG_NAME": "English",
+	"STR_SETTINGS": "Settings",
+	"STR_FORCE_UI_BOOT": "Force UI boot          %ls",
+	"STR_SELECTED_THEME": "Selected theme      <%3c  >",
+	"STR_SHOW_AGB": "Show AGB_FIRM BIOS     %ls",
+	"STR_ENABLE_3D_UI": "Enable 3D UI           %ls",
+	"STR_QUICK_BOOT": "Quick boot             %ls",
+	"STR_CONSOLE_LANGUAGE": "Language  %16ls",
+	"STR_CHOOSE_NAND": "Choose the NAND you want to use",
+	"STR_PRESS_X_SYSNAND": "Ⓧ sysNAND",
+	"STR_PRESS_Y_EMUNAND": "Ⓨ emuNAND",
+	"STR_PRESS_B_BACK": "Ⓑ Back",
+	"STR_MISSING_THEME_FILES": "MISSING THEME FILES!",
+	"STR_AUTOBOOT": "Autoboot",
+	"STR_HOLD_R": "Hold R to go to the menu",
+	"STR_YES": "Yes",
+	"STR_NO": "No"
+}

@@ -32,12 +32,12 @@ typedef enum {
 } CfgType;
 
 typedef struct {
-	const char *key;
+	const wchar_t *key;
 	CfgType type;
 	union {
 		int i;
 		int b;
-		char *s;
+		wchar_t *s;
 	} val;
 } Cfg;
 

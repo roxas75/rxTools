@@ -1,0 +1,19 @@
+{
+	"STR_LANG_NAME": "Croatian",
+	"STR_SETTINGS": "Postavke",
+	"STR_FORCE_UI_BOOT": "Forsiraj ulazak u UI   %ls",
+	"STR_SELECTED_THEME": "Izabrana tema       <%3c  >",
+	"STR_SHOW_AGB": "Prikazi AGB_FIRM       %ls",
+	"STR_ENABLE_3D_UI": "Ukljuci 3D UI          %ls",
+	"STR_QUICK_BOOT": "Brzo Paljenje          %ls",
+	"STR_CONSOLE_LANGUAGE": "Jezik     %16ls",
+	"STR_CHOOSE_NAND": "Izaberi NAND datoteku koju zelite koristiti", 
+	"STR_PRESS_X_SYSNAND": "Ⓧ sysNAND",
+	"STR_PRESS_Y_EMUNAND": "Ⓨ emuNAND",
+	"STR_PRESS_B_BACK": "Ⓑ Povratak",
+	"STR_MISSING_THEME_FILES": "NEDOSTAJU DATOTEKE TEME!",
+	"STR_AUTOBOOT": "Automatsko pokretanje",
+	"STR_HOLD_R": "Pridrzite tipku R da bi ste usli u meni",
+	"STR_YES": "Da",
+	"STR_NO": "Ne"
+}

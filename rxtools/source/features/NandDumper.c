@@ -29,6 +29,7 @@
 #include "CTRDecryptor.h"
 #include "sdmmc.h"
 #include "stdio.h"
+#include "lang.h"
 
 #define NAND_SIZE 0x3AF00000
 #define NAND_SECTOR_SIZE 0x200
@@ -44,8 +45,10 @@ int NandSwitch(){
 	print(STR_PRESS_Y_EMUNAND[language]);
 	print(STR_PRESS_B_BACK[language]);
 	*/
-	ConsoleSetTitle(L"Choose the NAND you want to use");
-	print(L"Ⓧ sysNAND\nⓎ emuNAND\nⒷ Cancel\n");
+	ConsoleSetTitle(L"%28ls", strings[STR_CHOOSE_NAND]);
+	print(L"%ls\n%ls\n%ls\n", strings[STR_PRESS_X_SYSNAND], strings[STR_PRESS_Y_EMUNAND], strings[STR_PRESS_B_BACK]);
+
+//	print(L"Ⓧ sysNAND\nⓎ emuNAND\nⒷ Cancel\n");
 	ConsoleShow();
 	while (true) {
         u32 pad_state = InputWait();
