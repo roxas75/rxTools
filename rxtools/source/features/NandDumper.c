@@ -64,7 +64,7 @@ void NandDumper(){
 	ConsoleSetTitle(L"%sNAND Dumper", isEmuNand ? "emu" : "sys");
 	unsigned char* buf = (void*)0x21000000;
 	unsigned int nsectors = 0x200;  //sectors in a row
-	wchar_t ProgressBar[] = L"⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜";
+	wchar_t ProgressBar[] = L"⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ ";
 	unsigned int progress = 0;
 /*      int BACKCOLOR = */ConsoleGetBackgroundColor(); //can be removed, left only to keep binaries the same
 	if(FileOpen(&myFile, isEmuNand ? "rxTools/nand/EMUNAND.bin" : "rxTools/nand/NAND.bin", 1)){
@@ -73,7 +73,7 @@ void NandDumper(){
 		int x, y;
 		ConsoleGetXY(&x, &y);
 		y += FONT_HEIGHT * 6;
-		x += FONT_WIDTH * 2;
+		x += FONT_HWIDTH * 2;
 		DrawString(BOT_SCREEN, ProgressBar, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 		DrawString(BOT_SCREEN, L"Press Ⓑ anytime to abort", x, y + FONT_HEIGHT*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
@@ -84,7 +84,7 @@ void NandDumper(){
 
 			FileWrite(&myFile, buf, nsectors*NAND_SECTOR_SIZE, count*NAND_SECTOR_SIZE*nsectors);
 			TryScreenShot();
-			if((count % (int)(NAND_SIZE/NAND_SECTOR_SIZE/nsectors/15)) == 0 && count != 0){
+			if((count % (int)(NAND_SIZE/NAND_SECTOR_SIZE/nsectors/16)) == 0 && count != 0){
 				DrawString(BOT_SCREEN, PROGRESS_OK, x+(FONT_WIDTH*(progress++)), y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 			}
 			unsigned int pad = GetInput();
@@ -129,7 +129,10 @@ void DumpNandPartitions(){
 
 		for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
 			swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%08X / %08X", j*0x200, p_size[i]);
-			int x, y; ConsoleGetXY(&x, &y); y += FONT_HEIGHT * 3; x += FONT_WIDTH*2;
+			int x, y;
+			ConsoleGetXY(&x, &y);
+			y += FONT_HEIGHT * 3;
+			x += FONT_HWIDTH*2;
 			DrawString(BOT_SCREEN, wtmp, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 			if(isEmuNand) emunand_readsectors(j, sect_row, BUF1, p_addr[i]);
@@ -234,7 +237,10 @@ void RebuildNand(){
 
 			for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
 				swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%08X / %08X", j*0x200, p_size[i]);
-				int x, y; ConsoleGetXY(&x, &y); y += FONT_HEIGHT * 3; x += FONT_WIDTH*2;
+				int x, y;
+				ConsoleGetXY(&x, &y);
+				y += FONT_HEIGHT * 3;
+				x += FONT_HWIDTH*2;
 				DrawString(BOT_SCREEN, wtmp, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 				FileRead(&out, BUF1, sect_row*0x200, j*0x200);
