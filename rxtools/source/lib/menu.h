@@ -18,6 +18,7 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include <wchar.h>
 #include "common.h"
 #include "console.h"
 
@@ -35,6 +36,11 @@ typedef struct{
 	bool Showed;    //Useful, to not refresh everything everytime
 } Menu;
 
+void setLang(unsigned int i);
+void setLangByCode(const char *code);
+unsigned int getLang(void);
+const char *getLangCode(void);
+
 void MenuInit(Menu* menu);
 void MenuShow();
 void MenuNextSelection();
@@ -50,5 +56,7 @@ extern bool theme_3d;
 extern bool silent_boot;
 extern unsigned char language;
 extern Menu* MyMenu;
+
+extern const wchar_t * const *strings;
 
 #endif
