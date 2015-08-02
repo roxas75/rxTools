@@ -19,6 +19,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "common.h"
+#include "configuration.h"
+#include "lang.h"
 #include "menu.h"
 #include "draw.h"
 #include "hid.h"
@@ -29,8 +31,34 @@
 Menu* MyMenu;
 Menu *MenuChain[100];
 int openedMenus = 0;
-bool bootGUI, agb_bios, theme_3d, silent_boot;
-unsigned char Theme = '0', language = '0';
+
+const wchar_t * const *strings;
+static unsigned int langIndex;
+
+void setLang(unsigned int i){
+	langIndex = i;
+	strings = mlStrings[langIndex].strings;
+}
+
+void setLangByCode(const char *code){
+	unsigned int i;
+
+	for (i = 0; i < STR_LANG_NUM; i++)
+		if (!strcmp(code, mlStrings[i].code)) {
+			setLang(i);
+			return;
+		}
+
+	setLang(STR_LANG_EN);
+}
+
+unsigned int getLang(){
+	return langIndex;
+}
+
+const char *getLangCode(){
+	return mlStrings[langIndex].code;
+}
 
 void MenuInit(Menu* menu){
 	MyMenu = menu;
@@ -60,7 +88,7 @@ void MenuShow(){
 	}*/
 
 	//NEW GUI:
-	sprintf(str, "/rxTools/Theme/%c/%s", Theme, MyMenu->Option[MyMenu->Current].gfx_splash);
+	sprintf(str, "/rxTools/Theme/%u/%s", cfgs[CFG_THEME].val.i, MyMenu->Option[MyMenu->Current].gfx_splash);
 	DrawBottomSplash(str);
 }
 
