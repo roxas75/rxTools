@@ -1,0 +1,19 @@
+{
+	"STR_LANG_NAME": "Italian",
+	"STR_SETTINGS": "Impostazioni",
+	"STR_FORCE_UI_BOOT": "Forza avvio UI         %ls",
+	"STR_SELECTED_THEME": "Tema selezionato    <%3c  >",
+	"STR_SHOW_AGB": "Mostra BIOS AGB_FIRM   %ls",
+	"STR_ENABLE_3D_UI": "Attiva UI 3D           %ls",
+	"STR_QUICK_BOOT": "Avvio rapido           %ls",
+	"STR_CONSOLE_LANGUAGE": "Lingua    %16ls",
+	"STR_CHOOSE_NAND": "Seleziona la NAND da usare",
+	"STR_PRESS_X_SYSNAND": "Ⓧ sysNAND",
+	"STR_PRESS_Y_EMUNAND": "Ⓨ emuNAND",
+	"STR_PRESS_B_BACK": "Ⓑ Indietro",
+	"STR_MISSING_THEME_FILES": "FILE DEL TEMA MANCANTI!",
+	"STR_AUTOBOOT": "AVVIO AUTOMATICO",
+	"STR_HOLD_R": "Tieni premuto R per andare al menu",
+	"STR_YES": "Si",
+	"STR_NO": "No"
+}

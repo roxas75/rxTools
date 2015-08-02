@@ -1,0 +1,19 @@
+{
+	"STR_LANG_NAME": "Dutch",
+	"STR_SETTINGS": "Instellingen",
+	"STR_FORCE_UI_BOOT": "Start in UI            %ls",
+	"STR_SELECTED_THEME": "Selecteer thema     <%3c  >",
+	"STR_SHOW_AGB": "Toon AGB_FIRM BIOS     %ls",
+	"STR_ENABLE_3D_UI": "Gebruik 3D UI          %ls",
+	"STR_QUICK_BOOT": "Snel starten           %ls",
+	"STR_CONSOLE_LANGUAGE": "Taal      %16ls",
+	"STR_AUTOBOOT": "AUTOSTART",
+	"STR_CHOOSE_NAND": "Kies een NAND voor gebruik",
+	"STR_PRESS_X_SYSNAND": "Ⓧ sysNAND",
+	"STR_PRESS_Y_EMUNAND": "Ⓨ emuNAND",
+	"STR_PRESS_B_BACK": "Ⓑ Terug naar menu",
+	"STR_MISSING_THEME_FILES": "THEMA BESTANDEN ONTBREKEN!", 
+	"STR_HOLD_R": "R ingedrukt houden voor menu",
+	"STR_YES": "Ja",
+	"STR_NO": "Nee"
+}

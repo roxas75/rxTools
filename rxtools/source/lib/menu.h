@@ -37,9 +37,9 @@ typedef struct{
 } Menu;
 
 void setLang(unsigned int i);
-void setLangByCode(const char *code);
+void setLangByCode(const wchar_t *code);
 unsigned int getLang(void);
-const char *getLangCode(void);
+const wchar_t *getLangCode(void);
 
 void MenuInit(Menu* menu);
 void MenuShow();

@@ -1,0 +1,19 @@
+{
+	"STR_LANG_NAME": "Spanish",
+	"STR_SETTINGS": "Ajustes",
+	"STR_FORCE_UI_BOOT": "Iniciar en UI          %ls",
+	"STR_SELECTED_THEME": "Tema seleccionado   <%3c  >",
+	"STR_SHOW_AGB": "Ver AGB_FIRM BIOS      %ls",
+	"STR_ENABLE_3D_UI": "Habilitar 3D UI        %ls",
+	"STR_QUICK_BOOT": "Inicio rapido          %ls",
+	"STR_CONSOLE_LANGUAGE": "Lenguaje  %16ls",
+	"STR_CHOOSE_NAND": "Selecciona una NAND para usar",
+	"STR_PRESS_X_SYSNAND": "Ⓧ sysNAND",
+	"STR_PRESS_Y_EMUNAND": "Ⓨ emuNAND",
+	"STR_PRESS_B_BACK": "Ⓑ Volver al menu",
+	"STR_MISSING_THEME_FILES": "NO SE ENCUENTRAN LOS ARCHIVOS DEL TEMA!",
+	"STR_AUTOBOOT": "INICIO AUTOMATICO",
+	"STR_HOLD_R": "Manten pulsado R para ir al menu",
+	"STR_YES": "Si",
+	"STR_NO": "No"
+}

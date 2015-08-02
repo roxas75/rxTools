@@ -1,0 +1,19 @@
+{
+	"STR_LANG_NAME": "French",
+	"STR_SETTINGS": "Options", 
+	"STR_FORCE_UI_BOOT": "Forcer demarrage UI    %ls",
+	"STR_SELECTED_THEME": "Theme choisi        <%3c  >",
+	"STR_SHOW_AGB": "Activer AGB_FIRM       %ls",
+	"STR_ENABLE_3D_UI": "Activer UI 3D          %ls",
+	"STR_QUICK_BOOT": "Demarrage rapide       %ls",
+	"STR_CONSOLE_LANGUAGE": "Langage   %16ls",
+	"STR_CHOOSE_NAND": "Choissisez la NAND que vous voulez utiliser",
+	"STR_PRESS_X_SYSNAND": "Ⓧ sysNAND",
+	"STR_PRESS_Y_EMUNAND": "Ⓨ emuNAND",
+	"STR_PRESS_B_BACK": "Ⓑ Retour",
+	"STR_MISSING_THEME_FILES": "FICHIERS DE THEME MANQUANTS!",
+	"STR_AUTOBOOT": "DÉMARRAGE AUTOMATIQUE",
+	"STR_HOLD_R": "Maintenir le bouton R pour accéder au menu",
+	"STR_YES": "Oui",
+	"STR_NO": "Non"
+}

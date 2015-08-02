@@ -1,0 +1,9 @@
+{
+	"STR_PROGRESS_SPACE": "⬜",
+	"STR_PROGRESS_OK": "⬛",
+	"STR_PROGRESS_FAIL": "✖",
+	"STR_CURSOR": "⮞",
+	"STR_CURSOR_SPACE": "　",
+	"STR_ENABLED": "✔",
+	"STR_DISABLED": "✘"
+}
