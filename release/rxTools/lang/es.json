@@ -1,0 +1,12 @@
+{
+	"LANG_NAME": "Spanish",
+
+	"FORCE_UI_BOOT": "Iniciar en UI          %ls",
+	"SELECTED_THEME": "Tema seleccionado   <%3c  >",
+	"SHOW_AGB": "Ver AGB_FIRM BIOS      %ls",
+	"ENABLE_3D_UI": "Habilitar 3D UI        %ls",
+	"QUICK_BOOT": "Inicio rapido          %ls",
+	"CONSOLE_LANGUAGE": "Lenguaje  %16ls",
+	"AUTOBOOT": "INICIO AUTOMATICO",
+	"HOLD_R": "Manten pulsado R para ir al menu"
+}
