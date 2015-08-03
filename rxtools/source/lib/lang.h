@@ -15,28 +15,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <wchar.h>
 #include "configuration.h"
 
-#define LANG_CODE_LEN 5
-
-#if LANG_CODE_NUM > CFG_STR_MAX_LEN
-#error "LANG_CODE_LEN > CFG_STR_MAX_LEN"
-#endif
-
-enum {
-	STR_LANG_EN,
-	STR_LANG_IT,
-	STR_LANG_ES,
-	STR_LANG_FR,
-	STR_LANG_NL,
-	STR_LANG_NO,
-	STR_LANG_HR,
-	STR_LANG_RU,
-	STR_LANG_ZH_CN,
-	STR_LANG_ZH_TW,
-
-	STR_LANG_NUM
-};
+#define STR_MAX_LEN 64
 
 enum {
 	STR_LANG_NAME,
@@ -53,9 +35,7 @@ enum {
 	STR_NUM
 };
 
-extern const wchar_t * const *strings;
+extern const char langPath[];
+extern wchar_t strings[STR_NUM][STR_MAX_LEN];
 
-void setLang(unsigned int i);
-void setLangByCode(const char *code);
-unsigned int getLang(void);
-const char *getLangCode(void);
+int loadStrings(void);

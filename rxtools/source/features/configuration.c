@@ -54,7 +54,7 @@ char strr[100];
 File tempfile;
 UINT tmpu32;
 
-static char cfgLang[CFG_STR_MAX_LEN] = "en";
+static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
 
 Cfg cfgs[] = {
 	[CFG_GUI] = { "GUI", CFG_TYPE_BOOLEAN, { .i = 0 } },
@@ -441,15 +441,21 @@ void InstallConfigData(){
 void trySetLangFromTheme(){
 	File MyFile;
 	char str[100];
+	unsigned int i;
+
 	sprintf(str, "/rxTools/Theme/%u/LANG.txt", cfgs[CFG_THEME].val.i);
 	if (!FileOpen(&MyFile, str, 0))
 		return;
 	if (FileGetSize(&MyFile) > 0)
 	{
-		char tl[]="00";
-		FileRead(&MyFile, tl, 1, 0);
-		if(tl[0] - 0x30 >= 0 && tl[0] - 0x30 <= STR_LANG_NUM)
-			setLang(tl[0] - 0x30);
+		FileRead(&MyFile, cfgs[CFG_LANG].val.s, CFG_STR_MAX_LEN, 0);
+
+		for (i = 0; i < CFG_STR_MAX_LEN
+			&& cfgs[CFG_LANG].val.s[i] != '\r'
+			&& cfgs[CFG_LANG].val.s[i] != '\n'; i++);
+		str[i] = 0;
+
+		loadStrings();
 	}
 	FileClose(&MyFile);
 }
