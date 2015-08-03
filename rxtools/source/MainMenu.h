@@ -246,18 +246,7 @@ void SettingsMenuInit(){
 					}
 
 					cfgs[CFG_THEME].val.i = theme_num;
-					File MyFile;
-					sprintf(str, "/rxTools/Theme/%u/LANG.txt", theme_num);
-					if (FileOpen(&MyFile, str, 0))
-					{
-						if (FileGetSize(&MyFile) > 0)
-						{
-							char tl[]="00";
-							FileRead(&MyFile, tl, 1, 0);
-							if(tl[0] - 0x30 >= 0 && tl[0] - 0x30 <= STR_LANG_NUM)
-								setLang(tl[0] - 0x30);
-						}
-					}
+					trySetLangFromTheme();
 				}
 			}
 			else if (MyMenu->Current == 2) cfgs[CFG_AGB].val.i ^= 1;
