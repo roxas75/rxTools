@@ -72,7 +72,7 @@ void Initialize(){
 	f_mkdir("rxTools/nand");
 	InstallConfigData();
 	readCfg();
-	setLangByCode(cfgs[CFG_LANG].val.s);
+	loadStrings();
 
 	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
 	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
