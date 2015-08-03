@@ -32,34 +32,6 @@ Menu* MyMenu;
 Menu *MenuChain[100];
 int openedMenus = 0;
 
-const wchar_t * const *strings;
-static unsigned int langIndex;
-
-void setLang(unsigned int i){
-	langIndex = i;
-	strings = mlStrings[langIndex].strings;
-}
-
-void setLangByCode(const wchar_t *code){
-	unsigned int i;
-
-	for (i = 0; i < STR_LANG_NUM; i++)
-		if (!wcscmp(code, mlStrings[i].code)) {
-			setLang(i);
-			return;
-		}
-
-	setLang(STR_LANG_EN);
-}
-
-unsigned int getLang(){
-	return langIndex;
-}
-
-const wchar_t *getLangCode(){
-	return mlStrings[langIndex].code;
-}
-
 void MenuInit(Menu* menu){
 	MyMenu = menu;
 	ConsoleInit();
