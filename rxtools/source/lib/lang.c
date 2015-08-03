@@ -28,6 +28,31 @@ const char langPath[] = "/rxTools/lang";
 
 static const char *keys[STR_NUM] = {
 	[STR_LANG_NAME] = "LANG_NAME",
+	[STR_DUMP] = "DUMP",
+	[STR_DUMPING] = "DUMPING",
+	[STR_INJECT] = "INJECT",
+	[STR_CHOOSE] = "CHOOSE",
+	[STR_NAND] = "NAND",
+	[STR_SYSNAND] = "SYSNAND",
+	[STR_EMUNAND] = "EMUNAND",
+	[STR_BUTTON_ACTION] = "BUTTON_ACTION",
+	[STR_PRESS_BUTTON_ACTION] = "PRESS_BUTTON_ACTION",
+	[STR_HOLD_BUTTON_ACTION] = "HOLD_BUTTON_ACTION",
+	[STR_BUTTON_A] = "BUTTON_A",
+	[STR_BUTTON_B] = "BUTTON_B",
+	[STR_BUTTON_X] = "BUTTON_X",
+	[STR_BUTTON_Y] = "BUTTON_Y",
+	[STR_BUTTON_L] = "BUTTON_L",
+	[STR_BUTTON_R] = "BUTTON_R",
+	[STR_BUTTON_ZL] = "BUTTON_ZL",
+	[STR_BUTTON_ZR] = "BUTTON_ZR",
+	[STR_BUTTON_SELECT] = "BUTTON_SELECT",
+	[STR_BUTTON_HOME] = "BUTTON_HOME",
+	[STR_BUTTON_START] = "BUTTON_START",
+	[STR_CANCEL] = "CANCEL",
+	[STR_CONTINUE] = "CONTINUE",
+	[STR_FAILED] = "FAILED",
+	[STR_COMPLETED] = "COMPLETED",
 	[STR_SETTINGS] = "SETTINGS",
 	[STR_CHOOSE_NAND] = "CHOOSE_NAND",
 	[STR_PRESS_X_SYSNAND] = "PRESS_X_SYSNAND",
@@ -50,7 +75,7 @@ int loadStrings()
 {
 	const size_t tokenNum = 1 + STR_NUM * 2;
 	jsmntok_t t[tokenNum];
-	char buf[1024];
+	char buf[10240];
 	jsmn_parser p;
 	unsigned int i, j, k, l=0;
 	const char *s;
@@ -81,7 +106,8 @@ int loadStrings()
 			len = t[i].end - t[i].start;
 			if (!memcmp(s, keys[j], len)) {
 				i++;
-				len = t[i].end - t[i].start;
+				strings[j][mbstowcs(strings[j], buf + t[i].start, t[i].end - t[i].start)]=0;
+/*				len = t[i].end - t[i].start;
 				for (s = buf + t[i].start; len > 0
 					&& l < STR_MAX_LEN; s += k)
 				{
@@ -94,7 +120,7 @@ int loadStrings()
 				}
 
 				strings[j][l] = 0;
-				break;
+*/				break;
 			}
 		}
 	}
