@@ -39,16 +39,11 @@
 int NandSwitch(){
 	if(!checkEmuNAND()) return  0; //If No EmuNAND, we force to work on SysNAND
 	ConsoleInit();
-	/* freezes
-	ConsoleSetTitle(STR_CHOOSE_NAND[language]);
-	print(STR_PRESS_X_SYSNAND[language]);
-	print(STR_PRESS_Y_EMUNAND[language]);
-	print(STR_PRESS_B_BACK[language]);
-	*/
-	ConsoleSetTitle(L"%28ls", strings[STR_CHOOSE_NAND]);
-	print(L"%ls\n%ls\n%ls\n", strings[STR_PRESS_X_SYSNAND], strings[STR_PRESS_Y_EMUNAND], strings[STR_PRESS_B_BACK]);
+	print(strings[STR_CHOOSE], strings[STR_NAND]);
+	print(strings[STR_BUTTON_ACTION], strings[STR_BUTTON_X], strings[STR_SYSNAND]);
+	print(strings[STR_BUTTON_ACTION], strings[STR_BUTTON_Y], strings[STR_EMUNAND]);
+	print(strings[STR_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_CANCEL]);
 
-//	print(L"Ⓧ sysNAND\nⓎ emuNAND\nⒷ Cancel\n");
 	ConsoleShow();
 	while (true) {
         u32 pad_state = InputWait();
@@ -64,19 +59,22 @@ void NandDumper(){
 	if(checkEmuNAND() && (isEmuNand = NandSwitch()) == UNK_NAND) return;
 	isEmuNand--;
 	ConsoleInit();
-	ConsoleSetTitle(L"%sNAND Dumper", isEmuNand ? "emu" : "sys");
+	ConsoleSetTitle(strings[STR_DUMP], strings[STR_NAND]);
 	unsigned char* buf = (void*)0x21000000;
 	unsigned int nsectors = 0x200;  //sectors in a row
 	wchar_t ProgressBar[] = L"⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ ";
 	unsigned int progress = 0;
-/*      int BACKCOLOR = */ConsoleGetBackgroundColor(); //can be removed, left only to keep binaries the same
 	if(FileOpen(&myFile, isEmuNand ? "rxTools/nand/EMUNAND.bin" : "rxTools/nand/NAND.bin", 1)){
-		print(L"Dumping...\n\n");
+		print(strings[STR_DUMPING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND]);
 		ConsoleShow();
 		int x, y;
 		ConsoleGetXY(&x, &y);
 		y += FONT_HEIGHT * 6;
 		x += FONT_HWIDTH * 2;
+//		print("\n%ls\n", ProgressBar);
+//		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_CANCEL]);
+//		ConsoleShow();
+
 		DrawString(BOT_SCREEN, ProgressBar, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 		DrawString(BOT_SCREEN, L"Press Ⓑ anytime to abort", x, y + FONT_HEIGHT*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
@@ -98,13 +96,13 @@ void NandDumper(){
 			FileWrite(&myFile, buf, 0x200, 0);
 		}
 		FileClose(&myFile);
-		print(L"\nFinished dumping!\n");
+		print(strings[STR_COMPLETED]);
 		ConsoleShow();
 	}else{
-		print(L"Failed to create the dump.\n");
+		print(strings[STR_FAILED]);
 		ConsoleShow();
 	}
-	print(L"\nPress Ⓐ to exit\n");
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
