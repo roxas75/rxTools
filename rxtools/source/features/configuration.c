@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "configuration.h"
+#include "lang.h"
 #include "filepack.h"
 #include "screenshot.h"
 #include "fs.h"
@@ -418,6 +419,7 @@ void InstallConfigData(){
 	}
 
 	first_boot = true;
+	trySetLangFromTheme();
 	writeCfg();
 
 	sprintf(str, "/rxTools/Theme/%u/cfg0TOP.bin", cfgs[CFG_THEME].val.i);
@@ -434,4 +436,20 @@ void InstallConfigData(){
 	DrawTopSplash(str, strl, strr);
 
 	InputWait();
+}
+
+void trySetLangFromTheme(){
+	File MyFile;
+	char str[100];
+	sprintf(str, "/rxTools/Theme/%u/LANG.txt", cfgs[CFG_THEME].val.i);
+	if (!FileOpen(&MyFile, str, 0))
+		return;
+	if (FileGetSize(&MyFile) > 0)
+	{
+		char tl[]="00";
+		FileRead(&MyFile, tl, 1, 0);
+		if(tl[0] - 0x30 >= 0 && tl[0] - 0x30 <= STR_LANG_NUM)
+			setLang(tl[0] - 0x30);
+	}
+	FileClose(&MyFile);
 }

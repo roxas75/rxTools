@@ -66,6 +66,8 @@ extern bool first_boot;
 int InstallData(char* drive);
 void InstallConfigData();
 
+void trySetLangFromTheme(void);
+
 int writeCfg();
 int readCfg();
 
