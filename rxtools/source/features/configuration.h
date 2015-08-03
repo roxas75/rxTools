@@ -18,7 +18,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#define CFG_STR_MAX_LEN 5
+#define CFG_STR_MAX_LEN 16
 
 #define rxmode_emu_label "RX3D"
 #define rxmode_sys_label "Ver."
