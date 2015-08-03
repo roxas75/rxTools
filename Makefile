@@ -56,7 +56,7 @@ rxTools.dat: rxtools/rxtools.bin data.bin
 	@dd if=data.bin of=$@ seek=2K conv=notrunc
 
 rxinstaller.nds:
-	@$(MAKE) -C rxinstaller $@
+	@$(MAKE) -C rxinstaller
 
 all-target-brahma:
 	$(MAKE) -C brahma
