@@ -173,13 +173,40 @@ void AdvancedMenuInit(){
 
 void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
+	DIR d;
+	FILINFO fno;
 	char str[100];
 	char strl[100];
 	char strr[100];
+	const unsigned int maxLangNum = 16;
+	char langs[maxLangNum][CFG_STR_MAX_LEN];
 	unsigned char theme_num = 0;
-	unsigned int lang;
+	unsigned int curLang, langNum;
 
-	lang = getLang();
+	curLang = 0;
+	langNum = 0;
+
+	if (!f_opendir(&d, langPath)) {
+		while (langNum < maxLangNum) {
+			fno.lfname = langs[langNum];
+			fno.lfsize = CFG_STR_MAX_LEN;
+
+			if (f_readdir(&d, &fno))
+				break;
+
+			if (langs[langNum][0] == 0)
+				strcpy(langs[langNum], fno.fname);
+			else if (!strcmp(langs[langNum], cfgs[CFG_LANG].val.s))
+				curLang = langNum;
+
+			if (!strcmp(fno.fname, cfgs[CFG_LANG].val.s))
+				curLang = langNum;
+
+			langNum++;
+		}
+
+		f_closedir(&d);
+	}
 	
 	while (true) {
 		u32 pad_state = InputWait();
@@ -274,22 +301,18 @@ void SettingsMenuInit(){
 			}
 			else if (MyMenu->Current == 5)
 			{
-				if (pad_state & BUTTON_LEFT && lang > 0)
-				{
-					lang--;
-				} else
-				if (pad_state & BUTTON_RIGHT && lang + 1 < STR_LANG_NUM)
-				{
-					lang++;
-				}
+				if (pad_state & BUTTON_LEFT && curLang > 0)
+					curLang--;
+				else if (pad_state & BUTTON_RIGHT && curLang + 1 < langNum)
+					curLang++;
 
-				setLang(lang);
+				strcpy(cfgs[CFG_LANG].val.s, langs[curLang]);
+				loadStrings();
 			}
 		}
 		if (pad_state & BUTTON_B)
 		{
 			//Code to save settings
-			strcpy(cfgs[CFG_LANG].val.s, getLangCode());
 			writeCfg();
 			break;
 		}
