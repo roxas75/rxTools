@@ -28,7 +28,12 @@ const char langPath[] = "/rxTools/lang";
 
 static const char *keys[STR_NUM] = {
 	[STR_LANG_NAME] = "LANG_NAME",
-
+	[STR_SETTINGS] = "SETTINGS",
+	[STR_CHOOSE_NAND] = "CHOOSE_NAND",
+	[STR_PRESS_X_SYSNAND] = "PRESS_X_SYSNAND",
+	[STR_PRESS_Y_EMUNAND] = "PRESS_Y_EMUNAND",
+	[STR_PRESS_B_BACK] = "PRESS_B_BACK",
+	[STR_MISSING_THEME_FILES] = "MISSING_THEME_FILES",
 	[STR_FORCE_UI_BOOT] = "FORCE_UI_BOOT",
 	[STR_SELECTED_THEME] = "SELECTED_THEME",
 	[STR_SHOW_AGB] = "SHOW_AGB",
@@ -36,7 +41,9 @@ static const char *keys[STR_NUM] = {
 	[STR_QUICK_BOOT] = "QUICK_BOOT",
 	[STR_CONSOLE_LANGUAGE] = "CONSOLE_LANGUAGE",
 	[STR_AUTOBOOT] = "AUTOBOOT",
-	[STR_HOLD_R] = "HOLD_R"
+	[STR_HOLD_R] = "HOLD_R",
+	[STR_YES] = "YES",
+	[STR_NO] = "NO"
 };
 
 int loadStrings()
@@ -45,7 +52,7 @@ int loadStrings()
 	jsmntok_t t[tokenNum];
 	char buf[1024];
 	jsmn_parser p;
-	unsigned int i, j, k, l;
+	unsigned int i, j, k, l=0;
 	const char *s;
 	int r;
 	size_t len;
@@ -78,7 +85,7 @@ int loadStrings()
 				for (s = buf + t[i].start; len > 0
 					&& l < STR_MAX_LEN; s += k)
 				{
-					k = mbtowc(strings[j][l], s, len);
+					k = mbtowc((wchar_t*)strings[j][l], s, len);
 					if (k < 0)
 						break;
 

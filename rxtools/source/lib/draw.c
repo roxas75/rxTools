@@ -30,7 +30,7 @@ u32 current_y = 1;
 
 u8 *tmpscreen = (u8*)0x26000000;
 const u8 *fontaddr = font;
-extern wchar_t * const *strings;
+extern wchar_t strings[STR_NUM][STR_MAX_LEN];
 
 void ClearScreen(u8 *screen, u32 color)
 {
