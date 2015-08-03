@@ -18,7 +18,7 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-#define CFG_STR_MAX_LEN 5
+#define CFG_STR_MAX_LEN 16
 
 #define rxmode_emu_label "RX3D"
 #define rxmode_sys_label "Ver."
@@ -32,12 +32,12 @@ typedef enum {
 } CfgType;
 
 typedef struct {
-	const wchar_t *key;
+	const char *key;
 	CfgType type;
 	union {
 		int i;
 		int b;
-		wchar_t *s;
+		char *s;
 	} val;
 } Cfg;
 
@@ -65,6 +65,8 @@ extern bool first_boot;
 
 int InstallData(char* drive);
 void InstallConfigData();
+
+void trySetLangFromTheme(void);
 
 int writeCfg();
 int readCfg();

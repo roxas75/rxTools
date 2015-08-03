@@ -36,11 +36,6 @@ typedef struct{
 	bool Showed;    //Useful, to not refresh everything everytime
 } Menu;
 
-void setLang(unsigned int i);
-void setLangByCode(const wchar_t *code);
-unsigned int getLang(void);
-const wchar_t *getLangCode(void);
-
 void MenuInit(Menu* menu);
 void MenuShow();
 void MenuNextSelection();
@@ -56,7 +51,5 @@ extern bool theme_3d;
 extern bool silent_boot;
 extern unsigned char language;
 extern Menu* MyMenu;
-
-extern const wchar_t * const *strings;
 
 #endif

@@ -18,8 +18,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <locale.h>
 #include "configuration.h"
+#include "lang.h"
 #include "filepack.h"
 #include "screenshot.h"
 #include "fs.h"
@@ -54,22 +54,22 @@ char strr[100];
 File tempfile;
 UINT tmpu32;
 
-static wchar_t cfgLang[CFG_STR_MAX_LEN + 1] = L"en";
+static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
 
 Cfg cfgs[] = {
-	[CFG_GUI] = { L"GUI", CFG_TYPE_BOOLEAN, { .i = 0 } },
-	[CFG_THEME] = { L"Theme", CFG_TYPE_INT, { .i = 0 } },
-	[CFG_AGB] = { L"AGB", CFG_TYPE_BOOLEAN, { .i = 0 } },
-	[CFG_3D] = { L"3D", CFG_TYPE_BOOLEAN, { .i = 1 } },
-	[CFG_SILENT] = { L"Silent", CFG_TYPE_BOOLEAN, { .i = 0 } },
-	[CFG_LANG] = { L"Language", CFG_TYPE_STRING, { .s = cfgLang } }
+	[CFG_GUI] = { "GUI", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_THEME] = { "Theme", CFG_TYPE_INT, { .i = 0 } },
+	[CFG_AGB] = { "AGB", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_3D] = { "3D", CFG_TYPE_BOOLEAN, { .i = 1 } },
+	[CFG_SILENT] = { "Silent", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_LANG] = { "Language", CFG_TYPE_STRING, { .s = cfgLang } }
 };
 
 static const char jsonPath[] = "/rxTools/data/system.json";
 
-static int jsoneq(const wchar_t *json, jsmntok_t *tok, const wchar_t *s) {
-	if (tok->type == JSMN_STRING && wcslen(s) == tok->end - tok->start &&
-			wcsncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
 		return 0;
 	}
 	return -1;
@@ -78,20 +78,20 @@ static int jsoneq(const wchar_t *json, jsmntok_t *tok, const wchar_t *s) {
 int writeCfg()
 {
 	File fd;
-	wchar_t wbuf[128];
-	char buf[3*sizeof(wbuf)/sizeof(wbuf[0])];
-	const wchar_t *p;
-	wchar_t *jsonCur;
+	char buf[128];
+	const char *p;
+	char *jsonCur;
 	unsigned int i;
 	size_t len;
 	int left, res;
 
-	left = sizeof(wbuf)/sizeof(wbuf[0]);
-	jsonCur = wbuf;
+	left = sizeof(buf);
+	jsonCur = buf;
 
-	*jsonCur++ = L'{';
+	*jsonCur = '{';
 
 	left--;
+	jsonCur++;
 
 	i = 0;
 	for (i = 0; i < CFG_NUM; i++) {
@@ -99,11 +99,12 @@ int writeCfg()
 			if (left < 1)
 				return 1;
 
-			*jsonCur++ = L',';
+			*jsonCur = ',';
 			left--;
+			jsonCur++;
 		}
 
-		res = swprintf(jsonCur, left, L"\n\t\"%ls\": ", cfgs[i].key);
+		res = snprintf(jsonCur, left, "\n\t\"%s\": ", cfgs[i].key);
 		if (res < 0 || res >= left)
 			return 1;
 
@@ -112,7 +113,8 @@ int writeCfg()
 
 		switch (cfgs[i].type) {
 			case CFG_TYPE_INT:
-				res = swprintf(jsonCur, left, L"%d", cfgs[i].val.i);
+				res = snprintf(jsonCur, left,
+					"%d", cfgs[i].val.i);
 				if (res < 0 || res >= left)
 					return 1;
 
@@ -121,19 +123,23 @@ int writeCfg()
 
 			case CFG_TYPE_BOOLEAN:
 				if (cfgs[i].val.i) {
-					p = L"true";
+					len = sizeof("true");
+					p = "true";
 				} else {
-					p = L"false";
+					len = sizeof("false");
+					p = "false";
 				}
-				len = wcslen(p);
+
 				if (len >= left)
 					return -1;
 
-				wcscpy(jsonCur, p);
+				strcpy(jsonCur, p);
+				len--;
 				break;
 
 			case CFG_TYPE_STRING:
-				res = swprintf(jsonCur, left, L"\"%ls\"", cfgs[i].val.s);
+				res = snprintf(jsonCur, left,
+					"\"%s\"", cfgs[i].val.s);
 				if (res < 0 || res >= left)
 					return 1;
 
@@ -152,17 +158,17 @@ int writeCfg()
 	if (left < 0)
 		return 1;
 
-	*jsonCur++ = L'\n';
-	*jsonCur++ = L'}';
-	*jsonCur++ = L'\n';
+	*jsonCur = '\n';
+	jsonCur++;
+	*jsonCur = '}';
+	jsonCur++;
+	*jsonCur = '\n';
+	jsonCur++;
 
 	if (!FileOpen(&fd, jsonPath, 1))
 		return 1;
 
-	setlocale(LC_ALL, "UTF-8");
-	len = wcstombs(buf, wbuf, sizeof(buf));
-
-	FileWrite(&fd, buf, len, 0);
+	FileWrite(&fd, buf, (uintptr_t)jsonCur - (uintptr_t)buf, 0);
 	FileClose(&fd);
 
 	return 0;
@@ -173,7 +179,6 @@ int readCfg()
 	const size_t tokenNum = 1 + CFG_NUM * 2;
 	jsmntok_t t[tokenNum];
 	char buf[128];
-	wchar_t wbuf[sizeof(buf)];
 	jsmn_parser parser;
 	File fd;
 	unsigned int i, j, k;
@@ -190,11 +195,8 @@ int readCfg()
 	FileRead(&fd, buf, len, 0);
 	FileClose(&fd);
 
-	setlocale(LC_ALL, "UTF-8");
-	len = mbstowcs(wbuf, buf, sizeof(wbuf)/sizeof(wbuf[0]));
-
 	jsmn_init(&parser);
-	r = jsmn_parse(&parser, wbuf, len, t, tokenNum);
+	r = jsmn_parse(&parser, buf, len, t, tokenNum);
 	if (r < 0)
 		return r;
 
@@ -203,7 +205,7 @@ int readCfg()
 
 	/* Loop over all keys of the root object */
 	for (i = 1; i < r; i++) {
-		for (j = 0; jsoneq(wbuf, &t[i], cfgs[j].key) != 0; j++)
+		for (j = 0; jsoneq(buf, &t[i], cfgs[j].key) != 0; j++)
 			if (j >= CFG_NUM)
 				return 1;
 
@@ -212,21 +214,22 @@ int readCfg()
 			case CFG_TYPE_INT:
 				cfgs[j].val.i = 0;
 				for (k = t[i].start; k < t[i].end; k++) {
-					cfgs[j].val.i = cfgs[j].val.i * 10 + wbuf[k] - L'0';
+					cfgs[j].val.i *= 10;
+					cfgs[j].val.i += buf[k] - 48;
 				}
 
 				break;
 
 			case CFG_TYPE_BOOLEAN:
 				len = t[i].end - t[i].start;
-				cfgs[j].val.i = wbuf[t[i].start] == L't';
+				cfgs[j].val.i = buf[t[i].start] == 't';
 
 				break;
 
 			case CFG_TYPE_STRING:
 				len = t[i].end - t[i].start;
 
-				if (len > CFG_STR_MAX_LEN)
+				if (len + 1 > CFG_STR_MAX_LEN)
 					break;
 
 #ifdef DEBUG
@@ -234,7 +237,7 @@ int readCfg()
 					break;
 #endif
 
-				memcpy(cfgs[j].val.s, wbuf + t[i].start, len * sizeof(wbuf[0]));
+				memcpy(cfgs[j].val.s, buf + t[i].start, len);
 				cfgs[j].val.s[len] = 0;
 		}
 	}
@@ -416,7 +419,8 @@ void InstallConfigData(){
 	}
 
 	first_boot = true;
-//	writeCfg();
+	trySetLangFromTheme();
+	writeCfg();
 
 	sprintf(str, "/rxTools/Theme/%u/cfg0TOP.bin", cfgs[CFG_THEME].val.i);
 	DrawTopSplash(str, str, str);
@@ -432,4 +436,26 @@ void InstallConfigData(){
 	DrawTopSplash(str, strl, strr);
 
 	InputWait();
+}
+
+void trySetLangFromTheme(){
+	File MyFile;
+	char str[100];
+	unsigned int i;
+
+	sprintf(str, "/rxTools/Theme/%u/LANG.txt", cfgs[CFG_THEME].val.i);
+	if (!FileOpen(&MyFile, str, 0))
+		return;
+	if (FileGetSize(&MyFile) > 0)
+	{
+		FileRead(&MyFile, cfgs[CFG_LANG].val.s, CFG_STR_MAX_LEN, 0);
+
+		for (i = 0; i < CFG_STR_MAX_LEN
+			&& cfgs[CFG_LANG].val.s[i] != '\r'
+			&& cfgs[CFG_LANG].val.s[i] != '\n'; i++);
+		str[i] = 0;
+
+		loadStrings();
+	}
+	FileClose(&MyFile);
 }
