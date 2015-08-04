@@ -28,6 +28,7 @@ enum {
 	STR_LANG_RU,
 	STR_LANG_ZH_CN,
 	STR_LANG_ZH_TW,
+	STR_LANG_PT
 
 	STR_LANG_NUM
 };
@@ -198,14 +199,28 @@ static const struct {
 			[STR_AUTOBOOT] = L"自動引導",
 			[STR_HOLD_R] = L"按住R鈕進入菜單"
 		}
+	},[STR_LANG_ES] = {
+		.code = "pt",
+		.strings = {
+			[STR_LANG_NAME] = L"Português",
+
+			[STR_FORCE_UI_BOOT] = L"Iniciar UI             %ls",
+			[STR_SELECTED_THEME] = L"Tema selecionado    <%3c  >",
+			[STR_SHOW_AGB] = L"Exibir BIOS AGB_FIRM   %ls",
+			[STR_ENABLE_3D_UI] = L"Habilitar 3D UI        %ls",
+			[STR_QUICK_BOOT] = L"Inicio rapido          %ls",
+			[STR_CONSOLE_LANGUAGE] = L"Idioma    %16ls",
+			[STR_AUTOBOOT] = L"INICIO AUTOMATICO",
+			[STR_HOLD_R] = L"Precione R para ir para menu"
+		}
 	}
 };
 
-//static wchar_t* STR_YES[]={L"Yes", L"Si", L"Si", L"Oui", L"Ja", L"Ja", L"Da", L"Да", L"是", L"是"};
-//static wchar_t* STR_NO[]={L"No", L"No", L"No", L"Non", L"Nee", L"Nei", L"Ne", L"Нет", L"否", L"否"};
-//static wchar_t* STR_SETTINGS[]={L"           SETTINGS", L"          IMPOSTAZIONI", L"            AJUSTES", L"            OPTIONS", L"          INSTELLINGEN", L"         INNSTILLINGER", L"           Postavke", L"           НАСТРОЙКИ", L"            设置选项", L"            設定選項"};
-//static wchar_t* STR_MISSING_THEME_FILES={L" MISSING THEME FILES!   ", L" FILE DEL TEMA MANCANTI!   ", L" NO SE ENCUENTRAN LOS ARCHIVOS DEL TEMA!   ", L" FICHIERS DE THEME MANQUANTS !   ", L" THEMA BESTANDEN ONTBREKEN!   ", L" MANGLER TEMAFILER!   ", L" NEDOSTAJU DATOTEKE TEME!   ", L" ОТСУТСТВУЮТ ФАЙЛЫ ТЕМЫ!   ", L" 找不到主题文件!  ", L" 主題檔案缺失!  "};
-//static wchar_t* STR_CHOOSE_NAND={L"Choose the NAND you want to use", L"Seleziona la NAND da usare", L"Selecciona una NAND para usar:", L"Choissisez la NAND que vous voulez utiliser :", L"Kies een NAND voor gebruik:", L"Velg hvilken NAND du vil bruke:", L"Izaberi NAND datoteku koju zelite koristiti:", L"Выберите NAND, который хотите использовать", L"请选择要使用的NAND", L"請選擇要使用的NAND"};
-//static wchar_t* STR_PRESS_X_SYSNAND={L"Press Ⓧ: sysNAND\n", L"Premi Ⓧ: sysNAND\n", L"Pulsa Ⓧ: sysNAND\n", L"Bouton X : sysNAND\n", L"Druk Ⓧ: sysNAND\n", L"Trykk Ⓧ: sysNAND\n", L"Stisni Ⓧ: sysNAND\n", L"Нажмите Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n"};
-//static wchar_t* STR_PRESS_Y_EMUNAND={L"Press Ⓨ: emuNAND\n", L"Press Ⓨ: emuNAND\n", L"Pulsa Ⓨ: emuNAND\n", L"Bouton Y : emuNAND\n", L"Druk Ⓨ: emuNAND\n", L"Trykk Ⓨ: emuNAND\n", L"Stisni Ⓨ: emuNAND\n", L"Нажмите Ⓨ: emuNAND\n", L"按 Ⓨ: emuNAND\n", L"按 Ⓨ: emuNAND\n"};
-//static wchar_t* STR_PRESS_B_BACK={L"Press Ⓑ: Back\n", L"Premi Ⓑ: Indietro", L"Pulsa Ⓑ: Volver al menu", L"Bouton B : Retour\n", L"Druk Ⓑ: Terug naar menu\n", L"Trykk Ⓑ: Tilbake\n", L"Stisni Ⓑ: Povratak\n", L"Нажмите Ⓑ: Назад\n", L"按 Ⓑ: 返回\n", L"按 Ⓑ: 返回\n"};
+//static wchar_t* STR_YES[]={L"Yes", L"Si", L"Si", L"Oui", L"Ja", L"Ja", L"Da", L"Да", L"是", L"是", L"Sim"};
+//static wchar_t* STR_NO[]={L"No", L"No", L"No", L"Non", L"Nee", L"Nei", L"Ne", L"Нет", L"否", L"否", L"Não"};
+//static wchar_t* STR_SETTINGS[]={L"           SETTINGS", L"          IMPOSTAZIONI", L"            AJUSTES", L"            OPTIONS", L"          INSTELLINGEN", L"         INNSTILLINGER", L"           Postavke", L"           НАСТРОЙКИ", L"            设置选项", L"            設定選項", L"            OPÇÕES"};
+//static wchar_t* STR_MISSING_THEME_FILES={L" MISSING THEME FILES!   ", L" FILE DEL TEMA MANCANTI!   ", L" NO SE ENCUENTRAN LOS ARCHIVOS DEL TEMA!   ", L" FICHIERS DE THEME MANQUANTS !   ", L" THEMA BESTANDEN ONTBREKEN!   ", L" MANGLER TEMAFILER!   ", L" NEDOSTAJU DATOTEKE TEME!   ", L" ОТСУТСТВУЮТ ФАЙЛЫ ТЕМЫ!   ", L" 找不到主题文件!  ", L" 主題檔案缺失!  ", L" ARQUIVO DE TEMA FALTANDO!   "};
+//static wchar_t* STR_CHOOSE_NAND={L"Choose the NAND you want to use", L"Seleziona la NAND da usare", L"Selecciona una NAND para usar:", L"Choissisez la NAND que vous voulez utiliser :", L"Kies een NAND voor gebruik:", L"Velg hvilken NAND du vil bruke:", L"Izaberi NAND datoteku koju zelite koristiti:", L"Выберите NAND, который хотите использовать", L"请选择要使用的NAND", L"請選擇要使用的NAND", L"Selecione a NAND para iniciar"};
+//static wchar_t* STR_PRESS_X_SYSNAND={L"Press Ⓧ: sysNAND\n", L"Premi Ⓧ: sysNAND\n", L"Pulsa Ⓧ: sysNAND\n", L"Bouton X : sysNAND\n", L"Druk Ⓧ: sysNAND\n", L"Trykk Ⓧ: sysNAND\n", L"Stisni Ⓧ: sysNAND\n", L"Нажмите Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n", L"按 Ⓧ: sysNAND\n", L"Precione Ⓧ: sysNAND\n"};
+//static wchar_t* STR_PRESS_Y_EMUNAND={L"Press Ⓨ: emuNAND\n", L"Press Ⓨ: emuNAND\n", L"Pulsa Ⓨ: emuNAND\n", L"Bouton Y : emuNAND\n", L"Druk Ⓨ: emuNAND\n", L"Trykk Ⓨ: emuNAND\n", L"Stisni Ⓨ: emuNAND\n", L"Нажмите Ⓨ: emuNAND\n", L"按 Ⓨ: emuNAND\n", L"按 Ⓨ: emuNAND\n", L"Precione Ⓨ: emuNAND\n"};
+//static wchar_t* STR_PRESS_B_BACK={L"Press Ⓑ: Back\n", L"Premi Ⓑ: Indietro", L"Pulsa Ⓑ: Volver al menu", L"Bouton B : Retour\n", L"Druk Ⓑ: Terug naar menu\n", L"Trykk Ⓑ: Tilbake\n", L"Stisni Ⓑ: Povratak\n", L"Нажмите Ⓑ: Назад\n", L"按 Ⓑ: 返回\n", L"按 Ⓑ: 返回\n", L"Precione Ⓑ: Voltar"};
