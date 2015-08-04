@@ -1,6 +1,6 @@
 {
 	"LANG_NAME": "Dutch",
-
+	"SETTINGS": "Instellingen",
 	"FORCE_UI_BOOT": "Start in UI            %ls",
 	"SELECTED_THEME": "Selecteer thema     <%3c  >",
 	"SHOW_AGB": "Toon AGB_FIRM BIOS     %ls",
@@ -8,5 +8,12 @@
 	"QUICK_BOOT": "Snel starten           %ls",
 	"CONSOLE_LANGUAGE": "Taal      %16ls",
 	"AUTOBOOT": "AUTOSTART",
-	"HOLD_R": "R ingedrukt houden voor menu"
+	"CHOOSE_NAND": "Kies een NAND voor gebruik",
+	"PRESS_X_SYSNAND": "Ⓧ sysNAND",
+	"PRESS_Y_EMUNAND": "Ⓨ emuNAND",
+	"PRESS_B_BACK": "Ⓑ Terug naar menu",
+	"MISSING_THEME_FILES": "THEMA BESTANDEN ONTBREKEN!", 
+	"HOLD_R": "R ingedrukt houden voor menu",
+	"YES": "Ja",
+	"NO": "Nee"
 }

@@ -29,6 +29,7 @@
 #include "CTRDecryptor.h"
 #include "sdmmc.h"
 #include "stdio.h"
+#include "lang.h"
 
 #define NAND_SIZE 0x3AF00000
 #define NAND_SECTOR_SIZE 0x200
@@ -37,15 +38,11 @@
 
 int NandSwitch(){
 	if(!checkEmuNAND()) return  0; //If No EmuNAND, we force to work on SysNAND
-	ConsoleInit();
-	/* freezes
-	ConsoleSetTitle(STR_CHOOSE_NAND[language]);
-	print(STR_PRESS_X_SYSNAND[language]);
-	print(STR_PRESS_Y_EMUNAND[language]);
-	print(STR_PRESS_B_BACK[language]);
-	*/
-	ConsoleSetTitle(L"Choose the NAND you want to use");
-	print(L"Ⓧ sysNAND\nⓎ emuNAND\nⒷ Cancel\n");
+	print(strings[STR_CHOOSE], strings[STR_NAND]);
+	print(strings[STR_QUERY_BUTTON_ACTION], strings[STR_BUTTON_X], strings[STR_SYSNAND]);
+	print(strings[STR_QUERY_BUTTON_ACTION], strings[STR_BUTTON_Y], strings[STR_EMUNAND]);
+	print(strings[STR_QUERY_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_CANCEL]);
+
 	ConsoleShow();
 	while (true) {
         u32 pad_state = InputWait();
@@ -58,24 +55,31 @@ int NandSwitch(){
 void NandDumper(){
 	File myFile;
 	int isEmuNand = SYS_NAND;
-	if(checkEmuNAND() && (isEmuNand = NandSwitch()) == UNK_NAND) return;
-	isEmuNand--;
 	ConsoleInit();
-	ConsoleSetTitle(L"%sNAND Dumper", isEmuNand ? "emu" : "sys");
+	ConsoleSetTitle(strings[STR_DUMP], strings[STR_NAND]);
+	if(checkEmuNAND() && (isEmuNand = NandSwitch()) == UNK_NAND) return;
+	ConsoleInit();
+	ConsoleSetTitle(strings[STR_DUMP], strings[STR_NAND]);
+	isEmuNand--;
 	unsigned char* buf = (void*)0x21000000;
 	unsigned int nsectors = 0x200;  //sectors in a row
+	wchar_t tmpstr[STR_MAX_LEN];
 	wchar_t ProgressBar[] = L"⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜ ";
 	unsigned int progress = 0;
-/*      int BACKCOLOR = */ConsoleGetBackgroundColor(); //can be removed, left only to keep binaries the same
 	if(FileOpen(&myFile, isEmuNand ? "rxTools/nand/EMUNAND.bin" : "rxTools/nand/NAND.bin", 1)){
-		print(L"Dumping...\n\n");
+		print(strings[STR_DUMPING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND]);
 		ConsoleShow();
 		int x, y;
 		ConsoleGetXY(&x, &y);
 		y += FONT_HEIGHT * 6;
 		x += FONT_HWIDTH * 2;
+//		print("\n%ls\n", ProgressBar);
+//		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_CANCEL]);
+//		ConsoleShow();
+
 		DrawString(BOT_SCREEN, ProgressBar, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-		DrawString(BOT_SCREEN, L"Press Ⓑ anytime to abort", x, y + FONT_HEIGHT*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+		swprintf(tmpstr, STR_MAX_LEN, strings[STR_PRESS_BUTTON_ACTION], strings[BUTTON_B], strings[STR_CANCEL]);
+		DrawString(BOT_SCREEN, tmpstr, x, y + FONT_HEIGHT*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 		for(int count = 0; count < NAND_SIZE/NAND_SECTOR_SIZE/nsectors; count++){
 
@@ -95,28 +99,28 @@ void NandDumper(){
 			FileWrite(&myFile, buf, 0x200, 0);
 		}
 		FileClose(&myFile);
-		print(L"\nFinished dumping!\n");
+		print(strings[STR_COMPLETED]);
 		ConsoleShow();
 	}else{
-		print(L"Failed to create the dump.\n");
+		print(strings[STR_FAILED]);
 		ConsoleShow();
 	}
-	print(L"\nPress Ⓐ to exit\n");
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
 
 void DumpNandPartitions(){
 	int isEmuNand = SYS_NAND;
+	ConsoleInit();
+	ConsoleSetTitle(strings[STR_DUMP], strings[STR_NAND_PARTITIONS]);
 	if(checkEmuNAND() && (isEmuNand = NandSwitch()) == UNK_NAND) return;
 	isEmuNand--;
 	char* p_name[] = { "twln.bin", "twlp.bin", "agb_save.bin", "firm0.bin", "firm1.bin", "ctrnand.bin" };
-	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, 0x2F3E3600};
+	wchar_t* p_descr[] = { strings[STR_TWLN], strings[STR_TWLP], strings[STR_AGB_SAVE], strings[STR_FIRM0], strings[STR_FIRM1], strings[STR_CTRNAND] };
+	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, 0x2F3E3600 };
 	unsigned int p_addr[] = { TWLN, TWLP, AGB_SAVE, FIRM0, FIRM1, CTRNAND };
 	int sect_row = 0x80;
-
-	ConsoleInit();
-	ConsoleSetTitle(L"%sNAND Partitions Decryptor", isEmuNand ? "emu" : "sys");
 
 	char tmp[256];
 	wchar_t wtmp[256];
@@ -124,7 +128,7 @@ void DumpNandPartitions(){
 		File out;
 		sprintf(tmp, "rxTools/nand/%s%s", isEmuNand ? "emu_" : "", p_name[i]);
 		FileOpen(&out, tmp, 1);
-		print(L"Dumping %s ...\n", p_name[i]);
+		print(strings[STR_DUMPING], p_descr[i]);
 		ConsoleShow();
 
 		for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
@@ -141,7 +145,7 @@ void DumpNandPartitions(){
 		}
 		FileClose(&out);
 	}
-	print(L"\nPress Ⓐ to exit\n");
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -156,7 +160,7 @@ void GenerateNandXorpads(){
 	ConsoleShow();
 	CreatePad(&myInfo, 0);
 
-	print(L"\nPress Ⓐ to exit\n");
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -249,7 +253,7 @@ void RebuildNand(){
 			FileClose(&out);
 		}
 	}
-	print(L"\nPress Ⓐ to exit\n");
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }

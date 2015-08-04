@@ -1,0 +1,9 @@
+{
+	"PROGRESS_SPACE": "⬜",
+	"PROGRESS_OK": "⬛",
+	"PROGRESS_FAIL": "✖",
+	"CURSOR": "⮞",
+	"CURSOR_SPACE": "　",
+	"ENABLED": "✔",
+	"DISABLED": "✘"
+}
