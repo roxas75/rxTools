@@ -194,6 +194,9 @@ void SettingsMenuInit(){
 			if (f_readdir(&d, &fno))
 				break;
 
+			if (fno.fname[0] == 0)
+				break;
+
 			if (langs[langNum][0] == 0)
 				strcpy(langs[langNum], fno.fname);
 			else if (!strcmp(langs[langNum], cfgs[CFG_LANG].val.s))
