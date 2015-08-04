@@ -6,14 +6,10 @@
 	"SHOW_AGB": "显示AGB_FIRM BIOS      %ls",
 	"ENABLE_3D_UI": "启用3D界面             %ls",
 	"QUICK_BOOT": "快速启动               %ls",
-	"CONSOLE_LANGUAGE": "界面语言  %16ls",
-	"CHOOSE_NAND": "请选择要使用的NAND",
-	"PRESS_X_SYSNAND": "Ⓧ sysNAND",
-	"PRESS_Y_EMUNAND": "Ⓨ emuNAND",
-	"PRESS_B_BACK": "Ⓑ 返回",
-	"MISSING_THEME_FILES": "找不到主题文件!",
+	"MENU_LANGUAGE": "界面语言  %16ls",
+	"CHOOSE": "请选择要使用的%ls\n",
+	"CANCEL": "返回",
 	"AUTOBOOT": "自动启动",
-	"HOLD_R": "按住R键进入菜单",
 	"YES": "是",
 	"NO": "否"
 }

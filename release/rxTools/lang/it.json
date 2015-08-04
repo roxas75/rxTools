@@ -6,14 +6,11 @@
 	"SHOW_AGB": "Mostra BIOS AGB_FIRM   %ls",
 	"ENABLE_3D_UI": "Attiva UI 3D           %ls",
 	"QUICK_BOOT": "Avvio rapido           %ls",
-	"CONSOLE_LANGUAGE": "Lingua    %16ls",
-	"CHOOSE_NAND": "Seleziona la NAND da usare",
-	"PRESS_X_SYSNAND": "Ⓧ sysNAND",
-	"PRESS_Y_EMUNAND": "Ⓨ emuNAND",
-	"PRESS_B_BACK": "Ⓑ Indietro",
-	"MISSING_THEME_FILES": "FILE DEL TEMA MANCANTI!",
+	"MENU_LANGUAGE": "Lingua    %16ls",
+	"CHOOSE": "Seleziona la %ls:\n",
+	"CANCEL": "indietro",
 	"AUTOBOOT": "AVVIO AUTOMATICO",
-	"HOLD_R": "Tieni premuto R per andare al menu",
+	"HOLD_BUTTON_ACTION": "Tieni premuto %ls per %ls",
 	"YES": "Si",
 	"NO": "No"
 }
