@@ -23,7 +23,7 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  patch.bin
+TARGET 		:=  agb_patch.bin
 BUILD		:=	build
 SOURCE		:=	source
 TOOLS		:=	../../tools
@@ -31,15 +31,13 @@ LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
 
-all: $(BUILD) patch.bin
+all: $(TARGET)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
-arm9payload.bin:
-
-patch.bin: $(BUILD)/080238a8.bin
-	@$(TOOLS)/cfwtool $(BUILD) $(TARGET) a
+$(TARGET): $(BUILD)/080238a8.bin
+	@$(TOOLS)/cfwtool $(dir $<) $@ a
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
 	$(OBJCOPY) -O binary $< $@
@@ -47,7 +45,7 @@ $(BUILD)/%.bin: $(BUILD)/%.elf
 $(BUILD)/%.elf: $(BUILD)/%.o
 	$(LD) -e 0 -Ttext $(<:$(BUILD)/%.o=0x%) $< -o $@
 
-$(BUILD)/080238a8.o: $(SOURCE)/p9_signatures_spoof.s
+$(BUILD)/080238a8.o: $(SOURCE)/p9_signatures_spoof.s $(BUILD)
 	$(AS) $< -o $@
 
 #---------------------------------------------------------------------------------

@@ -32,7 +32,7 @@ unsigned int curSize = 0;
 
 PartitionInfo packInfo;
 
-void LoadPack(){
+int LoadPack(){
 	packInfo.size = FILEPACK_SIZE; packInfo.buffer = FILEPACK_ADDR;
 	File FilePack; FileOpen(&FilePack, "rxTools.dat", 0);
 	curSize = FileRead(&FilePack, FILEPACK_ADDR, FILEPACK_SIZE, FILEPACK_OFF);
@@ -43,10 +43,12 @@ void LoadPack(){
 	for (int i = 0; i < nEntry; i++){
 		Entry[i].off += (int)FILEPACK_ADDR;
 		if (!CheckHash((void*)Entry[i].off, Entry[i].size, Entry[i].hash)){
-			DrawString(TOP_SCREEN, L"rxTools.dat is corrupted!", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, BLACK, WHITE); 		//Who knows, if there is any corruption in our files, we need to stop
-			while (1);
+			DrawString(TOP_SCREEN, L"rxTools.dat is corrupted!", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, BLACK, WHITE);
+			return 1;
 		}
 	}
+
+	return 0;
 }
 
 void SavePack(){
