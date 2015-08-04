@@ -6,14 +6,11 @@
 	"SHOW_AGB": "Toon AGB_FIRM BIOS     %ls",
 	"ENABLE_3D_UI": "Gebruik 3D UI          %ls",
 	"QUICK_BOOT": "Snel starten           %ls",
-	"CONSOLE_LANGUAGE": "Taal      %16ls",
+	"MENU_LANGUAGE": "Taal      %16ls",
 	"AUTOBOOT": "AUTOSTART",
-	"CHOOSE_NAND": "Kies een NAND voor gebruik",
-	"PRESS_X_SYSNAND": "Ⓧ sysNAND",
-	"PRESS_Y_EMUNAND": "Ⓨ emuNAND",
-	"PRESS_B_BACK": "Ⓑ Terug naar menu",
-	"MISSING_THEME_FILES": "THEMA BESTANDEN ONTBREKEN!", 
-	"HOLD_R": "R ingedrukt houden voor menu",
+	"CHOOSE": "Kies een %ls:\n",
+	"CANCEL": "terug",
+	"HOLD_BUTTON_ACTION": "%ls ingedrukt houden voor %ls",
 	"YES": "Ja",
 	"NO": "Nee"
 }
