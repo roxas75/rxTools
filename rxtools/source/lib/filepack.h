@@ -32,7 +32,7 @@ typedef struct{
 	char name[16];
 }PackEntry;
 
-void LoadPack();
+int LoadPack();
 void SavePack();
 void* GetFilePack(char* name);
 PackEntry* GetEntryPack(int filenumber);
