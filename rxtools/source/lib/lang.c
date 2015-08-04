@@ -31,11 +31,19 @@ static const char *keys[STR_NUM] = {
 	[STR_DUMP] = "DUMP",
 	[STR_DUMPING] = "DUMPING",
 	[STR_INJECT] = "INJECT",
+	[STR_DECRYPT] = "DECRYPT",
 	[STR_CHOOSE] = "CHOOSE",
 	[STR_NAND] = "NAND",
 	[STR_SYSNAND] = "SYSNAND",
 	[STR_EMUNAND] = "EMUNAND",
-	[STR_BUTTON_ACTION] = "BUTTON_ACTION",
+	[STR_NAND_PARTITIONS] = "NAND_PARTITIONS",
+	[STR_TWLN] = "TWLN",
+	[STR_TWLP] = "TWLP",
+	[STR_AGB_SAVE] = "AGB_SAVE",
+	[STR_FIRM0] = "FIRM0",
+	[STR_FIRM1] = "FIRM1",
+	[STR_CTRNAND] = "CTRNAND",
+	[STR_QUERY_BUTTON_ACTION] = "QUERY_BUTTON_ACTION",
 	[STR_PRESS_BUTTON_ACTION] = "PRESS_BUTTON_ACTION",
 	[STR_HOLD_BUTTON_ACTION] = "HOLD_BUTTON_ACTION",
 	[STR_BUTTON_A] = "BUTTON_A",
@@ -103,7 +111,7 @@ int loadStrings()
 			s = buf + t[i].start;
 
 			len = t[i].end - t[i].start;
-			if (!memcmp(s, keys[j], len)) {
+			if (!keys[j][len] && !memcmp(s, keys[j], len)) {
 				i++;
 				len = t[i].end - t[i].start;
 				s = buf + t[i].start;
