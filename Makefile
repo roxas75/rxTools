@@ -37,7 +37,7 @@ clean:
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 release: rxTools.dat rxtools/font.bin all-target-brahma all-target-theme rxinstaller.nds
-	@mkdir -p release/mset release/ninjhax
+	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
