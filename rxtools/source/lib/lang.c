@@ -45,10 +45,9 @@ int loadStrings()
 	jsmntok_t t[tokenNum];
 	char buf[1024];
 	jsmn_parser p;
-	unsigned int i, j, k, l;
+	unsigned int i, j, k;
 	const char *s;
-	int r;
-	size_t len;
+	int l, r, len;
 	File fd;
 
 	sprintf(buf, "%s/%s", langPath, cfgs[CFG_LANG].val.s);
@@ -75,18 +74,18 @@ int loadStrings()
 			if (!memcmp(s, keys[j], len)) {
 				i++;
 				len = t[i].end - t[i].start;
-				for (s = buf + t[i].start; len > 0
-					&& l < STR_MAX_LEN; s += k)
-				{
-					k = mbtowc(strings[j][l], s, len);
-					if (k < 0)
+				s = buf + t[i].start;
+				for (k = 0; k + 1 < STR_MAX_LEN && len > 0; k++) {
+					l = mbtowc(strings[j] + k, s, len);
+					if (l < 0)
 						break;
 
-					l++;
-					len -= k;
+					len -= l;
+					s += l;
 				}
 
-				strings[j][l] = 0;
+				strings[j][k] = 0;
+				mbtowc(NULL, NULL, 0);
 				break;
 			}
 		}
