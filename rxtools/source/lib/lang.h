@@ -28,7 +28,7 @@ enum {
 	STR_LANG_RU,
 	STR_LANG_ZH_CN,
 	STR_LANG_ZH_TW,
-	STR_LANG_PT
+	STR_LANG_PT,
 
 	STR_LANG_NUM
 };
@@ -199,7 +199,7 @@ static const struct {
 			[STR_AUTOBOOT] = L"自動引導",
 			[STR_HOLD_R] = L"按住R鈕進入菜單"
 		}
-	},[STR_LANG_ES] = {
+	}, [STR_LANG_PT] = {
 		.code = "pt",
 		.strings = {
 			[STR_LANG_NAME] = L"Português",
