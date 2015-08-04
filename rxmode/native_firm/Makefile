@@ -23,7 +23,7 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  patch.bin
+TARGET 		:=  nat_patch.bin
 BUILD		:=	build
 SOURCE		:=	source
 TOOLS		:=	../../tools
@@ -31,18 +31,16 @@ LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
 
-all: $(BUILD) arm9payload.bin patch.bin
+all: $(TARGET)
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
-arm9payload.bin:
-	@cd source/payload && make
-
-patch.bin: $(BUILD)/0801b564.bin $(BUILD)/0807882c.bin $(BUILD)/0807886c.bin	\
+$(TARGET): $(BUILD)/0801b564.bin $(BUILD)/0807882c.bin $(BUILD)/0807886c.bin	\
 	$(BUILD)/080282f8.bin $(BUILD)/08086140.bin $(BUILD)/08086174.bin	\
 	$(BUILD)/080859ec.bin $(BUILD)/08094454.bin	\
-	$(BUILD)/0805d63c.bin $(BUILD)/080632b8.bin
+	$(BUILD)/0805d63c.bin $(BUILD)/080632b8.bin	\
+	$(BUILD)/0801a4c0.bin
 	@$(TOOLS)/cfwtool $(BUILD) $(TARGET) n
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
@@ -50,6 +48,9 @@ $(BUILD)/%.bin: $(BUILD)/%.elf
 
 $(BUILD)/%.elf: $(BUILD)/%.o
 	$(LD) -e 0 -Ttext $(<:$(BUILD)/%.o=0x%) $< -o $@
+
+$(BUILD)/0801a4c0.bin: $(BUILD)
+	@cd source/payload && make
 
 $(BUILD)/0801b564.o: $(SOURCE)/k9_fix_flags.s $(BUILD)
 	$(AS) $< -o $@

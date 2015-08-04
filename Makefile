@@ -17,7 +17,8 @@ CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
 tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/font_tool
-RXMODE_TARGETS = rxmode/nat_patch.bin rxmode/agb_patch.bin rxmode/twl_patch.bin
+RXMODE_TARGETS = rxmode/native_firm/nat_patch.bin rxmode/agb_firm/agb_patch.bin	\
+	rxmode/twl_firm/twl_patch.bin
 DATA_FILES := $(wildcard data/*.*) data/reboot/reboot.bin $(RXMODE_TARGETS)
 
 all: rxTools.dat
@@ -29,7 +30,9 @@ distclean: clean
 .PHONY: clean
 clean:
 	@$(MAKE) -C rxtools clean
-	@$(MAKE) -C rxmode clean
+	@$(MAKE) -C rxmode/native_firm clean
+	@$(MAKE) -C rxmode/agb_firm clean
+	@$(MAKE) -C rxmode/twl_firm clean
 	@$(MAKE) -C brahma clean
 	@$(MAKE) -C theme clean
 	@$(MAKE) -C rxinstaller clean
@@ -37,7 +40,7 @@ clean:
 	@rm -f $(tools) payload.bin data.bin rxTools.dat
 
 release: rxTools.dat rxtools/font.bin all-target-brahma all-target-theme rxinstaller.nds
-	@mkdir -p release/mset release/ninjhax
+	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
@@ -56,7 +59,7 @@ rxTools.dat: rxtools/rxtools.bin data.bin
 	@dd if=data.bin of=$@ seek=2K conv=notrunc
 
 rxinstaller.nds:
-	@$(MAKE) -C rxinstaller $@
+	@$(MAKE) -C rxinstaller
 
 all-target-brahma:
 	$(MAKE) -C brahma
