@@ -1,42 +1,37 @@
 export PATH	:= $(DEVKITARM)/bin:$(PATH)
 
-CC=arm-none-eabi-gcc
-LD=arm-none-eabi-ld
+AS	:= arm-none-eabi-as
+CC	:= arm-none-eabi-gcc
+LD	:= arm-none-eabi-ld
+OC	:= arm-none-eabi-objcopy
 
-INCLUDES=-I../include
-DEFINES=
+CFLAGS	:= -fshort-wchar -fomit-frame-pointer -std=gnu99 -Os -g -march=armv6k -mtune=mpcore -I../include
+LDFLAGS	:= -T crs.ld
+OCFLAGS	:= -R .compat
 
-ARCH=-march=armv6k -mtune=mpcore -mlittle-endian
-CFLAGS=-fshort-wchar -fomit-frame-pointer -ffast-math -std=gnu99 -Os -ffunction-sections -g -mword-relocations $(ARCH) $(INCLUDES) $(DEFINES)
-LDFLAGS=-nostartfiles --specs=crs.specs -Wl,-gc-sections $(ARCH)
-OBJCOPY=arm-none-eabi-objcopy
-OCFLAGS=-R .compat
-
-OBJS=$(patsubst src/%.c, obj/%.o, $(wildcard src/*.c))
-OBJS+=$(patsubst src/%.s, obj/%.o, $(wildcard src/*.s))
-
-OUT_DIR=obj
+BUILD	:= build
+SOURCE	:= source
+OBJS	:= $(patsubst $(SOURCE)/%.c, $(BUILD)/%.o, $(wildcard $(SOURCE)/*.c))	\
+	$(patsubst $(SOURCE)/%.s, $(BUILD)/%.o, $(wildcard $(SOURCE)/*.s))
 
 all: code.bin
 
-obj/%.o: src/%.c | dirs
+$(BUILD)/%.o: $(SOURCE)/%.c $(BUILD)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-obj/%.o: src/%.s | dirs
-	$(CC) -x assembler-with-cpp $(ARCH) -c $^ -o $@
+$(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
+	$(AS) $(ARCH) -c $< -o $@
 
 code.elf: $(OBJS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(LD) -o $@ $^ $(LDFLAGS)
 
 code.bin: code.elf
-	$(OBJCOPY) $(OCFLAGS) -O binary $^ $@
+	$(OC) $(OCFLAGS) -O binary $^ $@
 
-dirs: ${OUT_DIR}
-
-${OUT_DIR}:
-	mkdir -p ${OUT_DIR}
+$(BUILD):
+	mkdir -p $(BUILD)
 
 .PHONY: clean
 
 clean:
-	rm -rf *~ obj *.elf *.bin
+	rm -rf *~ $(BUILD) *.elf *.bin

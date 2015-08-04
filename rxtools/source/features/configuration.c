@@ -450,7 +450,7 @@ void trySetLangFromTheme(){
 	{
 		FileRead(&MyFile, cfgs[CFG_LANG].val.s, CFG_STR_MAX_LEN, 0);
 
-		for (i = 0; i < CFG_STR_MAX_LEN
+		for (i = 0; i + 1 < CFG_STR_MAX_LEN
 			&& cfgs[CFG_LANG].val.s[i] != '\r'
 			&& cfgs[CFG_LANG].val.s[i] != '\n'; i++);
 		str[i] = 0;
