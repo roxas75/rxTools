@@ -6,14 +6,11 @@
 	"SHOW_AGB": "Vis AGB_FIRM BIOS      %ls",
 	"ENABLE_3D_UI": "Aktiver UI i 3D        %ls",
 	"QUICK_BOOT": "Rask oppstart          %ls",
-	"CONSOLE_LANGUAGE": "Sprak     %16ls",
-	"CHOOSE_NAND": "Velg hvilken NAND du vil bruke",
-	"PRESS_X_SYSNAND": "Ⓧ sysNAND",
-	"PRESS_Y_EMUNAND": "Ⓨ emuNAND",
-	"PRESS_B_BACK": "Ⓑ Tilbake",
-	"MISSING_THEME_FILES": "MANGLER TEMAFILER!",
+	"MENU_LANGUAGE": "Sprak     %16ls",
+	"CHOOSE": "Velg %ls\n",
+	"CANCEL": "tilbake",
 	"AUTOBOOT": "AUTOMATISK OPPSTART",
-	"HOLD_R": "Hold R for å gå til menyen",
+	"HOLD_BUTTON_ACTION": "Hold %ls for %ls\n",
 	"YES": "Ja",
 	"NO": "Nei"
 }
