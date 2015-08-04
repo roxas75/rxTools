@@ -34,29 +34,43 @@
 #define FONT_ADDRESS	(void*)0x27E00000
 extern unsigned char *fontaddr;
 
-void LoadFont(){
+int LoadFont(){
 	File MyFile;
 	if (FileOpen(&MyFile, "/rxTools/font.bin", 0))
 	{
 		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
 		fontaddr = FONT_ADDRESS;
+		return 0;
 	}else{
-		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+		return 1;
 	}
 }
 
-void Initialize(){
+int Initialize()
+{
 	char str[100];
 	char strl[100];
 	char strr[100];
+	int r;
+
 	DrawString(BOT_SCREEN, L"INITIALIZE...", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
+
 	if(FSInit()){
 		DrawString(BOT_SCREEN, L"LOADING...   ", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 	}else{
 		DrawString(BOT_SCREEN, L"ERROR!       ", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+		return 1;
 	}
-	LoadFont();
-	LoadPack();
+
+	r = LoadFont();
+	if (r) {
+		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+		return r;
+	}
+
+	r = LoadPack();
+	if (r)
+		return r;
 
 	//Console Stuff
 	ConsoleSetXY(15, 20);
@@ -72,7 +86,12 @@ void Initialize(){
 	f_mkdir("rxTools/nand");
 	InstallConfigData();
 	readCfg();
-	setLangByCode(cfgs[CFG_LANG].val.s);
+
+	r = loadStrings();
+	if (r) {
+		DrawString(BOT_SCREEN, L"Language load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+		return r;
+	}
 
 	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
 	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
@@ -116,10 +135,14 @@ rxTools_boot:
 		DrawTopSplash(str, strl, strr);
 	else
 		DrawTopSplash(str, str, str);
+
+	return 0;
 }
 
 int main(){
-	Initialize();
+	if (Initialize())
+		while (1);
+
 	//7.X Keys stuff
 	File KeyFile;
 	if(FileOpen(&KeyFile, "/slot0x25KeyX.bin", 0)){

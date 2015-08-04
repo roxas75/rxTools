@@ -1,0 +1,12 @@
+{
+	"LANG_NAME": "French",
+
+	"FORCE_UI_BOOT": "Forcer demarrage UI    %ls",
+	"SELECTED_THEME": "Theme choisi        <%3c  >",
+	"SHOW_AGB": "Activer AGB_FIRM       %ls",
+	"ENABLE_3D_UI": "Activer UI 3D          %ls",
+	"QUICK_BOOT": "Demarrage rapide       %ls",
+	"CONSOLE_LANGUAGE": "Langage   %16ls",
+	"AUTOBOOT": "DÉMARRAGE AUTOMATIQUE",
+	"HOLD_R": "Maintenir le bouton R pour accéder au menu"
+}

@@ -1,0 +1,12 @@
+{
+	"LANG_NAME": "English",
+
+	"FORCE_UI_BOOT": "Force UI boot          %ls",
+	"SELECTED_THEME": "Selected theme      <%3c  >",
+	"SHOW_AGB": "Show AGB_FIRM BIOS     %ls",
+	"ENABLE_3D_UI": "Enable 3D UI           %ls",
+	"QUICK_BOOT": "Quick boot             %ls",
+	"CONSOLE_LANGUAGE": "Language  %16ls",
+	"AUTOBOOT": "AUTOBOOT",
+	"HOLD_R": "Hold R to go to the menu"
+}

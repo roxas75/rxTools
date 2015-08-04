@@ -1,0 +1,12 @@
+{
+	"LANG_NAME": "Russian",
+
+	"FORCE_UI_BOOT": "Загружать UI           %ls",
+	"SELECTED_THEME": "Выбранная тема      <%3c  >",
+	"SHOW_AGB": "Показывать AGB_FIRM    %ls",
+	"ENABLE_3D_UI": "Включить 3D UI         %ls",
+	"QUICK_BOOT": "Быстрая загрузка       %ls",
+	"CONSOLE_LANGUAGE": "Язык      %16ls",
+	"AUTOBOOT": "АВТОЗАГРУЗКА",
+	"HOLD_R": "Удерживайте R для перехода в меню"
+}
