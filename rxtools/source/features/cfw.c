@@ -162,14 +162,17 @@ void rxModeQuickBoot(){
 }
 
 //Just patches signatures check, loads in sysnand
-void DevMode(){
+void DevMode(){	
+	/*DevMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
+
+	u8* firm = (void*)0x24000000;
+	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
+	if (strncmp((char*)firm, "FIRM", 4))
+		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
+
 	if(Platform_CheckUnit() == PLATFORM_3DS)
 	{
-		u8* firm = (void*)0x24000000;
-		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
-		if (strncmp((char*)firm, "FIRM", 4))
-			nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
-
+		//o3ds patches
 		unsigned char sign1[] = { 0xC1, 0x17, 0x49, 0x1C, 0x31, 0xD0, 0x68, 0x46, 0x01, 0x78, 0x40, 0x1C, 0x00, 0x29, 0x10, 0xD1 };
 		unsigned char sign2[] = { 0xC0, 0x1C, 0x76, 0xE7, 0x20, 0x00, 0x74, 0xE7, 0x22, 0xF8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F };
 		unsigned char patch1[] = { 0x00, 0x20, 0x4E, 0xB0, 0x70, 0xBD };
@@ -182,8 +185,17 @@ void DevMode(){
 			if (!memcmp(firm + i, sign2, 16)){
 				memcpy(firm + i, patch2, 2);
 			}
-		}
-		memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
-		_softreset();
+		}		
 	}
+	else
+	{
+		//new 3ds patches
+		u8 patch1[] = { 0x6D, 0x20, 0xCE, 0x77 };
+		u8 patch2[] = { 0x5A, 0xC5, 0x73, 0xC1 };
+		memcpy((u32*)0x08052FD8, patch1, 4);
+		memcpy((u32*)0x08058804, patch2, 4);
+	}
+
+	memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
+		_softreset();
 }
