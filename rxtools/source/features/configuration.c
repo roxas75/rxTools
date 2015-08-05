@@ -246,6 +246,9 @@ int readCfg()
 }
 
 int InstallData(char* drive){
+	static const FirmInfo native_info = { 0x66000, 0x84A00, 0x08006800, 0x35000, 0x31000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000};
+	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
+	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
 	FIL firmfile;
 	wchar_t *progressbar = L"⬜⬜⬜⬜⬜⬜⬜";
 	wchar_t *progress = progressbar+0;
@@ -265,7 +268,7 @@ int InstallData(char* drive){
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
 	u8* n_firm_patch = GetFilePack("nat_patch.bin");
-	applyPatch(n_firm, n_firm_patch);
+	applyPatch(n_firm, n_firm_patch, &native_info);
 	u8 keyx[16] = {0};
 	if(GetSystemVersion() < 3){
 		if (!FileOpen(&tempfile, KEYFILENAME, 0))
@@ -310,7 +313,7 @@ int InstallData(char* drive){
 	}
 
 	if(a_firm){
-		applyPatch(a_firm, a_firm_patch);
+		applyPatch(a_firm, a_firm_patch, &agb_info);
 		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
@@ -341,7 +344,7 @@ int InstallData(char* drive){
 		FileClose(&tempfile);
 		a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
 		if(a_firm){
-			applyPatch(a_firm, a_firm_patch);
+			applyPatch(a_firm, a_firm_patch, &agb_info);
 			sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
 			if(FileOpen(&tempfile, tmpstr, 1)){
 				FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
@@ -362,7 +365,7 @@ int InstallData(char* drive){
 	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	u8* t_firm_patch = GetFilePack("twl_patch.bin");
 	if(t_firm){
-		applyPatch(t_firm, t_firm_patch);
+		applyPatch(t_firm, t_firm_patch, &twl_info);
 		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, t_firm, TWL_SIZE, 0);

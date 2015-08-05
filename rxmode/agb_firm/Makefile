@@ -37,7 +37,7 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
 $(TARGET): $(BUILD)/080238a8.bin
-	@$(TOOLS)/cfwtool $(dir $<) $@ a
+	@$(TOOLS)/cfwtool $(dir $<) $@
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
 	$(OBJCOPY) -O binary $< $@
