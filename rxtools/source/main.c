@@ -27,7 +27,6 @@
 #include "draw.h"
 #include "hid.h"
 #include "screenshot.h"
-#include "filepack.h"
 #include "cfw.h"
 #include "configuration.h"
 
@@ -66,10 +65,6 @@ int Initialize()
 		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
 		return r;
 	}
-
-	r = LoadPack();
-	if (r)
-		return r;
 
 	//Console Stuff
 	ConsoleSetXY(15, 20);

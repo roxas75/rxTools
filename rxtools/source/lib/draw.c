@@ -23,7 +23,6 @@
 #include "fs.h"
 #include "font.h"
 #include "draw.h"
-#include "filepack.h"
 
 u32 current_y = 1;
 

@@ -23,7 +23,7 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  agb_patch
+TARGET 		:=  agb_firm
 BUILD		:=	build
 SOURCE		:=	source
 LD		:=	arm-none-eabi-ld
