@@ -47,17 +47,15 @@ FILES       := data/titlekey.bin data/reboot.bin data/patch.bin data/SplashScree
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2\
-			-march=armv5te -mtune=arm946e-s -fomit-frame-pointer\
-			-ffast-math -std=c99\
-			$(ARCH)
+CFLAGS	:=	-g -Wall -O2 -mtune=arm946e-s -fomit-frame-pointer -ffast-math	\
+		-std=c99 $(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM9
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
 ASFLAGS	:=	-g $(ARCH)
-LDFLAGS	=	-nostartfiles -g --specs=../stub.specs $(ARCH) -Wl,-Map,$(TARGET).map
+LDFLAGS	=	-nostartfiles -g $(ARCH) -Wl,-T../stub.ld,-Map,$(TARGET).map
 
 LIBS	:=
 
@@ -123,21 +121,9 @@ source/lib/font.h: font.bin
 font.bin: unifont-8.0.01.bmp
 	@convert -crop 4096x4096+32+64 -depth 1 -negate $< gray:$@;
 
-unifont-8.0.01.bmp:
-	@echo open mirrorcatalogs.com >ftp.txt
-	@echo anonymous >>ftp.txt
-	@echo >>ftp.txt
-	@echo cd /gnu/unifont/unifont-8.0.01 >>ftp.txt
-	@echo get $@ >>ftp.txt
-	@echo bye >>ftp.txt
-	@(test -s $(DEVKITPRO)/msys/bin/ftp.exe && (cat ftp.txt | ftp.exe)) || (cat ftp.txt | ftp)
-	@rm ftp.txt
-
 $(BUILD): source/lib/font.h
 	@[ -d $@ ] || mkdir -p $@
 	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-
-	@rm -fr $(OUTPUT).elf
 
 #---------------------------------------------------------------------------------
 clean:
