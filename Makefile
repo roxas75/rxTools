@@ -23,7 +23,7 @@ all: rxTools.dat
 
 .PHONY: distclean
 distclean: clean
-	@rm -rf release/rxTools.dat release/ninjhax release/mset
+	@rm -rf release/rxTools.dat release/ninjhax release/mset release/rxTools/system release/rxTools/theme release/*.pdf
 
 .PHONY: clean
 clean:
@@ -31,6 +31,7 @@ clean:
 	@$(MAKE) -C rxmode/native_firm clean
 	@$(MAKE) -C rxmode/agb_firm clean
 	@$(MAKE) -C rxmode/twl_firm clean
+	@$(MAKE) -C reboot clean
 	@$(MAKE) -C brahma clean
 	@$(MAKE) -C theme clean
 	@$(MAKE) -C rxinstaller clean
@@ -72,7 +73,7 @@ all-target-brahma:
 	$(MAKE) -C brahma
 
 reboot/reboot.bin:
-	$(MAKE) -C $(dir $@) $(notdir $@)
+	$(MAKE) -C $(dir $@)
 
 $(RXMODE_TARGETS):
 	$(MAKE) -C $(dir $@) $(notdir $@)
