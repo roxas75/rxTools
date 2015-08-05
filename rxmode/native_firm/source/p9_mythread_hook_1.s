@@ -15,6 +15,7 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ p9 mythread hook
+.section .patch.p9.mythread.ldr, "a"
 .arm
 .align 2
 

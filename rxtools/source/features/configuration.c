@@ -267,7 +267,7 @@ int InstallData(char* drive){
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
-	u8* n_firm_patch = GetFilePack("nat_patch.bin");
+	u8* n_firm_patch = GetFilePack("nat_patch.elf");
 	applyPatch(n_firm, n_firm_patch, &native_info);
 	u8 keyx[16] = {0};
 	if(GetSystemVersion() < 3){
@@ -305,7 +305,7 @@ int InstallData(char* drive){
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
 	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
-	u8* a_firm_patch = GetFilePack("agb_patch.bin");
+	u8* a_firm_patch = GetFilePack("agb_patch.elf");
 	if (!a_firm && checkEmuNAND())
 	{
 		/* Try to get the Title Key from the EmuNAND */
@@ -363,7 +363,7 @@ int InstallData(char* drive){
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
 	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
-	u8* t_firm_patch = GetFilePack("twl_patch.bin");
+	u8* t_firm_patch = GetFilePack("twl_patch.elf");
 	if(t_firm){
 		applyPatch(t_firm, t_firm_patch, &twl_info);
 		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);

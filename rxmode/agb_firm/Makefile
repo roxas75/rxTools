@@ -23,32 +23,28 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  agb_patch.bin
+TARGET 		:=  agb_patch
 BUILD		:=	build
 SOURCE		:=	source
-TOOLS		:=	../../tools
 LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
 
-all: $(TARGET)
+all: $(TARGET).elf
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
-$(TARGET): $(BUILD)/080238a8.bin
-	@$(TOOLS)/cfwtool $(dir $<) $@
+%.elf: %_unstrip.elf
+	$(STRIP) $< -o $@
 
-$(BUILD)/%.bin: $(BUILD)/%.elf
-	$(OBJCOPY) -O binary $< $@
+$(TARGET)_unstrip.elf: $(BUILD)/p9_signatures_spoof.o
+	$(LD) -i -Tscript.ld $^ -o $@
 
-$(BUILD)/%.elf: $(BUILD)/%.o
-	$(LD) -e 0 -Ttext $(<:$(BUILD)/%.o=0x%) $< -o $@
-
-$(BUILD)/080238a8.o: $(SOURCE)/p9_signatures_spoof.s $(BUILD)
+$(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@
 
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET) *.bin
+	@rm -fr $(BUILD) $(TARGET)_unstrip.elf $(TARGET).elf
