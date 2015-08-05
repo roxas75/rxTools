@@ -16,9 +16,8 @@
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
-tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/font_tool
-RXMODE_TARGETS = rxmode/native_firm/nat_patch.bin rxmode/agb_firm/agb_patch.bin	\
-	rxmode/twl_firm/twl_patch.bin
+RXMODE_TARGETS = rxmode/native_firm/native_firm.elf rxmode/agb_firm/agb_firm.elf	\
+	rxmode/twl_firm/twl_firm.elf
 DATA_FILES := $(wildcard data/*.*) data/reboot/reboot.bin $(RXMODE_TARGETS)
 
 all: rxTools.dat
@@ -37,26 +36,35 @@ clean:
 	@$(MAKE) -C theme clean
 	@$(MAKE) -C rxinstaller clean
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
-	@rm -f $(tools) payload.bin data.bin rxTools.dat
+	@rm -f payload.bin rxTools.dat
 
-release: rxTools.dat rxtools/font.bin all-target-brahma all-target-theme rxinstaller.nds
+release: rxTools.dat rxtools/font.bin data/reboot/reboot.bin $(RXMODE_TARGETS)	\
+	all-target-brahma all-target-theme rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
 	@cp rxinstaller.nds release/mset/rxinstaller.nds
 
+	@mkdir -p release/rxTools/system release/rxTools/theme
+
 	@mkdir -p release/rxTools/theme/0
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
-	@cp rxtools/font.bin release/rxTools
+
+	@cp rxtools/font.bin release/rxTools/system
+	@cp data/reboot/reboot.bin release/rxTools/system
+
+	@mkdir -p release/rxTools/system/patches
+	@cp rxmode/native_firm/native_firm.elf release/rxTools/system/patches
+	@cp rxmode/agb_firm/agb_firm.elf release/rxTools/system/patches
+	@cp rxmode/twl_firm/twl_firm.elf release/rxTools/system/patches
 
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
 
-rxTools.dat: rxtools/rxtools.bin data.bin
+rxTools.dat: rxtools/rxtools.bin
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax bigpayload
 	@dd if=rxtools/rxtools.bin of=$@ seek=272 conv=notrunc
-	@dd if=data.bin of=$@ seek=2K conv=notrunc
 
 rxinstaller.nds:
 	@$(MAKE) -C rxinstaller
@@ -64,16 +72,13 @@ rxinstaller.nds:
 all-target-brahma:
 	$(MAKE) -C brahma
 
-data.bin: tools/pack_tool $(DATA_FILES)
-	@tools/pack_tool $(DATA_FILES) $@
-
 data/reboot/reboot.bin:
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
-$(RXMODE_TARGETS): tools/cfwtool
+$(RXMODE_TARGETS):
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
-rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
+rxtools/rxtools.bin:
 	@$(MAKE) -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
@@ -82,8 +87,5 @@ all-target-theme:
 	@$(MAKE) -C theme
 
 .PHONY: rxtools/font.bin
-rxtools/font.bin: tools/font_tool
+rxtools/font.bin:
 	@$(MAKE) -C $(dir $@) $(notdir $@)
-
-$(tools): tools/%: tools/toolsrc/%/main.c
-	$(LINK.c) $(OUTPUT_OPTION) $^

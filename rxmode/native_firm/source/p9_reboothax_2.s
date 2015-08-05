@@ -15,6 +15,7 @@
 
 //----------------- REBOOT FUNCTION ----------------
 .equ buffer,        0x24000000
+.section .patch.p9.reboot.body, "a"
 .arm
 .align 2
 

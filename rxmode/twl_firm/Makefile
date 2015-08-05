@@ -8,32 +8,27 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  twl_patch.bin
+TARGET 		:=  twl_firm
 BUILD		:=	build
 SOURCE		:=	source
-TOOLS		:=	../../tools
 LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
 
-all: $(TARGET)
+all: $(TARGET).elf
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
-	
-$(TARGET): $(BUILD)/080238c0.bin
-	@$(TOOLS)/cfwtool $(BUILD) $(TARGET) t
 
-$(BUILD)/%.bin: $(BUILD)/%.elf
-	$(OBJCOPY) -O binary $< $@
+%.elf: %_unstrip.elf
+	$(STRIP) $< -o $@
 
-$(BUILD)/%.elf: $(BUILD)/%.o
-	$(LD) -e 0 -Ttext $(<:$(BUILD)/%.o=0x%) $< -o $@
+$(TARGET)_unstrip.elf: $(BUILD)/p9_signatures_spoof.o
+	$(LD) -i -Tscript.ld $^ -o $@
 
-$(BUILD)/080238c0.o: $(SOURCE)/p9_signatures_spoof.s $(BUILD)
+$(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET) *.bin
- 
+	@rm -fr $(BUILD) $(TARGET)_unstrip.elf $(TARGET).elf

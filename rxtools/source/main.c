@@ -27,16 +27,14 @@
 #include "draw.h"
 #include "hid.h"
 #include "screenshot.h"
-#include "filepack.h"
 #include "cfw.h"
 #include "configuration.h"
 
 #define FONT_ADDRESS	(void*)0x27E00000
-extern unsigned char *fontaddr;
 
 int LoadFont(){
 	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/font.bin", 0))
+	if (FileOpen(&MyFile, "/rxTools/system/font.bin", 0))
 	{
 		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
 		fontaddr = FONT_ADDRESS;
@@ -67,10 +65,6 @@ int Initialize()
 		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
 		return r;
 	}
-
-	r = LoadPack();
-	if (r)
-		return r;
 
 	//Console Stuff
 	ConsoleSetXY(15, 20);
