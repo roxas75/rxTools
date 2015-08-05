@@ -8,7 +8,7 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  twl_patch
+TARGET 		:=  twl_firm
 BUILD		:=	build
 SOURCE		:=	source
 LD		:=	arm-none-eabi-ld

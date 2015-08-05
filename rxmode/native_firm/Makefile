@@ -23,7 +23,7 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  nat_patch
+TARGET 		:=  native_firm
 BUILD		:=	build
 SOURCE		:=	source
 LD		:=	arm-none-eabi-ld
