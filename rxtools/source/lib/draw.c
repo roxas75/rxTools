@@ -28,7 +28,7 @@
 u32 current_y = 1;
 
 u8 *tmpscreen = (u8*)0x26000000;
-const u8 *fontaddr = font;
+const u8 (* fontaddr)[FONT_HEIGHT][CHAR_COLUMNS][FONT_WIDTH / 8] = (void *)font;
 
 void ClearScreen(u8 *screen, u32 color)
 {
@@ -63,8 +63,9 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 		u8 b;
 	} fore, back;
 	u8 (* pScreen)[SCREEN_HEIGHT][BYTES_PER_PIXEL];
-	u16 charVal, *pChar, *pCharEnd;
-	u32 fontY;
+	u8 charVal, i;
+	u32 fontX, fontY;
+	div_t charDiv;
 
 	if (SCREEN_WIDTH < x + FONT_WIDTH || y < FONT_HEIGHT)
 		return;
@@ -81,31 +82,36 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 
 	pScreen = screen;
 
-	pChar = (u16 *)fontaddr + character * FONT_WIDTH;
-	pCharEnd = pChar + FONT_WIDTH;
-	while (pChar != pCharEnd) {
-		charVal = *pChar;
-		pChar++;
+	charDiv = div(character, CHAR_COLUMNS);
+	fontY = FONT_HEIGHT;
+	while (fontY > 0) {
+		fontY--;
+		i = 0;
 
-		for (fontY = 0; fontY < FONT_HEIGHT; fontY++) {
-			if (charVal & 1) {
+		for (fontX = 0; fontX < FONT_WIDTH; fontX++) {
+			if (fontX == 0 || fontX % 8 == 0) {
+				charVal = fontaddr[charDiv.quot][fontY][charDiv.rem][i];
+				i++;
+			}
+
+			if (charVal & 0x80) {
 				if (fore.a) {
-					pScreen[x][SCREEN_HEIGHT - (y - fontY)][0] = fore.b;
-					pScreen[x][SCREEN_HEIGHT - (y - fontY)][1] = fore.g;
-					pScreen[x][SCREEN_HEIGHT - (y - fontY)][2] = fore.r;
+					pScreen[x + fontX][SCREEN_HEIGHT - y][0] = fore.b;
+					pScreen[x + fontX][SCREEN_HEIGHT - y][1] = fore.g;
+					pScreen[x + fontX][SCREEN_HEIGHT - y][2] = fore.r;
 				}
 			} else {
 				if (back.a) {
-					pScreen[x][SCREEN_HEIGHT - (y - fontY)][0] = back.b;
-					pScreen[x][SCREEN_HEIGHT - (y - fontY)][1] = back.g;
-					pScreen[x][SCREEN_HEIGHT - (y - fontY)][2] = back.r;
+					pScreen[x + fontX][SCREEN_HEIGHT - y][0] = back.b;
+					pScreen[x + fontX][SCREEN_HEIGHT - y][1] = back.g;
+					pScreen[x + fontX][SCREEN_HEIGHT - y][2] = back.r;
 				}
 			}
 
-			charVal >>= 1;
+			charVal <<= 1;
 		}
 
-		x++;
+		y--;
 	}
 }
 

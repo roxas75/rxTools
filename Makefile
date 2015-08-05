@@ -16,7 +16,7 @@
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
-tools = tools/pack_tool tools/font_tool
+tools = tools/pack_tool
 RXMODE_TARGETS = rxmode/native_firm/nat_patch.elf rxmode/agb_firm/agb_patch.elf	\
 	rxmode/twl_firm/twl_patch.elf
 DATA_FILES := $(wildcard data/*.*) data/reboot/reboot.bin $(RXMODE_TARGETS)
@@ -73,7 +73,7 @@ data/reboot/reboot.bin:
 $(RXMODE_TARGETS):
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
-rxtools/rxtools.bin: tools/font_tool
+rxtools/rxtools.bin:
 	@$(MAKE) -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
@@ -82,7 +82,7 @@ all-target-theme:
 	@$(MAKE) -C theme
 
 .PHONY: rxtools/font.bin
-rxtools/font.bin: tools/font_tool
+rxtools/font.bin:
 	@$(MAKE) -C $(dir $@) $(notdir $@)
 
 $(tools): tools/%: tools/toolsrc/%/main.c
