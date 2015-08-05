@@ -41,7 +41,7 @@ $(TARGET): $(BUILD)/0801b564.bin $(BUILD)/0807882c.bin $(BUILD)/0807886c.bin	\
 	$(BUILD)/080859ec.bin $(BUILD)/08094454.bin	\
 	$(BUILD)/0805d63c.bin $(BUILD)/080632b8.bin	\
 	$(BUILD)/0801a4c0.bin
-	@$(TOOLS)/cfwtool $(BUILD) $(TARGET) n
+	@$(TOOLS)/cfwtool $(BUILD) $(TARGET)
 
 $(BUILD)/%.bin: $(BUILD)/%.elf
 	$(OBJCOPY) -O binary $< $@

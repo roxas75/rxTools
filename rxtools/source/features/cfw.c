@@ -55,11 +55,30 @@ void firmlaunch(u8* firm){
 	_softreset();
 }
 
-void applyPatch(unsigned char* file, unsigned char* patch){
+static unsigned int addrToOff(uintptr_t addr, const FirmInfo *info)
+{
+	if (addr >= info->arm9Entry && addr <= info->arm9Entry + info->p9Off)
+		return info->arm9Off + (addr - info->arm9Entry);
+
+	if (addr >= info->p9Entry && addr <= info->p9Entry + info->arm9Size - info->p9Start)
+		return info->arm9Off + (addr - info->p9Entry) + info->p9Start;
+
+	if (addr >= info->arm11Entry && addr <= info->arm11Entry + info->arm11Size)
+		return info->arm11Off + (addr - info->arm11Entry);
+
+	return 0;
+}
+
+void applyPatch(unsigned char* file, unsigned char* patch, const FirmInfo *info)
+{
 	unsigned int ndiff = *((unsigned int*)patch); patch += 4;
 	for(int i = 0; i < ndiff; i++){
-		unsigned int off = *((unsigned int*)patch); patch += 4;
-		unsigned int len = *((unsigned int*)patch); patch += 4;
+		unsigned int off = addrToOff(*((uint32_t *)patch), info); patch += 4;
+		if (off == 0)
+			continue;
+
+		unsigned int len = *((uint32_t *)patch); patch += 4;
+
 		if(1){
 			for(int j = 0; j < len; j++){
 				*(file + j + off) = *patch++;
@@ -67,7 +86,7 @@ void applyPatch(unsigned char* file, unsigned char* patch){
 		}else{
 			patch += len;
 		}
-		while(((unsigned int)patch % 4)!= 0) patch++;
+		while(((uintptr_t)patch % sizeof(uint32_t))!= 0) patch++;
 	}
 }
 
