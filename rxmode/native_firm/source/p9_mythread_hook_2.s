@@ -19,6 +19,6 @@
 .arm
 .align 2
 
-	.word 0x0801A6E0	//This is our CreateThread code address, we'll compile it with gcc
+	.word CreateMyThread
 
 .pool

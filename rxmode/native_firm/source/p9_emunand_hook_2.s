@@ -19,7 +19,7 @@
 .thumb
 .align 2
 
-	ldr r4, =0x0801A5B0
+	ldr r4, =EMUNAND_READ
 	bx r4
 
 .pool
