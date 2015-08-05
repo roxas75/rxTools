@@ -18,7 +18,6 @@ CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
 RXMODE_TARGETS = rxmode/native_firm/native_firm.elf rxmode/agb_firm/agb_firm.elf	\
 	rxmode/twl_firm/twl_firm.elf
-DATA_FILES := $(wildcard data/*.*) data/reboot/reboot.bin $(RXMODE_TARGETS)
 
 all: rxTools.dat
 
@@ -38,7 +37,7 @@ clean:
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
 	@rm -f payload.bin rxTools.dat
 
-release: rxTools.dat rxtools/font.bin data/reboot/reboot.bin $(RXMODE_TARGETS)	\
+release: rxTools.dat rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 	all-target-brahma all-target-theme rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp rxTools.dat release
@@ -53,7 +52,7 @@ release: rxTools.dat rxtools/font.bin data/reboot/reboot.bin $(RXMODE_TARGETS)	\
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
 
 	@cp rxtools/font.bin release/rxTools/system
-	@cp data/reboot/reboot.bin release/rxTools/system
+	@cp reboot/reboot.bin release/rxTools/system
 
 	@mkdir -p release/rxTools/system/patches
 	@cp rxmode/native_firm/native_firm.elf release/rxTools/system/patches
@@ -72,7 +71,7 @@ rxinstaller.nds:
 all-target-brahma:
 	$(MAKE) -C brahma
 
-data/reboot/reboot.bin:
+reboot/reboot.bin:
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
 $(RXMODE_TARGETS):
