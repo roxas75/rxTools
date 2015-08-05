@@ -32,7 +32,6 @@
 #include "configuration.h"
 
 #define FONT_ADDRESS	(void*)0x27E00000
-extern unsigned char *fontaddr;
 
 int LoadFont(){
 	File MyFile;
