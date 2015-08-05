@@ -30,7 +30,6 @@
 #include "aes.h"
 #include "polarssl/sha2.h"
 #include "stdio.h"
-#include "filepack.h"
 
 #define bswap_16(a) ((((a) << 8) & 0xff00) | (((a) >> 8) & 0xff))
 #define bswap_32(a) ((((a) << 24) & 0xff000000) | (((a) << 8) & 0xff0000) | (((a) >> 8) & 0xff00) | (((a) >> 24) & 0xff))
@@ -247,6 +246,30 @@ int CheckRegionSilent(int drive)
 	return 0;
 }
 
+static unsigned int HashGen(unsigned char* file, unsigned int size)
+{
+	unsigned tbl[256];
+	unsigned crc;
+	for (unsigned i = 0; i < 256; i++)
+	{
+		crc = i << 24;
+		for (unsigned j = 8; j > 0; j--)
+		{
+			if (crc & 0x80000000)
+				crc = (crc << 1) ^ 0x04c11db7;
+			else
+				crc = (crc << 1);
+			tbl[i] = crc;
+		}
+	}
+	crc = 0;
+	for (unsigned i = 0; i < size; i++)
+		crc = (crc << 8) ^ tbl[((crc >> 24) ^ *file++) & 0xFF];
+	for (; size; size >>= 8)
+		crc = (crc << 8) ^ tbl[((crc >> 24) ^ size) & 0xFF];
+	return ~crc;
+}
+
 int checkDgFile(char* path, unsigned int hash)
 {
 	unsigned char* buf = (unsigned char*)0x21000000;
@@ -257,7 +280,7 @@ int checkDgFile(char* path, unsigned int hash)
 	{
 		rb = FileRead(&fp, buf, fixedsize, 0);
 		FileClose(&fp);
-		if (!CheckHash(buf, rb, hash)) return 0;
+		if (HashGen(buf, rb) == hash) return 0;
 	} else {
 		return 0;
 	}

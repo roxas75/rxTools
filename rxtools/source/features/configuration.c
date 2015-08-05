@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include "configuration.h"
 #include "lang.h"
-#include "filepack.h"
 #include "screenshot.h"
 #include "fs.h"
 #include "ff.h"
@@ -246,6 +245,9 @@ int readCfg()
 }
 
 int InstallData(char* drive){
+	static const FirmInfo native_info = { 0x66000, 0x84A00, 0x08006800, 0x35000, 0x31000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000};
+	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
+	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
 	FIL firmfile;
 	wchar_t *progressbar = L"⬜⬜⬜⬜⬜⬜⬜";
 	wchar_t *progress = progressbar+0;
@@ -264,8 +266,9 @@ int InstallData(char* drive){
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
-	u8* n_firm_patch = GetFilePack("nat_patch.bin");
-	applyPatch(n_firm, n_firm_patch);
+	if (applyPatch(n_firm, "/rxTools/system/patches/native_firm.elf", &native_info))
+		return CONF_ERRPATCH;
+
 	u8 keyx[16] = {0};
 	if(GetSystemVersion() < 3){
 		if (!FileOpen(&tempfile, KEYFILENAME, 0))
@@ -302,15 +305,38 @@ int InstallData(char* drive){
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
 	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
-	u8* a_firm_patch = GetFilePack("agb_patch.bin");
 	if (!a_firm && checkEmuNAND())
 	{
 		/* Try to get the Title Key from the EmuNAND */
 		a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 2);
+		if (!a_firm) {
+			/* If we cannot decrypt it from firmware.bin because of titlekey messed up,
+			it probably means that AGB has been modified in some way. */
+			//So we read it from his installed ncch...
+			FindApp(0x00040138, 0x00000202, 1);
+			char* path = getContentAppPath();
+			if (!FileOpen(&tempfile, path, 0) && checkEmuNAND())
+			{
+				/* Try with EmuNAND */
+				FindApp(0x00040138, 0x00000202, 2);
+				path = getContentAppPath();
+				if (!FileOpen(&tempfile, path, 0))
+				{
+					f_close(&firmfile);
+					return CONF_ERRNFIRM;
+				}
+			}
+
+			FileRead(&tempfile, WORKBUF, AGB_SIZE, 0);
+			FileClose(&tempfile);
+			a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
+		}
 	}
 
-	if(a_firm){
-		applyPatch(a_firm, a_firm_patch);
+	if (a_firm) {
+		if (applyPatch(a_firm, "/rxTools/system/patches/agb_firm.elf", &agb_info))
+			return CONF_ERRPATCH;
+
 		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
@@ -320,49 +346,19 @@ int InstallData(char* drive){
 			return CONF_ERRNFIRM;
 		}
 		*progress++ = PROGRESS_OK;
-	}else{
-		//If we cannot decrypt it from firmware.bin because of titlekey messed up, it probably means that AGB has been modified in some way.
-		//So we read it from his installed ncch...
-		FindApp(0x00040138, 0x00000202, 1);
-		char* path = getContentAppPath();
-		if (!FileOpen(&tempfile, path, 0) && checkEmuNAND())
-		{
-			/* Try with EmuNAND */
-			FindApp(0x00040138, 0x00000202, 2);
-			path = getContentAppPath();
-			if (!FileOpen(&tempfile, path, 0))
-			{
-				f_close(&firmfile);
-				return CONF_ERRNFIRM;
-			}
-		}
-
-		FileRead(&tempfile, WORKBUF, AGB_SIZE, 0);
-		FileClose(&tempfile);
-		a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
-		if(a_firm){
-			applyPatch(a_firm, a_firm_patch);
-			sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
-			if(FileOpen(&tempfile, tmpstr, 1)){
-				FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
-				FileClose(&tempfile);
-			}else {
-				f_close(&firmfile);
-				return CONF_ERRNFIRM;
-			}
-			*progress++ = PROGRESS_OK;
-		}else{
-			*progress++ = PROGRESS_FAIL; //If we get here, then we'll play without AGB, lol
-		}
+	} else {
+		*progress++ = PROGRESS_FAIL; //If we get here, then we'll play without AGB, lol
 	}
+
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
 	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
-	u8* t_firm_patch = GetFilePack("twl_patch.bin");
 	if(t_firm){
-		applyPatch(t_firm, t_firm_patch);
+		if (applyPatch(t_firm, "/rxTools/system/patches/twl_firm.elf", &twl_info))
+			return CONF_ERRPATCH;
+
 		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, t_firm, TWL_SIZE, 0);

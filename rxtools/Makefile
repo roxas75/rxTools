@@ -115,15 +115,13 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 all: font.bin $(BUILD)
 
 source/lib/font.h: font.bin
-	@dd if=$< of=font.tmp count=8
+	@dd if=$< of=font.tmp count=16
 	@raw2c font.tmp
 	@mv font.c $@
 	@rm font.h font.tmp
 
 font.bin: unifont-8.0.01.bmp
-	@convert -crop 4096x4096+32+64 -depth 1 -negate $< gray:font.tmp;
-	@../tools/font_tool font.tmp $@
-	@rm font.tmp
+	@convert -crop 4096x4096+32+64 -depth 1 -negate $< gray:$@;
 
 unifont-8.0.01.bmp:
 	@echo open mirrorcatalogs.com >ftp.txt
