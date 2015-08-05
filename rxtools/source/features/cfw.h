@@ -45,7 +45,7 @@ void rxModeEmu();
 void rxModeQuickBoot();
 u8* decryptFirmTitleNcch(u8* title, unsigned int size);
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
-void applyPatch(unsigned char* file, unsigned char* patch, const FirmInfo *info);
+void applyPatch(void *file, const void *patch, const FirmInfo *info);
 Platform_UnitType Platform_CheckUnit(void);
 
 #endif

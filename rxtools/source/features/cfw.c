@@ -24,6 +24,7 @@
 #include "filepack.h"
 #include "console.h"
 #include "aes.h"
+#include "elf.h"
 #include "sdmmc.h"
 #include "fs.h"
 #include "ncch.h"
@@ -55,7 +56,7 @@ void firmlaunch(u8* firm){
 	_softreset();
 }
 
-static unsigned int addrToOff(uintptr_t addr, const FirmInfo *info)
+static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
 {
 	if (addr >= info->arm9Entry && addr <= info->arm9Entry + info->p9Off)
 		return info->arm9Off + (addr - info->arm9Entry);
@@ -69,24 +70,26 @@ static unsigned int addrToOff(uintptr_t addr, const FirmInfo *info)
 	return 0;
 }
 
-void applyPatch(unsigned char* file, unsigned char* patch, const FirmInfo *info)
+void applyPatch(void *file, const void *patch, const FirmInfo *info)
 {
-	unsigned int ndiff = *((unsigned int*)patch); patch += 4;
-	for(int i = 0; i < ndiff; i++){
-		unsigned int off = addrToOff(*((uint32_t *)patch), info); patch += 4;
+	const Elf32_Ehdr *hdr;
+	const Elf32_Shdr *cur, *btm;
+	unsigned int off;
+
+	hdr = patch;
+	cur = (void *)((uintptr_t)patch + hdr->e_shoff);
+	btm = cur + hdr->e_shnum;
+	for (; cur != btm; cur++) {
+		if (cur->sh_type != SHT_PROGBITS || !(cur->sh_flags & SHF_ALLOC))
+			continue;
+
+		off = addrToOff(cur->sh_addr, info);
 		if (off == 0)
 			continue;
 
-		unsigned int len = *((uint32_t *)patch); patch += 4;
-
-		if(1){
-			for(int j = 0; j < len; j++){
-				*(file + j + off) = *patch++;
-			}
-		}else{
-			patch += len;
-		}
-		while(((uintptr_t)patch % sizeof(uint32_t))!= 0) patch++;
+		memcpy((void *)((uintptr_t)file + off),
+			(void *)((uintptr_t)patch + cur->sh_offset),
+			cur->sh_size);
 	}
 }
 

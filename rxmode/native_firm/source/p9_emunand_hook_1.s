@@ -15,6 +15,7 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ p9 emunand hook
+.section .patch.p9.nand.write, "a"
 .thumb
 .align 2
 

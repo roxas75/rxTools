@@ -2,6 +2,7 @@
 // |      Copyright(c) 2015, Roxas75      | //
 // |         All rights reserved.         | //
 // ---------------------------------------- //
+.section .patch.p9.sig, "a"
 .thumb
 
 	mov		r0, #0

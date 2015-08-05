@@ -28,6 +28,7 @@
 .equ buffer,        0x24000000
 
 //----------------- PROCESS9 ----------------------
+.section .patch.p9.reboot.entry, "a"
 .arm
 .align 2
 	GetFileName:
