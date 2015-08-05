@@ -34,7 +34,7 @@
 
 int LoadFont(){
 	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/font.bin", 0))
+	if (FileOpen(&MyFile, "/rxTools/system/font.bin", 0))
 	{
 		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
 		fontaddr = FONT_ADDRESS;

@@ -51,8 +51,8 @@ release: rxTools.dat rxtools/font.bin data/reboot/reboot.bin $(RXMODE_TARGETS)	\
 	@mkdir -p release/rxTools/theme/0
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
-	@cp rxtools/font.bin release/rxTools
 
+	@cp rxtools/font.bin release/rxTools/system
 	@cp data/reboot/reboot.bin release/rxTools/system
 
 	@mkdir -p release/rxTools/system/patches
