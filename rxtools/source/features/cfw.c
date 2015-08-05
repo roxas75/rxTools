@@ -21,7 +21,6 @@
 #include "cfw.h"
 #include "common.h"
 #include "hid.h"
-#include "filepack.h"
 #include "console.h"
 #include "aes.h"
 #include "elf.h"
@@ -50,10 +49,24 @@ Platform_UnitType Platform_CheckUnit(void) {
 	return *PLATFORM_REG;
 }
 
-void firmlaunch(u8* firm){
-	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
-	memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
+static int loadExecReboot()
+{
+	File fd;
+
+	if (!FileOpen(&fd, "/rxTools/system/reboot.bin", 0))
+		return 1;
+
+	if (FileRead(&fd, (void*)0x080F0000, 0x8000, 0) < 0)
+		return 1;
+
+	FileClose(&fd);
 	_softreset();
+	return 0;
+}
+
+static int firmlaunch(u8* firm){
+	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
+	return loadExecReboot();
 }
 
 static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
@@ -70,27 +83,35 @@ static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
 	return 0;
 }
 
-void applyPatch(void *file, const void *patch, const FirmInfo *info)
+int applyPatch(void *file, const char *patch, const FirmInfo *info)
 {
-	const Elf32_Ehdr *hdr;
-	const Elf32_Shdr *cur, *btm;
-	unsigned int off;
+	File fd;
+	Elf32_Ehdr ehdr;
+	Elf32_Shdr shdr;
+	unsigned int cur, off;
 
-	hdr = patch;
-	cur = (void *)((uintptr_t)patch + hdr->e_shoff);
-	btm = cur + hdr->e_shnum;
-	for (; cur != btm; cur++) {
-		if (cur->sh_type != SHT_PROGBITS || !(cur->sh_flags & SHF_ALLOC))
+	if (!FileOpen(&fd, patch, 0))
+		return 1;
+
+	if (FileRead(&fd, &ehdr, sizeof(ehdr), 0) < 0)
+		return 1;
+
+	cur = ehdr.e_shoff;
+	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
+		if (FileRead(&fd, &shdr, sizeof(shdr), cur) < 0)
 			continue;
 
-		off = addrToOff(cur->sh_addr, info);
+		if (shdr.sh_type != SHT_PROGBITS || !(shdr.sh_flags & SHF_ALLOC))
+			continue;
+
+		off = addrToOff(shdr.sh_addr, info);
 		if (off == 0)
 			continue;
 
-		memcpy((void *)((uintptr_t)file + off),
-			(void *)((uintptr_t)patch + cur->sh_offset),
-			cur->sh_size);
+		FileRead(&fd, (void *)((uintptr_t)file + off), shdr.sh_size, shdr.sh_offset);
 	}
+
+	return 0;
 }
 
 u8* decryptFirmTitleNcch(u8* title, unsigned int size){
@@ -184,7 +205,7 @@ void rxModeQuickBoot(){
 }
 
 //Just patches signatures check, loads in sysnand
-void DevMode(){	
+int DevMode(){
 	/*DevMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
 	u8* firm = (void*)0x24000000;
@@ -218,6 +239,5 @@ void DevMode(){
 		memcpy((u32*)0x08058804, patch2, 4);
 	}
 
-	memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
-		_softreset();
+	return loadExecReboot();
 }

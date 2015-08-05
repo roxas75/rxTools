@@ -39,13 +39,13 @@ typedef enum {
 	PLATFORM_N3DS=7,
 } Platform_UnitType;
 
-void DevMode();
+int DevMode();
 void rxModeSys();
 void rxModeEmu();
 void rxModeQuickBoot();
 u8* decryptFirmTitleNcch(u8* title, unsigned int size);
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
-void applyPatch(void *file, const void *patch, const FirmInfo *info);
+int applyPatch(void *file, const char *patch, const FirmInfo *info);
 Platform_UnitType Platform_CheckUnit(void);
 
 #endif

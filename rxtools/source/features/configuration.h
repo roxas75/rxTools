@@ -46,6 +46,7 @@ enum {
 	CONF_NOFIRMBIN = -2,
 	CONF_ERRNFIRM = -3,
 	CONF_CANTOPENFILE = -4,
+	CONF_ERRPATCH = -5
 };
 
 enum {
