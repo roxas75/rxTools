@@ -54,87 +54,69 @@ void DrawClearScreenAll(void) {
 	current_y = 0;
 }
 
-void DrawCharacter(u8 *screen, wchar_t character, u32 x, u32 y, u32 color, u32 bgcolor)
+static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y, u32 color, u32 bgcolor)
 {
-	u32 yy;
-	u8 *screenPos, *screenStart = screen + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
-	//Use cached value, yep.
-	u8 foreA = color >> 24, foreR = color >> 16, foreG = color >> 8, foreB = color;
-	u8 backA = bgcolor >> 24, backR = bgcolor >> 16, backG = bgcolor >> 8, backB = bgcolor;
-	u32 charPos = character * FONT_WIDTH * FONT_HEIGHT / 8;
-	u16 charVal;
-	for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL * (character<FONT_CJK_START?FONT_HWIDTH:FONT_WIDTH); screenPos += (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL)
-	{
-		charVal = *(u16*)(fontaddr+charPos);
-		charPos+=2;
-		for (yy = FONT_HEIGHT; yy--;)
-		{
-			if (charVal & 1)
-			{
-				if(foreA){
-					*(screenPos++) = foreB;
-					*(screenPos++) = foreG;
-					*(screenPos++) = foreR;
+	struct {
+		u8 a;
+		u8 r;
+		u8 g;
+		u8 b;
+	} fore, back;
+	u8 (* pScreen)[SCREEN_HEIGHT][BYTES_PER_PIXEL];
+	u16 charVal, *pChar, *pCharEnd;
+	u32 fontY;
+
+	if (SCREEN_WIDTH < x + FONT_WIDTH || y < FONT_HEIGHT)
+		return;
+
+	fore.a = color >> 24;
+	fore.r = color >> 16;
+	fore.g = color >> 8;
+	fore.b = color;
+
+	back.a = bgcolor >> 24;
+	back.r = bgcolor >> 16;
+	back.g = bgcolor >> 8;
+	back.b = color;
+
+	pScreen = screen;
+
+	pChar = (u16 *)fontaddr + character * FONT_WIDTH;
+	pCharEnd = pChar + FONT_WIDTH;
+	while (pChar != pCharEnd) {
+		charVal = *pChar;
+		pChar++;
+
+		for (fontY = 0; fontY < FONT_HEIGHT; fontY++) {
+			if (charVal & 1) {
+				if (fore.a) {
+					pScreen[x][SCREEN_HEIGHT - (y - fontY)][0] = fore.b;
+					pScreen[x][SCREEN_HEIGHT - (y - fontY)][1] = fore.g;
+					pScreen[x][SCREEN_HEIGHT - (y - fontY)][2] = fore.r;
 				}
-				else
-				{
-					screenPos += 3;
+			} else {
+				if (back.a) {
+					pScreen[x][SCREEN_HEIGHT - (y - fontY)][0] = back.b;
+					pScreen[x][SCREEN_HEIGHT - (y - fontY)][1] = back.g;
+					pScreen[x][SCREEN_HEIGHT - (y - fontY)][2] = back.r;
 				}
 			}
-			else
-			{
-				if(backA){
-					*(screenPos++) = backB;
-					*(screenPos++) = backG;
-					*(screenPos++) = backR;
-				}
-				else
-				{
-					screenPos += 3;
-				}
-			}
+
 			charVal >>= 1;
 		}
-	}
-	//Still i don't know if we should draw the text twice.
-	if(screen == BOT_SCREEN && BOT_SCREEN2){
-		screenStart = BOT_SCREEN2 + (x * SCREEN_HEIGHT + SCREEN_HEIGHT - y - 1) * BYTES_PER_PIXEL;
-		charPos = character * FONT_WIDTH * FONT_HEIGHT / 8;
-		for (screenPos = screenStart; screenPos < screenStart + (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL * (character<FONT_CJK_START?FONT_HWIDTH:FONT_WIDTH); screenPos += (SCREEN_HEIGHT - FONT_HEIGHT) * BYTES_PER_PIXEL)
-		{
-			charVal = *(u16*)(fontaddr+charPos);
-			charPos+=2;
-			for (yy = FONT_HEIGHT; yy--;)
-			{
-				if (charVal & 1)
-				{
-					if(foreA){
-						*(screenPos++) = foreB;
-						*(screenPos++) = foreG;
-						*(screenPos++) = foreR;
-					}
-					else
-					{
-						screenPos += 3;
-					}
-				}
-				else
-				{
-					if(backA){
-						*(screenPos++) = backB;
-						*(screenPos++) = backG;
-						*(screenPos++) = backR;
-					}
-					else
-					{
-						screenPos += 3;
-					}
-				}
-				charVal >>= 1;
-			}
-		}
+
+		x++;
 	}
 }
+
+void DrawCharacter(u8 *screen, wchar_t character, u32 x, u32 y, u32 color, u32 bgcolor)
+{
+	DrawCharacterOn1frame(screen, character, x, y, color, bgcolor);
+
+	if (screen == BOT_SCREEN && BOT_SCREEN2)
+		DrawCharacterOn1frame(BOT_SCREEN2, character, x, y, color, bgcolor);
+}
+
 void DrawString(u8 *screen, const wchar_t *str, u32 x, u32 y, u32 color, u32 bgcolor)
 {
 	unsigned int dx = 0;
