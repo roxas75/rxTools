@@ -197,11 +197,7 @@ void rxModeEmu(){
 }
 
 void rxModeQuickBoot(){
-	if(!checkEmuNAND()){
-		rxMode(0);
-	}else{
-		rxMode(1);
-	}
+	rxMode(1);
 }
 
 //Just patches signatures check, loads in sysnand
