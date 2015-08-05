@@ -15,10 +15,11 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ p9 emunand hook
+.section .patch.p9.nand.read, "a"
 .thumb
 .align 2
 
-	ldr r4, =0x0801A5B0
+	ldr r4, =EMUNAND_READ
 	bx r4
 
 .pool

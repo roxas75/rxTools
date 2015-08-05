@@ -26,12 +26,11 @@ SFLAGS=-c -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar
 # No linker flags yet, but here if you need it
 LDFLAGS=
 
-all:
+all: payload.elf
+
+payload.elf:
 	$(CC) -g -Wall arm9/myThread/myThread.c arm9/myThread/handlers.s $(CFLAGS) -Iinclude
 	$(CC) -c arm11/hookswi.s
 	$(CC) -g $(PATCHES) -I arm9/myThread $(SFLAGS)
-	$(CC) -nostdlib -T 3ds.ld EmuNAND.o CreateThread.o myThread.o handlers.o hookswi.o FS.o
-	$(OBJCOPY) -O binary a.out code.bin
-	$(OD) -t a.out
-	rm -f *.o *.out
-	mv code.bin ../../build/0801a4c0.bin
+	$(CC) -nostdlib -T 3ds.ld EmuNAND.o CreateThread.o myThread.o handlers.o hookswi.o FS.o -o $@
+	rm -f *.o
