@@ -16,9 +16,9 @@
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
 
-tools = tools/addxor_tool tools/cfwtool tools/pack_tool tools/xor tools/font_tool
-RXMODE_TARGETS = rxmode/native_firm/nat_patch.bin rxmode/agb_firm/agb_patch.bin	\
-	rxmode/twl_firm/twl_patch.bin
+tools = tools/addxor_tool tools/pack_tool tools/xor tools/font_tool
+RXMODE_TARGETS = rxmode/native_firm/nat_patch.elf rxmode/agb_firm/agb_patch.elf	\
+	rxmode/twl_firm/twl_patch.elf
 DATA_FILES := $(wildcard data/*.*) data/reboot/reboot.bin $(RXMODE_TARGETS)
 
 all: rxTools.dat
@@ -70,7 +70,7 @@ data.bin: tools/pack_tool $(DATA_FILES)
 data/reboot/reboot.bin:
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
-$(RXMODE_TARGETS): tools/cfwtool
+$(RXMODE_TARGETS):
 	$(MAKE) -C $(dir $@) $(notdir $@)
 
 rxtools/rxtools.bin: tools/addxor_tool tools/font_tool
