@@ -28,7 +28,6 @@
 #define FONT_HEIGHT	16
 #define FONT_HWIDTH	(FONT_WIDTH>>1)
 #define FONT_CJK_START	0x2400
-#define FONT_PIXEL_PER_BYTE	8
 #define TOP_SCREEN	(u8*)(*(u32*)0x080FFFC0)
 #define TOP_SCREEN2	(u8*)(*(u32*)0x080FFFC4)
 #define BOT_SCREEN	(u8*)(*(u32*)0x080FFFD4)
@@ -57,7 +56,7 @@
 #define CHAR_SELECTED	"\u2714"
 #define CHAR_UNSELECTED	"\u2718"
 
-extern const u8 (* fontaddr)[FONT_WIDTH][FONT_HEIGHT / FONT_PIXEL_PER_BYTE];
+extern const u16 (* fontaddr)[FONT_WIDTH];
 
 void ClearScreen(u8 *screen, u32 color);
 void DrawClearScreenAll(void);
