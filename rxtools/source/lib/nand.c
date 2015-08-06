@@ -20,7 +20,6 @@
 #include "crypto.h"
 #include "sdmmc.h"
 #include "nand.h"
-#include "cfw.h"
 
 u8 NANDCTR[16];
 int sysversion = 0;
@@ -62,34 +61,19 @@ void FSNandInitCrypto(void) {
 	while (i --) { *(ctrStore++) = *(ctrStart--); }
 }
 
-int checkEmuNAND(){
-	unsigned char* check[0x200];
-
-	if (Platform_CheckUnit() == PLATFORM_3DS){
-		sdmmc_sdcard_readsectors(0x3AF00000 / 0x200, 1, check);
-		if (*((char*)check + 0x100) == 'N' && *((char*)check + 0x101) == 'C' && *((char*)check + 0x102) == 'S' && *((char*)check + 0x103) == 'D'){
-			return 0x3AF00000;
-		}
-
+int checkEmuNAND() {
+	u8 *check = (u8 *)0x26000000;
+	sdmmc_sdcard_readsectors(0x3AF00000 / 0x200, 1, check);
+	if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
+		return 0x3AF00000;
+	} else {
 		sdmmc_sdcard_readsectors(0x3BA00000 / 0x200, 1, check);
-		if (*((char*)check + 0x100) == 'N' && *((char*)check + 0x101) == 'C' && *((char*)check + 0x102) == 'S' && *((char*)check + 0x103) == 'D'){
+		if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
 			return 0x3BA00000;
+		} else {
+			return 0;
 		}
 	}
-
-	if (Platform_CheckUnit() == PLATFORM_N3DS){
-		sdmmc_sdcard_readsectors(0x4D800000 / 0x200, 1, check);
-		if (*((char*)check + 0x100) == 'N' && *((char*)check + 0x101) == 'C' && *((char*)check + 0x102) == 'S' && *((char*)check + 0x103) == 'D'){
-			return 0x4D800000;
-		}
-
-		sdmmc_sdcard_readsectors(0x76000000 / 0x200, 1, check);
-		if (*((char*)check + 0x100) == 'N' && *((char*)check + 0x101) == 'C' && *((char*)check + 0x102) == 'S' && *((char*)check + 0x103) == 'D'){
-			return 0x76000000;
-		}
-	}
-
-	return 0;
 }
 
 void GetNANDCTR(u8 *ctr) {
