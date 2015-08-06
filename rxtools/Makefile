@@ -35,7 +35,7 @@ export TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source/features source source/lib source/lib/fatfs source/lib/polarssl
 DATA		:=
-INCLUDES	:=	include source source/lib source/lib/fatfs source/features source/lib/polarssl
+INCLUDES	:=	include source source/lib source/features
 
 FILES       := data/titlekey.bin data/reboot.bin data/patch.bin data/SplashScreen.bin
 #---------------------------------------------------------------------------------
