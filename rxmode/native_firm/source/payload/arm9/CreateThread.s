@@ -48,5 +48,5 @@ CreateMyThread:
 	svc 0x8
 
 	pop {r1-r12, lr}
-	ldr r0, =0x80CAFA8
-	ldr pc, =0x8086144
+	ldr r0, =0x80CB0A8
+    ldr pc, =0x80860B4
