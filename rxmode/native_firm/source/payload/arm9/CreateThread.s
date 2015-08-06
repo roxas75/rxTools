@@ -15,7 +15,7 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 .arm
-.global myThread
+.global KEYXSPACE
 KEYXSPACE:    						//needed to reserve the space where we'll write the keyX. Optimizing every single byte!
 	.word 0xDEADBEEF
 	.string8 "InsertKeyXHere!"

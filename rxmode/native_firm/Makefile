@@ -23,65 +23,47 @@ endif
 
 include $(DEVKITARM)/base_rules
 
-TARGET 		:=  nat_patch.bin
+TARGET 		:=  native_firm
 BUILD		:=	build
 SOURCE		:=	source
-TOOLS		:=	../../tools
 LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
 
-all: $(TARGET)
+all: $(TARGET).elf
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
-$(TARGET): $(BUILD)/0801b564.bin $(BUILD)/0807882c.bin $(BUILD)/0807886c.bin	\
-	$(BUILD)/080282f8.bin $(BUILD)/08086140.bin $(BUILD)/08086174.bin	\
-	$(BUILD)/080859ec.bin $(BUILD)/08094454.bin	\
-	$(BUILD)/0805d63c.bin $(BUILD)/080632b8.bin	\
-	$(BUILD)/0801a4c0.bin
-	@$(TOOLS)/cfwtool $(BUILD) $(TARGET) n
+$(BUILD)/payload/arm9:
+	@[ -d $@ ] || mkdir -p $@
 
-$(BUILD)/%.bin: $(BUILD)/%.elf
-	$(OBJCOPY) -O binary $< $@
+$(BUILD)/payload/arm9/myThread:
+	@[ -d $@ ] || mkdir -p $@
 
-$(BUILD)/%.elf: $(BUILD)/%.o
-	$(LD) -e 0 -Ttext $(<:$(BUILD)/%.o=0x%) $< -o $@
+$(BUILD)/payload/arm11:
+	@[ -d $@ ] || mkdir -p $@
 
-$(BUILD)/0801a4c0.bin: $(BUILD)
-	@cd source/payload && make
+%.elf: %_unstrip.elf
+	$(STRIP) $< -o $@
 
-$(BUILD)/0801b564.o: $(SOURCE)/k9_fix_flags.s $(BUILD)
-	$(AS) $< -o $@
+$(TARGET)_unstrip.elf: $(SOURCE)/payload/payload.elf	\
+	$(BUILD)/k9_fix_flags.elf $(BUILD)/p9_keyx_spoof.elf	\
+	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
+	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
+	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf	\
+	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf
+	$(LD) -i -Tscript.ld $^ -o $@
 
-$(BUILD)/0807882c.o: $(SOURCE)/p9_emunand_hook_1.s $(BUILD)
-	$(AS) $< -o $@
+$(SOURCE)/payload/payload.elf:
+	$(MAKE) -C $(dir $@) $(notdir $@)
 
-$(BUILD)/0807886c.o: $(SOURCE)/p9_emunand_hook_2.s $(BUILD)
-	$(AS) $< -o $@
+$(BUILD)/%.elf: $(BUILD)/%.o $(SOURCE)/payload/payload.elf
+	$(LD) -s -R $(SOURCE)/payload/payload.elf -Tscript.ld $< -o $@
 
-$(BUILD)/080282f8.o: $(SOURCE)/p9_keyx_spoof.s $(BUILD)
-	$(AS) $< -o $@
-
-$(BUILD)/08086140.o: $(SOURCE)/p9_mythread_hook_1.s $(BUILD)
-	$(AS) $< -o $@
-
-$(BUILD)/08086174.o: $(SOURCE)/p9_mythread_hook_2.s $(BUILD)
-	$(AS) $< -o $@
-
-$(BUILD)/080859ec.o: $(SOURCE)/p9_reboothax_1.s $(BUILD)
-	$(AS) $< -o $@
-
-$(BUILD)/08094454.o: $(SOURCE)/p9_reboothax_2.s $(BUILD)
-	$(AS) $< -o $@
-
-$(BUILD)/0805d63c.o: $(SOURCE)/p9_signatures_spoof_1.s $(BUILD)
-	$(AS) $< -o $@
-
-$(BUILD)/080632b8.o: $(SOURCE)/p9_signatures_spoof_2.s $(BUILD)
+$(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET) *.bin
+	@rm -fr $(BUILD) $(TARGET)_unstrip.elf $(TARGET).elf source/payload/payload.elf

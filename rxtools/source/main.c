@@ -27,14 +27,12 @@
 #include "draw.h"
 #include "hid.h"
 #include "screenshot.h"
-#include "filepack.h"
 #include "cfw.h"
 #include "configuration.h"
 
 #define FONT_ADDRESS	(void*)0x27E00000
-extern unsigned char *fontaddr;
 char *cfgLang = "en.json";
-const char *fontpath = "/rxTools/font.bin";
+const char *fontpath = "/rxTools/system/font.bin";
 
 int LoadFont(){
 	File MyFile;
@@ -75,8 +73,6 @@ int Initialize()
 	}else{
 		preloadStringsU();
 	}
-
-	LoadPack();
 
 	//Console Stuff
 	ConsoleSetXY(15, 20);

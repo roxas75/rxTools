@@ -15,10 +15,11 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ p9 keyx spoof
+.section .patch.p9.keyx, "a"
 .thumb
 .align 2
 
-	ldr 	r2, =0x801A6D0 		//Here we'll put the keyX, this is a redirection
+	ldr 	r2, =KEYXSPACE
 	mov	    r1, #5
 	mov 	r0, #0x25
 	bl		0x080575B4
