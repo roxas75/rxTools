@@ -183,7 +183,7 @@ static void patch_processes()
 {
 	uintptr_t p;
 
-	for (p = 0x23A00000; p < 0x24000000; p++) {
+	for (p = 0x23A00000; p < 0x27b00000; p++) {
 		//System Settings label
 		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
 			rx_strcpy((char *)p, "Shit", 4, 2, 1);
