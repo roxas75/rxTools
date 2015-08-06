@@ -16,8 +16,8 @@
 .arm
 .global EMUNAND_WRITE
 
-EntryPoint 	  = 0x080D8670
-Break_Func 	  = 0x08062A29
+EntryPoint 	  = 0x080D86F0
+Break_Func 	  = 0x08062891
 NandFirstSect = 0xAAAABBBB
 
 EMUNAND_WRITE:
@@ -76,7 +76,7 @@ EMUNAND_WRITE:
                  MOVS    R2, R4
                  ADDS    R2, R2, #0xC
                  MOV     R0, R12
-                 LDR     R5, =0x08078971
+                 LDR     R5, =0x080788C1
                  BLX     R5
                  STMFD   SP!, {R0-R3}
                  ldr r2, =bytes1
@@ -145,7 +145,7 @@ EMUNAND_READ:
                  MOVS    R2, R4
                  ADDS    R2, R2, #0xC
                  MOV     R0, R12
-                 LDR     R5, =0x08078751
+                 LDR     R5, =0x080786A1
                  BLX     R5
                  STMFD   SP!, {R0-R3}
                  ldr r2, =bytes1
