@@ -6,28 +6,28 @@ SECTIONS
 	.data : { *(.data) *(.data*) }
 	.bss : { *(.bss) *(.bss*) }
 
-	. = 0x0801b3d4;
+	. = 0x0801b564;
 	.patch.k9.flags : { *(.patch.k9.flags) }
 
-	. = 0x080288f8;
+	. = 0x080282f8;
 	.patch.p9.keyx : { *(.patch.p9.keyx) }
 
-	. = 0x0805e524;
+	. = 0x0805d63c;
 	.patch.p9.sig.1 : { *(.patch.p9.sig.1) }
 
-	. = 0x080630b0;
+	. = 0x080632b8;
 	.patch.p9.sig.2 : { *(.patch.p9.sig.2) }
 
-	. = 0x08078d7e;
+	. = 0x0807882c;
 	.patch.p9.nand.write : { *(.patch.p9.nand.write) }
 
-	. = 0x08078dbe;
+	. = 0x0807886c;
 	.patch.p9.nand.read : { *(.patch.p9.nand.read) }
 
-	. = 0x080866b0;
+	. = 0x08086140;
 	.patch.p9.mythread.ldr : { *(.patch.p9.mythread.ldr) }
 
-	. = 0x080866e4;
+	. = 0x08086174;
 	.patch.p9.mythread.addr : { *(.patch.p9.mythread.addr) }
 
 	. = 0x080859ec;
