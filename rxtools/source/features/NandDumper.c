@@ -27,7 +27,7 @@
 #include "crypto.h"
 #include "ncch.h"
 #include "CTRDecryptor.h"
-#include "sdmmc.h"
+#include "fatfs/sdmmc.h"
 #include "stdio.h"
 
 #define NAND_SIZE 0x3AF00000
