@@ -66,4 +66,4 @@ $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET)_unstrip.elf $(TARGET).elf
+	@rm -fr $(BUILD) $(TARGET)_unstrip.elf $(TARGET).elf source/payload/payload.elf
