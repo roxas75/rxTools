@@ -19,7 +19,7 @@
 #include "common.h"
 #include "screenshot.h"
 #include "fs.h"
-#include "ff.h"
+#include "fatfs/ff.h"
 #include "console.h"
 #include "draw.h"
 #include "hid.h"
@@ -27,7 +27,7 @@
 #include "crypto.h"
 #include "TitleKeyDecrypt.h"
 #include "NandDumper.h"
-#include "aes.h"
+#include "polarssl/aes.h"
 #include "polarssl/sha2.h"
 #include "stdio.h"
 
