@@ -25,9 +25,6 @@
 #include "draw.h"
 #include "hid.h"
 
-#define CHAR_CURSOR	L"⮞"
-#define CHAR_WSPACE	L"　"
-
 Menu* MyMenu;
 Menu *MenuChain[100];
 int openedMenus = 0;
@@ -102,7 +99,7 @@ void MenuRefresh(){
 	MyMenu->Showed = 0;
 	ConsoleSetTitle(MyMenu->Name);
 	for (int i = 0; i < MyMenu->nEntryes; i++){
-		print(L"%ls %ls\n", i == MyMenu->Current ? CHAR_CURSOR : CHAR_WSPACE, MyMenu->Option[i].Str);
+		print(L"%ls %ls\n", i == MyMenu->Current ? strings[STR_CURSOR] : strings[STR_NO_CURSOR], MyMenu->Option[i].Str);
 	}
 	int x = 0, y = 0;
 	ConsoleGetXY(&x, &y);
