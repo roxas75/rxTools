@@ -27,7 +27,7 @@
 u32 current_y = 1;
 
 u8 *tmpscreen = (u8*)0x26000000;
-const u8 (* fontaddr)[FONT_HEIGHT][CHAR_COLUMNS][FONT_WIDTH / 8] = (void *)font;
+const u8 (* fontaddr)[FONT_WIDTH][CHAR_COLUMNS][FONT_HEIGHT / FONT_PIXEL_PER_BYTE] = (void *)font;
 
 void ClearScreen(u8 *screen, u32 color)
 {
@@ -62,8 +62,8 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 		u8 b;
 	} fore, back;
 	u8 (* pScreen)[SCREEN_HEIGHT][BYTES_PER_PIXEL];
-	u8 charVal, i;
-	u32 fontX, fontY;
+	u32 fontX, fontY, i;
+	u8 charVal;
 	div_t charDiv;
 
 	if (SCREEN_WIDTH < x + FONT_WIDTH || y < FONT_HEIGHT)
@@ -82,35 +82,35 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 	pScreen = screen;
 
 	charDiv = div(character, CHAR_COLUMNS);
-	fontY = FONT_HEIGHT;
-	while (fontY > 0) {
-		fontY--;
-		i = 0;
+	for (fontX = 0; fontX < FONT_WIDTH; fontX++) {
+		fontY = 0;
 
-		for (fontX = 0; fontX < FONT_WIDTH; fontX++) {
-			if (fontX == 0 || fontX % 8 == 0) {
-				charVal = fontaddr[charDiv.quot][fontY][charDiv.rem][i];
-				i++;
-			}
+		i = FONT_HEIGHT / FONT_PIXEL_PER_BYTE;
+		while (i > 0) {
+			i--;
 
-			if (charVal & 0x80) {
-				if (fore.a) {
-					pScreen[x + fontX][SCREEN_HEIGHT - y][0] = fore.b;
-					pScreen[x + fontX][SCREEN_HEIGHT - y][1] = fore.g;
-					pScreen[x + fontX][SCREEN_HEIGHT - y][2] = fore.r;
+			charVal = fontaddr[charDiv.rem][fontX][charDiv.quot][i];
+			do {
+				if (charVal & 1) {
+					if (fore.a) {
+						pScreen[x][SCREEN_HEIGHT - (y - fontY)][0] = fore.b;
+						pScreen[x][SCREEN_HEIGHT - (y - fontY)][1] = fore.g;
+						pScreen[x][SCREEN_HEIGHT - (y - fontY)][2] = fore.r;
+					}
+				} else {
+					if (back.a) {
+						pScreen[x][SCREEN_HEIGHT - (y - fontY)][0] = back.b;
+						pScreen[x][SCREEN_HEIGHT - (y - fontY)][1] = back.g;
+						pScreen[x][SCREEN_HEIGHT - (y - fontY)][2] = back.r;
+					}
 				}
-			} else {
-				if (back.a) {
-					pScreen[x + fontX][SCREEN_HEIGHT - y][0] = back.b;
-					pScreen[x + fontX][SCREEN_HEIGHT - y][1] = back.g;
-					pScreen[x + fontX][SCREEN_HEIGHT - y][2] = back.r;
-				}
-			}
 
-			charVal <<= 1;
+				fontY++;
+				charVal >>= 1;
+			} while (fontY % FONT_PIXEL_PER_BYTE);
 		}
 
-		y--;
+		x++;
 	}
 }
 
