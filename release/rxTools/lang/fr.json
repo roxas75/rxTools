@@ -1,16 +1,12 @@
 {
 	"LANG_NAME": "French",
-	"SETTINGS": "Options", 
+
 	"FORCE_UI_BOOT": "Forcer demarrage UI    %ls",
 	"SELECTED_THEME": "Theme choisi        <%3c  >",
 	"SHOW_AGB": "Activer AGB_FIRM       %ls",
 	"ENABLE_3D_UI": "Activer UI 3D          %ls",
 	"QUICK_BOOT": "Demarrage rapide       %ls",
-	"MENU_LANGUAGE": "Langage   %16ls",
-	"CHOOSE": "Choissisez %ls:\n",
-	"CANCEL": "retour",
+	"CONSOLE_LANGUAGE": "Langage   %16ls",
 	"AUTOBOOT": "DÉMARRAGE AUTOMATIQUE",
-	"HOLD_BUTTON_ACTION": "Maintenir le bouton %ls pour %ls\n",
-	"YES": "Oui",
-	"NO": "Non"
+	"HOLD_R": "Maintenir le bouton R pour accéder au menu"
 }
