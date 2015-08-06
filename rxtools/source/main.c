@@ -31,10 +31,12 @@
 #include "configuration.h"
 
 #define FONT_ADDRESS	(void*)0x27E00000
+char *cfgLang = "en.json";
+const char *fontpath = "/rxTools/system/font.bin";
 
 int LoadFont(){
 	File MyFile;
-	if (FileOpen(&MyFile, "/rxTools/system/font.bin", 0))
+	if (FileOpen(&MyFile, fontpath, 0))
 	{
 		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
 		fontaddr = FONT_ADDRESS;
@@ -49,21 +51,27 @@ int Initialize()
 	char str[100];
 	char strl[100];
 	char strr[100];
+	char tmp[256];
+	wchar_t wtmp[256];
 	int r;
 
-	DrawString(BOT_SCREEN, L"INITIALIZE...", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
+	preloadStringsA();
+
+	DrawString(BOT_SCREEN, strings[STR_INITIALIZING], FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 
 	if(FSInit()){
-		DrawString(BOT_SCREEN, L"LOADING...   ", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_LOADING], SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 	}else{
-		DrawString(BOT_SCREEN, L"ERROR!       ", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_FAILED], SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
 		return 1;
 	}
 
 	r = LoadFont();
-	if (r) {
-		DrawString(BOT_SCREEN, L"Font load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
-		return r;
+	if (r){
+		swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), strings[STR_ERROR_OPENING], fontpath);
+		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT*2, RED, BLACK);
+	}else{
+		preloadStringsU();
 	}
 
 	//Console Stuff
@@ -81,10 +89,13 @@ int Initialize()
 	InstallConfigData();
 	readCfg();
 
+	if (r)
+		cfgs[CFG_LANG].val.s = cfgLang;
 	r = loadStrings();
 	if (r) {
-		DrawString(BOT_SCREEN, L"Language load error", FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
-		return r;
+		sprintf(tmp, "%s/%s", langPath, cfgs[CFG_LANG].val.s);
+		swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), strings[STR_ERROR_OPENING], tmp);
+		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT*3, RED, BLACK);
 	}
 
 	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
@@ -110,8 +121,8 @@ int Initialize()
 		else
 		{
 			ConsoleInit();
-			ConsoleSetTitle(L"%24ls",strings[STR_AUTOBOOT]);
-			print(strings[STR_HOLD_R]);
+			ConsoleSetTitle(strings[STR_AUTOBOOT]);
+			print(strings[STR_HOLD_BUTTON_ACTION], strings[STR_BUTTON_R], strings[STR_OPEN_MENU]);
 			ConsoleShow();
 
 			for (int i = 0; i < 0x333333 * 6; i++){
@@ -139,7 +150,8 @@ int main(){
 
 	//7.X Keys stuff
 	File KeyFile;
-	if(FileOpen(&KeyFile, "/slot0x25KeyX.bin", 0)){
+	const char *keyfile = "/slot0x25KeyX.bin";
+	if(FileOpen(&KeyFile, keyfile, 0)){
 		u8 keyX[16];
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
@@ -147,8 +159,10 @@ int main(){
 	}else{
 		if(GetSystemVersion() < 3){
 			ConsoleInit();
-			ConsoleSetTitle(L"%17ls", L"WARNING");
-			print(L"WARNING:\n\nCannot find slot0x25KeyX.bin. If\nyour firmware version is less than\n7.X, some titles decryption will\nfail, and some EmuNANDs will not\nboot.\n\nPress Ⓐ to continue...\n");
+			ConsoleSetTitle(strings[STR_WARNING]);
+			print(strings[STR_ERROR_OPENING], keyfile);
+			print(strings[STR_WARNING_KEYFILE]);
+			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 		}
