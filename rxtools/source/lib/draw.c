@@ -27,7 +27,7 @@
 u32 current_y = 1;
 
 u8 *tmpscreen = (u8*)0x26000000;
-const u8 (* fontaddr)[FONT_WIDTH][CHAR_COLUMNS][FONT_HEIGHT / FONT_PIXEL_PER_BYTE] = (void *)font;
+const u8 (* fontaddr)[FONT_WIDTH][FONT_HEIGHT / FONT_PIXEL_PER_BYTE] = (void *)font;
 
 void ClearScreen(u8 *screen, u32 color)
 {
@@ -64,7 +64,6 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 	u8 (* pScreen)[SCREEN_HEIGHT][BYTES_PER_PIXEL];
 	u32 fontX, fontY, i;
 	u8 charVal;
-	div_t charDiv;
 
 	if (SCREEN_WIDTH < x + FONT_WIDTH || y < FONT_HEIGHT)
 		return;
@@ -81,7 +80,6 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 
 	pScreen = screen;
 
-	charDiv = div(character, CHAR_COLUMNS);
 	for (fontX = 0; fontX < FONT_WIDTH; fontX++) {
 		fontY = 0;
 
@@ -89,7 +87,7 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 		while (i > 0) {
 			i--;
 
-			charVal = fontaddr[charDiv.rem][fontX][charDiv.quot][i];
+			charVal = fontaddr[character][fontX][i];
 			do {
 				if (charVal & 1) {
 					if (fore.a) {
