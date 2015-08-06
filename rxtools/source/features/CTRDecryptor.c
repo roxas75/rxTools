@@ -29,6 +29,7 @@
 #include "ncch.h"
 #include "crypto.h"
 #include "stdio.h"
+#include "lang.h"
 #include "menu.h"
 
 #define BUFFER_ADDR ((u8*)0x21000000)
@@ -91,7 +92,7 @@ int ProcessCTR(char* path){
 	File myFile;
 	if(FileOpen(&myFile, path, 0)){
 		ConsoleInit();
-		ConsoleSetTitle(L"%24ls",L"CTR DECRYPTOR");
+		ConsoleSetTitle(strings[STR_DECRYPT], strings[STR_CTR]);
 		unsigned int ncch_base = 0x100;
 		unsigned char magic[] = { 0, 0, 0, 0, 0};
 		FileRead(&myFile, magic, 4, ncch_base);
@@ -111,26 +112,25 @@ int ProcessCTR(char* path){
 		ctr_ncchheader NCCH; unsigned int mediaunitsize = 0x200;
 		FileRead(&myFile, &NCCH, 0x200, ncch_base);
 
-		//print(path); print("\n");
 		print(L"%s\n", (char*)NCCH.productcode);
 		unsigned int NEWCRYPTO = 0, CRYPTO = 1;
 		if(NCCH.flags[3] != 0) NEWCRYPTO = 1;
 		if(NCCH.flags[7] & 4) CRYPTO = 0;
 		if(NEWCRYPTO){
-			print(L"\nCryptoType : 7.X Key security\n");
+			print(strings[STR_CRYPTO_TYPE], strings[STR_KEY7]);
 		}else if(CRYPTO){
-			print(L"\nCryptoType : Secure\n");
+			print(strings[STR_CRYPTO_TYPE], strings[STR_SECURE]);
 		}else{
-			print(L"\nCryptoType : None\nDecryption completed!\n");
+			print(strings[STR_CRYPTO_TYPE], strings[STR_NONE]);
+			print(strings[STR_COMPLETED]);
 			FileClose(&myFile);
 			ConsoleShow();
 			return 3;
 		}
 
-		ConsoleShow();
 		u8 CTR[16];
 		if(getle32(NCCH.extendedheadersize) > 0){
-			print(L"Decrypting ExHeader...\n");
+			print(strings[STR_DECRYPTING], strings[STR_EXHEADER]);
 			ConsoleShow();
 			ncch_get_counter(NCCH, CTR, 1);
 			FileRead(&myFile, BUFFER_ADDR, 0x800, ncch_base + 0x200);
@@ -143,7 +143,7 @@ int ProcessCTR(char* path){
 			FileWrite(&myFile, BUFFER_ADDR, 0x800, ncch_base + 0x200);
 		}
 		if(getle32(NCCH.exefssize) > 0){
-			print(L"Decrypting ExeFS...\n");
+			print(strings[STR_DECRYPTING], strings[STR_EXEFS]);
 			ConsoleShow();
 			ncch_get_counter(NCCH, CTR, 2);
 			myInfo.buffer = BUFFER_ADDR;
@@ -157,7 +157,7 @@ int ProcessCTR(char* path){
 			FileWrite(&myFile, BUFFER_ADDR, getle32(NCCH.exefssize) * mediaunitsize, ncch_base + getle32(NCCH.exefsoffset) * mediaunitsize);
 		}
 		if(getle32(NCCH.romfssize) > 0){
-			print(L"Decrypting RomFS... ");
+			print(strings[STR_DECRYPTING], strings[STR_ROMFS]);
 			ConsoleShow();
 			ncch_get_counter(NCCH, CTR, 3);
 			myInfo.buffer = BUFFER_ADDR;
@@ -181,7 +181,7 @@ int ProcessCTR(char* path){
 		FileWrite(&myFile, &NCCH, 0x200, ncch_base);
 		if(ncch_base == 0x4000) FileWrite(&myFile, ((u8*)&NCCH) + 0x100, 0x100, 0x1100);   //Only for NCSD
 		FileClose(&myFile);
-		print(L"Decryption completed!\n");
+		print(strings[STR_COMPLETED]);
 		ConsoleShow();
 		return 0;
 	}else return 1;
@@ -220,13 +220,15 @@ int ExploreFolders(char* folder){
 
 void CTRDecryptor(){
 	ConsoleInit();
-	ConsoleSetTitle(L"%24ls",L"CTR DECRYPTOR");
+	ConsoleSetTitle(strings[STR_DECRYPT], strings[STR_CTR]);
 	ConsoleShow();
 
 	int nfiles = ExploreFolders("");
 
 	ConsoleInit();
-	print(L"Decrypted %d files\n\nPress Ⓐ to exit\n", nfiles);
+	print(strings[STR_DECRYPTED], nfiles, strings[STR_FILES]);
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
