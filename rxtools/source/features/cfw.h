@@ -18,21 +18,34 @@
 #ifndef CFW_H
 #define CFW_H
 
+#include <stddef.h>
+#include <stdint.h>
 #include "common.h"
 
+typedef struct{
+        unsigned int arm9Off;
+        size_t arm9Size;
+        uintptr_t arm9Entry;
+        unsigned int arm11Off;
+        size_t arm11Size;
+        uintptr_t arm11Entry;
+        unsigned int p9Off;
+        uintptr_t p9Start;
+        uintptr_t p9Entry;
+} FirmInfo;
 
 typedef enum {
 	PLATFORM_3DS=1,
 	PLATFORM_N3DS=7,
 } Platform_UnitType;
 
-void DevMode();
+int DevMode();
 void rxModeSys();
 void rxModeEmu();
 void rxModeQuickBoot();
 u8* decryptFirmTitleNcch(u8* title, unsigned int size);
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
-void applyPatch(unsigned char* file, unsigned char* patch);
+int applyPatch(void *file, const char *patch, const FirmInfo *info);
 Platform_UnitType Platform_CheckUnit(void);
 
 #endif

@@ -21,9 +21,9 @@
 #include "cfw.h"
 #include "common.h"
 #include "hid.h"
-#include "filepack.h"
 #include "console.h"
 #include "aes.h"
+#include "elf.h"
 #include "sdmmc.h"
 #include "fs.h"
 #include "ncch.h"
@@ -49,26 +49,69 @@ Platform_UnitType Platform_CheckUnit(void) {
 	return *PLATFORM_REG;
 }
 
-void firmlaunch(u8* firm){
-	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
-	memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
+static int loadExecReboot()
+{
+	File fd;
+
+	if (!FileOpen(&fd, "/rxTools/system/reboot.bin", 0))
+		return 1;
+
+	if (FileRead(&fd, (void*)0x080F0000, 0x8000, 0) < 0)
+		return 1;
+
+	FileClose(&fd);
 	_softreset();
+	return 0;
 }
 
-void applyPatch(unsigned char* file, unsigned char* patch){
-	unsigned int ndiff = *((unsigned int*)patch); patch += 4;
-	for(int i = 0; i < ndiff; i++){
-		unsigned int off = *((unsigned int*)patch); patch += 4;
-		unsigned int len = *((unsigned int*)patch); patch += 4;
-		if(1){
-			for(int j = 0; j < len; j++){
-				*(file + j + off) = *patch++;
-			}
-		}else{
-			patch += len;
-		}
-		while(((unsigned int)patch % 4)!= 0) patch++;
+static int firmlaunch(u8* firm){
+	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
+	return loadExecReboot();
+}
+
+static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
+{
+	if (addr >= info->arm9Entry && addr <= info->arm9Entry + info->p9Off)
+		return info->arm9Off + (addr - info->arm9Entry);
+
+	if (addr >= info->p9Entry && addr <= info->p9Entry + info->arm9Size - info->p9Start)
+		return info->arm9Off + (addr - info->p9Entry) + info->p9Start;
+
+	if (addr >= info->arm11Entry && addr <= info->arm11Entry + info->arm11Size)
+		return info->arm11Off + (addr - info->arm11Entry);
+
+	return 0;
+}
+
+int applyPatch(void *file, const char *patch, const FirmInfo *info)
+{
+	File fd;
+	Elf32_Ehdr ehdr;
+	Elf32_Shdr shdr;
+	unsigned int cur, off;
+
+	if (!FileOpen(&fd, patch, 0))
+		return 1;
+
+	if (FileRead(&fd, &ehdr, sizeof(ehdr), 0) < 0)
+		return 1;
+
+	cur = ehdr.e_shoff;
+	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
+		if (FileRead(&fd, &shdr, sizeof(shdr), cur) < 0)
+			continue;
+
+		if (shdr.sh_type != SHT_PROGBITS || !(shdr.sh_flags & SHF_ALLOC))
+			continue;
+
+		off = addrToOff(shdr.sh_addr, info);
+		if (off == 0)
+			continue;
+
+		FileRead(&fd, (void *)((uintptr_t)file + off), shdr.sh_size, shdr.sh_offset);
 	}
+
+	return 0;
 }
 
 u8* decryptFirmTitleNcch(u8* title, unsigned int size){
@@ -154,22 +197,21 @@ void rxModeEmu(){
 }
 
 void rxModeQuickBoot(){
-	if(!checkEmuNAND()){
-		rxMode(0);
-	}else{
-		rxMode(1);
-	}
+	rxMode(1);
 }
 
 //Just patches signatures check, loads in sysnand
-void DevMode(){
+int DevMode(){
+	/*DevMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
+
+	u8* firm = (void*)0x24000000;
+	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
+	if (strncmp((char*)firm, "FIRM", 4))
+		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
+
 	if(Platform_CheckUnit() == PLATFORM_3DS)
 	{
-		u8* firm = (void*)0x24000000;
-		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
-		if (strncmp((char*)firm, "FIRM", 4))
-			nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
-
+		//o3ds patches
 		unsigned char sign1[] = { 0xC1, 0x17, 0x49, 0x1C, 0x31, 0xD0, 0x68, 0x46, 0x01, 0x78, 0x40, 0x1C, 0x00, 0x29, 0x10, 0xD1 };
 		unsigned char sign2[] = { 0xC0, 0x1C, 0x76, 0xE7, 0x20, 0x00, 0x74, 0xE7, 0x22, 0xF8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x0F };
 		unsigned char patch1[] = { 0x00, 0x20, 0x4E, 0xB0, 0x70, 0xBD };
@@ -182,8 +224,16 @@ void DevMode(){
 			if (!memcmp(firm + i, sign2, 16)){
 				memcpy(firm + i, patch2, 2);
 			}
-		}
-		memcpy((void*)0x080F0000, GetFilePack("reboot.bin"), 0x8000);
-		_softreset();
+		}		
 	}
+	else
+	{
+		//new 3ds patches
+		u8 patch1[] = { 0x6D, 0x20, 0xCE, 0x77 };
+		u8 patch2[] = { 0x5A, 0xC5, 0x73, 0xC1 };
+		memcpy((u32*)0x08052FD8, patch1, 4);
+		memcpy((u32*)0x08058804, patch2, 4);
+	}
+
+	return loadExecReboot();
 }
