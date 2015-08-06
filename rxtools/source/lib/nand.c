@@ -18,7 +18,7 @@
 #include "common.h"
 #include "CTRDecryptor.h"
 #include "crypto.h"
-#include "sdmmc.h"
+#include "fatfs/sdmmc.h"
 #include "nand.h"
 
 u8 NANDCTR[16];

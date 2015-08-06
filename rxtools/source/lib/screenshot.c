@@ -21,7 +21,7 @@
 #include "draw.h"
 #include "hid.h"
 #include "fs.h"
-#include "ff.h"
+#include "fatfs/ff.h"
 #include "stdio.h"
 
 unsigned char bmpTopHeader[] = {
