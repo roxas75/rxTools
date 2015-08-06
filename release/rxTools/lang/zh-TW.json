@@ -1,15 +1,12 @@
 {
 	"LANG_NAME": "Chinese trad.",
-	"SETTINGS": "設定選項",
+
 	"FORCE_UI_BOOT": "引導時強制進菜單       %ls",
 	"SELECTED_THEME": "選擇主題            <%3c  >",
 	"SHOW_AGB": "顯示AGB_FIRM BIOS      %ls",
 	"ENABLE_3D_UI": "啟用3D介面             %ls",
 	"QUICK_BOOT": "快速引導               %ls",
-	"MENU_LANGUAGE": "介面語言  %16ls",
-	"CHOOSE": "請選擇要使用的%ls\n",
-	"CANCEL": "返回",
+	"CONSOLE_LANGUAGE": "介面語言  %16ls",
 	"AUTOBOOT": "自動引導",
-	"YES": "是",
-	"NO": "否"
+	"HOLD_R": "按住R鈕進入菜單"
 }

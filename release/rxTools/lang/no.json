@@ -1,16 +1,12 @@
 {
 	"LANG_NAME": "Norwegian",
-	"SETTINGS": "Innstillinger",
+
 	"FORCE_UI_BOOT": "Tving oppstart av UI   %ls",
 	"SELECTED_THEME": "Valgt tema          <%3c  >",
 	"SHOW_AGB": "Vis AGB_FIRM BIOS      %ls",
 	"ENABLE_3D_UI": "Aktiver UI i 3D        %ls",
 	"QUICK_BOOT": "Rask oppstart          %ls",
-	"MENU_LANGUAGE": "Sprak     %16ls",
-	"CHOOSE": "Velg %ls\n",
-	"CANCEL": "tilbake",
+	"CONSOLE_LANGUAGE": "Sprak     %16ls",
 	"AUTOBOOT": "AUTOMATISK OPPSTART",
-	"HOLD_BUTTON_ACTION": "Hold %ls for %ls\n",
-	"YES": "Ja",
-	"NO": "Nei"
+	"HOLD_R": "Hold R for å gå til menyen"
 }
