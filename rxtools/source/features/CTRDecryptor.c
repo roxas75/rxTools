@@ -22,7 +22,7 @@
 #include "common.h"
 #include "screenshot.h"
 #include "fs.h"
-#include "ff.h"
+#include "fatfs/ff.h"
 #include "console.h"
 #include "draw.h"
 #include "hid.h"

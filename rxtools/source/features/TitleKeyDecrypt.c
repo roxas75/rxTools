@@ -20,7 +20,7 @@
 #include "draw.h"
 #include "hid.h"
 #include "fs.h"
-#include "sdmmc.h"
+#include "fatfs/sdmmc.h"
 #include "CTRDecryptor.h"
 #include "crypto.h"
 #include "stdio.h"
