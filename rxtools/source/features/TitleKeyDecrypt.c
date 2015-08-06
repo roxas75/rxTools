@@ -18,7 +18,6 @@
 #include "TitleKeyDecrypt.h"
 #include "console.h"
 #include "draw.h"
-#include "lang.h"
 #include "hid.h"
 #include "fs.h"
 #include "fatfs/sdmmc.h"
@@ -28,8 +27,6 @@
 
 #define BUF1 (u8*)0x21000000
 #define TITLES (u8*)0x22000000
-
-#define PROGRESS_WIDTH	16
 
 // From https://github.com/profi200/Project_CTR/blob/master/makerom/pki/prod.h#L19
 static const u8 common_keyy[6][16] = {
@@ -80,16 +77,16 @@ u32 DecryptTitleKey(u8 *titleid, u8 *key, u32 index) {
 
 void DecryptTitleKeys() {
 	ConsoleInit();
-	ConsoleSetTitle(strings[STR_DECRYPT], strings[STR_TITLE_KEYS]);
+	ConsoleSetTitle(L"Title Key Dumper");
 	File tick;
 	File dump;
-	const char *filename="rxTools/decTitleKeys.bin";
-	print(strings[STR_OPENING], "ticket.db");
-	FileOpen(&dump, filename, 1);
+	print(L"Opening ticket.db...\n");
+	ConsoleShow();
+	FileOpen(&dump, "rxTools/decTitleKeys.bin", 1);
 	u32 tick_size = 0xD0000;     //Chunk size
 	nKey = 0; int nullbyte = 0;
 	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
-		print(strings[STR_DECRYPTING], strings[STR_TITLE_KEYS], filename);
+		print(L"Decrypting title keys...\n");
 		ConsoleShow();
 		u8 *buf = BUF1;
 		int pos = 0;
@@ -117,14 +114,11 @@ void DecryptTitleKeys() {
 		FileClose(&dump);
 		FileClose(&tick);
 	} else {
-		print(strings[STR_FAILED]);
+		print(L"FAILURE!\n");
 	}
-	FileWrite(&dump, &nKey, 4, 0);
-	FileWrite(&dump, &nullbyte, 4, 4);
-	FileWrite(&dump, &nullbyte, 4, 8);
-	FileWrite(&dump, &nullbyte, 4, 12);
+	FileWrite(&dump, &nKey, 4, 0); FileWrite(&dump, &nullbyte, 4, 4); FileWrite(&dump, &nullbyte, 4, 8); FileWrite(&dump, &nullbyte, 4, 12);
 	FileClose(&dump);
-	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+	print(L"\nPress Ⓐ to exit\n");
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -132,31 +126,27 @@ void DecryptTitleKeys() {
 /** This decrypts the encTitleKeys.bin inside RxTools directory on SD. */
 void DecryptTitleKeyFile(void) {
 	ConsoleInit();
-	ConsoleSetTitle(strings[STR_DECRYPT], strings[STR_TITLE_KEYS_FILE]);
+	ConsoleSetTitle(L"Title Key Decrypt");
 	FIL tick, dump;
 	FRESULT rr = 0;
 	UINT br = 0;
-	const char *filename = "rxTools/encTitleKeys.bin";
-	const char *filename2 = "rxTools/decTitleKeys.bin";
-	const char *filename3 = "rxTools/decTitleKeysA.bin";
-	print(strings[STR_OPENING], filename);
+	u8 step = 0;
+	print(L"Opening rxTools/encTitleKeys.bin...\n");
 	ConsoleShow();
 	//decTitleKeys.bin that generated from other stuff can be handled streamly.
-	FileOpen(&dump, filename2, 1);
-	rr = f_open(&dump, filename3, FA_WRITE | FA_CREATE_ALWAYS);
+	FileOpen(&dump, "rxTools/decTitleKeys.bin", 1);
+	rr = f_open(&dump, "rxTools/decTitleKeysA.bin", FA_WRITE | FA_CREATE_ALWAYS);
 	if (rr != FR_OK) {
 		f_close(&dump);
-		print(strings[STR_ERROR_OPENING], filename3);
-		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+		print(L"FAIL open rxTools/decTitleKeysA.bin [%04X].\n\nPress Ⓐ to exit\n", rr);
 		ConsoleShow();
 		WaitForButton(BUTTON_A);
 		return;
 	}
-	rr = f_open(&tick, filename, FA_READ | FA_OPEN_EXISTING);
+	rr = f_open(&tick, "rxTools/encTitleKeys.bin", FA_READ | FA_OPEN_EXISTING);
 	if (rr != FR_OK) {
 		f_close(&tick); f_close(&dump);
-		print(strings[STR_ERROR_OPENING], filename);
-		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+		print(L"FAIL open rxTools/encTitleKeys.bin [%04X].\n\nPress Ⓐ to exit\n", rr);
 		ConsoleShow();
 		WaitForButton(BUTTON_A);
 		return;
@@ -167,54 +157,31 @@ void DecryptTitleKeyFile(void) {
 	u32 kindex = 0, nkeys = 0;
 	u8 titleid[8] = {0,};
 	u8 key[16] = {0,};
-	wchar_t progressbar[41] = {0,};
-	wchar_t* progress = progressbar;
-	for(i=0; i<PROGRESS_WIDTH; i++)
-		wcscat(progressbar, strings[STR_PROGRESS]);
+	wchar_t* progressbar = L"[          ]";
+	wchar_t* progress = progressbar+1;
 	u8 percent = 0;
+	step = 1;
 
 	rr = f_read(&tick, line, sizeof(line), &br);
-	if ((rr != FR_OK)||(br != sizeof(line)))
-	{
-		print(strings[STR_ERROR_READING], filename);
-		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-		ConsoleShow();
-		WaitForButton(BUTTON_A);
-		return;
-	}
+	if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
 	keycount = line[0];
 	if (f_size(&tick) != 0x10 + 0x20*keycount) {
-		print(strings[STR_KEYS_MISMATCH], keycount, 0x10 + 0x20*keycount, f_size(&tick));
-		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-		ConsoleShow();
-		WaitForButton(BUTTON_A);
-		return;
+		print(L"encrypted keys binary size mismatch. Retry later?\nkeys count: %04X\n length: E@%08X, A@%08X\n", keycount, 0x10 + 0x20*keycount, f_size(&tick));
+		goto ioerror;
 	}
 
-	print(progressbar);
+	print(L"%d encrypted keys found.\n%s%04X/%04X\n", keycount, progressbar, i, keycount);
 	ConsoleShow();
 	ConsolePrevLine();
 
 	f_lseek(&dump, 0x10);
 	for (i = 0; i < keycount; i ++) {
 		rr = f_read(&tick, line, sizeof(line), &br);
-		if ((rr != FR_OK)||(br != sizeof(line))) {
-			print(strings[STR_ERROR_READING], filename);
-			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
-			return;
-		}
+		if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
 		kindex = line[0]; //Title Type which decides which common KeyY.
 		memcpy(titleid, line + 2, 8);
 		rr = f_read(&tick, line, sizeof(line), &br);
-		if ((rr != FR_OK)||(br != sizeof(line))) {
-			print(strings[STR_ERROR_READING], filename);
-			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
-			return;
-		}
+		if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
 		memcpy(key, line, 16);
 
 		memcpy(TITLES + nkeys * 8, titleid, 8);
@@ -223,50 +190,35 @@ void DecryptTitleKeyFile(void) {
 		line[1] = 0;
 		memcpy(line + 2, titleid, 8);
 		rr = f_write(&dump, line, sizeof(line), &br);
-		if ((rr != FR_OK)||(br != sizeof(line))) {
-			print(strings[STR_ERROR_WRITING], filename3);
-			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
-			return;
-		}
+		if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
 		DecryptTitleKey(titleid, key, kindex);
 		rr = f_write(&dump, key, sizeof(key), &br);
-		if ((rr != FR_OK)||(br != sizeof(key))) {
-			print(strings[STR_ERROR_WRITING], filename3);
-			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
-			return;
-		}
+		if ((rr != FR_OK)||(br != sizeof(key))) goto ioerror;
 		nkeys ++;
 
-		if (percent < i*PROGRESS_WIDTH/keycount) {
+		if (percent < i*10/keycount) {
 			percent++;
-			wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-			progress += wcslen(strings[STR_PROGRESS_OK]);
-			print(progressbar);
+			*(progress++) = L'=';
+			print(L"%s%04X/%04X\n", progressbar, i, keycount);
 			ConsoleShow();
 			ConsolePrevLine();
 		}
 	}
 	percent++;
-	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-	progress += wcslen(strings[STR_PROGRESS_OK]);
-	print(progressbar);
+	*(progress++) = L'=';
+	print(L"%s%04X/%04X\n", progressbar, i, keycount);
 	ConsoleShow();
 	rr = f_write(&dump, line, sizeof(line), &br);
-	if ((rr != FR_OK)||(br != sizeof(line))) 
-	{
-		print(strings[STR_ERROR_WRITING], filename3);
-		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-		ConsoleShow();
-		WaitForButton(BUTTON_A);
-		return;
-	}
+	if ((rr != FR_OK)||(br != sizeof(line))) goto ioerror;
 	f_close(&tick); f_close(&dump);
-	print(strings[STR_DECRYPTED], nkeys, strings[STR_TITLE_KEYS]);
-	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+	print(L"DONE %04X keys decrypted.\n\nPress Ⓐ to exit\n", nkeys);
+	ConsoleShow();
+	WaitForButton(BUTTON_A);
+	return;
+
+ioerror:
+	print(L"FAIL IO when %d. T@%08X,D@%08X,[%04X]\n\nPress Ⓐ to exit\n", step, f_tell(&tick), f_tell(&dump), rr);
+	f_close(&tick); f_close(&dump);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 	return;

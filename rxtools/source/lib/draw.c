@@ -23,7 +23,6 @@
 #include "fs.h"
 #include "font.h"
 #include "draw.h"
-#include "lang.h"
 
 u32 current_y = 1;
 
@@ -223,9 +222,7 @@ void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[])
 	}
 	else
 	{
-		wchar_t tmp[256];
-		swprintf(tmp, sizeof(tmp)/sizeof(tmp[0]), strings[STR_ERROR_OPENING], splash_file);
-		DrawString(BOT_SCREEN, tmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+		DrawString(BOT_SCREEN, L"MISSING THEME FILES!", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
 	}
 }
 
@@ -247,8 +244,6 @@ void DrawSplash(u8 *screen, char splash_file[]) {
 	}
 	else
 	{
-		wchar_t tmp[256];
-		swprintf(tmp, sizeof(tmp)/sizeof(tmp[0]), strings[STR_ERROR_OPENING], splash_file);
-		DrawString(BOT_SCREEN, tmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+		DrawString(BOT_SCREEN, L"MISSING THEME FILES!", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
 	}
 }
