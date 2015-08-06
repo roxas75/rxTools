@@ -30,7 +30,6 @@ enum {
 	CTRNAND = 0x0B95CA00,
 } NAND_PARTITIONS;
 
-
 int GetSystemVersion();
 void FSNandInitCrypto(void);
 int checkEmuNAND();

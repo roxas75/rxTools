@@ -42,28 +42,6 @@ char str[100];
 unsigned int emuNandMounted = 0;
 void (*_softreset)() = (void*)0x080F0000;
 
-//----------- only for n3ds code --------------
-#define DATAFOLDER	"rxtools/data"
-#define KEYFILENAME	"slot0x25KeyX.bin"
-#define WORKBUF		(u8*)0x21000000
-#define NAT_SIZE	0xF1000
-#define AGB_SIZE	0xD9C00
-#define TWL_SIZE	0x1A1C00
-#define PROGRESS_OK	L'?'
-#define PROGRESS_FAIL	L'?'
-#define PROGRESS_X	(SCREEN_WIDTH-7*FONT_WIDTH)/2
-
-bool first_boot;
-char tmpstr1[256] = { 0 };
-char str[100];
-char strl[100];
-char strr[100];
-File tempfile;
-UINT tmpu32;
-
-//------- end of "only for n3ds code" ---------
-
-
 // @breif  Determine platform of the console.
 // @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
 // @note   Maybe modified to support more platforms
@@ -185,58 +163,11 @@ void setAgbBios()
 }
 
 int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
-
-	if (Platform_CheckUnit() == PLATFORM_N3DS) //Patch at every boot, only for n3ds testing
-	{
-		DrawString(BOT_SCREEN, L"PREPARING RXMODE BOOT FOR N3DS", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, WHITE, BLACK);
-		static const FirmInfo native_info = { 0x66A00, 0x8A600, 0x08006000, 0x33A00, 0x33000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000 };
-
-		char* drive = "0";
-		//Create the workdir
-		sprintf(tmpstr1, "%s:%s", drive, DATAFOLDER);
-		f_mkdir(tmpstr1);
-
-		FIL firmfile;
-
-		//Read firmware data
-		f_open(&firmfile, "firm.dat", FA_READ | FA_OPEN_EXISTING);
-
-		//Create patched native_firm
-		f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
-		u8* n_firm = WORKBUF;
-		applyPatch(n_firm, "/rxTools/system/patches/native_firm.elf", &native_info);
-		u8 keyx[16] = { 0 };
-		if (GetSystemVersion() < 3){
-			if (!FileOpen(&tempfile, KEYFILENAME, 0))
-			{
-				f_close(&firmfile);
-			}
-			FileRead(&tempfile, &keyx[0], 16, 0);
-			FileClose(&tempfile);
-		}
-		DrawString(BOT_SCREEN, L"FIRM PATCHED", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, WHITE, BLACK);
-
-		*((unsigned int*)(FIRM_ADDR + 0x7B0BC)) = checkEmuNAND() - 1;
-
-		DrawString(BOT_SCREEN, L"aaaabbbb THING DONE", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, WHITE, BLACK);
-		sprintf(tmpstr1, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
-		if (FileOpen(&tempfile, tmpstr1, 1)){
-			FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
-			FileClose(&tempfile);
-		}
-		else {
-			f_close(&firmfile);
-		}
-		DrawString(BOT_SCREEN, L"READY TO BOOT", FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, WHITE, BLACK);
-	}
-
-	//Boot
 	setFirmMode(mode);
-	if (Platform_CheckUnit() == PLATFORM_3DS) setAgbBios();
-
+	setAgbBios();
 	File myFile;
 	u8* native_firm = (u8*)0x21000000;
-	if (FileOpen(&myFile, "rxtools/data/0004013800000002.bin", 0)){
+	if(FileOpen(&myFile, "rxtools/data/0004013800000002.bin", 0)){
 		FileRead(&myFile, native_firm, 0xF0000, 0);
 		FileClose(&myFile);
 		firmlaunch(native_firm);
