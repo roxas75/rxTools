@@ -1,15 +1,12 @@
 {
 	"LANG_NAME": "Chinese simp.",
-	"SETTINGS": "设置选项",
+
 	"FORCE_UI_BOOT": "启动时强制进菜单       %ls",
 	"SELECTED_THEME": "选择主题            <%3c  >",
 	"SHOW_AGB": "显示AGB_FIRM BIOS      %ls",
 	"ENABLE_3D_UI": "启用3D界面             %ls",
 	"QUICK_BOOT": "快速启动               %ls",
-	"MENU_LANGUAGE": "界面语言  %16ls",
-	"CHOOSE": "请选择要使用的%ls\n",
-	"CANCEL": "返回",
+	"CONSOLE_LANGUAGE": "界面语言  %16ls",
 	"AUTOBOOT": "自动启动",
-	"YES": "是",
-	"NO": "否"
+	"HOLD_R": "按住R键进入菜单"
 }

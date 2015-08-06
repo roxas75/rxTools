@@ -1,16 +1,12 @@
 {
 	"LANG_NAME": "Croatian",
-	"SETTINGS": "Postavke",
+
 	"FORCE_UI_BOOT": "Forsiraj ulazak u UI   %ls",
 	"SELECTED_THEME": "Izabrana tema       <%3c  >",
 	"SHOW_AGB": "Prikazi AGB_FIRM       %ls",
 	"ENABLE_3D_UI": "Ukljuci 3D UI          %ls",
 	"QUICK_BOOT": "Brzo Paljenje          %ls",
-	"MENU_LANGUAGE": "Jezik     %16ls",
-	"CHOOSE": "Izaberi %ls:\n", 
-	"CANCEL": "povratak",
+	"CONSOLE_LANGUAGE": "Jezik     %16ls",
 	"AUTOBOOT": "Automatsko pokretanje",
-	"HOLD_BUTTON_ACTION": "Pridrzite tipku %ls da bi %ls\n",
-	"YES": "Da",
-	"NO": "Ne"
+	"HOLD_R": "Pridrzite tipku R da bi ste usli u meni"
 }
