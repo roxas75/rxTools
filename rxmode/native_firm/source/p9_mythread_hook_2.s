@@ -15,9 +15,10 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ p9 mythread hook
+.section .patch.p9.mythread.addr, "a"
 .arm
 .align 2
 
-	.word 0x0801A6E0	//This is our CreateThread code address, we'll compile it with gcc
+	.word CreateMyThread
 
 .pool

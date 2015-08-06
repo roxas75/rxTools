@@ -15,7 +15,7 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ k9 fix flags
-.thumb
+.section .patch.k9.flags, "a"
 
     .word 0x360003
     .word 0x10100000

@@ -88,7 +88,7 @@ EMUNAND_WRITE:
                  LDMFD   SP!, {R1-R7,LR}
                  BX      LR
 
-
+.global EMUNAND_READ
 EMUNAND_READ:
 				 STMFD   SP!, {R0-R3}
                  MOV     R3, R0
