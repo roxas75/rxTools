@@ -13,17 +13,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+CODE_FILE := code.bin
+CODE_PATH := rxTools/system/
+SET_CODE_PATH := CODE_PATH=$(CODE_PATH)$(CODE_FILE)
+
 CFLAGS = -std=c11 -O2 -Wall -Wextra
-CAKEFLAGS = dir_out=$(CURDIR) name=rxTools.dat
+CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) path=$(CODE_PATH)
 
 RXMODE_TARGETS = rxmode/native_firm/native_firm.elf rxmode/agb_firm/agb_firm.elf	\
 	rxmode/twl_firm/twl_firm.elf
 
-all: rxTools.dat
+all: $(CODE_FILE)
 
 .PHONY: distclean
 distclean: clean
-	@rm -rf release/rxTools.dat release/ninjhax release/mset release/rxTools/system release/rxTools/theme release/*.pdf
+	@rm -rf release/ninjhax release/mset release/rxTools/system release/rxTools/theme release/*.pdf
 
 .PHONY: clean
 clean:
@@ -32,26 +36,22 @@ clean:
 	@$(MAKE) -C rxmode/agb_firm clean
 	@$(MAKE) -C rxmode/twl_firm clean
 	@$(MAKE) -C reboot clean
-	@$(MAKE) -C brahma clean
+	@$(MAKE) $(SET_CODE_PATH) -C brahma clean
 	@$(MAKE) -C theme clean
-	@$(MAKE) -C rxinstaller clean
+	@$(MAKE) $(SET_CODE_PATH) -C rxinstaller clean
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
-	@rm -f payload.bin rxTools.dat
+	@rm -f payload.bin $(CODE_FILE)
 
-release: rxTools.dat rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
+release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 	all-target-brahma all-target-theme rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax release/rxTools
-	@cp rxTools.dat release
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
 	@cp rxinstaller.nds release/mset/rxinstaller.nds
 
 	@mkdir -p release/rxTools/system release/rxTools/theme
 
-	@mkdir -p release/rxTools/theme/0
-	@mv theme/*.bin release/rxTools/theme/0
-	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
-
+	@cp $(CODE_FILE) release/rxTools/system
 	@cp rxtools/font.bin release/rxTools/system
 	@cp reboot/reboot.bin release/rxTools/system
 
@@ -60,17 +60,21 @@ release: rxTools.dat rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 	@cp rxmode/agb_firm/agb_firm.elf release/rxTools/system/patches
 	@cp rxmode/twl_firm/twl_firm.elf release/rxTools/system/patches
 
+	@mkdir -p release/rxTools/theme/0
+	@mv theme/*.bin release/rxTools/theme/0
+	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
+
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
 
-rxTools.dat: rxtools/rxtools.bin
+$(CODE_FILE): rxtools/rxtools.bin
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax bigpayload
 	@dd if=rxtools/rxtools.bin of=$@ seek=272 conv=notrunc
 
 rxinstaller.nds:
-	@$(MAKE) -C rxinstaller
+	@$(MAKE) $(SET_CODE_PATH) -C rxinstaller
 
 all-target-brahma:
-	$(MAKE) -C brahma
+	$(MAKE) $(SET_CODE_PATH) -C brahma
 
 reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
