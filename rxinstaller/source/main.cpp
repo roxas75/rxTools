@@ -145,7 +145,6 @@ int main(int argc, char **argv) {
 	int patchfile = 0;
 	int header;
 	rawDataOffset=0;
-	char rxTools[]="YS:/rxTools.dat";
     char custom[6][35];
 
 	aread(&header,1,4,patchfile);
@@ -283,7 +282,7 @@ int main(int argc, char **argv) {
 
     if (fwSelected < (int)patches.size()) {
         for(int i=0;i< 32;i+=2){
-            *(workbuffer+0x11C+i)=rxTools[i/2];
+            *(workbuffer+0x11C+i)=(L"YS:/" CODE_PATH)[i/2];
             *(workbuffer+0x11C+i+1)=0;
         }
     } else {

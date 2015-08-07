@@ -119,7 +119,7 @@ source/lib/font.h: font.bin
 	@rm font.h font.tmp
 
 font.bin: unifont-8.0.01.bmp
-	@convert -crop 4096x4096+32+64 -depth 1 -negate -transpose $< - | convert -crop 16x4096 -append - gray:$@;
+	@convert -crop 4096x4096+32+64 -transpose $< - | convert -crop 16x4096 -append - - | convert -roll +8 -negate -depth 1 - gray:$@;
 
 $(BUILD): source/lib/font.h
 	@[ -d $@ ] || mkdir -p $@

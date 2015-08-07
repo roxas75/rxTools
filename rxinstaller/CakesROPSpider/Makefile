@@ -1,11 +1,13 @@
 export PATH	:= $(DEVKITARM)/bin:$(PATH)
 
+CODE_PATH	:= rxTools/system/code.bin
+
 AS	:= arm-none-eabi-as
 CC	:= arm-none-eabi-gcc
 LD	:= arm-none-eabi-ld
 OC	:= arm-none-eabi-objcopy
 
-CFLAGS	:= -fshort-wchar -fomit-frame-pointer -std=gnu99 -Os -g -march=armv6k -mtune=mpcore -I../include
+CFLAGS	:= -fshort-wchar -fomit-frame-pointer -std=gnu99 -Os -g -march=armv6k -mtune=mpcore -I../include -DCODE_PATH=\"$(CODE_PATH)\"
 LDFLAGS	:= -T crs.ld
 OCFLAGS	:= -R .compat
 
