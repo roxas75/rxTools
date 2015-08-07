@@ -21,6 +21,10 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+ifndef CODE_PATH
+$(error "Please set CODE_PATH")
+endif
+
 include $(DEVKITARM)/ds_rules
 
 #---------------------------------------------------------------------------------
@@ -58,7 +62,7 @@ GAME_SUBTITLE2 := Roxas75
 ARCH := -marm -mthumb-interwork -march=armv5te -mtune=arm946e-s
 
 CFLAGS   := -Wno-multichar -g -Wall -O3\
-            $(ARCH) $(INCLUDE) -DARM9
+            $(ARCH) $(INCLUDE) -DARM9 -DCODE_PATH=\"$(CODE_PATH)\"
 CXXFLAGS := $(CFLAGS) -fno-rtti -fno-exceptions -O3
 ASFLAGS  := -g $(ARCH)
 LDFLAGS   = -specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
@@ -185,7 +189,7 @@ patches: patches.elf
 	$(OBJCOPY) -O binary $^ $@
 
 patches.elf: patches.S
-	$(CC) -nostartfiles -nostdlib -Ttext=0 patches.S -o $@
+	$(CC) -DCODE_PATH=\"$(CODE_PATH)\" -nostartfiles -nostdlib -Ttext=0 patches.S -o $@
 
 #---------------------------------------------------------------------------------
 else

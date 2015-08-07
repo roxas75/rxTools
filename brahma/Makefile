@@ -6,6 +6,10 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+ifndef CODE_PATH
+$(error "Please set CODE_PATH")
+endif
+
 TOPDIR ?= $(CURDIR)
 include $(DEVKITARM)/3ds_rules
 
@@ -44,7 +48,7 @@ CFLAGS	:=	-g -Wall -O3 -mword-relocations \
 			-fomit-frame-pointer -ffast-math \
 			$(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DARM_ARCH -w
+CFLAGS	+=	$(INCLUDE) -DARM11 -D_3DS -DARM_ARCH -DCODE_PATH=\"$(CODE_PATH)\" -w
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions -std=gnu++11 -w
 

@@ -70,7 +70,6 @@ void UserSettingsCRC(void *buffer)
 // Apply zoogie patches
 int ApplyPatch(const u8 *patchBuf, u8 *work, u32 sel)
 {
-	const wchar_t rxTools[] = L"YS:/rxTools.dat";
 	u32 magic = *(u32 *)(patchBuf);
 	if(magic != 0x524f5050)
 		return -1;
@@ -114,7 +113,7 @@ int ApplyPatch(const u8 *patchBuf, u8 *work, u32 sel)
 		}
 	}
 	else
-		compat.app.memcpy(name, rxTools, PAYLOAD_FNAME_LEN);
+		compat.app.memcpy(name, L"YS:/" CODE_PATH, PAYLOAD_FNAME_LEN);
 
 	// Fix CRCs
 	UserSettingsCRC(work);
