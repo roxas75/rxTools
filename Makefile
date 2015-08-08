@@ -18,7 +18,8 @@ CODE_PATH := rxTools/system/
 SET_CODE_PATH := CODE_PATH=$(CODE_PATH)$(CODE_FILE)
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
-CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) path=$(CODE_PATH)
+CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(CODE_PATH)
+#CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE)
 
 RXMODE_TARGETS = rxmode/native_firm/native_firm.elf rxmode/agb_firm/agb_firm.elf	\
 	rxmode/twl_firm/twl_firm.elf

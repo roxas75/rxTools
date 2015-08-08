@@ -41,9 +41,8 @@
 #define NAT_SIZE	0xEBC00
 #define AGB_SIZE	0xD9C00
 #define TWL_SIZE	0x1A1C00
-#define PROGRESS_OK	L'⬛'
-#define PROGRESS_FAIL	L'✖'
-#define PROGRESS_X	(SCREEN_WIDTH-7*FONT_WIDTH)/2
+#define PROGRESS_WIDTH	7
+#define PROGRESS_X	(SCREEN_WIDTH-PROGRESS_WIDTH*FONT_WIDTH)/2
 
 bool first_boot;
 char tmpstr[256] = {0};
@@ -249,7 +248,9 @@ int InstallData(char* drive){
 	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
 	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
 	FIL firmfile;
-	wchar_t *progressbar = L"⬜⬜⬜⬜⬜⬜⬜";
+	wchar_t progressbar[41] = {0,};
+	for(int i=0; i<PROGRESS_WIDTH; i++)
+		wcscat(progressbar, strings[STR_PROGRESS]);
 	wchar_t *progress = progressbar+0;
 	print(L"%ls", progressbar);
 	ConsolePrevLine();
@@ -260,7 +261,8 @@ int InstallData(char* drive){
 
 	//Read firmware data
 	if (f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
-	*progress++ = PROGRESS_OK;
+	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
+	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create patched native_firm
@@ -279,7 +281,8 @@ int InstallData(char* drive){
 		FileRead(&tempfile, &keyx[0], 16, 0);
 		FileClose(&tempfile);
 	}
-	*progress++ = PROGRESS_OK;
+	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
+	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	for(int i = 0; i < NAT_SIZE; i+=0x4){
 		if(!strcmp((char*)n_firm + i, "InsertKeyXHere!") && keyx[0] != 0){
@@ -289,7 +292,8 @@ int InstallData(char* drive){
 			*((unsigned int*)(n_firm + i)) = (checkEmuNAND() / 0x200) - 1;
 		}
 	}
-	*progress++ = PROGRESS_OK;
+	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
+	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
@@ -299,7 +303,8 @@ int InstallData(char* drive){
 		f_close(&firmfile);
 		return CONF_ERRNFIRM;
 	}
-	*progress++ = PROGRESS_OK;
+	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
+	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create AGB patched firmware
@@ -345,9 +350,11 @@ int InstallData(char* drive){
 			f_close(&firmfile);
 			return CONF_ERRNFIRM;
 		}
-		*progress++ = PROGRESS_OK;
+		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
+		progress += wcslen(strings[STR_PROGRESS_OK]);
 	} else {
-		*progress++ = PROGRESS_FAIL; //If we get here, then we'll play without AGB, lol
+		wcsncpy(progress, strings[STR_PROGRESS_FAIL], wcslen(strings[STR_PROGRESS_FAIL]));
+		progress += wcslen(strings[STR_PROGRESS_FAIL]); //If we get here, then we'll play without AGB, lol
 	}
 
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
@@ -368,9 +375,11 @@ int InstallData(char* drive){
 			f_close(&firmfile);
 			return CONF_ERRNFIRM;
 		}
-		*progress++ = PROGRESS_OK;
+		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
+		progress += wcslen(strings[STR_PROGRESS_OK]);
 	}else{
-		*progress++ = PROGRESS_FAIL;
+		wcsncpy(progress, strings[STR_PROGRESS_FAIL], wcslen(strings[STR_PROGRESS_FAIL]));
+		progress += wcslen(strings[STR_PROGRESS_FAIL]);
 	}
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
@@ -383,7 +392,8 @@ int InstallData(char* drive){
 		f_close(&firmfile);
 		return CONF_CANTOPENFILE;
 	}
-	*progress++ = PROGRESS_OK;
+	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
+	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	f_close(&firmfile);
