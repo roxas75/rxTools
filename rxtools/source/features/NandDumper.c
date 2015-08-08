@@ -79,7 +79,7 @@ void NandDumper(){
 		x += FONT_HWIDTH * 2;
 
 		DrawString(BOT_SCREEN, ProgressBar, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-		swprintf(tmpstr, STR_MAX_LEN, strings[STR_PRESS_BUTTON_ACTION], strings[BUTTON_B], strings[STR_CANCEL]);
+		swprintf(tmpstr, STR_MAX_LEN, strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_CANCEL]);
 		DrawString(BOT_SCREEN, tmpstr, x, y + FONT_HEIGHT*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 		for(int count = 0; count < NAND_SIZE/NAND_SECTOR_SIZE/nsectors; count++){
