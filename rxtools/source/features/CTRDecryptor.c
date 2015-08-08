@@ -164,7 +164,7 @@ int ProcessCTR(char* path){
 			myInfo.keyslot = NEWCRYPTO ? 0x25 : 0x2C;
 			myInfo.ctr = CTR;
 			myInfo.keyY = NCCH.signature;
-			for(int i = 0; i < getle32(NCCH.romfssize) * mediaunitsize / BLOCK_SIZE; i++){
+			for(int i = 0; i < (getle32(NCCH.romfssize) * mediaunitsize + BLOCK_SIZE - 1) / BLOCK_SIZE; i++){
 				print(L"%3d%%", (int)((i*BLOCK_SIZE)/(getle32(NCCH.romfssize) * mediaunitsize/ 100)));
 				for(int j = 0; j < 4; j++) ConsolePrev();
 				ConsoleShow();
@@ -172,7 +172,7 @@ int ProcessCTR(char* path){
 				myInfo.size = bytesRead;
 				DecryptPartition(&myInfo);
 				add_ctr(myInfo.ctr, bytesRead/16);
-				FileWrite(&myFile, BUFFER_ADDR, BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
+				FileWrite(&myFile, BUFFER_ADDR, bytesRead, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
 			}
 			print(L"\n");
 		}
