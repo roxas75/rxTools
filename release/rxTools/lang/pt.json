@@ -8,5 +8,5 @@
 	"QUICK_BOOT": "Inicio rapido          %ls",
 	"MENU_LANGUAGE": "Idioma    %16ls",
 	"AUTOBOOT": "INICIO AUTOMATICO",
-	"HOLD_BUTTON_ACTION": "Precione %ls para %ls"
+	"HOLD_BUTTON_ACTION": "Pressione %ls para %ls"
 }
