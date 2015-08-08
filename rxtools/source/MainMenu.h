@@ -35,11 +35,6 @@
 #include "configuration.h"
 #include "lang.h"
 
-#define ENABLED		L"✔"
-#define DISABLED	L"✘"
-//#define ENABLED		L"⦿"
-//#define DISABLED	L"⦾"
-
 static void returnHomeMenu(){
 	i2cWriteRegister(I2C_DEV_MCU, 0x20, (unsigned char)(1<<2));
 }
@@ -118,57 +113,57 @@ static Menu SettingsMenu = {
 void DecryptMenuInit(){
 	MenuInit(&DecryptMenu);
 	MenuShow();
-    while (true) {
-        u32 pad_state = InputWait();
+	while (true) {
+		u32 pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
 		if(pad_state & BUTTON_B) 	break;
 		TryScreenShot();
 		MenuShow();
-    }
+	}
 }
 
 void DumpMenuInit(){
 	MenuInit(&DumpMenu);
 	MenuShow();
-    while (true) {
-        u32 pad_state = InputWait();
+	while (true) {
+		u32 pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
 		if(pad_state & BUTTON_B) 	break;
 		TryScreenShot();
 		MenuShow();
-    }
+	}
 }
 
 void InjectMenuInit(){
 	MenuInit(&InjectMenu);
 	MenuShow();
-    while (true) {
-        u32 pad_state = InputWait();
+	while (true) {
+		u32 pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
 		if(pad_state & BUTTON_B) 	break;
 		TryScreenShot();
 		MenuShow();
-    }
+	}
 }
 
 void AdvancedMenuInit(){
 	MenuInit(&AdvancedMenu);
 	MenuShow();
-    while (true) {
-        u32 pad_state = InputWait();
+	while (true) {
+		u32 pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
 		if(pad_state & BUTTON_B) 	break;
 		TryScreenShot();
 		MenuShow();
-    }
+	}
 }
 
 void SettingsMenuInit(){
@@ -323,12 +318,13 @@ void SettingsMenuInit(){
 		TryScreenShot();
 		
 		//UPDATE SETTINGS GUI
-		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SELECTED_THEME], theme_num + 0x30);
-		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? ENABLED : DISABLED);
-		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_CONSOLE_LANGUAGE], strings[STR_LANG_NAME]);
+		swprintf(MyMenu->Name, CONSOLE_MAX_TITLE_LENGTH+1, strings[STR_SETTINGS]);
+		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SELECTED_THEME], theme_num + '0');
+		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
 		MenuRefresh();
 	}
 }
