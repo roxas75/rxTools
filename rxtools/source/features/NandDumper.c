@@ -89,7 +89,7 @@ void NandDumper(){
 
 			FileWrite(&myFile, buf, nsectors*NAND_SECTOR_SIZE, count*NAND_SECTOR_SIZE*nsectors);
 			TryScreenShot();
-			if((count % (int)(NAND_SIZE/NAND_SECTOR_SIZE/nsectors/16)) == 0 && count != 0){
+			if((count % (int)(NAND_SIZE/NAND_SECTOR_SIZE/nsectors/PROGRESS_WIDTH)) == 0 && count != 0){
 				DrawString(BOT_SCREEN, strings[STR_PROGRESS_OK], x+(FONT_WIDTH*(progress++)), y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 			}
 			unsigned int pad = GetInput();
@@ -190,7 +190,7 @@ void DumpNANDSystemTitles(){
 		if(*((char*)BUF1 + 0x100) == 'N' && *((char*)BUF1 + 0x101) == 'C' && *((char*)BUF1 + 0x102) == 'C' && *((char*)BUF1 + 0x103) == 'H'){
 			ctr_ncchheader ncch;
 			memcpy((void*)&ncch, BUF1, 0x200);
-			sprintf(filename, "%s/%s%08X%08X.app", isEmuNand ? "emu_" : "", outfolder, *((unsigned int*)(BUF1 + 0x10C)), *((unsigned int*)(BUF1 + 0x108)));
+			sprintf(filename, "%s/%s%08X%08X.app", outfolder, isEmuNand ? "emu_" : "", *((unsigned int*)(BUF1 + 0x10C)), *((unsigned int*)(BUF1 + 0x108)));
 			ConsoleInit();
 			print(strings[STR_DUMPING], L"", filename);
 			ConsoleShow();
