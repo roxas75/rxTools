@@ -33,7 +33,7 @@ void PadGen(){
 	SdPadgen();
 	ConsoleShow();
 
-	print(strings[STR_PRESS_BUTTON_ACTION], strings[BUTTON_A], strings[STR_CONTINUE]);
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
