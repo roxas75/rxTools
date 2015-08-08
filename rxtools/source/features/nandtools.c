@@ -20,6 +20,7 @@
 #include "nandtools.h"
 #include "console.h"
 #include "draw.h"
+#include "lang.h"
 #include "hid.h"
 #include "fs.h"
 #include "screenshot.h"
@@ -38,11 +39,11 @@ static struct {
     char* name;
     char* path;
 } CoolFiles[] = {
-    {"movable.sed", "private/movable.sed"},
-    {"SecureInfo_A", "rw/sys/SecureInfo_A"},
-    {"LocalFriendCodeSeed_B", "rw/sys/LocalFriendCodeSeed_B"},
-    {"rand_seed", "rw/sys/rand_seed"},
-    {"ticket.db", "dbs/ticket.db"},
+    {"movable.sed", "private"},
+    {"SecureInfo_A", "rw/sys"},
+    {"LocalFriendCodeSeed_B", "rw/sys"},
+    {"rand_seed", "rw/sys"},
+    {"ticket.db", "dbs"},
 };
 
 static Menu CoolFilesMenu = {
@@ -85,58 +86,62 @@ void dumpCoolFiles()
 
 	if (selectedFile == -1) return;
 	ConsoleInit();
-	ConsoleSetTitle(L"File Dumper: %s", CoolFiles[selectedFile].name);
+	ConsoleSetTitle(strings[STR_DUMP], strings[STR_FILES]);
 
-	char dest[256], tmpstr[256];
+	char dest[256], tmpstr[sizeof(dest)];
+	wchar_t wdest[sizeof(dest)];
 	sprintf(dest, "rxTools/%s", CoolFiles[selectedFile].name);
-	sprintf(tmpstr, "%d:%s", nandtype, CoolFiles[selectedFile].path);
-	print(L"Dumping...\n");
+	sprintf(tmpstr, "%d:%s/%s", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name);
+	mbstowcs(wdest, dest, sizeof(dest));
+	print(strings[STR_DUMPING], tmpstr, wdest);
 	ConsoleShow();
 
 	unsigned int res = FSFileCopy(dest, tmpstr);
-	if (res != 0 && selectedFile == 1)
-	{
-		/* Fix for SecureInfo_B */
-		print(L"Error. Trying with SecureInfo_B...\n");
-		sprintf(dest, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
-		sprintf(tmpstr, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
-		res = FSFileCopy(dest, tmpstr);
-	} else
-	if (res != 0 && selectedFile == 2)
-	{
-		/* Fix for LocalFriendCodeSeed_A */
-		print(L"Error. Trying with LocalFriendCodeSeed_A...\n");
-		sprintf(dest, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
-		sprintf(tmpstr, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
+	if (res != 0 && (selectedFile == 1 || selectedFile == 2)){
+		if (selectedFile == 1)
+		{
+			/* Fix for SecureInfo_B */
+			sprintf(dest, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
+			sprintf(tmpstr, "%d:%s/%.11s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'B');
+		}
+		else if (selectedFile == 2)
+		{
+			/* Fix for LocalFriendCodeSeed_A */
+			sprintf(dest, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
+			sprintf(tmpstr, "%d:%s/%.20s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'A');
+		}
+		mbstowcs(wdest, dest, sizeof(wdest));
+		print(strings[STR_FAILED]);
+		print(strings[STR_DUMPING], tmpstr, wdest);
+		ConsoleShow();
 		res = FSFileCopy(dest, tmpstr);
 	}
 
-	wchar_t *showres;
 	switch ((res >> 8) & 0xFF)
 	{
 		case 0:
-			showres = L"Success!";
+			print(strings[STR_COMPLETED]);
 			break;
 		case 1:
-			showres = L"Error opening input file.";
+			print(strings[STR_ERROR_OPENING], tmpstr);
 			break;
 		case 2:
-			showres = L"Error creating output file.";
+			print(strings[STR_ERROR_CREATING], dest);
 			break;
 		case 3:
 		case 4:
-			showres = L"Error reading input file.";
+			print(strings[STR_ERROR_READING], tmpstr);
 			break;
 		case 5:
 		case 6:
-			showres = L"Error writing output file.";
+			print(strings[STR_ERROR_WRITING], dest);
 			break;
 		default:
-			showres = L"Failure!";
+			print(strings[STR_FAILED]);
 			break;
 	}
 
-	print(L"%ls\n\nPress Ⓐ to exit\n", showres);
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
@@ -162,58 +167,60 @@ void restoreCoolFiles()
 
 	if (selectedFile == -1) return;
 	ConsoleInit();
-	ConsoleSetTitle(L"File Inject: %s", CoolFiles[selectedFile].name);
+	ConsoleSetTitle(strings[STR_INJECT], strings[STR_FILES]);
 
-	char dest[256], tmpstr[256];
+	char dest[256], tmpstr[sizeof(dest)];
+	wchar_t wsrc[sizeof(dest)];
 	sprintf(tmpstr, "rxTools/%s", CoolFiles[selectedFile].name);
-	sprintf(dest, "%d:%s", nandtype, CoolFiles[selectedFile].path);
-	print(L"Injecting...\n");
+	sprintf(dest, "%d:%s/%s", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name);
+	print(strings[STR_INJECTING], tmpstr, dest);
 	ConsoleShow();
 
 	unsigned int res = FSFileCopy(dest, tmpstr);
-	if (res != 0 && selectedFile == 1)
-	{
-		/* Fix for SecureInfo_B */
-		print(L"Error. Trying with SecureInfo_B...\n");
-		sprintf(tmpstr, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
-		sprintf(dest, "%d:%.18s%c", nandtype, CoolFiles[selectedFile].path, 'B');
-		res = FSFileCopy(dest, tmpstr);
-	} else
-	if (res != 0 && selectedFile == 2)
-	{
-		/* Fix for LocalFriendCodeSeed_A */
-		print(L"Error. Trying with LocalFriendCodeSeed_A...\n");
-		sprintf(tmpstr, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
-		sprintf(dest, "%d:%.27s%c", nandtype, CoolFiles[selectedFile].path, 'A');
+	if (res != 0 && (selectedFile == 1 || selectedFile == 2)){
+		if (selectedFile == 1)
+		{
+			/* Fix for SecureInfo_B */
+			sprintf(tmpstr, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
+			sprintf(dest, "%d:%s/%.11s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'B');
+		}
+		else if (selectedFile == 2)
+		{
+			sprintf(tmpstr, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
+			sprintf(dest, "%d:%s/%.20s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'A');
+		}
+		mbstowcs(wsrc, tmpstr, sizeof(wsrc));
+		print(strings[STR_FAILED]);
+		print(strings[STR_INJECTING], wsrc, dest);
+		ConsoleShow();
 		res = FSFileCopy(dest, tmpstr);
 	}
 
-	wchar_t *showres;
 	switch ((res >> 8) & 0xFF)
 	{
 		case 0:
-			showres = L"Success!";
+			print(strings[STR_COMPLETED]);
 			break;
 		case 1:
-			showres = L"Error opening input file.";
+			print(strings[STR_ERROR_OPENING], tmpstr);
 			break;
 		case 2:
-			showres = L"Error creating output file.";
+			print(strings[STR_ERROR_CREATING], dest);
 			break;
 		case 3:
 		case 4:
-			showres = L"Error reading input file.";
+			print(strings[STR_ERROR_READING], tmpstr);
 			break;
 		case 5:
 		case 6:
-			showres = L"Error writing output file.";
+			print(strings[STR_ERROR_WRITING], dest);
 			break;
 		default:
-			showres = L"Failure!";
+			print(strings[STR_FAILED]);
 			break;
 	}
 
-	print(L"%ls\n\nPress Ⓐ to exit\n", showres);
+	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
 }
