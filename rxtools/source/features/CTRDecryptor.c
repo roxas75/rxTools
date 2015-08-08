@@ -168,7 +168,7 @@ int ProcessCTR(char* path){
 				print(L"%3d%%", (int)((i*BLOCK_SIZE)/(getle32(NCCH.romfssize) * mediaunitsize/ 100)));
 				for(int j = 0; j < 4; j++) ConsolePrev();
 				ConsoleShow();
-				size_t bytesRead = FileRead(&myFile, BUFFER_ADDR, BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
+				size_t bytesRead = FileRead(&myFile, BUFFER_ADDR, i*BLOCK_SIZE <= (getle32(NCCH.romfssize) * mediaunitsize) ? BLOCK_SIZE : (getle32(NCCH.romfssize) * mediaunitsize) % BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
 				myInfo.size = bytesRead;
 				DecryptPartition(&myInfo);
 				add_ctr(myInfo.ctr, bytesRead/16);
