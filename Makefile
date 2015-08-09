@@ -27,11 +27,11 @@ RXMODE_TARGETS = rxmode/native_firm/native_firm.elf rxmode/agb_firm/agb_firm.elf
 all: $(CODE_FILE)
 
 .PHONY: distclean
-distclean: clean
-	@rm -rf release/ninjhax release/mset release/rxTools/system release/rxTools/theme release/*.pdf
+distclean:
+	@rm -rf release
 
 .PHONY: clean
-clean:
+clean: distclean
 	@$(MAKE) -C rxtools clean
 	@$(MAKE) -C rxmode/native_firm clean
 	@$(MAKE) -C rxmode/agb_firm clean
@@ -42,7 +42,6 @@ clean:
 	@$(MAKE) $(SET_CODE_PATH) -C rxinstaller clean
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
 	@rm -f payload.bin $(CODE_FILE)
-	@rm -r release
 
 release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 	all-target-brahma all-target-theme rxinstaller.nds
