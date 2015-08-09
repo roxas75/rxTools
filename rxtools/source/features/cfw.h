@@ -40,6 +40,7 @@ typedef enum {
 } Platform_UnitType;
 
 int DevMode();
+void FirmLoader();
 void rxModeSys();
 void rxModeEmu();
 void rxModeQuickBoot();
