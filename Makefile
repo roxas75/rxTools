@@ -52,7 +52,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 
 	@mkdir -p release/rxTools/system release/rxTools/theme
 
-	@cp $(CODE_FILE) release/rxTools/system
+	@cp $(CODE_FILE) release/$(CODE_PATH)
 	@cp rxtools/font.bin release/rxTools/system
 	@cp reboot/reboot.bin release/rxTools/system
 
