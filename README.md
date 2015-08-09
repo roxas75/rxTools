@@ -31,6 +31,8 @@ I do not support piracy in any way, all the data and information in my software 
 - Dynamic RAM dumping (just for debug purposes)
 
 ## How to build
+Use 64 bit environment.
+
 Requirements for Windows:
 - git, clone this repository with the following command: *git  clone --recursive https://github.com/roxas75/rxTools.git*
 - [Python 2.7](https://www.python.org)
