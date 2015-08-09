@@ -78,9 +78,6 @@ static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
 	if (addr >= info->p9Entry && addr <= info->p9Entry + info->arm9Size - info->p9Start)
 		return info->arm9Off + (addr - info->p9Entry) + info->p9Start;
 
-	if (addr >= info->arm11Entry && addr <= info->arm11Entry + info->arm11Size)
-		return info->arm11Off + (addr - info->arm11Entry);
-
 	return 0;
 }
 
@@ -225,7 +222,7 @@ int DevMode(){
 			if (!memcmp(firm + i, sign2, 16)){
 				memcpy(firm + i, patch2, 2);
 			}
-		}		
+		}
 	}
 	else
 	{
