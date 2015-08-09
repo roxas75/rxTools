@@ -117,31 +117,27 @@ void FileExplorerBack(){
 
 char* FileExplorerSelect(){
 	//enter file/folder
-	if (!strcmp(files[pointer], "..")) FileExplorerBack();
-	else if (strcmp(files[pointer], "."))
+	int u;
+	int isafile = 0;
+	for (u = 0; u < strlen(files[pointer]); u++)
 	{
-		int u;
-		int isafile = 0;
-		for (u = 0; u<strlen(files[pointer]); u++)
-		{
-			if (files[pointer][u] == '.') isafile = 1;
-		}
-		if (isafile){
-			//Open file
-			char str[256] = { 0 };
-			sprintf(str, "%s%s", dir, files[pointer]);
-			return str;
-		}
-		else
-		{
-			//enter folder
-			if(opened_folder!=0) strcat(dir, "/");
-			strcat(dir, files[pointer]);		
-			beginning = 0;
-			pointer = 0;
-			opened_folder++;
-			count = file_list(dir, &files);
-		}
+		if (files[pointer][u] == '.') isafile = 1;
+	}
+	if (isafile){
+		//Open file
+		char str[256] = { 0 };
+		sprintf(str, "%s%s", dir, files[pointer]);
+		return str;
+	}
+	else
+	{
+		//enter folder
+		if (opened_folder != 0) strcat(dir, "/");
+		strcat(dir, files[pointer]);
+		beginning = 0;
+		pointer = 0;
+		opened_folder++;
+		count = file_list(dir, &files);
 	}
 	return NULL;
 }
