@@ -244,9 +244,9 @@ int readCfg()
 }
 
 int InstallData(char* drive){
-	static const FirmInfo native_info = { 0x66000, 0x84A00, 0x08006800, 0x35000, 0x31000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000};
-	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
-	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0, 0, 0, 0xD600, 0xE200, 0x08020000};
+	static const FirmInfo native_info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000};
+	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0xD600, 0xE200, 0x08020000};
+	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	FIL firmfile;
 	wchar_t progressbar[41] = {0,};
 	for(int i=0; i<PROGRESS_WIDTH; i++)
