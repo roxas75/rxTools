@@ -84,13 +84,14 @@ static Menu InjectMenu = {
 
 static Menu AdvancedMenu = {
 	L"Other Options",
-	.Option = (MenuEntry[4]){
+	.Option = (MenuEntry[5]){
 		{ L" Downgrade MSET on SysNAND", &downgradeMSET, "adv0.bin" },
 		{ L" Install FBI over Health&Safety App", &installFBI, "adv1.bin" },
 		{ L" Restore original Health&Safety App", &restoreHS, "adv2.bin" },
 		{ L" Launch DevMode", &DevMode, "adv3.bin" },
+		{ L" Load a firm", &FirmLoader, "adv4.bin" },
 	},
-	4,
+	5,
 	0,
 	0
 };

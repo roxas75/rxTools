@@ -29,6 +29,7 @@
 #include "ncch.h"
 #include "draw.h"
 #include "menu.h"
+#include "fileexplorer.h"
 #include "CTRDecryptor.h"
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
@@ -236,4 +237,35 @@ int DevMode(){
 	}
 
 	return loadExecReboot();
+}
+
+void FirmLoader(){
+
+	char* firm_path = FileExplorerMain();
+	if (firm_path != NULL)
+	{
+		File myFile;
+		u8* native_firm = (u8*)0x21000000;
+		uint32_t firm_magic;
+		uint32_t magic = 0x4D524946;
+		if (FileOpen(&myFile, firm_path, 0)){
+			FileRead(&myFile, &firm_magic, sizeof(uint32_t), 0);
+			if (firm_magic == magic){ //Check if it's a FIRM or shit!
+				FileRead(&myFile, native_firm, 0xF0000, 0);
+				FileClose(&myFile);
+				firmlaunch(native_firm);
+			}
+			else
+			{
+				ConsoleInit();
+				ConsoleSetTitle(L"FIRM LOADER ERROR!");
+				print(L"The file you selected is not a\n");
+				print(L"firmware. Are you crazy?!\n");
+				print(L"\n");
+				print(L"Press A to exit\n");
+				ConsoleShow();
+				WaitForButton(BUTTON_A);
+			}
+		}
+	}
 }
