@@ -2,7 +2,7 @@ cdn_firm.exe :
     Use this tool the first time you use rxTools.
     It will generate 'firmware.bin', a file necessary for the toolkit to work.
     Once it gets successfully generated, copy it in the root of your sdcard, along
-    with 'rxTools.dat'.
+    with 'rxTools' directory.
 
 msetdg.exe :
     Use this tool if you want to downgrade your System Settings app in your sysNand.
@@ -12,4 +12,4 @@ msetdg.exe :
     have to copy it in the root of your sdcard.
     Once you downgraded the app, this file will automatically be deleted.
 
--Roxas75
+(This file is originally written by Roxas75)
