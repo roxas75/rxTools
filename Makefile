@@ -42,6 +42,7 @@ clean:
 	@$(MAKE) $(SET_CODE_PATH) -C rxinstaller clean
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
 	@rm -f payload.bin $(CODE_FILE)
+	@rm -r release
 
 release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 	all-target-brahma all-target-theme rxinstaller.nds
@@ -61,9 +62,13 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 	@cp rxmode/agb_firm/agb_firm.elf release/rxTools/system/patches
 	@cp rxmode/twl_firm/twl_firm.elf release/rxTools/system/patches
 
-	@mkdir -p release/rxTools/theme/0
+	@mkdir -p release/rxTools/theme/0 release/rxTools/lang release/Tools/fbi_injection release/Tools/scripts
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
+	@cp lang/* release/rxTools/lang/
+	@cp tools/cdn_firm.py tools/msetdg.py tools/readme.txt release/Tools
+	@cp -r tools/fbi_injection/* release/Tools/fbi_injection/
+	@cp tools/scripts/* release/Tools/scripts/
 
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
 
