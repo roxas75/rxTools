@@ -126,7 +126,7 @@ char* FileExplorerSelect(){
 	if (isafile){
 		//Open file
 		char str[256] = { 0 };
-		sprintf(str, "%s%s", dir, files[pointer]);
+		sprintf(str, "%s%s%s", dir, opened_folder == 0 ? "" : "/", files[pointer]);
 		return str;
 	}
 	else
