@@ -26,9 +26,6 @@ typedef struct{
         unsigned int arm9Off;
         size_t arm9Size;
         uintptr_t arm9Entry;
-        unsigned int arm11Off;
-        size_t arm11Size;
-        uintptr_t arm11Entry;
         unsigned int p9Off;
         uintptr_t p9Start;
         uintptr_t p9Entry;
