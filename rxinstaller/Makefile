@@ -189,7 +189,7 @@ patches: patches.elf
 	$(OBJCOPY) -O binary $^ $@
 
 patches.elf: patches.S
-	$(CC) -DCODE_PATH=\"$(CODE_PATH)\" -nostartfiles -nostdlib -Ttext=0 patches.S -o $@
+	$(CC) -nostartfiles -nostdlib -Ttext=0 patches.S -o $@
 
 #---------------------------------------------------------------------------------
 else
