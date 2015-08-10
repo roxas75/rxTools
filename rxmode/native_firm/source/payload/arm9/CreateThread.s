@@ -15,11 +15,6 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 .arm
-.section .rodata.keyx, "a"
-.global KEYXSPACE
-KEYXSPACE:    						//needed to reserve the space where we'll write the keyX. Optimizing every single byte!
-	.word 0xDEADBEEF
-	.string8 "InsertKeyXHere!"
 //_______________________________________________________________________________________
 
 StackTop = 0x0801AE00 				//That's arbitrary
