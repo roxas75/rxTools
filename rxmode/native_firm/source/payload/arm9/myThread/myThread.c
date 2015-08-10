@@ -177,16 +177,17 @@ static void *memcpy32(void *dst, const void *src, size_t n)
 static void patchregion()
 {
 	memcpy32(dest, patchcode, sizeof(patchcode));
-}	
+}
 
 static void patch_processes()
 {
+	static const char newLabel[4] __attribute__((section(".rodata.label")));
 	uintptr_t p;
 
 	for (p = 0x23A00000; p < 0x24000000; p++) {
 		//System Settings label
 		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
-			rx_strcpy((char *)p, "Shit", 4, 2, 1);
+			rx_strcpy((char *)p, newLabel, 4, 2, 1);
 		}
 	}
 
