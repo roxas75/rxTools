@@ -235,6 +235,13 @@ void preloadStringsU()
 	wcscpy(strings[STR_PROGRESS_FAIL], L"✖");
 }
 
+void preloadStringsOnSwitch(void)
+{
+	extern int fontLoaded;
+	preloadStringsA();
+	if(!fontLoaded) preloadStringsU();
+}
+
 int loadStrings()
 {
 	const size_t tokenNum = 1 + STR_NUM * 2;
