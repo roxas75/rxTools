@@ -15,6 +15,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef LANG_H
+#define LANG_H
+
 #include <wchar.h>
 #include "configuration.h"
 
@@ -159,3 +162,5 @@ void preloadStringsA(void);
 void preloadStringsU(void);
 void preloadStringsOnSwitch(void);
 int loadStrings(void);
+
+#endif
