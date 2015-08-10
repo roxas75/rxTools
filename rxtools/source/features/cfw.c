@@ -234,8 +234,6 @@ static void setAgbBios()
 int rxMode(int emu)
 {
 	const u32 mmc_original[] = { 0x000D0004, 0x001E0017 };
-	const u32 nat_emuwrite[] = { ARMBXR4, 0x0801A4C0 };
-	const u32 nat_emuread[] = { ARMBXR4, 0x0801A5B0 };
 	int r;
 
 	setAgbBios();
@@ -244,14 +242,10 @@ int rxMode(int emu)
 	if (r)
 		return r;
 
-	if (emu && !checkEmuNAND())
-		emu = 0;
-
-	memcpy((void *)(FIRM_ADDR + 0xCCF2C),
-		emu ? &nat_emuwrite : &mmc_original, sizeof(mmc_original));
-
-	memcpy((void *)(FIRM_ADDR + 0xCCF6C),
-		emu ? &nat_emuread : &mmc_original, sizeof(mmc_original));
+	if (!emu || !checkEmuNAND()) {
+		memcpy((void *)(FIRM_ADDR + 0xCCF2C), &mmc_original, sizeof(mmc_original));
+		memcpy((void *)(FIRM_ADDR + 0xCCF6C), &mmc_original, sizeof(mmc_original));
+	}
 
 	return loadExecReboot();
 }
