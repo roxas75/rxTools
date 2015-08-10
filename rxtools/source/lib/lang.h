@@ -153,4 +153,5 @@ extern wchar_t strings[STR_NUM][STR_MAX_LEN];
 
 void preloadStringsA(void);
 void preloadStringsU(void);
+void preloadStringsOnSwitch(void);
 int loadStrings(void);
