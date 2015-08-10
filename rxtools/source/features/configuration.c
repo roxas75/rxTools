@@ -264,15 +264,13 @@ int InstallData(char* drive){
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	//Create patched native_firm
+	//Create decrypted native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
-	if (applyPatchToNative(n_firm, "/rxTools/system/patches/native_firm.elf"))
-		return CONF_ERRPATCH;
-
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);

@@ -125,80 +125,6 @@ int applyPatch(void *file, const char *patch, const FirmInfo *info)
 	return 0;
 }
 
-int applyPatchToNative(void *file, const char *patch)
-{
-	static const FirmInfo info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
-	unsigned int cur, off, shstrSize;
-	char shstrtab[512], *sh_name;
-	void *p;
-	Elf32_Ehdr ehdr;
-	Elf32_Shdr shdr;
-	FIL fd, keyxFd;
-	FRESULT r;
-	UINT br;
-
-	r = f_open(&fd, patch, FA_READ);
-	if (r != FR_OK)
-		return r;
-
-	r = f_read(&fd, &ehdr, sizeof(ehdr), &br);
-	if (r != FR_OK)
-		return r;
-
-	r = f_lseek(&fd, ehdr.e_shoff + ehdr.e_shstrndx * sizeof(Elf32_Shdr));
-	if (r != FR_OK)
-		return r;
-
-	r = f_read(&fd, &shdr, sizeof(shdr), &br);
-	if (r != FR_OK)
-		return r;
-
-	r = f_lseek(&fd, shdr.sh_offset);
-	if (r != FR_OK)
-		return r;
-
-	r = f_read(&fd, shstrtab, shdr.sh_size > sizeof(shstrtab) ?
-		sizeof(shstrtab) : shdr.sh_size, &shstrSize);
-	if (r != FR_OK)
-		return r;
-
-	cur = ehdr.e_shoff;
-	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
-		if (f_lseek(&fd, cur) != FR_OK)
-			continue;
-
-		if (f_read(&fd, &shdr, sizeof(shdr), &br) != FR_OK)
-			continue;
-
-		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
-			continue;
-
-		off = addrToOff(shdr.sh_addr, &info);
-		if (off == 0)
-			continue;
-
-		p = (void *)((uintptr_t)file + off);
-		sh_name = shstrtab + shdr.sh_name;
-
-		if (!strcmp(sh_name, ".rodata.keyx")) {
-			if (f_open(&keyxFd, "slot0x25KeyX.bin", FA_READ) != FR_OK)
-				continue;
-
-			f_read(&keyxFd, p, shdr.sh_size, &br);
-			f_close(&keyxFd);
-		} else if (!strcmp(sh_name, ".rodata.nand.sector")) {
-			*(u32 *)p = (checkEmuNAND() / 0x200) - 1;
-		} else if (shdr.sh_type == SHT_PROGBITS) {
-			if (f_lseek(&fd, shdr.sh_offset) != FR_OK)
-				continue;
-
-			f_read(&fd, p, shdr.sh_size, &br);
-		}
-	}
-
-	return 0;
-}
-
 u8* decryptFirmTitleNcch(u8* title, unsigned int size){
 	ctr_ncchheader NCCH;
 	u8 CTR[16];
@@ -235,8 +161,16 @@ static void setAgbBios()
 
 int rxMode(int emu)
 {
-	const u32 mmc_original[] = { 0x000D0004, 0x001E0017 };
-	int r;
+	static const FirmInfo info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
+	static const char patchNandPrefix[] = ".patch.p9.nand";
+	unsigned int cur, off, shstrSize;
+	char shstrtab[512], *sh_name;
+	int r, sector;
+	void *p;
+	Elf32_Ehdr ehdr;
+	Elf32_Shdr shdr;
+	FIL fd, keyxFd;
+	UINT br;
 
 	setAgbBios();
 
@@ -244,9 +178,68 @@ int rxMode(int emu)
 	if (r)
 		return r;
 
-	if (!emu || !checkEmuNAND()) {
-		memcpy((void *)(FIRM_ADDR + 0xCCF2C), &mmc_original, sizeof(mmc_original));
-		memcpy((void *)(FIRM_ADDR + 0xCCF6C), &mmc_original, sizeof(mmc_original));
+	r = f_open(&fd, "/rxTools/system/patches/native_firm.elf", FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, &ehdr, sizeof(ehdr), &br);
+	if (r != FR_OK)
+		return r;
+
+	r = f_lseek(&fd, ehdr.e_shoff + ehdr.e_shstrndx * sizeof(Elf32_Shdr));
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, &shdr, sizeof(shdr), &br);
+	if (r != FR_OK)
+		return r;
+
+	r = f_lseek(&fd, shdr.sh_offset);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, shstrtab, shdr.sh_size > sizeof(shstrtab) ?
+		sizeof(shstrtab) : shdr.sh_size, &shstrSize);
+	if (r != FR_OK)
+		return r;
+
+	sector = emu ? checkEmuNAND() : 0;
+
+	cur = ehdr.e_shoff;
+	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
+		if (f_lseek(&fd, cur) != FR_OK)
+			continue;
+
+		if (f_read(&fd, &shdr, sizeof(shdr), &br) != FR_OK)
+			continue;
+
+		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
+			continue;
+
+		off = addrToOff(shdr.sh_addr, &info);
+		if (off == 0)
+			continue;
+
+		p = (void *)(FIRM_ADDR + off);
+		sh_name = shstrtab + shdr.sh_name;
+
+		if (!strcmp(sh_name, ".rodata.keyx")) {
+			if (f_open(&keyxFd, "slot0x25KeyX.bin", FA_READ) != FR_OK)
+				continue;
+
+			f_read(&keyxFd, p, shdr.sh_size, &br);
+			f_close(&keyxFd);
+		} else if (!strcmp(sh_name, ".rodata.nand.sector")) {
+			if (sector)
+				*(u32 *)p = (sector / 0x200) - 1;
+		} else if (shdr.sh_type == SHT_PROGBITS
+			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1)))
+		{
+			if (f_lseek(&fd, shdr.sh_offset) != FR_OK)
+				continue;
+
+			f_read(&fd, p, shdr.sh_size, &br);
+		}
 	}
 
 	return loadExecReboot();
