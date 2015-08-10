@@ -25,8 +25,8 @@
 void FileExplorerShow();
 void FileExplorerNextSelection();
 void FileExplorerPrevSelection();
-char* FileExplorerSelect();
+int FileExplorerSelect(char *p, size_t n);
 void FileExplorerBack();
-char* FileExplorerMain();
+int FileExplorerMain(char *p, size_t n);
 
 #endif

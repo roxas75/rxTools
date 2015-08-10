@@ -53,7 +53,7 @@ size_t file_list(const char *path, char ***ls) {
 	*ls = calloc(1000, sizeof(char *));
 	count = 0;
 	f_readdir(&myDir, myInfo);
-	
+
 	while (!myInfo->fname[0] == 0)
 	{
 		(*ls)[count++] = strdup(myInfo->fname);
@@ -115,7 +115,10 @@ void FileExplorerBack(){
 	}
 }
 
-char* FileExplorerSelect(){
+/* This writes the path to p if it is a file.
+It returns written bytes to p if it succeeded in opening file or directory.
+Otherwise it returns a negative value */
+int FileExplorerSelect(char *p, size_t n){
 	//enter file/folder
 	int u;
 	int isafile = 0;
@@ -125,9 +128,9 @@ char* FileExplorerSelect(){
 	}
 	if (isafile){
 		//Open file
-		char str[256] = { 0 };
-		sprintf(str, "%s%s%s", dir, opened_folder == 0 ? "" : "/", files[pointer]);
-		return str;
+		return snprintf(p, n, "%s%s%s", dir,
+			opened_folder == 0 ? "" : "/", files[pointer]) > n ?
+			-1 : n;
 	}
 	else
 	{
@@ -139,14 +142,14 @@ char* FileExplorerSelect(){
 		opened_folder++;
 		count = file_list(dir, &files);
 	}
-	return NULL;
+	return 0;
 }
 
 /*File explorer main code
 Can be called from where you want and returns the selected file!
 */
 
-char* FileExplorerMain(){ 
+int FileExplorerMain(char *p, size_t n){
 	count = file_list(dir, &files);
 	while (true)
 	{
@@ -157,12 +160,11 @@ char* FileExplorerMain(){
 		else if (pad_state & BUTTON_UP) FileExplorerPrevSelection();
 		else if (pad_state & BUTTON_A)
 		{
-			char* path = FileExplorerSelect();
-			if (path != NULL)return path;
+			if (FileExplorerSelect(p, n) > 0)return 0;
 		}
 		else if (pad_state & BUTTON_B)
 		{
-			if (opened_folder == 0)return NULL;
+			if (opened_folder == 0)return -1;
 			else FileExplorerBack();
 		}
 
