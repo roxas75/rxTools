@@ -184,29 +184,16 @@ int rxMode(int emu)
 	return loadExecReboot();
 }
 
-void rxModeSys(){
-	char str[100];
+void rxModeWithSplash(int emu)
+{
+	char s[32];
 
-	sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(str);
-	rxMode(0);
-	sprintf(str, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(str);
+	sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+	DrawBottomSplash(s);
+	rxMode(emu);
+	sprintf(s, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
+	DrawBottomSplash(s);
 	WaitForButton(BUTTON_A);
-}
-
-void rxModeEmu(){
-	char str[100];
-
-	if (!checkEmuNAND()) rxModeSys();
-	else{
-		sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
-		DrawBottomSplash(str);
-		rxMode(1);
-		sprintf(str, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
-		DrawBottomSplash(str);
-		WaitForButton(BUTTON_A);
-	}
 }
 
 void rxModeQuickBoot(){

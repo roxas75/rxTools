@@ -38,8 +38,7 @@ typedef enum {
 
 int DevMode();
 void FirmLoader();
-void rxModeSys();
-void rxModeEmu();
+void rxModeWithSplash(int emu);
 void rxModeQuickBoot();
 u8* decryptFirmTitleNcch(u8* title, unsigned int size);
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
