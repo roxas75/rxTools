@@ -186,6 +186,8 @@ int applyPatchToNative(void *file, const char *patch)
 
 			f_read(&keyxFd, p, shdr.sh_size, &br);
 			f_close(&keyxFd);
+		} else if (!strcmp(sh_name, ".rodata.nand.sector")) {
+			*(u32 *)p = (checkEmuNAND() / 0x200) - 1;
 		} else if (shdr.sh_type == SHT_PROGBITS) {
 			if (f_lseek(&fd, shdr.sh_offset) != FR_OK)
 				continue;

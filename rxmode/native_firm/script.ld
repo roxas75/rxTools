@@ -3,6 +3,7 @@ SECTIONS
 	. = 0x0801a4c0;
 	.text : { *(.text) *(.text*) }
 	.rodata.keyx : { *(.rodata.keyx) }
+	.rodata.nand.sector : { *(.rodata.nand.sector) }
 	.rodata : { *(.rodata) *(.rodata*) }
 	.data : { *(.data) *(.data*) }
 	.bss : { *(.bss) *(.bss*) }
