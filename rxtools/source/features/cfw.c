@@ -40,7 +40,6 @@
 #define ARMBXR4	0x47204C00
 #define PLATFORM_REG_ADDR 0x10140FFC
 
-char str[100];
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 
@@ -186,6 +185,8 @@ int rxMode(int emu)
 }
 
 void rxModeSys(){
+	char str[100];
+
 	sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(str);
 	rxMode(0);
@@ -195,6 +196,8 @@ void rxModeSys(){
 }
 
 void rxModeEmu(){
+	char str[100];
+
 	if (!checkEmuNAND()) rxModeSys();
 	else{
 		sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
