@@ -14,16 +14,14 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-@ p9 keyx spoof
-.section .patch.p9.keyx, "a"
-.thumb
-.align 2
+        .section .rodata.keyx, "a"
+        .global keyx
+        .type keyx, %object
+keyx:
+        .skip 16, 0
 
-	ldr 	r2, =keyx
-	mov	    r1, #5
-	mov 	r0, #0x25
-	bl		0x080575B4
-	bl		0x0805FB48
-	pop 	{r4-r6,pc}
-
-.pool
+        .section .rodata.label, "a"
+        .global label
+        .type label, %object
+label:
+        .skip 4, 0

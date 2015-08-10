@@ -57,7 +57,7 @@ $(TARGET)_unstrip.elf: $(SOURCE)/payload/payload.elf	\
 	$(LD) -i -T$(LDSCRIPT) $^ -o $@
 
 $(SOURCE)/payload/payload.elf: $(BUILD)/payload/arm9/EmuNAND.o	\
-	$(BUILD)/payload/arm9/CreateThread.o	\
+	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/vars.o	\
 	$(BUILD)/payload/arm9/myThread/myThread.o	\
 	$(BUILD)/payload/arm9/myThread/handlers.o	\
 	$(BUILD)/payload/arm9/myThread/FS.o	\
