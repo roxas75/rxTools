@@ -36,6 +36,7 @@ typedef enum {
 	PLATFORM_N3DS=7,
 } Platform_UnitType;
 
+Platform_UnitType Platform_CheckUnit(void);
 int DevMode();
 void FirmLoader();
 void rxModeWithSplash(int emu);
