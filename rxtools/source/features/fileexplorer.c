@@ -46,7 +46,7 @@ size_t file_list(const char *path, char ***ls) {
 
 	int res=f_opendir(&myDir, dir);
 	if (res == FR_NO_FILE) {
-		print(L"no such directory: '%s'", path);
+		print(strings[STR_ERROR_OPENING], path);
 		return 0;
 	}
 	*ls = NULL;
@@ -66,7 +66,7 @@ size_t file_list(const char *path, char ***ls) {
 
 void FileExplorerShow(){
 	ConsoleInit();
-	ConsoleSetTitle(L"DIR: %s", dir);
+	ConsoleSetTitle(strings[STR_DIRECTORY], dir);
 	if (count != 0)
 	{
 		int n = 0;
@@ -80,7 +80,7 @@ void FileExplorerShow(){
 
 		int i = 0;
 		for (i = beginning; i < beginning + list[(pointer / 7)]; i++) {
-			print(L"%s %s\n", i == pointer ? "   " : "", files[i]);
+			print(L"%ls %s\n", i == pointer ? strings[STR_CURSOR] : strings[STR_NO_CURSOR], files[i]);
 		}
 	}
 	ConsoleShow();
