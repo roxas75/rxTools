@@ -16,6 +16,7 @@
  */
 
 #include <string.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "cfw.h"
@@ -24,6 +25,7 @@
 #include "console.h"
 #include "polarssl/aes.h"
 #include "elf.h"
+#include "fatfs/ff.h"
 #include "fatfs/sdmmc.h"
 #include "fs.h"
 #include "ncch.h"
@@ -55,19 +57,32 @@ static int loadExecReboot()
 	File fd;
 
 	if (!FileOpen(&fd, "/rxTools/system/reboot.bin", 0))
-		return 1;
+		return -1;
 
 	if (FileRead(&fd, (void*)0x080F0000, 0x8000, 0) < 0)
-		return 1;
+		return -1;
 
 	FileClose(&fd);
 	_softreset();
 	return 0;
 }
 
-static int firmlaunch(u8* firm){
-	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
-	return loadExecReboot();
+static int firmlaunch(char *path)
+{
+	FIL fd;
+	FRESULT r;
+	UINT br;
+
+	r = f_open(&fd, path, FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, FIRM_ADDR, 0x200000, &br);
+	if (r != FR_OK)
+		return r;
+
+	f_close(&fd);
+	return *(u32 *)FIRM_ADDR == 0x4D524946 ? loadExecReboot() : -1;
 }
 
 static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
@@ -163,14 +178,7 @@ void setAgbBios()
 int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
 	setFirmMode(mode);
 	setAgbBios();
-	File myFile;
-	u8* native_firm = (u8*)0x21000000;
-	if(FileOpen(&myFile, "rxtools/data/0004013800000002.bin", 0)){
-		FileRead(&myFile, native_firm, 0xF0000, 0);
-		FileClose(&myFile);
-		firmlaunch(native_firm);
-	}
-	return -1;
+	return firmlaunch("rxtools/data/0004013800000002.bin");
 }
 
 void rxModeSys(){
@@ -241,28 +249,16 @@ void FirmLoader(){
 	char* firm_path = FileExplorerMain();
 	if (firm_path != NULL)
 	{
-		File myFile;
-		u8* native_firm = (u8*)0x21000000;
-		uint32_t firm_magic;
-		uint32_t magic = 0x4D524946;
-		if (FileOpen(&myFile, firm_path, 0)){
-			FileRead(&myFile, &firm_magic, sizeof(uint32_t), 0);
-			if (firm_magic == magic){ //Check if it's a FIRM or shit!
-				FileRead(&myFile, native_firm, 0xF0000, 0);
-				FileClose(&myFile);
-				firmlaunch(native_firm);
-			}
-			else
-			{
-				ConsoleInit();
-				ConsoleSetTitle(L"FIRM LOADER ERROR!");
-				print(L"The file you selected is not a\n");
-				print(L"firmware. Are you crazy?!\n");
-				print(L"\n");
-				print(L"Press A to exit\n");
-				ConsoleShow();
-				WaitForButton(BUTTON_A);
-			}
+		if (firmlaunch(firm_path))
+		{
+			ConsoleInit();
+			ConsoleSetTitle(L"FIRM LOADER ERROR!");
+			print(L"The file you selected is not a\n");
+			print(L"firmware. Are you crazy?!\n");
+			print(L"\n");
+			print(L"Press A to exit\n");
+			ConsoleShow();
+			WaitForButton(BUTTON_A);
 		}
 	}
 }
