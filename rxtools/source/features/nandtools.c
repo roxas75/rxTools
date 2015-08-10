@@ -79,7 +79,7 @@ void dumpCoolFiles()
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }
-		if (pad_state & BUTTON_B) break;
+		if (pad_state & BUTTON_B) break; 
 		TryScreenShot();
 		MenuShow();
 	}
