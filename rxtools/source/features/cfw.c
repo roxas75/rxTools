@@ -67,7 +67,7 @@ static int loadExecReboot()
 	return 0;
 }
 
-static int firmlaunch(char *path)
+static int loadFirm(char *path)
 {
 	FIL fd;
 	FRESULT r;
@@ -82,7 +82,8 @@ static int firmlaunch(char *path)
 		return r;
 
 	f_close(&fd);
-	return *(u32 *)FIRM_ADDR == 0x4D524946 ? loadExecReboot() : -1;
+
+	return *(u32 *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
 }
 
 static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
@@ -150,19 +151,6 @@ u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
 	return decryptFirmTitleNcch(title, size);
 }
 
-void setFirmMode(int mode){ //0 : SysNand, 1 : EmuNand
-	if(!checkEmuNAND()) mode = 0;	//forcing to SysNand if there is no EmuNand
-	File firm;
-	u32 mmc_original[] = { 0x000D0004, 0x001E0017 };
-	u32 nat_emuwrite[] = { ARMBXR4, 0x0801A4C0 };
-	u32 nat_emuread[] = { ARMBXR4, 0x0801A5B0 };
-	if(FileOpen(&firm, "rxtools/data/0004013800000002.bin", 0)){
-		FileWrite(&firm, mode ? &nat_emuwrite : &mmc_original, 8, 0xCCF2C);
-		FileWrite(&firm, mode ? &nat_emuread : &mmc_original, 8, 0xCCF6C);
-		FileClose(&firm);
-	}
-}
-
 void setAgbBios()
 {
 	File agb_firm;
@@ -174,10 +162,29 @@ void setAgbBios()
 	}
 }
 
-int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
-	setFirmMode(mode);
+int rxMode(int emu)
+{
+	const u32 mmc_original[] = { 0x000D0004, 0x001E0017 };
+	const u32 nat_emuwrite[] = { ARMBXR4, 0x0801A4C0 };
+	const u32 nat_emuread[] = { ARMBXR4, 0x0801A5B0 };
+	int r;
+
 	setAgbBios();
-	return firmlaunch("rxtools/data/0004013800000002.bin");
+
+	r = loadFirm("rxtools/data/0004013800000002.bin");
+	if (r)
+		return r;
+
+	if (emu && !checkEmuNAND())
+		emu = 0;
+
+	memcpy((void *)((uintptr_t)FIRM_ADDR + 0xCCF2C),
+		emu ? &nat_emuwrite : &mmc_original, sizeof(mmc_original));
+
+	memcpy((void *)((uintptr_t)FIRM_ADDR + 0xCCF6C),
+		emu ? &nat_emuread : &mmc_original, sizeof(mmc_original));
+
+	return loadExecReboot();
 }
 
 void rxModeSys(){
@@ -248,7 +255,7 @@ void FirmLoader(){
 
 	if (!FileExplorerMain(firm_path, sizeof(firm_path)))
 	{
-		if (firmlaunch(firm_path))
+		if (loadFirm(firm_path))
 		{
 			ConsoleInit();
 			ConsoleSetTitle(L"FIRM LOADER ERROR!");
@@ -258,6 +265,19 @@ void FirmLoader(){
 			print(L"Press A to exit\n");
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
+			return;
+		}
+
+		if (loadExecReboot())
+		{
+			ConsoleInit();
+			ConsoleSetTitle(L"FIRM LOADER ERROR!");
+			print(L"Failed to load and execute reboot.bin\n"
+				L"\n"
+				L"Press A to exit\n");
+			ConsoleShow();
+			WaitForButton(BUTTON_A);
+			return;
 		}
 	}
 }
