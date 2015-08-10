@@ -73,6 +73,7 @@ void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[])
 void SplashScreen();
 void DrawFadeScreen(u8 *screen, u16 Width, u16 Height, u32 f);
 void fadeOut();
+void OpenAnimation();
 //Unused functions.
 void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);
 void DrawHexWithName(u8 *screen, const wchar_t *str, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);

@@ -265,3 +265,10 @@ void fadeOut(){
 		DrawFadeScreen(TOP_SCREEN2, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, x);
 	}
 }
+
+void OpenAnimation(){ //The Animation is here, but it leaves some shit on the screen so it has to be fixed
+	/*for (int x = 255; x >= 0; x = x - 51){
+		DrawFadeScreen(BOT_SCREEN, BOT_SCREEN_WIDTH, SCREEN_HEIGHT, x);
+	}
+	ClearScreen(BOT_SCREEN, RGB(0, 0, 0));*/
+}
