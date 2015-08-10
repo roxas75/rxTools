@@ -35,6 +35,7 @@
 #include "CTRDecryptor.h"
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
+#include "lang.h"
 
 #define FIRM_ADDR 0x24000000
 #define ARMBXR4	0x47204C00
@@ -322,11 +323,9 @@ void FirmLoader(){
 		if (loadFirm(firm_path))
 		{
 			ConsoleInit();
-			ConsoleSetTitle(L"FIRM LOADER ERROR!");
-			print(L"The file you selected is not a\n");
-			print(L"firmware. Are you crazy?!\n");
-			print(L"\n");
-			print(L"Press A to exit\n");
+			ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
+			print(strings[STR_WRONG], "", strings[STR_FIRMWARE_FILE]);
+			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 			return;
@@ -335,10 +334,9 @@ void FirmLoader(){
 		if (loadExecReboot())
 		{
 			ConsoleInit();
-			ConsoleSetTitle(L"FIRM LOADER ERROR!");
-			print(L"Failed to load and execute reboot.bin\n"
-				L"\n"
-				L"Press A to exit\n");
+			ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
+			print(strings[STR_ERROR_LAUNCHING], strings[STR_FIRMWARE_FILE]);
+			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 			ConsoleShow();
 			WaitForButton(BUTTON_A);
 			return;
