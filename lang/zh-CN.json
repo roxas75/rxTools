@@ -76,11 +76,5 @@
 	"NO": "否",
 	"MENU_LANGUAGE": "菜单语言  %16ls",
 	"SYSNAND": "真实系统",
-	"EMUNAND": "虚拟系统",
-	"JAPAN": "日本",
-	"USA": "美国",
-	"EUROPE": "欧洲",
-	"CHINA": "中国(神游)",
-	"KOREA": "韩国",
-	"TAIWAN": "港台"
+	"EMUNAND": "虚拟系统"
 }

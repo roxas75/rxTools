@@ -306,6 +306,7 @@ void SettingsMenuInit(){
 					curLang++;
 
 				strcpy(cfgs[CFG_LANG].val.s, langs[curLang]);
+				preloadStringsOnSwitch();
 				loadStrings();
 			}
 		}
