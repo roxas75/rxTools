@@ -159,7 +159,6 @@ void setFirmMode(int mode){ //0 : SysNand, 1 : EmuNand
 	if(FileOpen(&firm, "rxtools/data/0004013800000002.bin", 0)){
 		FileWrite(&firm, mode ? &nat_emuwrite : &mmc_original, 8, 0xCCF2C);
 		FileWrite(&firm, mode ? &nat_emuread : &mmc_original, 8, 0xCCF6C);
-		FileWrite(&firm, mode ? rxmode_emu_label : rxmode_sys_label, 4, 0x7A5A0);
 		FileClose(&firm);
 	}
 }
