@@ -148,7 +148,7 @@ u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
 	return decryptFirmTitleNcch(title, size);
 }
 
-void setAgbBios()
+static void setAgbBios()
 {
 	File agb_firm;
 	unsigned char svc = (cfgs[CFG_AGB].val.i ? 0x26 : 0x01);
