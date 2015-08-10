@@ -17,6 +17,10 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+ifndef LDSCRIPT
+$(error "Please set LDSCRIPT")
+endif
+
 include $(DEVKITARM)/ds_rules
 
 OD=arm-none-eabi-objdump
@@ -32,5 +36,5 @@ payload.elf:
 	$(CC) -g -Wall arm9/myThread/myThread.c arm9/myThread/handlers.s $(CFLAGS) -Iinclude
 	$(CC) -c arm11/hookswi.s
 	$(CC) -g $(PATCHES) -I arm9/myThread $(SFLAGS)
-	$(CC) -nostdlib -T 3ds.ld EmuNAND.o CreateThread.o myThread.o handlers.o hookswi.o FS.o -o $@
+	$(CC) -nostdlib -T $(LDSCRIPT) EmuNAND.o CreateThread.o myThread.o handlers.o hookswi.o FS.o -o $@
 	rm -f *.o
