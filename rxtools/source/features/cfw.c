@@ -46,7 +46,7 @@ _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 // @breif  Determine platform of the console.
 // @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
 // @note   Maybe modified to support more platforms
-Platform_UnitType Platform_CheckUnit(void) {
+static Platform_UnitType Platform_CheckUnit(void) {
 	return *(u32 *)PLATFORM_REG_ADDR;
 }
 
