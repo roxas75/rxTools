@@ -459,7 +459,7 @@ void trySetLangFromTheme(){
 		for (i = 0; i + 1 < CFG_STR_MAX_LEN
 			&& cfgs[CFG_LANG].val.s[i] != '\r'
 			&& cfgs[CFG_LANG].val.s[i] != '\n'; i++);
-		str[i] = 0;
+		cfgs[CFG_LANG].val.s[i] = 0;
 
 		loadStrings();
 	}
