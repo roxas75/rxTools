@@ -14,36 +14,14 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-.arm
-//_______________________________________________________________________________________
+        .section .rodata.keyx, "a"
+        .global keyx
+        .type keyx, %object
+keyx:
+        .skip 16, 0
 
-StackTop = 0x0801AE00 				//That's arbitrary
-StackSize = 0x200					//This too
-
-.text
-.global CreateMyThread
-.type CreateMyThread STT_FUNC
-
-CreateMyThread:
-	push {r1-r12, lr}
-
-	ldr r3, =0x08000c00	@ top of the stack
-
-	mov r0, r3
-	mov r1, #0xA00
-	mov r2, #0x0
-
-	thread_stack_loop:
-		str r2, [r0], #0x4
-		subs r1, r1, #4
-		bgt thread_stack_loop
-
-	mov r0, #0x3F @ thread priority
-	ldr r1, =myThread @ thread_addr
-	mov r2, #0x0 @ arg
-	mov r4, #0xFFFFFFFE
-	svc 0x8
-
-	pop {r1-r12, lr}
-	ldr r0, =0x80CAFA8
-	ldr pc, =0x8086144
+        .section .rodata.label, "a"
+        .global label
+        .type label, %object
+label:
+        .skip 4, 0

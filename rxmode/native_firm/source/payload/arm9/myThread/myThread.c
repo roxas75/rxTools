@@ -22,6 +22,7 @@
 #include <FS.h>
 #include <handlers.h>
 #include "hookswi.h"
+#include "vars.h"
 #include "font.c"
 #include "lib.c"
 
@@ -177,25 +178,32 @@ static void *memcpy32(void *dst, const void *src, size_t n)
 static void patchregion()
 {
 	memcpy32(dest, patchcode, sizeof(patchcode));
-}	
+}
 
-static void patch_processes()
+static void findRegion()
+{
+	uintptr_t p;
+
+	for (p = 0x26A00000; p < 0x27000000; p += 4)
+		if (!memcmp32((void *)p, originalcode, sizeof(originalcode))) {
+			dest = (void *)p;
+			break;
+		}
+}
+
+static int patchLabel()
 {
 	uintptr_t p;
 
 	for (p = 0x23A00000; p < 0x24000000; p++) {
 		//System Settings label
 		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
-			rx_strcpy((char *)p, "Shit", 4, 2, 1);
+			rx_strcpy((char*)p, label, 4, 2, 1);
+			return 0;
 		}
 	}
 
-	if (dest == NULL)
-		for (p = 0x26A00000; p < 0x27000000; p += 4)
-			if (!memcmp32((void *)p, originalcode, sizeof(originalcode))) {
-				dest = (void *)p;
-				break;
-			}
+	return 1;
 }
 
 static int getArmBoff(void *p)
@@ -282,6 +290,12 @@ static void initExceptionHandler()
 void myThread(){
 	initExceptionHandler();
 
+	do
+		findRegion();
+	while (dest == NULL);
+
+	svc_Backdoor(&patchregion);	// Edit just if the code is found, or the arm9 will get mad
+
 	while (1) {
 #ifdef DEBUG_DUMP_FCRAM
 		if(getHID() & BUTTON_SELECT){
@@ -292,11 +306,8 @@ void myThread(){
 		if (getHID() & BUTTON_START)
 			*(int *)8192 = 100;
 #endif
-
-		patch_processes();
-		if (dest != NULL) {
-			svc_Backdoor(&patchregion);		//Edit just if the code is found, or the arm9 will get mad
-#if !defined(DEBUG_DUMP_FCRAM) || !defined(DEBUG_DATA_ABORT)
+		if (!patchLabel()) {
+#if !defined(DEBUG_DATA_ABORT) && !defined(DEBUG_DUMP_FCRAM)
 			__asm__ volatile ("svc #9");
 #endif
 		}
