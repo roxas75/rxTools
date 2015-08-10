@@ -13,12 +13,16 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+.section .rodata.nand.sector, "a"
+nandTopSector:
+	.word 0xAAAABBBB
+
 .arm
+.text
 .global EMUNAND_WRITE
 
 EntryPoint 	  = 0x080D8670
 Break_Func 	  = 0x08062A29
-NandFirstSect = 0xAAAABBBB
 
 EMUNAND_WRITE:
 				 STMFD   SP!, {R0-R3}
@@ -37,7 +41,8 @@ EMUNAND_WRITE:
                  LDR     R1, =EntryPoint
                  STR     R1, [R3,#4]
 				 cmp     r2, #0
-				 ldreq   r2, =NandFirstSect
+				 ldreq   r2, =nandTopSector
+				 ldreq   r2, [r2]
                  STR     R2, [R3,#8]
 
  loc_801A310:
@@ -85,8 +90,7 @@ EMUNAND_WRITE:
                  LDR     R1, [R2,#4]
                  STR     R1, [R4,#4]
                  LDMFD   SP!, {R0-R3}
-                 LDMFD   SP!, {R1-R7,LR}
-                 BX      LR
+                 LDMFD   SP!, {R1-R7,PC}
 
 .global EMUNAND_READ
 EMUNAND_READ:
@@ -106,7 +110,8 @@ EMUNAND_READ:
                  LDR     R1, =EntryPoint
                  STR     R1, [R3,#4]
                  cmp     r2, #0
-				 ldreq   r2, =NandFirstSect
+				 ldreq   r2, =nandTopSector
+				 ldreq   r2, [r2]
                  STR     R2, [R3,#8]
 
  loc_801A40C:
@@ -154,8 +159,7 @@ EMUNAND_READ:
                  LDR     R1, [R2,#4]
                  STR     R1, [R4,#4]
                  LDMFD   SP!, {R0-R3}
-                 LDMFD   SP!, {R1-R7,LR}
-                 BX      LR
+                 LDMFD   SP!, {R1-R7,PC}
 
 bytes1:
 	.word 0
