@@ -339,10 +339,17 @@ void BootMenuInit(){
 	DrawBottomSplash(str);
 	while (true) {
 		u32 pad_state = InputWait();
-		if (pad_state & BUTTON_Y) rxModeWithSplash(1);      //Boot emunand
-		else if (pad_state & BUTTON_X) rxModeWithSplash(0); //Boot sysnand
-		else if (pad_state & BUTTON_B) { MenuClose(); break; } //Boot sysnand
+		if (pad_state & BUTTON_Y) {
+			rxModeWithSplash(1);      //Boot emunand
+			DrawBottomSplash(str);
+		} else if (pad_state & BUTTON_X) {
+			rxModeWithSplash(0); //Boot sysnand
+			DrawBottomSplash(str);
+		} else if (pad_state & BUTTON_B)
+			break;
 	}
+
+	MenuClose();
 }
 
 void CreditsMenuInit(){
