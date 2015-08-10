@@ -196,10 +196,6 @@ void rxModeWithSplash(int emu)
 	WaitForButton(BUTTON_A);
 }
 
-void rxModeQuickBoot(){
-	rxMode(1);
-}
-
 //Just patches signatures check, loads in sysnand
 int DevMode(){
 	/*DevMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/

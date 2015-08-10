@@ -39,7 +39,7 @@ typedef enum {
 int DevMode();
 void FirmLoader();
 void rxModeWithSplash(int emu);
-void rxModeQuickBoot();
+int rxMode(int emu);
 u8* decryptFirmTitleNcch(u8* title, unsigned int size);
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
 int applyPatch(void *file, const char *patch, const FirmInfo *info);
