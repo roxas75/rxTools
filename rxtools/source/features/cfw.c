@@ -36,7 +36,7 @@
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
 
-#define FIRM_ADDR (void*)0x24000000
+#define FIRM_ADDR 0x24000000
 #define ARMBXR4	0x47204C00
 #define PLATFORM_REG ((volatile u32*)0x10140FFC)
 
@@ -76,7 +76,7 @@ static int loadFirm(char *path)
 	if (r != FR_OK)
 		return r;
 
-	r = f_read(&fd, FIRM_ADDR, 0x200000, &br);
+	r = f_read(&fd, (void *)FIRM_ADDR, 0x200000, &br);
 	if (r != FR_OK)
 		return r;
 
@@ -177,10 +177,10 @@ int rxMode(int emu)
 	if (emu && !checkEmuNAND())
 		emu = 0;
 
-	memcpy((void *)((uintptr_t)FIRM_ADDR + 0xCCF2C),
+	memcpy((void *)(FIRM_ADDR + 0xCCF2C),
 		emu ? &nat_emuwrite : &mmc_original, sizeof(mmc_original));
 
-	memcpy((void *)((uintptr_t)FIRM_ADDR + 0xCCF6C),
+	memcpy((void *)(FIRM_ADDR + 0xCCF6C),
 		emu ? &nat_emuread : &mmc_original, sizeof(mmc_original));
 
 	return loadExecReboot();
