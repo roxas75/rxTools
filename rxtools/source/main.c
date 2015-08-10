@@ -61,9 +61,9 @@ int Initialize()
 	DrawString(BOT_SCREEN, strings[STR_INITIALIZING], FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 
 	if(FSInit()){
-		DrawString(BOT_SCREEN, strings[STR_LOADING], SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_LOADING], BOT_SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 	}else{
-		DrawString(BOT_SCREEN, strings[STR_FAILED], SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_FAILED], BOT_SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
 		return 1;
 	}
 
@@ -77,7 +77,7 @@ int Initialize()
 
 	//Console Stuff
 	ConsoleSetXY(15, 20);
-	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
+	ConsoleSetWH(BOT_SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
 	ConsoleSetTextColor(RGB(0, 141, 197));
 	ConsoleSetBackgroundColor(TRANSPARENT);
@@ -177,8 +177,8 @@ int main(){
 		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
 		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
 		if(pad_state & BUTTON_A)    	MenuSelect();
-		if(pad_state & BUTTON_SELECT)	ShutDown();
-		if(pad_state & BUTTON_START)	returnHomeMenu();
+		if (pad_state & BUTTON_SELECT)	{ fadeOut(); ShutDown(); }
+		if (pad_state & BUTTON_START)	{ fadeOut(); returnHomeMenu(); }
 		TryScreenShot();
 		MenuShow();
 	}
