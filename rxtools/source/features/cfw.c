@@ -245,9 +245,9 @@ int DevMode(){
 }
 
 void FirmLoader(){
+	char firm_path[256];
 
-	char* firm_path = FileExplorerMain();
-	if (firm_path != NULL)
+	if (!FileExplorerMain(firm_path, sizeof(firm_path)))
 	{
 		if (firmlaunch(firm_path))
 		{
