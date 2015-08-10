@@ -161,6 +161,22 @@ static void setAgbBios()
 
 int rxMode(int emu)
 {
+	if (!checkEmuNAND() && emu)
+	{
+		ConsoleInit();
+		ConsoleSetTitle(L"EMUNAND NOT FOUND!");
+		print(L"The emunand was not found on\n");
+		print(L"your SDCard. \n");
+		print(L"\n");
+		print(L"Press A to boot SYSNAND\n");
+		ConsoleShow();
+		WaitForButton(BUTTON_A);
+		emu = 0;
+		char s[32];
+		sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+		DrawBottomSplash(s);
+	}
+
 	static const FirmInfo info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
 	static const char patchNandPrefix[] = ".patch.p9.nand";
 	unsigned int cur, off, shstrSize;
