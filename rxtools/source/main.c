@@ -33,16 +33,17 @@
 #define FONT_ADDRESS	(void*)0x27E00000
 char *cfgLang = "en.json";
 const char *fontpath = "/rxTools/system/font.bin";
+int fontLoaded = 1;
 
-int LoadFont(){
+void LoadFont(){
 	File MyFile;
 	if (FileOpen(&MyFile, fontpath, 0))
 	{
 		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
 		fontaddr = FONT_ADDRESS;
-		return 0;
+  		fontLoaded = 0;
 	}else{
-		return 1;
+		fontLoaded = 1;
 	}
 }
 
@@ -66,8 +67,8 @@ int Initialize()
 		return 1;
 	}
 
-	r = LoadFont();
-	if (r){
+	LoadFont();
+	if (fontLoaded){
 		swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), strings[STR_ERROR_OPENING], fontpath);
 		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT*2, RED, BLACK);
 	}else{
@@ -89,7 +90,7 @@ int Initialize()
 	InstallConfigData();
 	readCfg();
 
-	if (r)
+	if (fontLoaded)
 		cfgs[CFG_LANG].val.s = cfgLang;
 	r = loadStrings();
 	if (r) {
