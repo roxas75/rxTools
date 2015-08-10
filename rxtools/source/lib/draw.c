@@ -66,7 +66,7 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 	u32 fontX, fontY;
 	u16 charVal;
 
-	if (SCREEN_WIDTH < x + FONT_WIDTH || y < FONT_HEIGHT)
+	if (BOT_SCREEN_WIDTH < x + FONT_WIDTH || y < FONT_HEIGHT)
 		return;
 
 	fore.a = color >> 24;
@@ -161,7 +161,7 @@ inline void writeByte(u8 *address, u8 value) {
 }
 
 void DrawPixel(u8 *screen, u32 x, u32 y, u32 color){
-	if(x >= SCREEN_WIDTH || x < 0) return;
+	if(x >= BOT_SCREEN_WIDTH || x < 0) return;
 	if(y >= SCREEN_HEIGHT || y < 0) return;
 	if(color & ALPHA_MASK){
 		u8 *address  = screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
@@ -242,5 +242,26 @@ void DrawSplash(u8 *screen, char splash_file[]) {
 		wchar_t tmp[256];
 		swprintf(tmp, sizeof(tmp)/sizeof(tmp[0]), strings[STR_ERROR_OPENING], splash_file);
 		DrawString(BOT_SCREEN, tmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+	}
+}
+
+void DrawFadeScreen(u8 *screen, u16 Width, u16 Height, u32 f)
+{
+	int i; for (i = 0; i<Width*Height / 2; i++)
+	{
+		*screen = (*screen*f) >> 8; screen++;
+		*screen = (*screen*f) >> 8; screen++;
+		*screen = (*screen*f) >> 8; screen++;
+		*screen = (*screen*f) >> 8; screen++;
+		*screen = (*screen*f) >> 8; screen++;
+		*screen = (*screen*f) >> 8; screen++;
+	}
+}
+
+void fadeOut(){
+	for (int x = 255; x >= 0; x = x - 15){
+		DrawFadeScreen(BOT_SCREEN, BOT_SCREEN_WIDTH, SCREEN_HEIGHT, x);
+		DrawFadeScreen(TOP_SCREEN, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, x);
+		DrawFadeScreen(TOP_SCREEN2, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, x);
 	}
 }

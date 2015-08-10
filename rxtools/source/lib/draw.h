@@ -21,9 +21,10 @@
 
 //Screen Macros
 #define BYTES_PER_PIXEL	3  //Our color buffer accepts 24-bits color.
-#define SCREEN_WIDTH	320
-#define SCREEN_HEIGHT	240
-#define SCREEN_SIZE	(BYTES_PER_PIXEL*SCREEN_WIDTH*SCREEN_HEIGHT)
+#define BOT_SCREEN_WIDTH	320
+#define TOP_SCREEN_WIDTH	400
+#define SCREEN_HEIGHT    	240
+#define SCREEN_SIZE	(BYTES_PER_PIXEL*BOT_SCREEN_WIDTH*SCREEN_HEIGHT)
 #define FONT_WIDTH	16
 #define FONT_HEIGHT	16
 #define FONT_HWIDTH	(FONT_WIDTH>>1)
@@ -70,6 +71,9 @@ void DrawSplash(u8 *screen, char splash_file[]);
 void DrawBottomSplash(char splash_file[]);
 void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[]);
 void SplashScreen();
+void DrawFadeScreen(u8 *screen, u16 Width, u16 Height, u32 f);
+void fadeOut();
 //Unused functions.
 void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);
 void DrawHexWithName(u8 *screen, const wchar_t *str, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);
+
