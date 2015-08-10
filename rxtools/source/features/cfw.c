@@ -38,7 +38,7 @@
 
 #define FIRM_ADDR 0x24000000
 #define ARMBXR4	0x47204C00
-#define PLATFORM_REG ((volatile u32*)0x10140FFC)
+#define PLATFORM_REG_ADDR 0x10140FFC
 
 char tmp[256];
 char str[100];
@@ -49,7 +49,7 @@ _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 // @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
 // @note   Maybe modified to support more platforms
 Platform_UnitType Platform_CheckUnit(void) {
-	return *PLATFORM_REG;
+	return *(u32 *)PLATFORM_REG_ADDR;
 }
 
 static int loadExecReboot()
