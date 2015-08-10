@@ -40,7 +40,6 @@
 #define ARMBXR4	0x47204C00
 #define PLATFORM_REG_ADDR 0x10140FFC
 
-char tmp[256];
 char str[100];
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
