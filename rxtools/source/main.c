@@ -129,7 +129,7 @@ int Initialize()
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
-		rxModeQuickBoot();
+		rxMode(1);
 	}
 rxTools_boot:
 	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
