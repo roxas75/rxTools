@@ -22,6 +22,7 @@
 #include "cfw.h"
 #include "common.h"
 #include "hid.h"
+#include "lang.h"
 #include "console.h"
 #include "polarssl/aes.h"
 #include "elf.h"
@@ -51,17 +52,21 @@ Platform_UnitType Platform_CheckUnit(void) {
 	return *(u32 *)PLATFORM_REG_ADDR;
 }
 
-static int loadExecReboot()
+static FRESULT loadExecReboot()
 {
-	File fd;
+	FIL fd;
+	FRESULT r;
+	UINT br;
 
-	if (!FileOpen(&fd, "/rxTools/system/reboot.bin", 0))
-		return -1;
+	r = f_open(&fd, "/rxTools/system/reboot.bin", FA_READ);
+	if (r != FR_OK)
+		return r;
 
-	if (FileRead(&fd, (void*)0x080F0000, 0x8000, 0) < 0)
-		return -1;
+	r = f_read(&fd, (void*)0x080F0000, 0x8000, &br);
+	if (r != FR_OK)
+		return r;
 
-	FileClose(&fd);
+	f_close(&fd);
 	_softreset();
 }
 
@@ -182,6 +187,7 @@ int rxMode(int emu)
 	static const char patchNandPrefix[] = ".patch.p9.nand";
 	unsigned int cur, off, shstrSize;
 	char shstrtab[512], *sh_name;
+	const wchar_t *msg;
 	int r, sector;
 	void *p;
 	Elf32_Ehdr ehdr;
@@ -192,35 +198,46 @@ int rxMode(int emu)
 	setAgbBios();
 
 	r = loadFirm("rxtools/data/0004013800000002.bin");
-	if (r)
-		return r;
+	if (r) {
+		msg = L"Failed to load NATIVE_FIRM: %d\n"
+			L"Reboot rxTools and try again.\n";
+		goto fail;
+	}
 
 	r = f_open(&fd, "/rxTools/system/patches/native_firm.elf", FA_READ);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_read(&fd, &ehdr, sizeof(ehdr), &br);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_lseek(&fd, ehdr.e_shoff + ehdr.e_shstrndx * sizeof(Elf32_Shdr));
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_read(&fd, &shdr, sizeof(shdr), &br);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_lseek(&fd, shdr.sh_offset);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_read(&fd, shstrtab, shdr.sh_size > sizeof(shstrtab) ?
 		sizeof(shstrtab) : shdr.sh_size, &shstrSize);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
-	sector = emu ? checkEmuNAND() : 0;
+	if (emu) {
+		sector = checkEmuNAND();
+		if (sector == 0) {
+			msg = L"Failed to find EmuNAND.\n"
+				L"Check your EmuNAND.\n";
+			goto fail;
+		}
+	} else
+		sector = 0;
 
 	cur = ehdr.e_shoff;
 	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
@@ -262,7 +279,26 @@ int rxMode(int emu)
 		}
 	}
 
-	return loadExecReboot();
+	r = loadExecReboot(); // This won't return if it succeeds.
+	msg = L"Failed to load reboot.bin: %d\n"
+		L"Check your installation.\n";
+
+fail:
+	ConsoleInit();
+	ConsoleSetTitle(L"rxMode");
+	print(msg, r);
+	print(L"\n");
+	print(strings[STR_PRESS_BUTTON_ACTION],
+		strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+	ConsoleShow();
+	WaitForButton(BUTTON_A);
+
+	return r;
+
+patchFail:
+	msg = L"Failed to load native_firm.elf: %d\n"
+		L"Check your installation.\n";
+	goto fail;
 }
 
 void rxModeWithSplash(int emu)
@@ -272,9 +308,6 @@ void rxModeWithSplash(int emu)
 	sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(s);
 	rxMode(emu);
-	sprintf(s, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(s);
-	WaitForButton(BUTTON_A);
 }
 
 //Just patches signatures check, loads in sysnand
