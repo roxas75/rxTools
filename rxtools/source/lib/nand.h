@@ -32,7 +32,7 @@ enum {
 
 int GetSystemVersion();
 void FSNandInitCrypto(void);
-int checkEmuNAND();
+unsigned int checkEmuNAND();
 void GetNANDCTR(u8 *ctr);
 void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);
 void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);

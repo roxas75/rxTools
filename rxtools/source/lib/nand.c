@@ -61,7 +61,7 @@ void FSNandInitCrypto(void) {
 	while (i --) { *(ctrStore++) = *(ctrStart--); }
 }
 
-int checkEmuNAND() {
+unsigned int checkEmuNAND() {
 	u8 *check = (u8 *)0x26000000;
 	sdmmc_sdcard_readsectors(0x3AF00000 / 0x200, 1, check);
 	if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
