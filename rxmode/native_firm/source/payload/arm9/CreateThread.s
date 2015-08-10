@@ -15,6 +15,7 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 .arm
+.section .rodata.keyx, "a"
 .global KEYXSPACE
 KEYXSPACE:    						//needed to reserve the space where we'll write the keyX. Optimizing every single byte!
 	.word 0xDEADBEEF
@@ -24,6 +25,7 @@ KEYXSPACE:    						//needed to reserve the space where we'll write the keyX. Op
 StackTop = 0x0801AE00 				//That's arbitrary
 StackSize = 0x200					//This too
 
+.text
 .global CreateMyThread
 .type CreateMyThread STT_FUNC
 

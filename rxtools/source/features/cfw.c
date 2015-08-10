@@ -16,6 +16,7 @@
  */
 
 #include <string.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "cfw.h"
@@ -24,6 +25,7 @@
 #include "console.h"
 #include "polarssl/aes.h"
 #include "elf.h"
+#include "fatfs/ff.h"
 #include "fatfs/sdmmc.h"
 #include "fs.h"
 #include "ncch.h"
@@ -34,20 +36,18 @@
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
 
-#define FIRM_ADDR (void*)0x24000000
+#define FIRM_ADDR 0x24000000
 #define ARMBXR4	0x47204C00
-#define PLATFORM_REG ((volatile u32*)0x10140FFC)
+#define PLATFORM_REG_ADDR 0x10140FFC
 
-char tmp[256];
-char str[100];
 unsigned int emuNandMounted = 0;
-void (*_softreset)() = (void*)0x080F0000;
+_Noreturn void (* const _softreset)() = (void *)0x080F0000;
 
 // @breif  Determine platform of the console.
 // @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
 // @note   Maybe modified to support more platforms
-Platform_UnitType Platform_CheckUnit(void) {
-	return *PLATFORM_REG;
+static Platform_UnitType Platform_CheckUnit(void) {
+	return *(u32 *)PLATFORM_REG_ADDR;
 }
 
 static int loadExecReboot()
@@ -55,19 +55,32 @@ static int loadExecReboot()
 	File fd;
 
 	if (!FileOpen(&fd, "/rxTools/system/reboot.bin", 0))
-		return 1;
+		return -1;
 
 	if (FileRead(&fd, (void*)0x080F0000, 0x8000, 0) < 0)
-		return 1;
+		return -1;
 
 	FileClose(&fd);
 	_softreset();
-	return 0;
 }
 
-static int firmlaunch(u8* firm){
-	memcpy(FIRM_ADDR, firm, 0x200000); 	//Fixed size, no FIRM right now is that big
-	return loadExecReboot();
+static int loadFirm(char *path)
+{
+	FIL fd;
+	FRESULT r;
+	UINT br;
+
+	r = f_open(&fd, path, FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, (void *)FIRM_ADDR, 0x200000, &br);
+	if (r != FR_OK)
+		return r;
+
+	f_close(&fd);
+
+	return *(u32 *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
 }
 
 static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
@@ -112,6 +125,78 @@ int applyPatch(void *file, const char *patch, const FirmInfo *info)
 	return 0;
 }
 
+int applyPatchToNative(void *file, const char *patch)
+{
+	static const FirmInfo info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
+	unsigned int cur, off, shstrSize;
+	char shstrtab[512], *sh_name;
+	void *p;
+	Elf32_Ehdr ehdr;
+	Elf32_Shdr shdr;
+	FIL fd, keyxFd;
+	FRESULT r;
+	UINT br;
+
+	r = f_open(&fd, patch, FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, &ehdr, sizeof(ehdr), &br);
+	if (r != FR_OK)
+		return r;
+
+	r = f_lseek(&fd, ehdr.e_shoff + ehdr.e_shstrndx * sizeof(Elf32_Shdr));
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, &shdr, sizeof(shdr), &br);
+	if (r != FR_OK)
+		return r;
+
+	r = f_lseek(&fd, shdr.sh_offset);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&fd, shstrtab, shdr.sh_size > sizeof(shstrtab) ?
+		sizeof(shstrtab) : shdr.sh_size, &shstrSize);
+	if (r != FR_OK)
+		return r;
+
+	cur = ehdr.e_shoff;
+	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
+		if (f_lseek(&fd, cur) != FR_OK)
+			continue;
+
+		if (f_read(&fd, &shdr, sizeof(shdr), &br) != FR_OK)
+			continue;
+
+		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
+			continue;
+
+		off = addrToOff(shdr.sh_addr, &info);
+		if (off == 0)
+			continue;
+
+		p = (void *)((uintptr_t)file + off);
+		sh_name = shstrtab + shdr.sh_name;
+
+		if (!strcmp(sh_name, ".rodata.keyx")) {
+			if (f_open(&keyxFd, "slot0x25KeyX.bin", FA_READ) != FR_OK)
+				continue;
+
+			f_read(&keyxFd, p, shdr.sh_size, &br);
+			f_close(&keyxFd);
+		} else if (shdr.sh_type == SHT_PROGBITS) {
+			if (f_lseek(&fd, shdr.sh_offset) != FR_OK)
+				continue;
+
+			f_read(&fd, p, shdr.sh_size, &br);
+		}
+	}
+
+	return 0;
+}
+
 u8* decryptFirmTitleNcch(u8* title, unsigned int size){
 	ctr_ncchheader NCCH;
 	u8 CTR[16];
@@ -135,21 +220,7 @@ u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
 	return decryptFirmTitleNcch(title, size);
 }
 
-void setFirmMode(int mode){ //0 : SysNand, 1 : EmuNand
-	if(!checkEmuNAND()) mode = 0;	//forcing to SysNand if there is no EmuNand
-	File firm;
-	u32 mmc_original[] = { 0x000D0004, 0x001E0017 };
-	u32 nat_emuwrite[] = { ARMBXR4, 0x0801A4C0 };
-	u32 nat_emuread[] = { ARMBXR4, 0x0801A5B0 };
-	if(FileOpen(&firm, "rxtools/data/0004013800000002.bin", 0)){
-		FileWrite(&firm, mode ? &nat_emuwrite : &mmc_original, 8, 0xCCF2C);
-		FileWrite(&firm, mode ? &nat_emuread : &mmc_original, 8, 0xCCF6C);
-		FileWrite(&firm, mode ? rxmode_emu_label : rxmode_sys_label, 4, 0x7A5A0);
-		FileClose(&firm);
-	}
-}
-
-void setAgbBios()
+static void setAgbBios()
 {
 	File agb_firm;
 	unsigned char svc = (cfgs[CFG_AGB].val.i ? 0x26 : 0x01);
@@ -160,42 +231,41 @@ void setAgbBios()
 	}
 }
 
-int rxMode(int mode){	//0 : SysNand, 1 : EmuNand
-	setFirmMode(mode);
+int rxMode(int emu)
+{
+	const u32 mmc_original[] = { 0x000D0004, 0x001E0017 };
+	const u32 nat_emuwrite[] = { ARMBXR4, 0x0801A4C0 };
+	const u32 nat_emuread[] = { ARMBXR4, 0x0801A5B0 };
+	int r;
+
 	setAgbBios();
-	File myFile;
-	u8* native_firm = (u8*)0x21000000;
-	if(FileOpen(&myFile, "rxtools/data/0004013800000002.bin", 0)){
-		FileRead(&myFile, native_firm, 0xF0000, 0);
-		FileClose(&myFile);
-		firmlaunch(native_firm);
-	}
-	return -1;
+
+	r = loadFirm("rxtools/data/0004013800000002.bin");
+	if (r)
+		return r;
+
+	if (emu && !checkEmuNAND())
+		emu = 0;
+
+	memcpy((void *)(FIRM_ADDR + 0xCCF2C),
+		emu ? &nat_emuwrite : &mmc_original, sizeof(mmc_original));
+
+	memcpy((void *)(FIRM_ADDR + 0xCCF6C),
+		emu ? &nat_emuread : &mmc_original, sizeof(mmc_original));
+
+	return loadExecReboot();
 }
 
-void rxModeSys(){
-	sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(str);
-	rxMode(0);
-	sprintf(str, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(str);
+void rxModeWithSplash(int emu)
+{
+	char s[32];
+
+	sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+	DrawBottomSplash(s);
+	rxMode(emu);
+	sprintf(s, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
+	DrawBottomSplash(s);
 	WaitForButton(BUTTON_A);
-}
-
-void rxModeEmu(){
-	if (!checkEmuNAND()) rxModeSys();
-	else{
-		sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
-		DrawBottomSplash(str);
-		rxMode(1);
-		sprintf(str, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
-		DrawBottomSplash(str);
-		WaitForButton(BUTTON_A);
-	}
-}
-
-void rxModeQuickBoot(){
-	rxMode(1);
 }
 
 //Just patches signatures check, loads in sysnand
@@ -237,32 +307,33 @@ int DevMode(){
 }
 
 void FirmLoader(){
+	char firm_path[256];
 
-	char* firm_path = FileExplorerMain();
-	if (firm_path != NULL)
+	if (!FileExplorerMain(firm_path, sizeof(firm_path)))
 	{
-		File myFile;
-		u8* native_firm = (u8*)0x21000000;
-		uint32_t firm_magic;
-		uint32_t magic = 0x4D524946;
-		if (FileOpen(&myFile, firm_path, 0)){
-			FileRead(&myFile, &firm_magic, sizeof(uint32_t), 0);
-			if (firm_magic == magic){ //Check if it's a FIRM or shit!
-				FileRead(&myFile, native_firm, 0xF0000, 0);
-				FileClose(&myFile);
-				firmlaunch(native_firm);
-			}
-			else
-			{
-				ConsoleInit();
-				ConsoleSetTitle(L"FIRM LOADER ERROR!");
-				print(L"The file you selected is not a\n");
-				print(L"firmware. Are you crazy?!\n");
-				print(L"\n");
-				print(L"Press A to exit\n");
-				ConsoleShow();
-				WaitForButton(BUTTON_A);
-			}
+		if (loadFirm(firm_path))
+		{
+			ConsoleInit();
+			ConsoleSetTitle(L"FIRM LOADER ERROR!");
+			print(L"The file you selected is not a\n");
+			print(L"firmware. Are you crazy?!\n");
+			print(L"\n");
+			print(L"Press A to exit\n");
+			ConsoleShow();
+			WaitForButton(BUTTON_A);
+			return;
+		}
+
+		if (loadExecReboot())
+		{
+			ConsoleInit();
+			ConsoleSetTitle(L"FIRM LOADER ERROR!");
+			print(L"Failed to load and execute reboot.bin\n"
+				L"\n"
+				L"Press A to exit\n");
+			ConsoleShow();
+			WaitForButton(BUTTON_A);
+			return;
 		}
 	}
 }

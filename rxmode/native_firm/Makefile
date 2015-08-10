@@ -26,6 +26,7 @@ include $(DEVKITARM)/base_rules
 TARGET 		:=  native_firm
 BUILD		:=	build
 SOURCE		:=	source
+LDSCRIPT	:=	script.ld
 LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
@@ -53,13 +54,13 @@ $(TARGET)_unstrip.elf: $(SOURCE)/payload/payload.elf	\
 	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
 	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf	\
 	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf
-	$(LD) -i -Tscript.ld $^ -o $@
+	$(LD) -i -T$(LDSCRIPT) $^ -o $@
 
 $(SOURCE)/payload/payload.elf:
-	$(MAKE) -C $(dir $@) $(notdir $@)
+	$(MAKE) -C $(dir $@) $(notdir $@) LDSCRIPT=$(CURDIR)/$(LDSCRIPT)
 
 $(BUILD)/%.elf: $(BUILD)/%.o $(SOURCE)/payload/payload.elf
-	$(LD) -s -R $(SOURCE)/payload/payload.elf -Tscript.ld $< -o $@
+	$(LD) -s -R $(SOURCE)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@

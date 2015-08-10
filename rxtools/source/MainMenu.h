@@ -206,7 +206,7 @@ void SettingsMenuInit(){
 
 		f_closedir(&d);
 	}
-	
+
 	while (true) {
 		u32 pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
@@ -316,9 +316,9 @@ void SettingsMenuInit(){
 			writeCfg();
 			break;
 		}
-		
+
 		TryScreenShot();
-		
+
 		//UPDATE SETTINGS GUI
 		swprintf(MyMenu->Name, CONSOLE_MAX_TITLE_LENGTH+1, strings[STR_SETTINGS]);
 		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
@@ -337,8 +337,8 @@ void BootMenuInit(){
 	DrawBottomSplash(str);
 	while (true) {
 		u32 pad_state = InputWait();
-		if (pad_state & BUTTON_Y) rxModeEmu();      //Boot emunand
-		else if (pad_state & BUTTON_X) rxModeSys(); //Boot sysnand
+		if (pad_state & BUTTON_Y) rxModeWithSplash(1);      //Boot emunand
+		else if (pad_state & BUTTON_X) rxModeWithSplash(0); //Boot sysnand
 		else if (pad_state & BUTTON_B) break; //Boot sysnand
 	}
 }

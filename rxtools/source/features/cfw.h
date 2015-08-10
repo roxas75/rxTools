@@ -38,12 +38,10 @@ typedef enum {
 
 int DevMode();
 void FirmLoader();
-void rxModeSys();
-void rxModeEmu();
-void rxModeQuickBoot();
+void rxModeWithSplash(int emu);
+int rxMode(int emu);
 u8* decryptFirmTitleNcch(u8* title, unsigned int size);
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
 int applyPatch(void *file, const char *patch, const FirmInfo *info);
-Platform_UnitType Platform_CheckUnit(void);
 
 #endif

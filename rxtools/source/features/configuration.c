@@ -244,7 +244,6 @@ int readCfg()
 }
 
 int InstallData(char* drive){
-	static const FirmInfo native_info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000};
 	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	FIL firmfile;
@@ -268,26 +267,13 @@ int InstallData(char* drive){
 	//Create patched native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
-	if (applyPatch(n_firm, "/rxTools/system/patches/native_firm.elf", &native_info))
+	if (applyPatchToNative(n_firm, "/rxTools/system/patches/native_firm.elf"))
 		return CONF_ERRPATCH;
 
-	u8 keyx[16] = {0};
-	if(GetSystemVersion() < 3){
-		if (!FileOpen(&tempfile, KEYFILENAME, 0))
-		{
-			f_close(&firmfile);
-			return CONF_CANTOPENFILE;
-		}
-		FileRead(&tempfile, &keyx[0], 16, 0);
-		FileClose(&tempfile);
-	}
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 	for(int i = 0; i < NAT_SIZE; i+=0x4){
-		if(!strcmp((char*)n_firm + i, "InsertKeyXHere!") && keyx[0] != 0){
-			memcpy(n_firm + i, keyx, 16);
-		}
 		if(*((unsigned int*)(n_firm + i)) == 0xAAAABBBB){
 			*((unsigned int*)(n_firm + i)) = (checkEmuNAND() / 0x200) - 1;
 		}
