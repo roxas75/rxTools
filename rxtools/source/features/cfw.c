@@ -232,6 +232,9 @@ int rxMode(int emu)
 		} else if (!strcmp(sh_name, ".rodata.nand.sector")) {
 			if (sector)
 				*(u32 *)p = (sector / 0x200) - 1;
+		} else if (!strcmp(sh_name, ".rodata.label")) {
+			memcpy(p, "RX-", 3);
+			((char *)p)[3] = sector ? 'E' : 'S';
 		} else if (shdr.sh_type == SHT_PROGBITS
 			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1)))
 		{
