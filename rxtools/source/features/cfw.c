@@ -51,17 +51,21 @@ Platform_UnitType Platform_CheckUnit(void) {
 	return *(u32 *)PLATFORM_REG_ADDR;
 }
 
-static int loadExecReboot()
+static FRESULT loadExecReboot()
 {
-	File fd;
+	FIL fd;
+	FRESULT r;
+	UINT br;
 
-	if (!FileOpen(&fd, "/rxTools/system/reboot.bin", 0))
-		return -1;
+	r = f_open(&fd, "/rxTools/system/reboot.bin", FA_READ);
+	if (r != FR_OK)
+		return r;
 
-	if (FileRead(&fd, (void*)0x080F0000, 0x8000, 0) < 0)
-		return -1;
+	r = f_read(&fd, (void*)0x080F0000, 0x8000, &br);
+	if (r != FR_OK)
+		return r;
 
-	FileClose(&fd);
+	f_close(&fd);
 	_softreset();
 }
 
