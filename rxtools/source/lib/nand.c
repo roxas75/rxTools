@@ -34,7 +34,8 @@ const u8 *fsVersionCTRs[] = {
 	(u8 *)0x080D748C, //6.x
 	(u8 *)0x080D740C, //7.x
 	(u8 *)0x080D74CC, //8.x
-	(u8 *)0x080D794C //9.x
+	(u8 *)0x080D794C, //9.x
+	(u8 *)0x080D8B8C  //9.x N3DS
 };
 const u32 fsVersionCTRsLength = sizeof(fsVersionCTRs) / sizeof(u8 *);
 /**Copy NAND Cypto to our region.*/
