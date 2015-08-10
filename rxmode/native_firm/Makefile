@@ -56,11 +56,28 @@ $(TARGET)_unstrip.elf: $(SOURCE)/payload/payload.elf	\
 	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf
 	$(LD) -i -T$(LDSCRIPT) $^ -o $@
 
-$(SOURCE)/payload/payload.elf:
-	$(MAKE) -C $(dir $@) $(notdir $@) LDSCRIPT=$(CURDIR)/$(LDSCRIPT)
+$(SOURCE)/payload/payload.elf: $(BUILD)/payload/arm9/EmuNAND.o	\
+	$(BUILD)/payload/arm9/CreateThread.o	\
+	$(BUILD)/payload/arm9/myThread/myThread.o	\
+	$(BUILD)/payload/arm9/myThread/handlers.o	\
+	$(BUILD)/payload/arm9/myThread/FS.o	\
+	$(BUILD)/payload/arm11/hookswi.o
+	$(LD) -T$(LDSCRIPT) $^ -o $@
 
 $(BUILD)/%.elf: $(BUILD)/%.o $(SOURCE)/payload/payload.elf
 	$(LD) -s -R $(SOURCE)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
+
+$(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.c $(BUILD)/payload/arm9/myThread
+	$(CC) -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss -I$(SOURCE)/payload/include $< -c -o $@
+
+$(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.s $(BUILD)/payload/arm9/myThread
+	$(AS) $< -o $@
+
+$(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.s $(BUILD)/payload/arm9
+	$(AS) $< -o $@
+
+$(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.s $(BUILD)/payload/arm11
+	$(AS) $< -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@
