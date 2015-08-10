@@ -28,7 +28,7 @@ static int rx_strcmp(char* s1, char* s2, unsigned int size, unsigned int w1, uns
 	return 1;
 }
 
-static void rx_strcpy(char* dest, char* source, unsigned int size, unsigned int w1, unsigned int w2){
+static void rx_strcpy(char* dest, const char* source, unsigned int size, unsigned int w1, unsigned int w2){
 	int i;
 
 	for(i = 0; i < size; i++){
