@@ -43,7 +43,7 @@
 char tmp[256];
 char str[100];
 unsigned int emuNandMounted = 0;
-void (*_softreset)() = (void*)0x080F0000;
+_Noreturn void (* const _softreset)() = (void *)0x080F0000;
 
 // @breif  Determine platform of the console.
 // @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
@@ -64,7 +64,6 @@ static int loadExecReboot()
 
 	FileClose(&fd);
 	_softreset();
-	return 0;
 }
 
 static int loadFirm(char *path)
