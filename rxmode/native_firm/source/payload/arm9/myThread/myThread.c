@@ -19,6 +19,7 @@
 #include <wchar.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <memory.h>
 #include <FS.h>
 #include <handlers.h>
 #include "hookswi.h"
@@ -33,7 +34,7 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 	int i;
 
 	for(i = 0; i < 0x600000; i++){
-		*(VRAM + i) = 0x77;			//Grey flush : Start Dumping
+		*(ARM9_VRAM_ADDR + i) = 0x77;			//Grey flush : Start Dumping
 	}
 
 	for (i = 0; i < sizeof(handle) / sizeof(unsigned int); i++)
@@ -43,7 +44,7 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 	fwrite9(handle, &br, buf, size);
 	fclose9(handle);
 	for(i = 0; i < 0x600000; i++){
-		*(VRAM + i) = 0xFF;			//White flush : Finished Dumping
+		*(ARM9_VRAM_ADDR + i) = 0xFF;			//White flush : Finished Dumping
 	}
 }
 #endif
@@ -70,7 +71,7 @@ static void scrPutc(int c)
 		unsigned char r;
 	};
 
-	struct px (* const fb)[FB_HEIGHT] = (void *)VRAM;
+	struct px (* const fb)[FB_HEIGHT] = (void *)ARM9_VRAM_ADDR;
 	unsigned int fnt_x, fnt_y;
 	const unsigned char *p;
 
