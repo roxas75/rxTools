@@ -16,9 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#define FCRAM (unsigned char*)0x20000000
-#define VRAM (unsigned char*)0x18000000
-
 static int rx_strcmp(char* s1, char* s2, unsigned int size, unsigned int w1, unsigned int w2){
 	int i;
 
