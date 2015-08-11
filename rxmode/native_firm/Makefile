@@ -34,7 +34,7 @@ LD	:= arm-none-eabi-ld
 
 .PHONY: clean all
 
-all: $(TARGET).elf
+all: $(BUILD)/$(TARGET).elf
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
@@ -51,7 +51,7 @@ $(BUILD)/payload/arm11:
 %.elf: %_unstrip.elf
 	$(STRIP) $< -o $@
 
-$(TARGET)_unstrip.elf: $(SOURCE)/payload/payload.elf	\
+$(BUILD)/$(TARGET)_unstrip.elf: $(SOURCE)/payload/payload.elf	\
 	$(BUILD)/k9_fix_flags.elf $(BUILD)/p9_keyx_spoof.elf	\
 	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
 	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
@@ -87,4 +87,4 @@ $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET)_unstrip.elf $(TARGET).elf source/payload/payload.elf
+	@rm -fr $(BUILD)

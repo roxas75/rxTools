@@ -18,7 +18,7 @@ LD		:=	arm-none-eabi-ld
 
 .PHONY: clean all
 
-all: $(TARGET).elf
+all: $(BUILD)/$(TARGET).elf
 
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
@@ -26,7 +26,7 @@ $(BUILD):
 %.elf: %_unstrip.elf
 	$(STRIP) $< -o $@
 
-$(TARGET)_unstrip.elf: $(BUILD)/p9_signatures_spoof.o
+$(BUILD)/$(TARGET)_unstrip.elf: $(BUILD)/p9_signatures_spoof.o
 	$(LD) -i -Tscript.ld $^ -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
@@ -34,4 +34,4 @@ $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET)_unstrip.elf $(TARGET).elf
+	@rm -fr $(BUILD)
