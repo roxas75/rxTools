@@ -315,7 +315,7 @@ int InstallData(char* drive){
 	}
 
 	if (a_firm) {
-		if (applyPatch(a_firm, "/rxTools/system/patches/agb_firm.elf", &agb_info))
+		if (applyPatch(a_firm, "/rxTools/system/patches/ctr/agb_firm.elf", &agb_info))
 			return CONF_ERRPATCH;
 
 		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
@@ -339,7 +339,7 @@ int InstallData(char* drive){
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
 	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	if(t_firm){
-		if (applyPatch(t_firm, "/rxTools/system/patches/twl_firm.elf", &twl_info))
+		if (applyPatch(t_firm, "/rxTools/system/patches/ctr/twl_firm.elf", &twl_info))
 			return CONF_ERRPATCH;
 
 		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
