@@ -21,10 +21,13 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
 
+ifndef BUILD
+$(error "Please set BUILD")
+endif
+
 include $(DEVKITARM)/base_rules
 
 TARGET 		:=  agb_firm
-BUILD		:=	build
 SOURCE		:=	source
 LD		:=	arm-none-eabi-ld
 
