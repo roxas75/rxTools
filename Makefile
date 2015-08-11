@@ -24,8 +24,7 @@ CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(CODE_PATH)
 #CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE)
 
-RXMODE_TARGETS = rxmode/native_firm/native_firm.elf rxmode/agb_firm/agb_firm.elf	\
-	rxmode/twl_firm/twl_firm.elf
+RXMODE_BUILD := rxmode/build
 
 all: $(CODE_FILE)
 
@@ -36,17 +35,16 @@ distclean:
 .PHONY: clean
 clean: distclean
 	@$(MAKE) -C rxtools clean
-	@$(MAKE) -C rxmode/native_firm clean
-	@$(MAKE) -C rxmode/agb_firm clean
-	@$(MAKE) -C rxmode/twl_firm clean
 	@$(MAKE) -C reboot clean
 	@$(MAKE) $(SET_CODE_PATH) -C brahma clean
 	@$(MAKE) -C theme clean
 	@$(MAKE) $(SET_CODE_PATH) -C rxinstaller clean
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
-	@rm -f payload.bin $(CODE_FILE)
+	@rm -Rf payload.bin $(CODE_FILE) rxmode/build
 
-release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
+release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
+	$(addprefix $(RXMODE_BUILD)/ktr/,native_firm.elf)	\
+	$(addprefix $(RXMODE_BUILD)/ctr/,native_firm.elf agb_firm.elf twl_firm.elf)	\
 	all-target-brahma all-target-theme rxinstaller.nds
 	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
@@ -59,10 +57,12 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin $(RXMODE_TARGETS)	\
 	@cp rxtools/font.bin release/rxTools/system
 	@cp reboot/reboot.bin release/rxTools/system
 
-	@mkdir -p release/rxTools/system/patches
-	@cp rxmode/native_firm/native_firm.elf release/rxTools/system/patches
-	@cp rxmode/agb_firm/agb_firm.elf release/rxTools/system/patches
-	@cp rxmode/twl_firm/twl_firm.elf release/rxTools/system/patches
+	@mkdir -p release/rxTools/system/patches/ctr release/rxTools/system/patches/ktr
+	@cp $(RXMODE_BUILD)/ctr/native_firm.elf release/rxTools/system/patches/ctr
+	@cp $(RXMODE_BUILD)/ctr/agb_firm.elf release/rxTools/system/patches/ctr
+	@cp $(RXMODE_BUILD)/ctr/twl_firm.elf release/rxTools/system/patches/ctr
+
+	@cp $(RXMODE_BUILD)/ktr/native_firm.elf release/rxTools/system/patches/ktr
 
 	@mkdir -p release/rxTools/theme/0 release/rxTools/lang release/Tools/fbi_injection release/Tools/scripts
 	@mv theme/*.bin release/rxTools/theme/0
@@ -87,8 +87,17 @@ all-target-brahma:
 reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
 
-$(RXMODE_TARGETS):
-	$(MAKE) $(SET_INCDIR) -C $(dir $@) $(notdir $@)
+$(RXMODE_BUILD)/ktr/native_firm.elf:
+	$(MAKE) $(SET_INCDIR) BUILD=$(CURDIR)/$(RXMODE_BUILD)/ktr PLATFORM_KTR=1 -C rxmode/native_firm
+
+$(RXMODE_BUILD)/ctr/native_firm.elf:
+	$(MAKE) $(SET_INCDIR) BUILD=$(CURDIR)/$(RXMODE_BUILD)/ctr -C rxmode/native_firm
+
+$(RXMODE_BUILD)/ctr/agb_firm.elf:
+	$(MAKE) $(SET_INCDIR) BUILD=$(CURDIR)/$(RXMODE_BUILD)/ctr -C rxmode/agb_firm
+
+$(RXMODE_BUILD)/ctr/twl_firm.elf:
+	$(MAKE) $(SET_INCDIR) BUILD=$(CURDIR)/$(RXMODE_BUILD)/ctr -C rxmode/twl_firm
 
 rxtools/rxtools.bin:
 	@$(MAKE) -C $(dir $@) all
