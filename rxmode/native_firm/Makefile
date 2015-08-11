@@ -68,7 +68,7 @@ $(BUILD)/%.elf: $(BUILD)/%.o $(SOURCE)/payload/payload.elf
 	$(LD) -s -R $(SOURCE)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
 
 $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.c $(BUILD)/payload/arm9/myThread
-	$(CC) -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/include $< -c -o $@
+	$(CC) -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.s $(BUILD)/payload/arm9/myThread
 	$(AS) $< -o $@
