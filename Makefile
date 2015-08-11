@@ -17,6 +17,9 @@ CODE_FILE := code.bin
 CODE_PATH := rxTools/system/
 SET_CODE_PATH := CODE_PATH=$(CODE_PATH)$(CODE_FILE)
 
+INCDIR := -I$(CURDIR)/include
+SET_INCDIR := INCDIR=$(INCDIR)
+
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(CODE_PATH)
 #CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE)
@@ -76,7 +79,7 @@ $(CODE_FILE): rxtools/rxtools.bin
 	@dd if=rxtools/rxtools.bin of=$@ seek=272 conv=notrunc
 
 rxinstaller.nds:
-	@$(MAKE) $(SET_CODE_PATH) -C rxinstaller
+	@$(MAKE) $(SET_CODE_PATH) $(SET_INCDIR) -C rxinstaller
 
 all-target-brahma:
 	$(MAKE) $(SET_CODE_PATH) -C brahma
@@ -85,7 +88,7 @@ reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
 
 $(RXMODE_TARGETS):
-	$(MAKE) -C $(dir $@) $(notdir $@)
+	$(MAKE) $(SET_INCDIR) -C $(dir $@) $(notdir $@)
 
 rxtools/rxtools.bin:
 	@$(MAKE) -C $(dir $@) all
