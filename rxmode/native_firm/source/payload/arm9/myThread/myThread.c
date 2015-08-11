@@ -20,10 +20,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <memory.h>
-#include <FS.h>
-#include <handlers.h>
-#include "hookswi.h"
-#include "vars.h"
+#include <payload/arm9/FS.h>
+#include <payload/arm9/handlers.h>
+#include <payload/arm9/vars.h>
+#include <payload/arm11/hookswi.h>
 #include "font.c"
 #include "lib.c"
 
