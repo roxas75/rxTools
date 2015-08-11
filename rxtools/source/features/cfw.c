@@ -183,10 +183,13 @@ int rxMode(int emu)
 		DrawBottomSplash(s);
 	}
 
-	static const FirmInfo info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
+	static const FirmInfo ktrInfo = { 0x66A00, 0x8A600, 0x08006000, 0x15B00, 0x16700, 0x08028000 };
+	static const FirmInfo ctrInfo = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
 	static const char patchNandPrefix[] = ".patch.p9.nand";
 	unsigned int cur, off, shstrSize;
-	char shstrtab[512], *sh_name;
+	char path[64], shstrtab[512], *sh_name;
+	const char *platformDir;
+	const FirmInfo *info;
 	const wchar_t *msg;
 	int r, sector;
 	void *p;
@@ -204,7 +207,25 @@ int rxMode(int emu)
 		goto fail;
 	}
 
-	r = f_open(&fd, "/rxTools/system/patches/native_firm.elf", FA_READ);
+	r = Platform_CheckUnit();
+	switch (r) {
+		case PLATFORM_N3DS:
+			info = &ktrInfo;
+			platformDir = "ktr";
+			break;
+
+		case PLATFORM_3DS:
+			info = &ctrInfo;
+			platformDir = "ctr";
+			break;
+
+		default:
+			msg = L"Unknown Platform: %d";
+			goto fail;
+	}
+
+	sprintf(path, "/rxTools/system/patches/%s/native_firm.elf", platformDir);
+	r = f_open(&fd, path, FA_READ);
 	if (r != FR_OK)
 		goto patchFail;
 
@@ -250,7 +271,7 @@ int rxMode(int emu)
 		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
 			continue;
 
-		off = addrToOff(shdr.sh_addr, &info);
+		off = addrToOff(shdr.sh_addr, info);
 		if (off == 0)
 			continue;
 
@@ -278,6 +299,10 @@ int rxMode(int emu)
 			f_read(&fd, p, shdr.sh_size, &br);
 		}
 	}
+
+	f_open(&fd, "NATIVE_FIRM.BIN", FA_WRITE | FA_CREATE_ALWAYS);
+	f_write(&fd, (void *)FIRM_ADDR, 0x200000, &br);
+	f_close(&fd);
 
 	r = loadExecReboot(); // This won't return if it succeeds.
 	msg = L"Failed to load reboot.bin: %d\n"

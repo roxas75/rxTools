@@ -21,8 +21,13 @@ nandTopSector:
 .text
 .global EMUNAND_WRITE
 
-EntryPoint 	  = 0x080D8670
-Break_Func 	  = 0x08062A29
+#ifdef PLATFORM_KTR
+EntryPoint = 0x080D86F0
+Break_Func = 0x08062891
+#else
+EntryPoint = 0x080D8670
+Break_Func = 0x08062A29
+#endif
 
 EMUNAND_WRITE:
 				 STMFD   SP!, {R0-R3}
@@ -81,7 +86,11 @@ EMUNAND_WRITE:
                  MOVS    R2, R4
                  ADDS    R2, R2, #0xC
                  MOV     R0, R12
+#ifdef PLATFORM_KTR
+                 LDR     R5, =0x080788C1
+#else
                  LDR     R5, =0x08078971
+#endif
                  BLX     R5
                  STMFD   SP!, {R0-R3}
                  ldr r2, =bytes1
@@ -150,7 +159,11 @@ EMUNAND_READ:
                  MOVS    R2, R4
                  ADDS    R2, R2, #0xC
                  MOV     R0, R12
+#ifdef PLATFORM_KTR
+                 LDR     R5, =0x080786A1
+#else
                  LDR     R5, =0x08078751
+#endif
                  BLX     R5
                  STMFD   SP!, {R0-R3}
                  ldr r2, =bytes1
