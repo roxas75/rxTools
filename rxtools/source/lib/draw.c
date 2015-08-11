@@ -262,9 +262,15 @@ void DrawFadeScreen(u8 *screen, u16 Width, u16 Height, u32 f)
 }
 
 void fadeOut(){
-	for (int x = 255; x >= 0; x-=4){
-		DrawFadeScreen(BOT_SCREEN, BOT_SCREEN_WIDTH, SCREEN_HEIGHT, x);
-		DrawFadeScreen(TOP_SCREEN, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, x);
-		DrawFadeScreen(TOP_SCREEN2, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, x);
+	void *tmpscreen = (void*)0x27000000;
+	void *tmpscreentop = (void*)(0x27000000+SCREEN_SIZE);
+	memcpy(tmpscreen, BOT_SCREEN, SCREEN_SIZE); 
+	memcpy(tmpscreentop, TOP_SCREEN, SCREEN_SIZE); 
+	for (int x = 255; x >= 0; x-=3){
+		DrawFadeScreen(tmpscreen, BOT_SCREEN_WIDTH, SCREEN_HEIGHT, 4);
+		DrawFadeScreen(tmpscreentop, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, 4);
+		memcpy(BOT_SCREEN, tmpscreen, SCREEN_SIZE); 
+		memcpy(BOT_SCREEN2, tmpscreen, SCREEN_SIZE); 
+		memcpy(TOP_SCREEN, tmpscreentop, SCREEN_SIZE); 
 	}
 }
