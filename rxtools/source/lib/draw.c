@@ -248,12 +248,16 @@ void DrawSplash(u8 *screen, char splash_file[]) {
 void DrawFadeScreen(u8 *screen, u16 Width, u16 Height, u32 f)
 {
 	u32 *screen32 = (u32 *)screen;
-	int i; for (i = 0; i<Width*Height * 3 / 4; i++)
+	u32 src, tmp;
+	int i,i;
+	for (i = 0; i<Width*Height * 3 / 4; i++)
 	{
-		*screen32 >>=1;
-		*screen32 &= 0x7F7F7F7F;
-		*screen32 += ((*screen32>>1) & 0x7F7F7F7F) + ((*screen32>>2) & 0x3F3F3F3F) + ((*screen32>>3) & 0x1F1F1F1F);
-		screen32++;
+		src = *screen32;
+		tmp = 0;
+		for (j = 0; j<f; j++){
+			tmp = ((tmp+src) >> 1) & 0x7F7F7F7F;
+		}
+		*(screen32++) = tmp;
 	}
 }
 
