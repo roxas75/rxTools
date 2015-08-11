@@ -27,6 +27,8 @@ CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(CODE_PATH)
 RXMODE_TARGETS = rxmode/native_firm/native_firm.elf rxmode/agb_firm/agb_firm.elf	\
 	rxmode/twl_firm/twl_firm.elf
 
+RXMODE_SET_BUILD := BUILD=../build
+
 all: $(CODE_FILE)
 
 .PHONY: distclean
@@ -36,9 +38,9 @@ distclean:
 .PHONY: clean
 clean: distclean
 	@$(MAKE) -C rxtools clean
-	@$(MAKE) -C rxmode/native_firm clean
-	@$(MAKE) -C rxmode/agb_firm clean
-	@$(MAKE) -C rxmode/twl_firm clean
+	@$(MAKE) $(RXMODE_SET_BUILD) -C rxmode/native_firm clean
+	@$(MAKE) $(RXMODE_SET_BUILD) -C rxmode/agb_firm clean
+	@$(MAKE) $(RXMODE_SET_BUILD) -C rxmode/twl_firm clean
 	@$(MAKE) -C reboot clean
 	@$(MAKE) $(SET_CODE_PATH) -C brahma clean
 	@$(MAKE) -C theme clean
@@ -88,7 +90,7 @@ reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
 
 $(RXMODE_TARGETS):
-	$(MAKE) $(SET_INCDIR) -C $(dir $@) $(notdir $@)
+	$(MAKE) $(SET_INCDIR) $(RXMODE_SET_BUILD) -C $(dir $@) $(notdir $@)
 
 rxtools/rxtools.bin:
 	@$(MAKE) -C $(dir $@) all
