@@ -45,5 +45,10 @@ CreateMyThread:
 	svc 0x8
 
 	pop {r1-r12, lr}
+#ifdef PLATFORM_KTR
+	ldr r0, =0x80CB0A8
+	ldr pc, =0x80860B4
+#else
 	ldr r0, =0x80CAFA8
 	ldr pc, =0x8086144
+#endif
