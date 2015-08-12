@@ -45,6 +45,8 @@ u32 NcchPadgen()
 	NcchInfo *info = (NcchInfo*)0x20316000;
 
 	const char *filename = "/ncchinfo.bin";
+	wchar_t wfilename[sizeof(filename)];
+	mbstowcs(wfilename, filename, sizeof(filename]))
 	if (!FileOpen(&pf, filename, 0)) {
 		print(strings[STR_ERROR_OPENING], filename+1);
 		return 1;
@@ -55,14 +57,14 @@ u32 NcchPadgen()
         	print(strings[STR_WRONG], filename+1, strings[STR_VERSION]);
 		return 0;
 	}
-	if (!info->n_entries || info->n_entries > MAXENTRIES || (info->ncch_info_version != 0xF0000003)) {
+	if (!info->n_entries || info->n_entries > MAXENTRIES) {
         	print(strings[STR_WRONG], filename+1, strings[STR_ENTRIES_COUNT]);
 		return 0;
 	}
 	FileRead(&pf, info->entries, info->n_entries * sizeof(NcchInfoEntry), 16);
 	FileClose(&pf);
 
-	print(strings[STR_PROCESSING], filename+1);
+	print(strings[STR_PROCESSING], wfilename+1);
 	ConsoleShow();
 	for(u32 i = 0; i < info->n_entries; i++) {
 		PadInfo padInfo = {.setKeyY = 1, .size_mb = info->entries[i].size_mb};
@@ -91,6 +93,8 @@ u32 SdPadgen()
 
 	u8 movable_seed[0x120] = {0};
 	const char *filename = "/movable.sed";
+	wchar_t wfilename[sizeof(filename)];
+	mbstowcs(wfilename, filename, sizeof(filename]))
 	// Load console 0x34 keyY from movable.sed if present on SD card
 	if (FileOpen(&fp, filename, 0)) {
 		bytesRead = FileRead(&fp, &movable_seed, 0x120, 0);
@@ -119,7 +123,7 @@ u32 SdPadgen()
 		return 1;
 	}
 
-       	print(strings[STR_PROCESSING], filename+1);
+       	print(strings[STR_PROCESSING], wfilename+1);
 	ConsoleShow();
 
 	bytesRead = FileRead(&fp, info->entries, info->n_entries * sizeof(SdInfoEntry), 4);
