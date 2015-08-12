@@ -44,7 +44,6 @@
 #define PROGRESS_WIDTH	6
 #define PROGRESS_X	(BOT_SCREEN_WIDTH-PROGRESS_WIDTH*FONT_WIDTH)/2
 
-bool first_boot;
 char tmpstr[256] = {0};
 char str[100];
 char strl[100];
@@ -395,12 +394,8 @@ int CheckInstallationData(){
 
 void InstallConfigData(){
 	if(CheckInstallationData() == 0)
-	{
-		first_boot = false;
 		return;
-	}
 
-	first_boot = true;
 	trySetLangFromTheme(0);
 	writeCfg();
 
