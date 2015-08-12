@@ -274,7 +274,8 @@ int InstallData(char* drive){
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
+	sprintf(tmpstr, "%s:%s/00040138%s.bin", drive, DATAFOLDER,
+		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
 		FileClose(&tempfile);
@@ -385,8 +386,11 @@ end:
 
 int CheckInstallationData(){
 	File file;
-	char str[32];
-	if(!FileOpen(&file, "rxTools/data/0004013800000002.bin", 0)) return -1;
+	char str[64];
+
+	sprintf(str, "rxTools/data/00040138%s.bin",
+		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
+	if(!FileOpen(&file, str, 0)) return -1;
 	FileClose(&file);
 
 	if (Platform_CheckUnit() == PLATFORM_3DS) {
