@@ -169,14 +169,14 @@ int main(){
 	}
 
 	//That's the Main Menu initialization, easy and cool
+	OpenAnimation();
 	MenuInit(&MainMenu);
 	MenuShow();
-
 	while (true) {
 		u32 pad_state = InputWait();
 		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
 		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
-		if(pad_state & BUTTON_A)    	MenuSelect();
+		if (pad_state & BUTTON_A)    	{ OpenAnimation(); MenuSelect(); }
 		if (pad_state & BUTTON_SELECT)	{ fadeOut(); ShutDown(); }
 		if (pad_state & BUTTON_START)	{ fadeOut(); returnHomeMenu(); }
 		TryScreenShot();

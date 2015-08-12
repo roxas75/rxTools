@@ -22,6 +22,7 @@
 #include "cfw.h"
 #include "common.h"
 #include "hid.h"
+#include "lang.h"
 #include "console.h"
 #include "polarssl/aes.h"
 #include "elf.h"
@@ -47,21 +48,25 @@ _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 // @breif  Determine platform of the console.
 // @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
 // @note   Maybe modified to support more platforms
-static Platform_UnitType Platform_CheckUnit(void) {
+Platform_UnitType Platform_CheckUnit(void) {
 	return *(u32 *)PLATFORM_REG_ADDR;
 }
 
-static int loadExecReboot()
+static FRESULT loadExecReboot()
 {
-	File fd;
+	FIL fd;
+	FRESULT r;
+	UINT br;
 
-	if (!FileOpen(&fd, "/rxTools/system/reboot.bin", 0))
-		return -1;
+	r = f_open(&fd, "/rxTools/system/reboot.bin", FA_READ);
+	if (r != FR_OK)
+		return r;
 
-	if (FileRead(&fd, (void*)0x080F0000, 0x8000, 0) < 0)
-		return -1;
+	r = f_read(&fd, (void*)0x080F0000, 0x8000, &br);
+	if (r != FR_OK)
+		return r;
 
-	FileClose(&fd);
+	f_close(&fd);
 	_softreset();
 }
 
@@ -162,10 +167,30 @@ static void setAgbBios()
 
 int rxMode(int emu)
 {
-	static const FirmInfo info = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
+	if (!checkEmuNAND() && emu)
+	{
+		ConsoleInit();
+		ConsoleSetTitle(L"EMUNAND NOT FOUND!");
+		print(L"The emunand was not found on\n");
+		print(L"your SDCard. \n");
+		print(L"\n");
+		print(L"Press A to boot SYSNAND\n");
+		ConsoleShow();
+		WaitForButton(BUTTON_A);
+		emu = 0;
+		char s[32];
+		sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+		DrawBottomSplash(s);
+	}
+
+	static const FirmInfo ktrInfo = { 0x66A00, 0x8A600, 0x08006000, 0x15B00, 0x16700, 0x08028000 };
+	static const FirmInfo ctrInfo = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
 	static const char patchNandPrefix[] = ".patch.p9.nand";
 	unsigned int cur, off, shstrSize;
-	char shstrtab[512], *sh_name;
+	char path[64], shstrtab[512], *sh_name;
+	const char *platformDir;
+	const FirmInfo *info;
+	const wchar_t *msg;
 	int r, sector;
 	void *p;
 	Elf32_Ehdr ehdr;
@@ -175,36 +200,67 @@ int rxMode(int emu)
 
 	setAgbBios();
 
-	r = loadFirm("rxtools/data/0004013800000002.bin");
-	if (r)
-		return r;
+	sprintf(path, "rxtools/data/00040138%s.bin",
+		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
+	r = loadFirm(path);
+	if (r) {
+		msg = L"Failed to load NATIVE_FIRM: %d\n"
+			L"Reboot rxTools and try again.\n";
+		goto fail;
+	}
 
-	r = f_open(&fd, "/rxTools/system/patches/native_firm.elf", FA_READ);
+	r = Platform_CheckUnit();
+	switch (r) {
+		case PLATFORM_N3DS:
+			info = &ktrInfo;
+			platformDir = "ktr";
+			break;
+
+		case PLATFORM_3DS:
+			info = &ctrInfo;
+			platformDir = "ctr";
+			break;
+
+		default:
+			msg = L"Unknown Platform: %d";
+			goto fail;
+	}
+
+	sprintf(path, "/rxTools/system/patches/%s/native_firm.elf", platformDir);
+	r = f_open(&fd, path, FA_READ);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_read(&fd, &ehdr, sizeof(ehdr), &br);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_lseek(&fd, ehdr.e_shoff + ehdr.e_shstrndx * sizeof(Elf32_Shdr));
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_read(&fd, &shdr, sizeof(shdr), &br);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_lseek(&fd, shdr.sh_offset);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
 	r = f_read(&fd, shstrtab, shdr.sh_size > sizeof(shstrtab) ?
 		sizeof(shstrtab) : shdr.sh_size, &shstrSize);
 	if (r != FR_OK)
-		return r;
+		goto patchFail;
 
-	sector = emu ? checkEmuNAND() : 0;
+	if (emu) {
+		sector = checkEmuNAND();
+		if (sector == 0) {
+			msg = L"Failed to find EmuNAND.\n"
+				L"Check your EmuNAND.\n";
+			goto fail;
+		}
+	} else
+		sector = 0;
 
 	cur = ehdr.e_shoff;
 	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
@@ -217,7 +273,7 @@ int rxMode(int emu)
 		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
 			continue;
 
-		off = addrToOff(shdr.sh_addr, &info);
+		off = addrToOff(shdr.sh_addr, info);
 		if (off == 0)
 			continue;
 
@@ -246,7 +302,30 @@ int rxMode(int emu)
 		}
 	}
 
-	return loadExecReboot();
+	f_open(&fd, "NATIVE_FIRM.BIN", FA_WRITE | FA_CREATE_ALWAYS);
+	f_write(&fd, (void *)FIRM_ADDR, 0x200000, &br);
+	f_close(&fd);
+
+	r = loadExecReboot(); // This won't return if it succeeds.
+	msg = L"Failed to load reboot.bin: %d\n"
+		L"Check your installation.\n";
+
+fail:
+	ConsoleInit();
+	ConsoleSetTitle(L"rxMode");
+	print(msg, r);
+	print(L"\n");
+	print(strings[STR_PRESS_BUTTON_ACTION],
+		strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+	ConsoleShow();
+	WaitForButton(BUTTON_A);
+
+	return r;
+
+patchFail:
+	msg = L"Failed to load native_firm.elf: %d\n"
+		L"Check your installation.\n";
+	goto fail;
 }
 
 void rxModeWithSplash(int emu)
@@ -256,9 +335,6 @@ void rxModeWithSplash(int emu)
 	sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(s);
 	rxMode(emu);
-	sprintf(s, "/rxTools/Theme/%u/bootE.bin", cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(s);
-	WaitForButton(BUTTON_A);
 }
 
 //Just patches signatures check, loads in sysnand

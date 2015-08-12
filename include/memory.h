@@ -15,34 +15,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CFW_H
-#define CFW_H
+#ifndef MEMORY_H
+#define MEMORY_H
 
-#include <stddef.h>
-#include <stdint.h>
-#include "common.h"
+#define CTR_ARM9_VRAM_ADDR 0x18000000
+#define KTR_ARM9_VRAM_ADDR 0xDEADBEEF
 
-typedef struct{
-        unsigned int arm9Off;
-        size_t arm9Size;
-        uintptr_t arm9Entry;
-        unsigned int p9Off;
-        uintptr_t p9Start;
-        uintptr_t p9Entry;
-} FirmInfo;
+#ifdef PLATFORM_KTR
+#define ARM9_VRAM_ADDR KTR_ARM9_VRAM_ADDR
+#else
+#define ARM9_VRAM_ADDR CTR_ARM9_VRAM_ADDR
+#endif
 
-typedef enum {
-	PLATFORM_3DS=1,
-	PLATFORM_N3DS=7,
-} Platform_UnitType;
+#define CTR_ARM11_VRAM_PADDR CTR_ARM9_VRAM_ADDR
+#define KTR_ARM11_VRAM_PADDR KTR_ARM9_VRAM_ADDR
 
-Platform_UnitType Platform_CheckUnit(void);
-int DevMode();
-void FirmLoader();
-void rxModeWithSplash(int emu);
-int rxMode(int emu);
-u8* decryptFirmTitleNcch(u8* title, unsigned int size);
-u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
-int applyPatch(void *file, const char *patch, const FirmInfo *info);
+#define ARM11_VRAM_PADDR ARM9_VRAM_ADDR
 
 #endif

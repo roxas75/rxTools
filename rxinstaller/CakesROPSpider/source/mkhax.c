@@ -1,6 +1,8 @@
 /*
  * Myria's libkhax implementation in C
  */
+#include <memory.h>
+
 #include "mkhax.h"
 
 #include "svc.h"
@@ -9,7 +11,7 @@
 
 void rand_patt()
 {
-	void *src = (void *)0x18000000;
+	void *src = (void *)CTR_ARM9_VRAM_ADDR;
 	for (int i = 0; i < 3; i++) {  // Do it 3 times to be safe
 		compat.app.GSPGPU_FlushDataCache(src, 0x00038400);
 		compat.app.GX_SetTextureCopy(src, (void *)0x1F48F000, 0x00038400, 0, 0, 0, 0, 8);

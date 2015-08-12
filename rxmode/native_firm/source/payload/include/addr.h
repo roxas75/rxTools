@@ -15,34 +15,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CFW_H
-#define CFW_H
+#ifndef ADDR_H
+#define ADDR_H
 
-#include <stddef.h>
-#include <stdint.h>
-#include "common.h"
+#define ARM9_FCRAM_ADDR 0x20000000
 
-typedef struct{
-        unsigned int arm9Off;
-        size_t arm9Size;
-        uintptr_t arm9Entry;
-        unsigned int p9Off;
-        uintptr_t p9Start;
-        uintptr_t p9Entry;
-} FirmInfo;
+#define ARM9_FOPEN_ADDR 0x0805B181
+#define ARM9_FWRITE_ADDR 0x0805C4D1
+#define ARM9_FREAD_ADDR 0x0804D9B1
+#define ARM9_FCLOSE_ADDR 0x0805B26D
 
-typedef enum {
-	PLATFORM_3DS=1,
-	PLATFORM_N3DS=7,
-} Platform_UnitType;
+#define ARM9_REGION_TOP_ADDR 0x26A00000
+#define ARM9_REGION_BTM_ADDR 0x27000000
 
-Platform_UnitType Platform_CheckUnit(void);
-int DevMode();
-void FirmLoader();
-void rxModeWithSplash(int emu);
-int rxMode(int emu);
-u8* decryptFirmTitleNcch(u8* title, unsigned int size);
-u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
-int applyPatch(void *file, const char *patch, const FirmInfo *info);
+#define ARM9_MSET_TOP_PADDR 0x23A00000
+#define ARM9_MSET_BTM_PADDR 0x24000000
+
+#define ARM9_ARM11EXCVEC_ADDR 0x1FFF4000
+
+#define ARM9_FIQ_HANDLER_PTR_ADDR 0x08000008
+#define ARM9_INSTR_HANDLER_PTR_ADDR 0x08000018
+#define ARM9_PREFETCH_HANDLER_PTR_ADDR 0x08000020
+#define ARM9_DATA_HANDLER_PTR_ADDR 0x0800002C
+
+#define ARM11_EXCVEC_VADDR 0xFFFF0000
 
 #endif
