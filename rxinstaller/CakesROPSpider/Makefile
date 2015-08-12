@@ -9,13 +9,12 @@ CC	:= arm-none-eabi-gcc
 LD	:= arm-none-eabi-ld
 OC	:= arm-none-eabi-objcopy
 
-INCDIR	+= -I../include -I../../include
-CFLAGS	:= -fshort-wchar -fomit-frame-pointer -std=gnu99 -Os -g -march=armv6k -mtune=mpcore $(INCDIR) -DCODE_PATH=\"$(CODE_PATH)\"
+CFLAGS	:= -fshort-wchar -fomit-frame-pointer -std=gnu99 -Os -g -march=armv6k -mtune=mpcore -I../include -I../../include -DCODE_PATH=\"$(CODE_PATH)\"
 LDFLAGS	:= -T crs.ld
 OCFLAGS	:= -R .compat
 
-BUILD	:= build
-SOURCE	:= source
+BUILD	:= $(CURDIR)/build
+SOURCE	:= $(CURDIR)/source
 OBJS	:= $(patsubst $(SOURCE)/%.c, $(BUILD)/%.o, $(wildcard $(SOURCE)/*.c))	\
 	$(patsubst $(SOURCE)/%.s, $(BUILD)/%.o, $(wildcard $(SOURCE)/*.s))
 
