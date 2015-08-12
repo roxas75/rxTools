@@ -29,7 +29,7 @@
 #include "ncch.h"
 #include "crypto.h"
 #include "polarssl/aes.h"
-#include "cfw.h"
+#include "firm.h"
 #include "downgradeapp.h"
 #include "stdio.h"
 #include "menu.h"

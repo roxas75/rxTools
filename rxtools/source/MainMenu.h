@@ -30,7 +30,7 @@
 #include "padgen.h"
 #include "nandtools.h"
 #include "downgradeapp.h"
-#include "cfw.h"
+#include "firm.h"
 #include "i2c.h"
 #include "configuration.h"
 #include "lang.h"
@@ -328,8 +328,8 @@ void SettingsMenuInit(){
 			break;
 		}
 
-		TryScreenShot();		
-		
+		TryScreenShot();
+
 	}
 }
 
