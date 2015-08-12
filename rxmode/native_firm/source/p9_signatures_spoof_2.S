@@ -17,7 +17,9 @@
 @ p9 signature spoof
 .section .patch.p9.sig.2, "a"
 .thumb
-.align 1
-	mov		r0, #0
-	b		0x80631AA
-.pool
+	mov	r0, #0
+#ifdef PLATFORM_KTR
+	b	0x8063866
+#else
+	b	0x80631AA
+#endif

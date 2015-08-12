@@ -59,12 +59,10 @@ enum {
 
 extern Cfg cfgs[];
 
-extern bool first_boot;
-
 int InstallData(char* drive);
 void InstallConfigData();
 
-void trySetLangFromTheme(void);
+void trySetLangFromTheme(int onswitch);
 
 int writeCfg();
 int readCfg();

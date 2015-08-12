@@ -88,7 +88,7 @@ static Menu AdvancedMenu = {
 		{ L" Downgrade MSET on SysNAND", &downgradeMSET, "adv0.bin" },
 		{ L" Install FBI over Health&Safety App", &installFBI, "adv1.bin" },
 		{ L" Restore original Health&Safety App", &restoreHS, "adv2.bin" },
-		{ L" Launch DevMode", &DevMode, "adv3.bin" },
+		{ L" Launch DevMode", (void(*)())&DevMode, "adv3.bin" },
 		{ L" Load a firm", &FirmLoader, "adv4.bin" },
 	},
 	5,
@@ -119,7 +119,7 @@ void DecryptMenuInit(){
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
-		if(pad_state & BUTTON_B) 	break;
+		if(pad_state & BUTTON_B) 	{ MenuClose(); break; }
 		TryScreenShot();
 		MenuShow();
 	}
@@ -133,7 +133,7 @@ void DumpMenuInit(){
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
-		if(pad_state & BUTTON_B) 	break;
+		if(pad_state & BUTTON_B) 	{ MenuClose(); break; }
 		TryScreenShot();
 		MenuShow();
 	}
@@ -147,7 +147,7 @@ void InjectMenuInit(){
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
-		if(pad_state & BUTTON_B) 	break;
+		if(pad_state & BUTTON_B) 	{ MenuClose(); break; }
 		TryScreenShot();
 		MenuShow();
 	}
@@ -161,7 +161,7 @@ void AdvancedMenuInit(){
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
-		if(pad_state & BUTTON_B) 	break;
+		if(pad_state & BUTTON_B) 	{ MenuClose(); break; }
 		TryScreenShot();
 		MenuShow();
 	}
@@ -208,6 +208,16 @@ void SettingsMenuInit(){
 	}
 
 	while (true) {
+		//UPDATE SETTINGS GUI
+		swprintf(MyMenu->Name, CONSOLE_MAX_TITLE_LENGTH+1, strings[STR_SETTINGS]);
+		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SELECTED_THEME], theme_num + '0');
+		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
+		MenuRefresh();
+
 		u32 pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP)   MenuPrevSelection();
@@ -272,7 +282,7 @@ void SettingsMenuInit(){
 					}
 
 					cfgs[CFG_THEME].val.i = theme_num;
-					trySetLangFromTheme();
+					trySetLangFromTheme(1);
 				}
 			}
 			else if (MyMenu->Current == 2) cfgs[CFG_AGB].val.i ^= 1;
@@ -314,20 +324,12 @@ void SettingsMenuInit(){
 		{
 			//Code to save settings
 			writeCfg();
+			MenuClose();
 			break;
 		}
 
-		TryScreenShot();
-
-		//UPDATE SETTINGS GUI
-		swprintf(MyMenu->Name, CONSOLE_MAX_TITLE_LENGTH+1, strings[STR_SETTINGS]);
-		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SELECTED_THEME], theme_num + '0');
-		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
-		MenuRefresh();
+		TryScreenShot();		
+		
 	}
 }
 
@@ -337,10 +339,17 @@ void BootMenuInit(){
 	DrawBottomSplash(str);
 	while (true) {
 		u32 pad_state = InputWait();
-		if (pad_state & BUTTON_Y) rxModeWithSplash(1);      //Boot emunand
-		else if (pad_state & BUTTON_X) rxModeWithSplash(0); //Boot sysnand
-		else if (pad_state & BUTTON_B) break; //Boot sysnand
+		if (pad_state & BUTTON_Y) {
+			rxModeWithSplash(1);      //Boot emunand
+			DrawBottomSplash(str);
+		} else if (pad_state & BUTTON_X) {
+			rxModeWithSplash(0); //Boot sysnand
+			DrawBottomSplash(str);
+		} else if (pad_state & BUTTON_B)
+			break;
 	}
+
+	MenuClose();
 }
 
 void CreditsMenuInit(){
@@ -348,6 +357,7 @@ void CreditsMenuInit(){
 	sprintf(str, "/rxTools/Theme/%u/credits.bin", cfgs[CFG_THEME].val.i);//DRAW TOP SCREEN TO SEE THE NEW THEME
 	DrawBottomSplash(str);
 	WaitForButton(BUTTON_B);
+	OpenAnimation();
 }
 
 static Menu MainMenu = {
