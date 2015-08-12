@@ -181,6 +181,7 @@ $(BUILD): include/patches.h
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) ../$(TARGET).elf ../$(TARGET).nds $(SOUNDBANK) patches.elf patches include/
+	@$(MAKE) --no-print-directory -C CakesROPSpider CODE_PATH=$(CODE_PATH) clean
 
 include/patches.h: patches
 	mkdir include
