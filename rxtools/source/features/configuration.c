@@ -41,8 +41,6 @@
 #define NAT_SIZE	0xEBC00
 #define AGB_SIZE	0xD9C00
 #define TWL_SIZE	0x1A1C00
-#define PROGRESS_WIDTH	6
-#define PROGRESS_X	(BOT_SCREEN_WIDTH-PROGRESS_WIDTH*FONT_WIDTH)/2
 
 char tmpstr[256] = {0};
 char str[100];
@@ -246,10 +244,16 @@ int InstallData(char* drive){
 	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	FIL firmfile;
-	wchar_t progressbar[41] = {0,};
-	for(int i=0; i<PROGRESS_WIDTH; i++)
+	unsigned int progressWidth, progressX;
+	wchar_t progressbar[8] = {0,};
+	wchar_t *progress = progressbar;
+	int i;
+
+	progressWidth = Platform_CheckUnit() == PLATFORM_3DS ? 7 : 3;
+	progressX = (BOT_SCREEN_WIDTH - progressWidth * FONT_WIDTH) / 2;
+
+	for (i = 0; i < progressWidth; i++)
 		wcscat(progressbar, strings[STR_PROGRESS]);
-	wchar_t *progress = progressbar+0;
 	print(L"%ls", progressbar);
 	ConsolePrevLine();
 
@@ -261,14 +265,14 @@ int InstallData(char* drive){
 	if (f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create decrypted native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
 	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	sprintf(tmpstr, "%s:%s/0004013800000002.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
@@ -280,7 +284,10 @@ int InstallData(char* drive){
 	}
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+
+	if (Platform_CheckUnit() != PLATFORM_3DS)
+		goto end;
 
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
@@ -332,7 +339,7 @@ int InstallData(char* drive){
 		progress += wcslen(strings[STR_PROGRESS_FAIL]); //If we get here, then we'll play without AGB, lol
 	}
 
-	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
@@ -356,7 +363,7 @@ int InstallData(char* drive){
 		wcsncpy(progress, strings[STR_PROGRESS_FAIL], wcslen(strings[STR_PROGRESS_FAIL]));
 		progress += wcslen(strings[STR_PROGRESS_FAIL]);
 	}
-	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&tempfile, tmpstr, 1)){
@@ -369,8 +376,9 @@ int InstallData(char* drive){
 	}
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, PROGRESS_X, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
+end:
 	f_close(&firmfile);
 	return 0;
 }
@@ -380,15 +388,19 @@ int CheckInstallationData(){
 	char str[32];
 	if(!FileOpen(&file, "rxTools/data/0004013800000002.bin", 0)) return -1;
 	FileClose(&file);
-	if(!FileOpen(&file, "rxTools/data/0004013800000202.bin", 0)) return -2;
-	FileClose(&file);
-	if(!FileOpen(&file, "rxTools/data/0004013800000102.bin", 0)) return -3;
-	FileClose(&file);
-	if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
-	FileRead(&file, str, 32, 0);
-	FileClose(&file);
-	if(memcmp(str, __DATE__, 11)) return -5;
-	if(memcmp(&str[12], __TIME__, 8)) return -5;
+
+	if (Platform_CheckUnit() == PLATFORM_3DS) {
+		if(!FileOpen(&file, "rxTools/data/0004013800000202.bin", 0)) return -2;
+		FileClose(&file);
+		if(!FileOpen(&file, "rxTools/data/0004013800000102.bin", 0)) return -3;
+		FileClose(&file);
+		if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
+		FileRead(&file, str, 32, 0);
+		FileClose(&file);
+		if(memcmp(str, __DATE__, 11)) return -5;
+		if(memcmp(&str[12], __TIME__, 8)) return -5;
+	}
+
 	return 0;
 }
 
