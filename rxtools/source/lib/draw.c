@@ -248,29 +248,20 @@ void DrawSplash(u8 *screen, char splash_file[]) {
 void DrawFadeScreen(u8 *screen, u16 Width, u16 Height, u32 f)
 {
 	u32 *screen32 = (u32 *)screen;
-	u32 src, tmp;
-	int i,i;
+	int i;
 	for (i = 0; i<Width*Height * 3 / 4; i++)
 	{
-		src = *screen32;
-		tmp = 0;
-		for (j = 0; j<f; j++){
-			tmp = ((tmp+src) >> 1) & 0x7F7F7F7F;
-		}
-		*(screen32++) = tmp;
+		*screen32 = (*screen32 >> 1) & 0x7F7F7F7F;
+		*screen32 += (*screen32 >> 2) & 0x3F3F3F3F; 
+		*screen32 += (*screen32 >> 1) & 0x7F7F7F7F; 
+		screen32++; 
 	}
 }
 
 void fadeOut(){
-	void *tmpscreen = (void*)0x27000000;
-	void *tmpscreentop = (void*)(0x27000000+SCREEN_SIZE);
-	memcpy(tmpscreen, BOT_SCREEN, SCREEN_SIZE); 
-	memcpy(tmpscreentop, TOP_SCREEN, SCREEN_SIZE); 
-	for (int x = 255; x >= 0; x-=3){
-		DrawFadeScreen(tmpscreen, BOT_SCREEN_WIDTH, SCREEN_HEIGHT, 4);
-		DrawFadeScreen(tmpscreentop, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, 4);
-		memcpy(BOT_SCREEN, tmpscreen, SCREEN_SIZE); 
-		memcpy(BOT_SCREEN2, tmpscreen, SCREEN_SIZE); 
-		memcpy(TOP_SCREEN, tmpscreentop, SCREEN_SIZE); 
-	}
+	for (int x = 255; x >= 0; x-=3){ 
+		DrawFadeScreen(BOT_SCREEN, BOT_SCREEN_WIDTH, SCREEN_HEIGHT, x); 
+		DrawFadeScreen(TOP_SCREEN, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, x); 
+		DrawFadeScreen(TOP_SCREEN2, TOP_SCREEN_WIDTH, SCREEN_HEIGHT, x); 
+	} 
 }
