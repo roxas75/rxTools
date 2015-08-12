@@ -47,7 +47,9 @@ void ScreenShot(){
 
 	do{
 		sprintf(tmp, "/Screenshot/top_screen_%d.bmp", top_count++);
-	}while(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) == FR_OK);
+		if(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) != FR_OK) break;
+		f_close(&myFile);
+	}while(1);
 
 	if(f_open(&myFile, tmp, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK){
 		unsigned int bmp_size = TOP_SCREEN_WIDTH*SCREEN_HEIGHT*3;
@@ -72,7 +74,9 @@ void ScreenShot(){
 
 	do{
 		sprintf(tmp, "/Screenshot/bot_screen_%d.bmp", bot_count++);
-	}while(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) == FR_OK);
+		if(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) != FR_OK) break;
+		f_close(&myFile);
+	}while(1);
 
 	if(f_open(&myFile, tmp, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK){
 		unsigned int bmp_size = BOT_SCREEN_WIDTH*SCREEN_HEIGHT*3;
