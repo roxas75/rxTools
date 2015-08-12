@@ -552,7 +552,7 @@ void manageFBI(bool restore)
 				/* Get the title version from the TMD */
 				tmd_ver = (unsigned short)((buf[0x1DC] << 8) | buf[0x1DD]);
 				print(strings[STR_VERSION_OF], strings[STR_TMD], tmd_ver);
-
+				ConsoleShow();
 
 				if (!restore)
 				{
@@ -577,6 +577,7 @@ void manageFBI(bool restore)
 
 					/* Backup the H&S TMD */
 					print(strings[STR_BACKING_UP], strings[STR_HEALTH_AND_SAFETY]);
+					ConsoleShow();
 					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
 					if (FileOpen(&tmp, path, 1))
 					{
