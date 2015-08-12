@@ -299,11 +299,6 @@ int rxMode(int emu)
 			f_read(&fd, p, shdr.sh_size, &br);
 		}
 	}
-	if (Platform_CheckUnit() == PLATFORM_N3DS) //This has to be done here as N3DS doesn't have a sigcheck patch in native_firm.elf
-	{
-		*((unsigned int*)(FIRM_ADDR + 0xB2B98)) = 0x47702000;
-		*((unsigned int*)(FIRM_ADDR + 0xB8A74)) = 0xE7762000;
-	}
 
 	f_open(&fd, "NATIVE_FIRM.BIN", FA_WRITE | FA_CREATE_ALWAYS);
 	f_write(&fd, (void *)FIRM_ADDR, 0x200000, &br);
