@@ -53,21 +53,13 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 
 static int patchLabel()
 {
-	uintptr_t p;
-
-#ifdef PLATFORM_KTR
-	for (p = 0x24000000; p < 0x27b00000; p++)
-#else
-	for (p = 0x23A00000; p < 0x24000000; p++)
-#endif
-	{
-		//System Settings label
-		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
-			rx_strcpy((char*)p, label, 4, 2, 1);
-			return 0;
-		}
+	int i;
+	//System Settings label
+	for (i = 0; i < 0x600000; i += 4)
+	if (rx_strcmp(FCRAM_ADDR_MAX - i, "Ver.", 4, 2, 1)){
+		rx_strcpy(FCRAM_ADDR_MAX - i, label, 4, 2, 1);
+		return 0;
 	}
-
 	return 1;
 }
 
