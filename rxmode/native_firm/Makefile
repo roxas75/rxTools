@@ -33,10 +33,11 @@ LD	:= arm-none-eabi-ld
 
 CFLAGS	:= -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
 
-PATCHES := $(SOURCE)/payload/payload.elf	\
+PATCHES := $(BUILD)/payload/payload.elf	\
 	$(BUILD)/k9_fix_flags.elf $(BUILD)/p9_keyx_spoof.elf	\
 	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
-	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf
+	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
+	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf
 
 PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
 	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/vars.o	\
@@ -62,6 +63,9 @@ all: $(BUILD)/$(TARGET).elf
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
+$(BUILD)/payload:
+	@[ -d $@ ] || mkdir -p $@
+
 $(BUILD)/payload/arm9:
 	@[ -d $@ ] || mkdir -p $@
 
@@ -77,11 +81,11 @@ $(BUILD)/payload/arm11:
 $(BUILD)/$(TARGET)_unstrip.elf: $(PATCHES)
 	$(LD) -i -T$(LDSCRIPT) $^ -o $@
 
-$(SOURCE)/payload/payload.elf: $(PAYLOAD_OBJS)
-	$(LD) -T$(LDSCRIPT) $^ -o $@
+$(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS) $(BUILD)/payload
+	$(LD) -T$(LDSCRIPT) $(PAYLOAD_OBJS) -o $@
 
-$(BUILD)/%.elf: $(BUILD)/%.o $(SOURCE)/payload/payload.elf
-	$(LD) -s -R $(SOURCE)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
+$(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
+	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
 
 $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.c $(BUILD)/payload/arm9/myThread
 	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
