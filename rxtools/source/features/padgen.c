@@ -45,8 +45,8 @@ u32 NcchPadgen()
 	NcchInfo *info = (NcchInfo*)0x20316000;
 
 	const char *filename = "/ncchinfo.bin";
-	wchar_t wfilename[sizeof(filename)];
-	mbstowcs(wfilename, filename, sizeof(filename]))
+	wchar_t wfilename[14];
+	mbstowcs(wfilename, filename, 14);
 	if (!FileOpen(&pf, filename, 0)) {
 		print(strings[STR_ERROR_OPENING], filename+1);
 		return 1;
@@ -93,8 +93,8 @@ u32 SdPadgen()
 
 	u8 movable_seed[0x120] = {0};
 	const char *filename = "/movable.sed";
-	wchar_t wfilename[sizeof(filename)];
-	mbstowcs(wfilename, filename, sizeof(filename]))
+	wchar_t wfilename[13];
+	mbstowcs(wfilename, filename, 13);
 	// Load console 0x34 keyY from movable.sed if present on SD card
 	if (FileOpen(&fp, filename, 0)) {
 		bytesRead = FileRead(&fp, &movable_seed, 0x120, 0);
