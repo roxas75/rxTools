@@ -71,7 +71,7 @@ Temporary Items
 *.d
 *.map
 **/build
-**/data
-release.zip
 **/font.h
+**/patches
 **/patches.h
+release

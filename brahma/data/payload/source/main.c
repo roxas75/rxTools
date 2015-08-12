@@ -4,7 +4,7 @@
 
 void* (*rxTools)() = (void*)0x08000030;
 
-void main()
+int main()
 {
 	/*int fbfound = 0;
 	unsigned char* screen = 0x20000000;
@@ -41,4 +41,5 @@ void main()
 	*(unsigned int*)0x10000020 = 0;
     *(unsigned int*)0x10000020 = 0x340;
 	rxTools();
+    return 0;
 }
