@@ -20,6 +20,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "common.h"
 
 typedef struct{
@@ -36,6 +37,15 @@ typedef enum {
 	PLATFORM_N3DS=7,
 } Platform_UnitType;
 
+typedef enum {
+        TID_CTR_NATIVE_FIRM = 0x00000002,
+        TID_CTR_TWL_FIRM = 0x00000102,
+        TID_CTR_AGB_FIRM = 0x00000202,
+        TID_KTR_NATIVE_FIRM = 0x20000002
+} FirmTid;
+
+extern const char firmPathFmt[];
+
 Platform_UnitType Platform_CheckUnit(void);
 int DevMode();
 void FirmLoader();
@@ -44,5 +54,10 @@ int rxMode(int emu);
 u8* decryptFirmTitleNcch(u8* title, unsigned int size);
 u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
 int applyPatch(void *file, const char *patch, const FirmInfo *info);
+
+static inline int getFirmPath(char *s, FirmTid id)
+{
+	return sprintf(s, firmPathFmt, id);
+}
 
 #endif
