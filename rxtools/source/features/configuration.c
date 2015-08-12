@@ -274,8 +274,8 @@ int InstallData(char* drive){
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	sprintf(tmpstr, "%s:%s/00040138%s.bin", drive, DATAFOLDER,
-		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
+	getFirmPath(tmpstr, Platform_CheckUnit() == PLATFORM_N3DS ?
+		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
 		FileClose(&tempfile);
@@ -325,7 +325,7 @@ int InstallData(char* drive){
 		if (applyPatch(a_firm, "/rxTools/system/patches/ctr/agb_firm.elf", &agb_info))
 			return CONF_ERRPATCH;
 
-		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
+		getFirmPath(tmpstr, TID_CTR_TWL_FIRM);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
 			FileClose(&tempfile);
@@ -349,7 +349,7 @@ int InstallData(char* drive){
 		if (applyPatch(t_firm, "/rxTools/system/patches/ctr/twl_firm.elf", &twl_info))
 			return CONF_ERRPATCH;
 
-		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
+		getFirmPath(tmpstr, TID_CTR_TWL_FIRM);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, t_firm, TWL_SIZE, 0);
 			FileClose(&tempfile);
@@ -388,24 +388,36 @@ int CheckInstallationData(){
 	File file;
 	char str[64];
 
-	sprintf(str, "rxTools/data/00040138%s.bin",
-		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
-	if(!FileOpen(&file, str, 0)) return -1;
-	FileClose(&file);
+	switch (Platform_CheckUnit()) {
+		case PLATFORM_3DS:
+			getFirmPath(str, TID_CTR_NATIVE_FIRM);
+			if(!FileOpen(&file, str, 0)) return -1;
+			FileClose(&file);
 
-	if (Platform_CheckUnit() == PLATFORM_3DS) {
-		if(!FileOpen(&file, "rxTools/data/0004013800000202.bin", 0)) return -2;
-		FileClose(&file);
-		if(!FileOpen(&file, "rxTools/data/0004013800000102.bin", 0)) return -3;
-		FileClose(&file);
-		if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
-		FileRead(&file, str, 32, 0);
-		FileClose(&file);
-		if(memcmp(str, __DATE__, 11)) return -5;
-		if(memcmp(&str[12], __TIME__, 8)) return -5;
+			getFirmPath(str, TID_CTR_TWL_FIRM);
+			if(!FileOpen(&file, str, 0)) return -2;
+			FileClose(&file);
+
+			getFirmPath(str, TID_CTR_AGB_FIRM);
+			if(!FileOpen(&file, str, 0)) return -3;
+			FileClose(&file);
+
+			if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
+			FileRead(&file, str, 32, 0);
+			FileClose(&file);
+			if(memcmp(str, __DATE__, 11)) return -5;
+			if(memcmp(&str[12], __TIME__, 8)) return -5;
+
+			return 0;
+
+		case PLATFORM_N3DS:
+			getFirmPath(str, TID_KTR_NATIVE_FIRM);
+			if(!FileOpen(&file, str, 0)) return -1;
+			FileClose(&file);
+
+		default:
+			return 0;
 	}
-
-	return 0;
 }
 
 void InstallConfigData(){

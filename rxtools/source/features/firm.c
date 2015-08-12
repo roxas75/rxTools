@@ -42,6 +42,8 @@
 #define ARMBXR4	0x47204C00
 #define PLATFORM_REG_ADDR 0x10140FFC
 
+const char firmPathFmt[] = "rxTools/data/00040138%08X.bin";
+
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 
@@ -157,8 +159,11 @@ u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
 static void setAgbBios()
 {
 	File agb_firm;
+	char path[64];
 	unsigned char svc = (cfgs[CFG_AGB].val.i ? 0x26 : 0x01);
-	if (FileOpen(&agb_firm, "rxtools/data/0004013800000202.bin", 0))
+
+	getFirmPath(path, TID_CTR_AGB_FIRM);
+	if (FileOpen(&agb_firm, path, 0))
 	{
 		FileWrite(&agb_firm, &svc, 1, 0xD7A12);
 		FileClose(&agb_firm);
@@ -200,8 +205,8 @@ int rxMode(int emu)
 
 	setAgbBios();
 
-	sprintf(path, "rxtools/data/00040138%s.bin",
-		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
+	getFirmPath(path, Platform_CheckUnit() == PLATFORM_N3DS ?
+		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
 	r = loadFirm(path);
 	if (r) {
 		msg = L"Failed to load NATIVE_FIRM: %d\n"
