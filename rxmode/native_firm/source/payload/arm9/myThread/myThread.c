@@ -56,7 +56,7 @@ static int patchLabel()
 	uintptr_t p;
 
 #ifdef PLATFORM_KTR
-	for (p = 0x24000000; p < 0x27b00000; p++)
+	for (p = 0x27500000; p < 0x27b00000; p++)
 #else
 	for (p = 0x23A00000; p < 0x24000000; p++)
 #endif
