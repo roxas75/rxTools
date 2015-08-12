@@ -31,7 +31,7 @@ TARGET	:= native_firm
 SOURCE	:= source
 LD	:= arm-none-eabi-ld
 
-CFLAGS	:= -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/payload/include
+CFLAGS	:= -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
 
 PATCHES := $(SOURCE)/payload/payload.elf	\
 	$(BUILD)/k9_fix_flags.elf $(BUILD)/p9_keyx_spoof.elf	\
@@ -49,7 +49,6 @@ else
 LDSCRIPT	:= ctr.ld
 
 PATCHES	+= $(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf	\
-	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf
 
 PAYLOAD_OBJS	+= $(BUILD)/payload/arm9/myThread/FS.o	\
 	$(BUILD)/payload/arm9/myThread/handlers.o	\
@@ -85,18 +84,21 @@ $(BUILD)/%.elf: $(BUILD)/%.o $(SOURCE)/payload/payload.elf
 	$(LD) -s -R $(SOURCE)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
 
 $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.c $(BUILD)/payload/arm9/myThread
-	$(CC) $(CFLAGS) $< -c -o $@
+	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.s $(BUILD)/payload/arm9/myThread
 	$(AS) $< -o $@
 
 $(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.S $(BUILD)/payload/arm9
-	$(CC) $(CFLAGS) $< -c -o $@
+	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.s $(BUILD)/payload/arm9
 	$(AS) $< -o $@
 
 $(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S $(BUILD)/payload/arm11
+	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
+
+$(BUILD)/%.o: $(SOURCE)/%.S $(BUILD)
 	$(CC) $(CFLAGS) $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)

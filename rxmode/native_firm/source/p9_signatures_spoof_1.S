@@ -15,9 +15,12 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ p9 signature spoof
-.section .patch.p9.sig.2, "a"
+.section .patch.p9.sig.1, "a"
 .thumb
-.align 1
-	mov		r0, #0
-	b		0x80631AA
-.pool
+	mov	r0, #0
+#ifdef PLATFORM_KTR
+	bx	lr
+#else
+	add	sp, #0x138
+	pop 	{r4-r6,pc}
+#endif
