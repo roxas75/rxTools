@@ -36,7 +36,9 @@ void ScreenShot(){
 		};
 
 	File myFile;
-	char tmp[256]; int count = 0;
+	char tmp[256];
+	static int top_count = 0;
+	static int bot_count = 0;
 	unsigned int written = 0;
 	char* bmp_cache; char* bmp_ptr;
 	u8 (*screen_ptr) [SCREEN_HEIGHT][BYTES_PER_PIXEL];
@@ -44,10 +46,10 @@ void ScreenShot(){
 	f_mkdir ("Screenshot");
 
 	do{
-		sprintf(tmp, "/Screenshot/top_screen_%d.bmp", count++);
-	}while(FileOpen(&myFile, tmp, 0));
+		sprintf(tmp, "/Screenshot/top_screen_%d.bmp", top_count++);
+	}while(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) == FR_OK);
 
-	if(FileOpen(&myFile, tmp, 1)){
+	if(f_open(&myFile, tmp, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK){
 		unsigned int bmp_size = TOP_SCREEN_WIDTH*SCREEN_HEIGHT*3;
 		bmp_cache = (char*)malloc(bmp_size + 0x36);
 		bmp_ptr = bmp_cache;
@@ -64,17 +66,15 @@ void ScreenShot(){
 			}
 		}
 		f_write(&myFile, bmp_cache, bmp_size + 0x36, &written);
-		f_sync(&myFile);
 		free(bmp_cache);
-		FileClose(&myFile);
+		f_close(&myFile);
 	}
 
-	count = 0;
 	do{
-		sprintf(tmp, "/Screenshot/bot_screen_%d.bmp", count++);
-	}while(FileOpen(&myFile, tmp, 0));
+		sprintf(tmp, "/Screenshot/bot_screen_%d.bmp", bot_count++);
+	}while(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) == FR_OK);
 
-	if(FileOpen(&myFile, tmp, 1)){
+	if(f_open(&myFile, tmp, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK){
 		unsigned int bmp_size = BOT_SCREEN_WIDTH*SCREEN_HEIGHT*3;
 		bmp_cache = (char*)malloc(bmp_size + 0x36);
 		bmp_ptr = bmp_cache;
@@ -91,9 +91,8 @@ void ScreenShot(){
 			}
 		}
 		f_write(&myFile, bmp_cache, bmp_size + 0x36, &written);
-		f_sync(&myFile);
 		free(bmp_cache);
-		FileClose(&myFile);
+		f_close(&myFile);
 	}
 
 }
