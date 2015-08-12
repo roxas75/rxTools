@@ -200,7 +200,9 @@ int rxMode(int emu)
 
 	setAgbBios();
 
-	r = loadFirm("rxtools/data/0004013800000002.bin");
+	sprintf(path, "rxtools/data/00040138%s.bin",
+		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
+	r = loadFirm(path);
 	if (r) {
 		msg = L"Failed to load NATIVE_FIRM: %d\n"
 			L"Reboot rxTools and try again.\n";
