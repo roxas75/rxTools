@@ -282,7 +282,7 @@ void SettingsMenuInit(){
 					}
 
 					cfgs[CFG_THEME].val.i = theme_num;
-					trySetLangFromTheme();
+					trySetLangFromTheme(1);
 				}
 			}
 			else if (MyMenu->Current == 2) cfgs[CFG_AGB].val.i ^= 1;

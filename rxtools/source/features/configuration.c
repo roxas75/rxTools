@@ -401,7 +401,7 @@ void InstallConfigData(){
 	}
 
 	first_boot = true;
-	trySetLangFromTheme();
+	trySetLangFromTheme(0);
 	writeCfg();
 
 	sprintf(str, "/rxTools/Theme/%u/cfg0TOP.bin", cfgs[CFG_THEME].val.i);
@@ -420,7 +420,7 @@ void InstallConfigData(){
 	InputWait();
 }
 
-void trySetLangFromTheme(){
+void trySetLangFromTheme(int onswitch) {
 	File MyFile;
 	char str[100];
 	unsigned int i;
@@ -437,6 +437,8 @@ void trySetLangFromTheme(){
 			&& cfgs[CFG_LANG].val.s[i] != '\n'; i++);
 		cfgs[CFG_LANG].val.s[i] = 0;
 
+		if(onswitch)
+			preloadStringsOnSwitch();
 		loadStrings();
 	}
 	FileClose(&MyFile);
