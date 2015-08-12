@@ -3,7 +3,7 @@
 	"SETTINGS": "Options", 
 	"FORCE_UI_BOOT": "Forcer demarrage UI    %ls",
 	"SELECTED_THEME": "Theme choisi        <%3c  >",
-	"SHOW_AGB": "Afficher le BIOS GBA : %ls",
+	"SHOW_AGB": "Afficher le BIOS GBA   %ls",
 	"ENABLE_3D_UI": "Activer UI 3D          %ls",
 	"QUICK_BOOT": "Demarrage rapide       %ls",
 	"MENU_LANGUAGE": "Langage   %16ls",
