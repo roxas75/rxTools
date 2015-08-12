@@ -20,7 +20,7 @@
 #include "crypto.h"
 #include "fatfs/sdmmc.h"
 #include "nand.h"
-#include "cfw.h"
+#include "firm.h"
 
 u8 NANDCTR[16];
 int sysversion = 0;

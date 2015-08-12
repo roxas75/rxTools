@@ -19,7 +19,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "cfw.h"
+#include "firm.h"
 #include "common.h"
 #include "hid.h"
 #include "lang.h"
