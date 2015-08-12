@@ -1,13 +1,15 @@
 export PATH	:= $(DEVKITARM)/bin:$(PATH)
 
-CODE_PATH	:= rxTools/system/code.bin
+ifndef CODE_PATH
+$(error "Please set CODE_PATH")
+endif
 
 AS	:= arm-none-eabi-as
 CC	:= arm-none-eabi-gcc
 LD	:= arm-none-eabi-ld
 OC	:= arm-none-eabi-objcopy
 
-INCDIR	+= -I../include
+INCDIR	+= -I../include -I../../include
 CFLAGS	:= -fshort-wchar -fomit-frame-pointer -std=gnu99 -Os -g -march=armv6k -mtune=mpcore $(INCDIR) -DCODE_PATH=\"$(CODE_PATH)\"
 LDFLAGS	:= -T crs.ld
 OCFLAGS	:= -R .compat

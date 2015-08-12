@@ -50,6 +50,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
 	@cp rxinstaller.nds release/mset/rxinstaller.nds
+	@cp rxinstaller/CakesROPSpider/code.bin release/mset/code.bin
 
 	@mkdir -p release/rxTools/system release/rxTools/theme
 
