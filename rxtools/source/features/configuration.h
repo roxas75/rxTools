@@ -59,8 +59,6 @@ enum {
 
 extern Cfg cfgs[];
 
-extern bool first_boot;
-
 int InstallData(char* drive);
 void InstallConfigData();
 
