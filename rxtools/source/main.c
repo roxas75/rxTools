@@ -27,7 +27,7 @@
 #include "draw.h"
 #include "hid.h"
 #include "screenshot.h"
-#include "cfw.h"
+#include "firm.h"
 #include "configuration.h"
 
 #define FONT_ADDRESS	(void*)0x27E00000
