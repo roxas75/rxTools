@@ -156,7 +156,7 @@ int main(){
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
 	}else{
-		if (sysver < 3) {
+		if (sysver < 7) {
 			ConsoleInit();
 			ConsoleSetTitle(strings[STR_WARNING]);
 			print(strings[STR_ERROR_OPENING], keyfile);
