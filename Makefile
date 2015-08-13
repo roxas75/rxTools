@@ -47,6 +47,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	all-target-brahma all-target-theme rxinstaller.nds
 	@mkdir -p release
 	@cp LICENSE release
+	@cp LICENSE_JSMN release
 
 	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
