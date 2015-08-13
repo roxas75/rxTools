@@ -18,7 +18,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "common.h"
 #include "configuration.h"
 #include "lang.h"
 #include "menu.h"
@@ -91,9 +90,9 @@ void MenuSelect(){
 }
 
 void MenuClose(){
-	if (openedMenus > 0){		
-		OpenAnimation();	
-	}	
+	if (openedMenus > 0){
+		OpenAnimation();
+	}
 }
 
 void MenuRefresh(){

@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include "common.h"
+#include <stddef.h>
+#include <stdint.h>
 
 #define AES_BIG_INPUT      1
 #define AES_LITTLE_INPUT   0
