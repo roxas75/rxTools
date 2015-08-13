@@ -155,7 +155,7 @@ int FileExplorerMain(char *p, size_t n){
 	{
 		FileExplorerShow();
 
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) FileExplorerNextSelection();
 		else if (pad_state & BUTTON_UP) FileExplorerPrevSelection();
 		else if (pad_state & BUTTON_A)

@@ -32,22 +32,22 @@
 #include "lang.h"
 #include "menu.h"
 
-#define BUFFER_ADDR ((u8*)0x21000000)
+#define BUFFER_ADDR ((uint8_t*)0x21000000)
 #define BLOCK_SIZE  (8*1024*1024)
 
 char str[100];
 
-u32 DecryptPartition(PartitionInfo* info){
+uint32_t DecryptPartition(PartitionInfo* info){
 	if(info->keyY != NULL)
 		setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
 	use_aeskey(info->keyslot);
 
-	u8 ctr[16] __attribute__((aligned(32)));
+	uint8_t ctr[16] __attribute__((aligned(32)));
 	memcpy(ctr, info->ctr, 16);
 
-	u32 size_bytes = info->size;
-	for (u32 i = 0; i < size_bytes; i += BLOCK_SIZE) {
-		u32 j;
+	uint32_t size_bytes = info->size;
+	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
+		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
 			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
 			aes_decrypt((void*)info->buffer+j, (void*)info->buffer+j, ctr, 1, AES_CTR_MODE);
@@ -64,13 +64,13 @@ void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. 
 	}else if(info->keyslot == 0x25){  //The new keyX is a bit tricky, 'couse only .code is encrypted with it
 		PartitionInfo myInfo;
 		memcpy((void*)&myInfo, (void*)info, sizeof(PartitionInfo));
-		u8 OriginalCTR[16]; memcpy(OriginalCTR, info->ctr, 16);
+		uint8_t OriginalCTR[16]; memcpy(OriginalCTR, info->ctr, 16);
 		myInfo.keyslot = 0x2C; myInfo.size = 0x200;
 		DecryptPartition(&myInfo); add_ctr(myInfo.ctr, 0x200 / 16);
 		if(myInfo.buffer[0] == '.' && myInfo.buffer[1] == 'c' && myInfo.buffer[2] == 'o' && myInfo.buffer[3] == 'd' && myInfo.buffer[4] == 'e'){
 			//The 7.xKey encrypted .code partition
-			u32 codeSize = *((unsigned int*)(myInfo.buffer + 0x0C));
-			u32 nextSection = *((unsigned int*)(myInfo.buffer + 0x18)) + 0x200;
+			uint32_t codeSize = *((unsigned int*)(myInfo.buffer + 0x0C));
+			uint32_t nextSection = *((unsigned int*)(myInfo.buffer + 0x18)) + 0x200;
 			myInfo.buffer += 0x200; myInfo.size = codeSize; myInfo.keyslot = 0x25;
 			DecryptPartition(&myInfo);
 			//The rest is normally encrypted
@@ -128,7 +128,7 @@ int ProcessCTR(char* path){
 			return 3;
 		}
 
-		u8 CTR[16];
+		uint8_t CTR[16];
 		if(getle32(NCCH.extendedheadersize) > 0){
 			print(strings[STR_DECRYPTING], strings[STR_EXHEADER]);
 			ConsoleShow();
@@ -179,7 +179,7 @@ int ProcessCTR(char* path){
 		NCCH.flags[7] |= 4; //Disable encryption
 		NCCH.flags[3] = 0;  //Disable 7.XKey usage
 		FileWrite(&myFile, &NCCH, 0x200, ncch_base);
-		if(ncch_base == 0x4000) FileWrite(&myFile, ((u8*)&NCCH) + 0x100, 0x100, 0x1100);   //Only for NCSD
+		if(ncch_base == 0x4000) FileWrite(&myFile, ((uint8_t*)&NCCH) + 0x100, 0x100, 0x1100);   //Only for NCSD
 		FileClose(&myFile);
 		print(strings[STR_COMPLETED]);
 		ConsoleShow();

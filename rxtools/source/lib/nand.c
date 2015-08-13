@@ -21,41 +21,41 @@
 #include "fatfs/sdmmc.h"
 #include "nand.h"
 
-u8 NANDCTR[16];
+uint8_t NANDCTR[16];
 int sysversion = 0;
 
 int GetSystemVersion() {
 	return sysversion;
 }
 /**CTR offsets with versions*/
-const u8 *fsVersionCTRs[] = {
-	(u8 *)0x080D7CAC, //4.x
-	(u8 *)0x080D858C, //5.x
-	(u8 *)0x080D748C, //6.x
-	(u8 *)0x080D740C, //7.x
-	(u8 *)0x080D74CC, //8.x
-	(u8 *)0x080D794C, //9.x
-	(u8 *)0x080D8B8C  //9.x N3DS
+const uint8_t *fsVersionCTRs[] = {
+	(uint8_t *)0x080D7CAC, //4.x
+	(uint8_t *)0x080D858C, //5.x
+	(uint8_t *)0x080D748C, //6.x
+	(uint8_t *)0x080D740C, //7.x
+	(uint8_t *)0x080D74CC, //8.x
+	(uint8_t *)0x080D794C, //9.x
+	(uint8_t *)0x080D8B8C  //9.x N3DS
 };
-const u32 fsVersionCTRsLength = sizeof(fsVersionCTRs) / sizeof(u8 *);
+const uint32_t fsVersionCTRsLength = sizeof(fsVersionCTRs) / sizeof(uint8_t *);
 /**Copy NAND Cypto to our region.*/
-u8 *FSNandFindCTR(void) {
-	for (u32 i = 0; i < fsVersionCTRsLength; i++)
-		if (*(u32 *)fsVersionCTRs[i] == 0x5C980) {
-			return (u8 *)(fsVersionCTRs[i] + 0x30);
+uint8_t *FSNandFindCTR(void) {
+	for (uint32_t i = 0; i < fsVersionCTRsLength; i++)
+		if (*(uint32_t *)fsVersionCTRs[i] == 0x5C980) {
+			return (uint8_t *)(fsVersionCTRs[i] + 0x30);
 		}
 	// If value not in previous list start memory scanning (test range)
-	for (u8 *c = (u8 *)0x080D8FFF; c > (u8 *)0x08000000; c--)
-		if (*(u32 *)c == 0x5C980 && *(u32 *)(c + 1) == 0x800005C9) {
+	for (uint8_t *c = (uint8_t *)0x080D8FFF; c > (uint8_t *)0x08000000; c--)
+		if (*(uint32_t *)c == 0x5C980 && *(uint32_t *)(c + 1) == 0x800005C9) {
 			return c + 0x30;
 		}
 	return NULL;
 }
 /**Copy NAND Cypto to our region.*/
 void FSNandInitCrypto(void) {
-	u8 *ctrStart = FSNandFindCTR();
-	u8 *ctrStore = NANDCTR;
-	u8 i = 16; //CTR length
+	uint8_t *ctrStart = FSNandFindCTR();
+	uint8_t *ctrStore = NANDCTR;
+	uint8_t i = 16; //CTR length
 	if (!ctrStart) { return; } //Avoid copying from NULL
 	ctrStart = ctrStart + 15;
 	//The CTR is stored backwards in memory.
@@ -63,7 +63,7 @@ void FSNandInitCrypto(void) {
 }
 
 unsigned int checkEmuNAND() {
-	u8 *check = (u8 *)0x26000000;
+	uint8_t *check = (uint8_t *)0x26000000;
 	int isn3ds = 0;
 	if (getMpInfo() == MPINFO_KTR)isn3ds = 1;
 
@@ -80,13 +80,13 @@ unsigned int checkEmuNAND() {
 	}
 }
 
-void GetNANDCTR(u8 *ctr) {
+void GetNANDCTR(uint8_t *ctr) {
 	for (int i = 0; i < 16; i++) { *(ctr + i) = NANDCTR[i]; }
 }
 
 void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
-	u8 myCtr[16];
+	uint8_t myCtr[16];
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
@@ -105,7 +105,7 @@ void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, uns
 
 void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
-	u8 myCtr[16];
+	uint8_t myCtr[16];
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
@@ -124,7 +124,7 @@ void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, un
 
 void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
-	u8 myCtr[16];
+	uint8_t myCtr[16];
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
@@ -143,7 +143,7 @@ void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, 
 
 void emunand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
-	u8 myCtr[16];
+	uint8_t myCtr[16];
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
