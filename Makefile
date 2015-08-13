@@ -45,6 +45,10 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	$(addprefix rxmode/build/,ktr/native_firm.elf	\
 		ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)	\
 	all-target-brahma all-target-theme rxinstaller.nds
+	@mkdir -p release
+	@cp LICENSE release
+	@cp LICENSE_JSMN release
+
 	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
