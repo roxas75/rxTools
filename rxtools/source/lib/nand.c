@@ -20,7 +20,6 @@
 #include "crypto.h"
 #include "fatfs/sdmmc.h"
 #include "nand.h"
-#include "firm.h"
 
 u8 NANDCTR[16];
 int sysversion = 0;
@@ -66,7 +65,7 @@ void FSNandInitCrypto(void) {
 unsigned int checkEmuNAND() {
 	u8 *check = (u8 *)0x26000000;
 	int isn3ds = 0;
-	if (Platform_CheckUnit() == PLATFORM_N3DS)isn3ds = 1;
+	if (getMpInfo() == MPINFO_KTR)isn3ds = 1;
 
 	sdmmc_sdcard_readsectors(isn3ds ? 0x4D800000 /0x200 : 0x3AF00000 / 0x200, 1, check);
 	if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
