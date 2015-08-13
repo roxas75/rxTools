@@ -13,6 +13,7 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+
 @---------------------------------------------------------------------------------
 @	Patch file format
 @
@@ -119,6 +120,11 @@ m4x_4x_1_end:
 patch_m4x_dg_description:
 @---------------------------------------------------------------------------------
 	.asciz	"4.x DG for rxTools"
+    
+@---------------------------------------------------------------------------------
+patch_m4x_ndg_description:
+@---------------------------------------------------------------------------------
+	.asciz	"4.x N3DS DG for rxTools"
 
 @---------------------------------------------------------------------------------
 patch_m4x_dg_1:
@@ -180,6 +186,67 @@ m4x_dg_1_YS:
 m4x_dg_1_end:
 @---------------------------------------------------------------------------------
 
+
+@---------------------------------------------------------------------------------
+patch_m4x_ndg_1:
+@---------------------------------------------------------------------------------
+
+	.word	m4x_ndg_1_end - m4x_ndg_1_start
+	.word	0
+
+@---------------------------------------------------------------------------------
+m4x_ndg_1_start: @ 0x279400
+@---------------------------------------------------------------------------------
+	.word 0x0010F2B9  @ pop_r0_r2
+	.word P4_LOAD_ADDRESS + (m4x_ndg_1_YS - m4x_ndg_1_start)
+	.word 0xBADC0DED  @ r2
+	.word 0x0018F19C  @ mount_sd("YS:") -> LDMFD           SP!, {R3-R5,PC}
+	.word 0x0010B690  @ r3
+	.word 0x00FAB000  @ r4
+	.word 0x00200200  @ r5
+	.word 0x0010F2B9  @ pop_r0_r2
+	.word 0x00279000  @ r0
+	.word 0x00000001  @ r2
+	.word 0x001549E1  @ pop_r1
+	.word 0x00295E0C  @ r1 Offset for the launcher path string
+	.word 0x001B82AC  @ ifile_open(0x00279000, path, 1) -> LDMFD   SP!, {R4-R8,PC}
+	.word 0x0018D5DC  @ r4
+	.word 0x00278340  @ r5
+	.word 0x00100200  @ r6
+	.word 0x000048CC  @ r7
+	.word 0x00143D60  @ r8
+	.word 0x001549E1  @ pop_r1
+	.word 0x00004800  @ r1 2nd stage offset in file
+	.word 0x00143D8C  @ pop_r0
+	.word 0x00279004  @ r0 handle.offset
+	.word 0x0010CCBC  @ str r1, [r0] -> LDMFD   SP!, {R4,PC}
+	.word 0x44444444  @ r4
+	.word 0x0010F2B9  @ pop_r0_r2
+	.word 0x00279000  @ r0
+	.word P4_S2_LOAD_ADDRESS
+	.word 0x0010538C  @ pop_r3
+	.word 0xDEADBEEF  @ r3 this(or similar junk pops) has to be here for patch_count1
+	.word 0x0010538C  @ pop_r3
+	.word 0x00000400  @ r3
+	.word 0x001549E1  @ pop_r1
+	.word 0x00279020  @ r1
+	.word 0x001B3958  @ ifile_read(0x00279000, 0x00279020, 0x002B0000, 0x00000400) -> LDMFD   SP!, {R4-R9,PC}
+	.word 0x002104E5  @ r4
+	.word 0x0019DA00  @ r5
+	.word 0x00017500  @ r6
+	.word 0x0021DF86  @ r7
+	.word 0x001AC100  @ r8
+	.word 0x001DDA22  @ r9
+	.word 0x0010538C  @ pop_r3
+	.word (P4_S2_LOAD_ADDRESS - (P4_LOAD_ADDRESS + m4x_ndg_1_post_pivot - m4x_ndg_1_start))
+	.word 0x00143D60  @ pivot -> ADD SP, SP, R3        LDR PC, [SP],#4
+m4x_ndg_1_post_pivot:
+m4x_ndg_1_YS:
+	.word 0x003A5359  @ YS:
+@---------------------------------------------------------------------------------
+m4x_ndg_1_end:
+@---------------------------------------------------------------------------------
+
 @---------------------------------------------------------------------------------
 patch_m4x_2:
 @---------------------------------------------------------------------------------
@@ -195,10 +262,10 @@ m4x_2_start:
 
 	.word 0x001C4FC4  @ pop_r1
 	.word P4_LOAD_ADDRESS
-
+	
 	.word 0x001334FC  @ eeprom_read(0x0001FE00, 0x00279400, 0x00000100) -> LDMFD           SP!, {R4,PC}
 	.word 0xFFFFFFFE  @ r4
-
+	
 	.word 0x0010538C  @ pop_r3
 	.word P4_LOAD_ADDRESS - 0x0FFFFF64
 	.word 0x00143D60 @ add sp,sp,r3 | ldr pc,[sp],#4
@@ -341,6 +408,17 @@ patch_m4x_dg:
 	.word	patch_message_length
 
 @---------------------------------------------------------------------------------
+patch_m4x_ndg:
+@---------------------------------------------------------------------------------
+	.word	0x50544348
+	.word	5
+	.word	patch_m4x_ndg_1
+	.word	patch_m4x_2
+	.word	patch_count1
+	.word	patch_count2
+	.word	patch_message_length
+    
+@---------------------------------------------------------------------------------
 patch_m6x_6x:
 @---------------------------------------------------------------------------------
 	.word	0x50544348
@@ -359,6 +437,9 @@ index:
 
 	.word	patch_m4x_dg_description
 	.word	patch_m4x_dg
+    
+    .word	patch_m4x_ndg_description
+	.word	patch_m4x_ndg
 
 	.word	patch_m6x_6x_description
 	.word	patch_m6x_6x

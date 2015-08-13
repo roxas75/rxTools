@@ -17,7 +17,9 @@
 
 #pragma once
 
-#include "common.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include "fatfs/ff.h"
 #include "nand.h"
 #define File FIL
@@ -31,4 +33,4 @@ size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);
 size_t FileGetSize(File *Handle);
 void FileClose(File *Handle);
 ////////////////////////////////////////////////////////////////Advanced FileSystem Operations
-u32 FSFileCopy(char *target, char *source);
+uint32_t FSFileCopy(char *target, char *source);

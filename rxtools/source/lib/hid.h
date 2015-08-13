@@ -17,9 +17,9 @@
 
 #pragma once
 
-#include "common.h"
+#include <stdint.h>
 
-#define HID_STATE (*(volatile u32*)0x10146000)
+#define HID_STATE (*(volatile uint32_t*)0x10146000)
 
 #define BUTTON_A      (1 << 0)
 #define BUTTON_B      (1 << 1)
@@ -34,6 +34,6 @@
 #define BUTTON_X      (1 << 10)
 #define BUTTON_Y      (1 << 11)
 
-u32 InputWait();
-u32 GetInput();
-void WaitForButton(u32 button);
+uint32_t InputWait();
+uint32_t GetInput();
+void WaitForButton(uint32_t button);

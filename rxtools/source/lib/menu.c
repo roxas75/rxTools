@@ -18,7 +18,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "common.h"
 #include "configuration.h"
 #include "lang.h"
 #include "menu.h"
@@ -28,12 +27,14 @@
 Menu* MyMenu;
 Menu *MenuChain[100];
 int openedMenus = 0;
+int saved_index = 0;
 
 void MenuInit(Menu* menu){
 	MyMenu = menu;
 	ConsoleInit();
-	MyMenu->Current = 0;
-	MyMenu->Showed = 0;
+	if (openedMenus == 0) MyMenu->Current = saved_index; //if we're entering the main menu, load the index
+	else  MyMenu->Current = 0;
+    MyMenu->Showed = 0;
 	ConsoleSetTitle(MyMenu->Name);
 	for(int i = 0; i < MyMenu->nEntryes; i++){
 		print(L"%s\n", MyMenu->Option[i].Str);
@@ -80,6 +81,7 @@ void MenuPrevSelection(){
 
 void MenuSelect(){
 	if(MyMenu->Option[MyMenu->Current].Func != NULL){
+		if (openedMenus == 0)saved_index = MyMenu->Current; //if leaving the main menu, save the index
 		MenuChain[openedMenus++] = MyMenu;
 		MyMenu->Option[MyMenu->Current].Func();
 		MenuInit(MenuChain[--openedMenus]);
@@ -89,8 +91,7 @@ void MenuSelect(){
 
 void MenuClose(){
 	if (openedMenus > 0){
-		MenuInit(MenuChain[--openedMenus]);
-		MenuShow();
+		OpenAnimation();
 	}
 }
 

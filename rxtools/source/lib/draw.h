@@ -17,21 +17,23 @@
 
 #pragma once
 
-#include "common.h"
+#include <stdint.h>
+#include <wchar.h>
 
 //Screen Macros
 #define BYTES_PER_PIXEL	3  //Our color buffer accepts 24-bits color.
-#define SCREEN_WIDTH	320
-#define SCREEN_HEIGHT	240
-#define SCREEN_SIZE	(BYTES_PER_PIXEL*SCREEN_WIDTH*SCREEN_HEIGHT)
+#define BOT_SCREEN_WIDTH	320
+#define TOP_SCREEN_WIDTH	400
+#define SCREEN_HEIGHT    	240
+#define SCREEN_SIZE	(BYTES_PER_PIXEL*BOT_SCREEN_WIDTH*SCREEN_HEIGHT)
 #define FONT_WIDTH	16
 #define FONT_HEIGHT	16
 #define FONT_HWIDTH	(FONT_WIDTH>>1)
 #define FONT_CJK_START	0x2400
-#define TOP_SCREEN	(u8*)(*(u32*)0x080FFFC0)
-#define TOP_SCREEN2	(u8*)(*(u32*)0x080FFFC4)
-#define BOT_SCREEN	(u8*)(*(u32*)0x080FFFD4)
-#define BOT_SCREEN2	(u8*)(*(u32*)0x080FFFD0)
+#define TOP_SCREEN	(uint8_t*)(*(uint32_t*)0x080FFFC0)
+#define TOP_SCREEN2	(uint8_t*)(*(uint32_t*)0x080FFFC4)
+#define BOT_SCREEN	(uint8_t*)(*(uint32_t*)0x080FFFD4)
+#define BOT_SCREEN2	(uint8_t*)(*(uint32_t*)0x080FFFD0)
 
 //Colors Macros
 #define ARGB(a,r,g,b)	(a<<24|r<<16|g<<8|b) //console asks for B,G,R in bytes
@@ -56,20 +58,23 @@
 #define CHAR_SELECTED	"\u2714"
 #define CHAR_UNSELECTED	"\u2718"
 
-extern const u16 (* fontaddr)[FONT_WIDTH];
+extern const uint16_t (* fontaddr)[FONT_WIDTH];
 
-void ClearScreen(u8 *screen, u32 color);
+void ClearScreen(uint8_t *screen, uint32_t color);
 void DrawClearScreenAll(void);
-void DrawCharacter(u8 *screen, wchar_t character, u32 x, u32 y, u32 color, u32 bgcolor);
-void DrawString(u8 *screen, const wchar_t *str, u32 x, u32 y, u32 color, u32 bgcolor);
-void DrawPixel(u8 *screen, u32 x, u32 y, u32 color);
-u32 GetPixel(u8 *screen, u32 x, u32 y);
+void DrawCharacter(uint8_t *screen, wchar_t character, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor);
+void DrawString(uint8_t *screen, const wchar_t *str, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor);
+void DrawPixel(uint8_t *screen, uint32_t x, uint32_t y, uint32_t color);
+uint32_t GetPixel(uint8_t *screen, uint32_t x, uint32_t y);
 void Debug(const char *format, ...);
 
-void DrawSplash(u8 *screen, char splash_file[]);
+void DrawSplash(uint8_t *screen, char splash_file[]);
 void DrawBottomSplash(char splash_file[]);
 void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[]);
 void SplashScreen();
+void DrawFadeScreen(uint8_t *screen, uint16_t Width, uint16_t Height, uint32_t f);
+void fadeOut();
+void OpenAnimation();
 //Unused functions.
-void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);
-void DrawHexWithName(u8 *screen, const wchar_t *str, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor);
+void DrawHex(uint8_t *screen, uint32_t hex, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor);
+void DrawHexWithName(uint8_t *screen, const wchar_t *str, uint32_t hex, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor);

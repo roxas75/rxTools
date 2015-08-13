@@ -15,9 +15,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <string.h>
 #include <wchar.h>
 #include "NandDumper.h"
-#include "common.h"
 #include "console.h"
 #include "draw.h"
 #include "lang.h"
@@ -46,7 +46,7 @@ int NandSwitch(){
 
 	ConsoleShow();
 	while (true) {
-        u32 pad_state = InputWait();
+        uint32_t pad_state = InputWait();
 		if(pad_state & BUTTON_X) return SYS_NAND;
 		if(pad_state & BUTTON_Y) return EMU_NAND;
 		if(pad_state & BUTTON_B) return UNK_NAND;
@@ -211,7 +211,7 @@ void DumpNANDSystemTitles(){
 	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_CANCEL]);
 	ConsoleShow();
 	while (true) {
-        u32 pad_state = InputWait();
+        uint32_t pad_state = InputWait();
 		if(pad_state & BUTTON_A){
 			CTRDecryptor();
 			break;

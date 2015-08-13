@@ -15,15 +15,12 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 .arm
-.global KEYXSPACE
-KEYXSPACE:    						//needed to reserve the space where we'll write the keyX. Optimizing every single byte!
-	.word 0xDEADBEEF
-	.string8 "InsertKeyXHere!"
 //_______________________________________________________________________________________
 
 StackTop = 0x0801AE00 				//That's arbitrary
 StackSize = 0x200					//This too
 
+.text
 .global CreateMyThread
 .type CreateMyThread STT_FUNC
 
@@ -48,5 +45,10 @@ CreateMyThread:
 	svc 0x8
 
 	pop {r1-r12, lr}
+#ifdef PLATFORM_KTR
+	ldr r0, =0x80CB0A8
+	ldr pc, =0x80860B4
+#else
 	ldr r0, =0x80CAFA8
 	ldr pc, =0x8086144
+#endif

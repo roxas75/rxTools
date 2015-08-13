@@ -16,6 +16,8 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <wchar.h>
 #include "fatfs/ff.h"
 #include "fs.h"
@@ -46,12 +48,15 @@ static const char *keys[STR_NUM] = {
 	[STR_OPENING] = "OPENING",
 	[STR_RESTORE] = "RESTORE",
 	[STR_RESTORING] = "RESTORING",
+	[STR_LOAD] = "LOAD",
+	[STR_DIRECTORY] = "DIRECTORY",
 	[STR_MISSING] = "MISSING",
 	[STR_ERROR_OPENING] = "ERROR_OPENING",
 	[STR_ERROR_CREATING] = "ERROR_CREATING",
 	[STR_ERROR_READING] = "ERROR_READING",
 	[STR_ERROR_WRITING] = "ERROR_WRITING",
 	[STR_ERROR_COPYING] = "ERROR_COPYING",
+	[STR_ERROR_LAUNCHING] = "ERROR_LAUNCHING",
 	[STR_WRONG] = "WRONG",
 	[STR_GOT] = "GOT",
 	[STR_EXPECTED] = "EXPECTED",
@@ -81,6 +86,7 @@ static const char *keys[STR_NUM] = {
 	[STR_TMD_VERSION] = "TMD_VERSION",
 	[STR_TMD_SIZE] = "TMD_SIZE",
 	[STR_HASH] = "HASH",
+	[STR_FIRMWARE_FILE] = "FIRMWARE_FILE",
 	[STR_CHECK_TMD_ONLY] = "CHECK_TMD_ONLY",
 	[STR_INJECT_FBI] = "INJECT_FBI",
 	[STR_SYSTEM_TITLES] = "SYSTEM_TITLES",
@@ -233,6 +239,13 @@ void preloadStringsU()
 	wcscpy(strings[STR_PROGRESS], L"⬜");
 	wcscpy(strings[STR_PROGRESS_OK], L"⬛");
 	wcscpy(strings[STR_PROGRESS_FAIL], L"✖");
+}
+
+void preloadStringsOnSwitch(void)
+{
+	extern int fontLoaded;
+	preloadStringsA();
+	if(!fontLoaded) preloadStringsU();
 }
 
 int loadStrings()
