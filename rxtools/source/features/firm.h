@@ -45,8 +45,8 @@ int DevMode();
 void FirmLoader();
 void rxModeWithSplash(int emu);
 int rxMode(int emu);
-u8* decryptFirmTitleNcch(u8* title, unsigned int size);
-u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
+uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size);
+uint8_t* decryptFirmTitle(uint8_t* title, unsigned int size, unsigned int tid, int drive);
 int applyPatch(void *file, const char *patch, const FirmInfo *info);
 
 static inline int getFirmPath(char *s, FirmTid id)

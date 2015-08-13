@@ -38,9 +38,9 @@ void PadGen(){
 	WaitForButton(BUTTON_A);
 }
 
-u32 NcchPadgen()
+uint32_t NcchPadgen()
 {
-	u32 result;
+	uint32_t result;
 	File pf;
 	NcchInfo *info = (NcchInfo*)0x20316000;
 
@@ -66,7 +66,7 @@ u32 NcchPadgen()
 
 	print(strings[STR_PROCESSING], wfilename+1);
 	ConsoleShow();
-	for(u32 i = 0; i < info->n_entries; i++) {
+	for(uint32_t i = 0; i < info->n_entries; i++) {
 		PadInfo padInfo = {.setKeyY = 1, .size_mb = info->entries[i].size_mb};
 		memcpy(padInfo.CTR, info->entries[i].CTR, 16);
 		memcpy(padInfo.keyY, info->entries[i].keyY, 16);
@@ -84,14 +84,14 @@ u32 NcchPadgen()
 	return 0;
 }
 
-u32 SdPadgen()
+uint32_t SdPadgen()
 {
 	size_t bytesRead;
-	u32 result;
+	uint32_t result;
 	File fp;
 	SdInfo *info = (SdInfo*)0x20316000;
 
-	u8 movable_seed[0x120] = {0};
+	uint8_t movable_seed[0x120] = {0};
 	const char *filename = "/movable.sed";
 	wchar_t wfilename[13];
 	mbstowcs(wfilename, filename, 13);
@@ -129,7 +129,7 @@ u32 SdPadgen()
 	bytesRead = FileRead(&fp, info->entries, info->n_entries * sizeof(SdInfoEntry), 4);
 	FileClose(&fp);
 
-	for(u32 i = 0; i < info->n_entries; i++) {
+	for(uint32_t i = 0; i < info->n_entries; i++) {
 		PadInfo padInfo = {.keyslot = 0x34, .setKeyY = 0, .size_mb = info->entries[i].size_mb};
 		memcpy(padInfo.CTR, info->entries[i].CTR, 16);
 		memcpy(padInfo.filename, info->entries[i].filename, 180);
@@ -144,7 +144,7 @@ u32 SdPadgen()
 
 static const uint8_t zero_buf[16] __attribute__((aligned(16))) = {0};
 
-u32 CreatePad(PadInfo *info, int index)
+uint32_t CreatePad(PadInfo *info, int index)
 {
 	File pf;
 	#define BUFFER_ADDR ((volatile uint8_t*)0x21000000)
@@ -157,14 +157,14 @@ u32 CreatePad(PadInfo *info, int index)
 		setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
 	use_aeskey(info->keyslot);
 
-	u8 ctr[16] __attribute__((aligned(32)));
+	uint8_t ctr[16] __attribute__((aligned(32)));
 	memcpy(ctr, info->CTR, 16);
 
-	u32 size_bytes = info->size_mb*1024*1024;
-	u32 size_100 = size_bytes/100;
-	u32 seekpos = 0;
-	for (u32 i = 0; i < size_bytes; i += BLOCK_SIZE) {
-		u32 j;
+	uint32_t size_bytes = info->size_mb*1024*1024;
+	uint32_t size_100 = size_bytes/100;
+	uint32_t seekpos = 0;
+	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
+		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
 			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
 			aes_decrypt((void*)zero_buf, (void*)BUFFER_ADDR+j, ctr, 1, AES_CTR_MODE);
