@@ -33,3 +33,13 @@
 #define vu16 volatile u16
 #define vu32 volatile u32
 #define vu64 volatile u64
+
+typedef enum {
+	MPINFO_CTR = 1,
+	MPINFO_KTR = 7,
+} MpInfo;
+
+static inline MpInfo getMpInfo()
+{
+        return *(MpInfo *)0x10140FFC;
+}

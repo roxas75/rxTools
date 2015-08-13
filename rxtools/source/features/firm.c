@@ -40,19 +40,11 @@
 
 #define FIRM_ADDR 0x24000000
 #define ARMBXR4	0x47204C00
-#define PLATFORM_REG_ADDR 0x10140FFC
 
 const char firmPathFmt[] = "rxTools/data/00040138%08X.bin";
 
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
-
-// @breif  Determine platform of the console.
-// @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
-// @note   Maybe modified to support more platforms
-Platform_UnitType Platform_CheckUnit(void) {
-	return *(u32 *)PLATFORM_REG_ADDR;
-}
 
 static FRESULT loadExecReboot()
 {
@@ -205,7 +197,7 @@ int rxMode(int emu)
 
 	setAgbBios();
 
-	getFirmPath(path, Platform_CheckUnit() == PLATFORM_N3DS ?
+	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
 		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
 	r = loadFirm(path);
 	if (r) {
@@ -214,14 +206,14 @@ int rxMode(int emu)
 		goto fail;
 	}
 
-	r = Platform_CheckUnit();
+	r = getMpInfo();
 	switch (r) {
-		case PLATFORM_N3DS:
+		case MPINFO_KTR:
 			info = &ktrInfo;
 			platformDir = "ktr";
 			break;
 
-		case PLATFORM_3DS:
+		case MPINFO_CTR:
 			info = &ctrInfo;
 			platformDir = "ctr";
 			break;
@@ -351,7 +343,7 @@ int DevMode(){
 	if (strncmp((char*)firm, "FIRM", 4))
 		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
 
-	if(Platform_CheckUnit() == PLATFORM_3DS)
+	if(getMpInfo() == MPINFO_CTR)
 	{
 		//o3ds patches
 		unsigned char sign1[] = { 0xC1, 0x17, 0x49, 0x1C, 0x31, 0xD0, 0x68, 0x46, 0x01, 0x78, 0x40, 0x1C, 0x00, 0x29, 0x10, 0xD1 };

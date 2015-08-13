@@ -249,7 +249,7 @@ int InstallData(char* drive){
 	wchar_t *progress = progressbar;
 	int i;
 
-	progressWidth = Platform_CheckUnit() == PLATFORM_3DS ? 7 : 3;
+	progressWidth = getMpInfo() == MPINFO_CTR ? 7 : 3;
 	progressX = (BOT_SCREEN_WIDTH - progressWidth * FONT_WIDTH) / 2;
 
 	for (i = 0; i < progressWidth; i++)
@@ -274,7 +274,7 @@ int InstallData(char* drive){
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	getFirmPath(tmpstr, Platform_CheckUnit() == PLATFORM_N3DS ?
+	getFirmPath(tmpstr, getMpInfo() == MPINFO_KTR ?
 		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
@@ -287,7 +287,7 @@ int InstallData(char* drive){
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	if (Platform_CheckUnit() != PLATFORM_3DS)
+	if (getMpInfo() != MPINFO_CTR)
 		goto end;
 
 	//Create AGB patched firmware
@@ -388,8 +388,8 @@ int CheckInstallationData(){
 	File file;
 	char str[64];
 
-	switch (Platform_CheckUnit()) {
-		case PLATFORM_3DS:
+	switch (getMpInfo()) {
+		case MPINFO_CTR:
 			getFirmPath(str, TID_CTR_NATIVE_FIRM);
 			if(!FileOpen(&file, str, 0)) return -1;
 			FileClose(&file);
@@ -410,7 +410,7 @@ int CheckInstallationData(){
 
 			return 0;
 
-		case PLATFORM_N3DS:
+		case MPINFO_KTR:
 			getFirmPath(str, TID_KTR_NATIVE_FIRM);
 			if(!FileOpen(&file, str, 0)) return -1;
 			FileClose(&file);
