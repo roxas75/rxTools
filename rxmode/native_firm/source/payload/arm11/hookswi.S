@@ -13,10 +13,11 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#include <memory.h>
+
 	.section .rodata
 
 reg = 0x1EF00000
-vram = 0x18000000
 
 	.global hookSwi
 	.type	hookSwi, %object
@@ -25,8 +26,8 @@ vram = 0x18000000
 hookSwi:
 	push	{ r0, r1 }
 
-	mov	r1, #vram
-	add	r0, r1, #reg - vram
+	mov	r1, #ARM11_VRAM_PADDR
+	add	r0, r1, #reg - ARM11_VRAM_PADDR
 
 	@ Set VRAM
 	str	r1, [r0, #0x468]

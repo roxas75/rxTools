@@ -20,11 +20,6 @@
 
 #define CFG_STR_MAX_LEN 16
 
-#define rxmode_emu_label "RX3D"
-#define rxmode_sys_label "Ver."
-
-#include "common.h"
-
 typedef enum {
 	CFG_TYPE_INT,
 	CFG_TYPE_BOOLEAN,
@@ -62,12 +57,10 @@ enum {
 
 extern Cfg cfgs[];
 
-extern bool first_boot;
-
 int InstallData(char* drive);
 void InstallConfigData();
 
-void trySetLangFromTheme(void);
+void trySetLangFromTheme(int onswitch);
 
 int writeCfg();
 int readCfg();

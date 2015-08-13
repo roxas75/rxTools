@@ -19,10 +19,14 @@
 #include <wchar.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <memory.h>
+#ifndef PLATFORM_KTR
 #include <FS.h>
 #include <handlers.h>
 #include "hookswi.h"
 #include "font.c"
+#endif
+#include "vars.h"
 #include "lib.c"
 
 #ifdef DEBUG_DUMP_FCRAM
@@ -32,7 +36,7 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 	int i;
 
 	for(i = 0; i < 0x600000; i++){
-		*(VRAM + i) = 0x77;			//Grey flush : Start Dumping
+		*(ARM9_VRAM_ADDR + i) = 0x77;			//Grey flush : Start Dumping
 	}
 
 	for (i = 0; i < sizeof(handle) / sizeof(unsigned int); i++)
@@ -42,10 +46,32 @@ void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
 	fwrite9(handle, &br, buf, size);
 	fclose9(handle);
 	for(i = 0; i < 0x600000; i++){
-		*(VRAM + i) = 0xFF;			//White flush : Finished Dumping
+		*(ARM9_VRAM_ADDR + i) = 0xFF;			//White flush : Finished Dumping
 	}
 }
 #endif
+
+static int patchLabel()
+{
+	uintptr_t p;
+
+#ifdef PLATFORM_KTR
+	for (p = 0x27500000; p < 0x27b00000; p++)
+#else
+	for (p = 0x23A00000; p < 0x24000000; p++)
+#endif
+	{
+		//System Settings label
+		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
+			rx_strcpy((char*)p, label, 4, 2, 1);
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+#ifndef PLATFORM_KTR
 
 #define FB_HEIGHT 240
 #define FB_WIDTH 320
@@ -69,7 +95,7 @@ static void scrPutc(int c)
 		unsigned char r;
 	};
 
-	struct px (* const fb)[FB_HEIGHT] = (void *)VRAM;
+	struct px (* const fb)[FB_HEIGHT] = (void *)ARM9_VRAM_ADDR;
 	unsigned int fnt_x, fnt_y;
 	const unsigned char *p;
 
@@ -177,25 +203,17 @@ static void *memcpy32(void *dst, const void *src, size_t n)
 static void patchregion()
 {
 	memcpy32(dest, patchcode, sizeof(patchcode));
-}	
+}
 
-static void patch_processes()
+static void findRegion()
 {
 	uintptr_t p;
 
-	for (p = 0x23A00000; p < 0x24000000; p++) {
-		//System Settings label
-		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
-			rx_strcpy((char *)p, "Shit", 4, 2, 1);
+	for (p = 0x26A00000; p < 0x27000000; p += 4)
+		if (!memcmp32((void *)p, originalcode, sizeof(originalcode))) {
+			dest = (void *)p;
+			break;
 		}
-	}
-
-	if (dest == NULL)
-		for (p = 0x26A00000; p < 0x27000000; p += 4)
-			if (!memcmp32((void *)p, originalcode, sizeof(originalcode))) {
-				dest = (void *)p;
-				break;
-			}
 }
 
 static int getArmBoff(void *p)
@@ -279,8 +297,18 @@ static void initExceptionHandler()
 	*(void **)0x08000020 = handlePrefetch;
 }
 
+#endif
+
 void myThread(){
+#ifndef PLATFORM_KTR
 	initExceptionHandler();
+
+	do
+		findRegion();
+	while (dest == NULL);
+
+	svc_Backdoor(&patchregion);	// Edit just if the code is found, or the arm9 will get mad
+#endif
 
 	while (1) {
 #ifdef DEBUG_DUMP_FCRAM
@@ -292,11 +320,8 @@ void myThread(){
 		if (getHID() & BUTTON_START)
 			*(int *)8192 = 100;
 #endif
-
-		patch_processes();
-		if (dest != NULL) {
-			svc_Backdoor(&patchregion);		//Edit just if the code is found, or the arm9 will get mad
-#if !defined(DEBUG_DUMP_FCRAM) || !defined(DEBUG_DATA_ABORT)
+		if (!patchLabel()) {
+#if !defined(DEBUG_DATA_ABORT) && !defined(DEBUG_DUMP_FCRAM)
 			__asm__ volatile ("svc #9");
 #endif
 		}

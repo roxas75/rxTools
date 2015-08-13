@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "common.h"
 #include "MainMenu.h"
 #include "crypto.h"
 #include "fs.h"
@@ -27,22 +26,23 @@
 #include "draw.h"
 #include "hid.h"
 #include "screenshot.h"
-#include "cfw.h"
+#include "firm.h"
 #include "configuration.h"
 
 #define FONT_ADDRESS	(void*)0x27E00000
 char *cfgLang = "en.json";
 const char *fontpath = "/rxTools/system/font.bin";
+int fontLoaded = 1;
 
-int LoadFont(){
+void LoadFont(){
 	File MyFile;
 	if (FileOpen(&MyFile, fontpath, 0))
 	{
 		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
 		fontaddr = FONT_ADDRESS;
-		return 0;
+  		fontLoaded = 0;
 	}else{
-		return 1;
+		fontLoaded = 1;
 	}
 }
 
@@ -60,14 +60,14 @@ int Initialize()
 	DrawString(BOT_SCREEN, strings[STR_INITIALIZING], FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 
 	if(FSInit()){
-		DrawString(BOT_SCREEN, strings[STR_LOADING], SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_LOADING], BOT_SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
 	}else{
-		DrawString(BOT_SCREEN, strings[STR_FAILED], SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+		DrawString(BOT_SCREEN, strings[STR_FAILED], BOT_SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
 		return 1;
 	}
 
-	r = LoadFont();
-	if (r){
+	LoadFont();
+	if (fontLoaded){
 		swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), strings[STR_ERROR_OPENING], fontpath);
 		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT*2, RED, BLACK);
 	}else{
@@ -76,7 +76,7 @@ int Initialize()
 
 	//Console Stuff
 	ConsoleSetXY(15, 20);
-	ConsoleSetWH(SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
+	ConsoleSetWH(BOT_SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
 	ConsoleSetBorderColor(BLUE);
 	ConsoleSetTextColor(RGB(0, 141, 197));
 	ConsoleSetBackgroundColor(TRANSPARENT);
@@ -89,7 +89,7 @@ int Initialize()
 	InstallConfigData();
 	readCfg();
 
-	if (r)
+	if (fontLoaded)
 		cfgs[CFG_LANG].val.s = cfgLang;
 	r = loadStrings();
 	if (r) {
@@ -113,7 +113,7 @@ int Initialize()
 			DrawBottomSplash(str);
 
 			for (int i = 0; i < 0x333333 * 2; i++){
-				u32 pad = GetInput();
+				uint32_t pad = GetInput();
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
@@ -125,11 +125,11 @@ int Initialize()
 			ConsoleShow();
 
 			for (int i = 0; i < 0x333333 * 6; i++){
-				u32 pad = GetInput();
+				uint32_t pad = GetInput();
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
-		rxModeQuickBoot();
+		rxMode(1);
 	}
 rxTools_boot:
 	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
@@ -151,12 +151,12 @@ int main(){
 	File KeyFile;
 	const char *keyfile = "/slot0x25KeyX.bin";
 	if(FileOpen(&KeyFile, keyfile, 0)){
-		u8 keyX[16];
+		uint8_t keyX[16];
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
 	}else{
-		if(GetSystemVersion() < 3){
+		if (sysver < 7) {
 			ConsoleInit();
 			ConsoleSetTitle(strings[STR_WARNING]);
 			print(strings[STR_ERROR_OPENING], keyfile);
@@ -168,16 +168,16 @@ int main(){
 	}
 
 	//That's the Main Menu initialization, easy and cool
+	OpenAnimation();
 	MenuInit(&MainMenu);
 	MenuShow();
-
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
 		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
-		if(pad_state & BUTTON_A)    	MenuSelect();
-		if(pad_state & BUTTON_SELECT)	ShutDown();
-		if(pad_state & BUTTON_START)	returnHomeMenu();
+		if (pad_state & BUTTON_A)    	{ OpenAnimation(); MenuSelect(); }
+		if (pad_state & BUTTON_SELECT)	{ fadeOut(); ShutDown(); }
+		if (pad_state & BUTTON_START)	{ fadeOut(); returnHomeMenu(); }
 		TryScreenShot();
 		MenuShow();
 	}

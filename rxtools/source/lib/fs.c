@@ -15,7 +15,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "common.h"
 #include "fs.h"
 #include "fatfs/ff.h"
 
@@ -74,18 +73,18 @@ void FileClose(File *Handle) {
   * @retval Compounded value of (STEP<<8)|FR_xx, so it contains real reasons.
   * @note   directly FATFS calls. FATFS return value only ranges from 0 to 19.
   */
-u32 FSFileCopy(char *target, char *source) {
+uint32_t FSFileCopy(char *target, char *source) {
 	FIL src, dst;
-	u32 step = 0; //Tells you where it failed
+	uint32_t step = 0; //Tells you where it failed
 	FRESULT retfatfs = 0; //FATFS return value
-	u32 blockSize = 0x4000;
-	u8 *buffer = (u8 *)0x26000200; //Temp buffer for transfer.
+	uint32_t blockSize = 0x4000;
+	uint8_t *buffer = (uint8_t *)0x26000200; //Temp buffer for transfer.
 	UINT byteI = 0, byteO = 0; //Bytes that read or written
 	retfatfs = f_open(&src, source, FA_READ | FA_OPEN_EXISTING);
 	if (retfatfs != FR_OK) {step = 1; goto closeExit;}
 	retfatfs = f_open(&dst, target, FA_WRITE | FA_CREATE_ALWAYS);
 	if (retfatfs != FR_OK) {step = 2; goto closeExit;}
-	u32 totalSize = src.fsize;
+	uint32_t totalSize = src.fsize;
 	//If source file has no contents, nothing to be copied.
 	if (!totalSize) { goto closeExit; }
 	while (totalSize) {

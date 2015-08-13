@@ -15,27 +15,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
-OUTPUT_ARCH(arm)
+#ifndef FILEEXPLORER_H
+#define FILEEXPLORER_H
 
-/*0x080C3EE0*/
-ENTRY(_start)
+#include <wchar.h>
+#include "console.h"
 
-SECTIONS
-{
-  . = 0x0801A4C0;
-  start_addr = .;
-  .text.start : { *(.text.start) }
-  .text       : { *(.text) *(.text*) }
-  .rodata     : { *(.rodata) *(.rodata*) }
-  .data       : { *(.data) *(.data*) }
-  .bss        : { *(.bss) *(.bss*) }
-  /*. = ALIGN(32);*/
-  /*.stack : {
-    stack_start = .;
-    . += 0x40;
-    . = ALIGN(32);
-    stack_end = .;
-  }*/
-  total_size = . - start_addr;
-}
+void FileExplorerShow();
+void FileExplorerNextSelection();
+void FileExplorerPrevSelection();
+int FileExplorerSelect(char *p, size_t n);
+void FileExplorerBack();
+int FileExplorerMain(char *p, size_t n);
+
+#endif

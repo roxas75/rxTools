@@ -15,6 +15,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdint.h>
+#include <string.h>
 #include "TitleKeyDecrypt.h"
 #include "console.h"
 #include "draw.h"
@@ -26,13 +28,13 @@
 #include "crypto.h"
 #include "stdio.h"
 
-#define BUF1 (u8*)0x21000000
-#define TITLES (u8*)0x22000000
+#define BUF1 (uint8_t*)0x21000000
+#define TITLES (uint8_t*)0x22000000
 
 #define PROGRESS_WIDTH	16
 
 // From https://github.com/profi200/Project_CTR/blob/master/makerom/pki/prod.h#L19
-static const u8 common_keyy[6][16] = {
+static const uint8_t common_keyy[6][16] = {
 	{0xD0, 0x7B, 0x33, 0x7F, 0x9C, 0xA4, 0x38, 0x59, 0x32, 0xA2, 0xE2, 0x57, 0x23, 0x23, 0x2E, 0xB9} , // 0 - eShop Titles
 	{0x0C, 0x76, 0x72, 0x30, 0xF0, 0x99, 0x8F, 0x1C, 0x46, 0x82, 0x82, 0x02, 0xFA, 0xAC, 0xBE, 0x4C} , // 1 - System Titles
 	{0xC4, 0x75, 0xCB, 0x3A, 0xB8, 0xC7, 0x88, 0xBB, 0x57, 0x5E, 0x12, 0xA1, 0x09, 0x07, 0xB8, 0xA4} , // 2
@@ -45,17 +47,17 @@ int nTicket = 0;
 int nKey = 0;
 int nullbyte = 0;
 
-int isEqual(u8 *tid1, u8 *tid2) {
+int isEqual(uint8_t *tid1, uint8_t *tid2) {
 	for (int i = 0; i < 8; i++) {
 		if (tid1[i] != tid2[i]) { return 0; }
 	}
 	return 1;
 }
 
-int isAlreadyDumped(u8 *titleid) {
+int isAlreadyDumped(uint8_t *titleid) {
 	if (nKey == 0) { return 0; }
 	for (int i = 0; i < nKey; i++) {
-		u8 *stored = TITLES + 8 * i;
+		uint8_t *stored = TITLES + 8 * i;
 		if (isEqual(stored, titleid)) {
 			return 1;
 		}
@@ -63,10 +65,10 @@ int isAlreadyDumped(u8 *titleid) {
 	return 0;
 }
 
-u32 DecryptTitleKey(u8 *titleid, u8 *key, u32 index) {
-	u8 ctr[16] __attribute__((aligned(32)));
-	u8 keyY[16] __attribute__((aligned(32)));
-	u8 titleId[8] __attribute__((aligned(32)));
+uint32_t DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
+	uint8_t ctr[16] __attribute__((aligned(32)));
+	uint8_t keyY[16] __attribute__((aligned(32)));
+	uint8_t titleId[8] __attribute__((aligned(32)));
 	memcpy(titleId, titleid, 8);
 	memset(ctr, 0, 16);
 	memcpy(ctr, titleId, 8);
@@ -86,12 +88,12 @@ void DecryptTitleKeys() {
 	const char *filename="rxTools/decTitleKeys.bin";
 	print(strings[STR_OPENING], "ticket.db");
 	FileOpen(&dump, filename, 1);
-	u32 tick_size = 0xD0000;     //Chunk size
+	uint32_t tick_size = 0xD0000;     //Chunk size
 	nKey = 0; int nullbyte = 0;
 	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
 		print(strings[STR_DECRYPTING], strings[STR_TITLE_KEYS], filename);
 		ConsoleShow();
-		u8 *buf = BUF1;
+		uint8_t *buf = BUF1;
 		int pos = 0;
 		for (;;) {
 			int rb = FileRead(&tick, buf, tick_size, pos);
@@ -99,9 +101,9 @@ void DecryptTitleKeys() {
 			pos += rb;
 			for (int j = 0; j < tick_size; j++) {
 				if (!strcmp((char *)buf + j, "Root-CA00000003-XS0000000c")) {
-					u8 *titleid = buf + j + 0x9C;
-					u32 kindex = *(buf + j + 0xB1);
-					u8 Key[16]; memcpy(Key, BUF1 + j + 0x7F, 16);
+					uint8_t *titleid = buf + j + 0x9C;
+					uint32_t kindex = *(buf + j + 0xB1);
+					uint8_t Key[16]; memcpy(Key, BUF1 + j + 0x7F, 16);
 					if (!isAlreadyDumped(titleid)) {
 						memcpy(TITLES + nKey * 8, titleid, 8);
 						FileWrite(&dump, &kindex, 4, 0x10 + nKey * 0x20);
@@ -162,16 +164,16 @@ void DecryptTitleKeyFile(void) {
 		return;
 	}
 
-	u32 line[4] = {0,};
-	u32 keycount = 0, i = 0;
-	u32 kindex = 0, nkeys = 0;
-	u8 titleid[8] = {0,};
-	u8 key[16] = {0,};
+	uint32_t line[4] = {0,};
+	uint32_t keycount = 0, i = 0;
+	uint32_t kindex = 0, nkeys = 0;
+	uint8_t titleid[8] = {0,};
+	uint8_t key[16] = {0,};
 	wchar_t progressbar[41] = {0,};
 	wchar_t* progress = progressbar;
 	for(i=0; i<PROGRESS_WIDTH; i++)
 		wcscat(progressbar, strings[STR_PROGRESS]);
-	u8 percent = 0;
+	uint8_t percent = 0;
 
 	rr = f_read(&tick, line, sizeof(line), &br);
 	if ((rr != FR_OK)||(br != sizeof(line)))
@@ -256,7 +258,7 @@ void DecryptTitleKeyFile(void) {
 	print(progressbar);
 	ConsoleShow();
 	rr = f_write(&dump, line, sizeof(line), &br);
-	if ((rr != FR_OK)||(br != sizeof(line))) 
+	if ((rr != FR_OK)||(br != sizeof(line)))
 	{
 		print(strings[STR_ERROR_WRITING], filename3);
 		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
@@ -272,17 +274,17 @@ void DecryptTitleKeyFile(void) {
 	return;
 }
 
-int GetTitleKey(u8 *TitleKey, u32 low, u32 high, int drive) {
+int GetTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 	File tick;
-	u32 tid_low = ((low >> 24) & 0xff) | ((low << 8) & 0xff0000) | ((low >> 8) & 0xff00) | ((low << 24) & 0xff000000);
-	u32 tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
-	u32 tick_size = 0x200;     //Chunk size
+	uint32_t tid_low = ((low >> 24) & 0xff) | ((low << 8) & 0xff0000) | ((low >> 8) & 0xff00) | ((low << 24) & 0xff000000);
+	uint32_t tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
+	uint32_t tick_size = 0x200;     //Chunk size
 
 	char path[64] = {0};
 	sprintf(path, "%d:dbs/ticket.db", drive);
 
 	if (FileOpen(&tick, path, 0)) {
-		u8 *buf = TITLES;
+		uint8_t *buf = TITLES;
 		int pos = 0;
 		for (;;) {
 			int rb = FileRead(&tick, buf, tick_size, pos);
@@ -294,10 +296,10 @@ int GetTitleKey(u8 *TitleKey, u32 low, u32 high, int drive) {
 			}
 			for (int j = 0; j < tick_size; j++) {
 				if (!strcmp((char *)buf + j, "Root-CA00000003-XS0000000c")) {
-					u8 *titleid = buf + j + 0x9C;
-					u32 kindex = *(buf + j + 0xB1);
-					u8 Key[16]; memcpy(Key, buf + j + 0x7F, 16);
-					if (*((u32 *)titleid) == tid_low && *((u32 *)(titleid + 4)) == tid_high) {
+					uint8_t *titleid = buf + j + 0x9C;
+					uint32_t kindex = *(buf + j + 0xB1);
+					uint8_t Key[16]; memcpy(Key, buf + j + 0x7F, 16);
+					if (*((uint32_t *)titleid) == tid_low && *((uint32_t *)(titleid + 4)) == tid_high) {
 						DecryptTitleKey(titleid, Key, kindex);
 						memcpy(TitleKey, Key, 16);
 						FileClose(&tick);

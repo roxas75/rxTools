@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "common.h"
+#include <stdlib.h>
 #include "menu.h"
 #include "nandtools.h"
 #include "console.h"
@@ -32,7 +32,7 @@
 
 #define nCoolFiles sizeof(CoolFiles)/sizeof(CoolFiles[0])
 
-u32 selectedFile;
+uint32_t selectedFile;
 void SelectFile();
 
 static struct {
@@ -75,7 +75,7 @@ void dumpCoolFiles()
 
 	while (true)
 	{
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }
@@ -89,11 +89,11 @@ void dumpCoolFiles()
 	ConsoleSetTitle(strings[STR_DUMP], strings[STR_FILES]);
 
 	char dest[256], tmpstr[sizeof(dest)];
-	wchar_t wdest[sizeof(dest)];
+	wchar_t wsrc[sizeof(tmpstr)];
 	sprintf(dest, "rxTools/%s", CoolFiles[selectedFile].name);
 	sprintf(tmpstr, "%d:%s/%s", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name);
-	mbstowcs(wdest, dest, sizeof(dest));
-	print(strings[STR_DUMPING], tmpstr, wdest);
+	mbstowcs(wsrc, tmpstr, sizeof(tmpstr));
+	print(strings[STR_DUMPING], wsrc, dest);
 	ConsoleShow();
 
 	unsigned int res = FSFileCopy(dest, tmpstr);
@@ -110,9 +110,9 @@ void dumpCoolFiles()
 			sprintf(dest, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
 			sprintf(tmpstr, "%d:%s/%.20s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'A');
 		}
-		mbstowcs(wdest, dest, sizeof(wdest));
+		mbstowcs(wsrc, tmpstr, sizeof(tmpstr));
 		print(strings[STR_FAILED]);
-		print(strings[STR_DUMPING], tmpstr, wdest);
+		print(strings[STR_DUMPING], wsrc, dest);
 		ConsoleShow();
 		res = FSFileCopy(dest, tmpstr);
 	}
@@ -156,7 +156,7 @@ void restoreCoolFiles()
 	MenuShow();
 	while (true)
 	{
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }
@@ -170,10 +170,11 @@ void restoreCoolFiles()
 	ConsoleSetTitle(strings[STR_INJECT], strings[STR_FILES]);
 
 	char dest[256], tmpstr[sizeof(dest)];
-	wchar_t wsrc[sizeof(dest)];
+	wchar_t wsrc[sizeof(tmpstr)];
 	sprintf(tmpstr, "rxTools/%s", CoolFiles[selectedFile].name);
 	sprintf(dest, "%d:%s/%s", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name);
-	print(strings[STR_INJECTING], tmpstr, dest);
+	mbstowcs(wsrc, tmpstr, sizeof(tmpstr));
+	print(strings[STR_INJECTING], wsrc, dest);
 	ConsoleShow();
 
 	unsigned int res = FSFileCopy(dest, tmpstr);
