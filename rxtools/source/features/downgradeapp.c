@@ -614,7 +614,7 @@ void manageFBI(bool restore)
 					sprintf(path, "0:fbi_inject.tmd");
 					sprintf(path2, "0:fbi_inject.app");
 
-					print(strings[STR_INJECTING], strings[STR_FBI]);
+					print(strings[STR_INJECTING], "", strings[STR_FBI]);
 				} else {
 					/* Generate the H&S backup data paths */
 					memset(&tmpstr, 0, 256);
