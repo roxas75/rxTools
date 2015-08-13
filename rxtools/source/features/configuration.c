@@ -303,13 +303,11 @@ int InstallData(char* drive){
 			it probably means that AGB has been modified in some way. */
 			//So we read it from his installed ncch...
 			FindApp(0x00040138, 0x00000202, 1);
-			char* path = getContentAppPath();
-			if (!FileOpen(&tempfile, path, 0) && checkEmuNAND())
+			if (!FileOpen(&tempfile, cntpath, 0) && checkEmuNAND())
 			{
 				/* Try with EmuNAND */
 				FindApp(0x00040138, 0x00000202, 2);
-				path = getContentAppPath();
-				if (!FileOpen(&tempfile, path, 0))
+				if (!FileOpen(&tempfile, cntpath, 0))
 				{
 					f_close(&firmfile);
 					return CONF_ERRNFIRM;

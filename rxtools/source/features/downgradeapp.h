@@ -18,6 +18,9 @@
 #ifndef DOWNGRADEAPP_H
 #define DOWNGRADEAPP_H
 
+extern char cntpath[256];
+extern char tmpdpath[256];
+
 //Utilities
 char* getContentAppPath();
 char* getTMDAppPath();
