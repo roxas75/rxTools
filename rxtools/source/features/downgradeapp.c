@@ -674,7 +674,7 @@ void manageFBI(bool restore)
 													{
 //														print(L"\n\nWhat would you like to do?\nⒷ Keep %ls Data\nⓍ Delete %ls Data\n\n", restore ? L"backup": L"FBI injection", restore ? L"backup": L"FBI injection");
 														print(strings[STR_CHOOSE], "");
-														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_B], "LKeep" );
+														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_B], L"Keep" );
 														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_X], L"Delete" );
 														ConsoleShow();
 														checkLoop = 0;
