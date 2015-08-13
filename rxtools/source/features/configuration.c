@@ -43,13 +43,6 @@
 #define AGB_SIZE	0xD9C00
 #define TWL_SIZE	0x1A1C00
 
-char tmpstr[256] = {0};
-char str[100];
-char strl[100];
-char strr[100];
-File tempfile;
-UINT tmpu32;
-
 static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
 
 Cfg cfgs[] = {
@@ -245,9 +238,12 @@ int InstallData(char* drive){
 	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	FIL firmfile;
+	File fd;
 	unsigned int progressWidth, progressX;
 	wchar_t progressbar[8] = {0,};
 	wchar_t *progress = progressbar;
+	UINT br;
+	char path[64];
 	int i;
 
 	progressWidth = getMpInfo() == MPINFO_CTR ? 7 : 3;
@@ -259,8 +255,8 @@ int InstallData(char* drive){
 	ConsolePrevLine();
 
 	//Create the workdir
-	sprintf(tmpstr, "%s:%s", drive, DATAFOLDER);
-	f_mkdir(tmpstr);
+	sprintf(path, "%s:%s", drive, DATAFOLDER);
+	f_mkdir(path);
 
 	//Read firmware data
 	if (f_open(&firmfile, "firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
@@ -269,17 +265,17 @@ int InstallData(char* drive){
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create decrypted native_firm
-	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
+	f_read(&firmfile, WORKBUF, NAT_SIZE, &br);
 	uint8_t* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	getFirmPath(tmpstr, getMpInfo() == MPINFO_KTR ?
+	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
 		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
-	if(FileOpen(&tempfile, tmpstr, 1)){
-		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
-		FileClose(&tempfile);
+	if(FileOpen(&fd, path, 1)){
+		FileWrite(&fd, n_firm, NAT_SIZE, 0);
+		FileClose(&fd);
 	}else {
 		f_close(&firmfile);
 		return CONF_ERRNFIRM;
@@ -292,7 +288,7 @@ int InstallData(char* drive){
 		goto end;
 
 	//Create AGB patched firmware
-	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
+	f_read(&firmfile, WORKBUF, AGB_SIZE, &br);
 	uint8_t* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
 	if (!a_firm && checkEmuNAND())
 	{
@@ -303,19 +299,19 @@ int InstallData(char* drive){
 			it probably means that AGB has been modified in some way. */
 			//So we read it from his installed ncch...
 			FindApp(0x00040138, 0x00000202, 1);
-			if (!FileOpen(&tempfile, cntpath, 0) && checkEmuNAND())
+			if (!FileOpen(&fd, cntpath, 0) && checkEmuNAND())
 			{
 				/* Try with EmuNAND */
 				FindApp(0x00040138, 0x00000202, 2);
-				if (!FileOpen(&tempfile, cntpath, 0))
+				if (!FileOpen(&fd, cntpath, 0))
 				{
 					f_close(&firmfile);
 					return CONF_ERRNFIRM;
 				}
 			}
 
-			FileRead(&tempfile, WORKBUF, AGB_SIZE, 0);
-			FileClose(&tempfile);
+			FileRead(&fd, WORKBUF, AGB_SIZE, 0);
+			FileClose(&fd);
 			a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
 		}
 	}
@@ -324,10 +320,10 @@ int InstallData(char* drive){
 		if (applyPatch(a_firm, "/rxTools/system/patches/ctr/agb_firm.elf", &agb_info))
 			return CONF_ERRPATCH;
 
-		getFirmPath(tmpstr, TID_CTR_TWL_FIRM);
-		if(FileOpen(&tempfile, tmpstr, 1)){
-			FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
-			FileClose(&tempfile);
+		getFirmPath(path, TID_CTR_TWL_FIRM);
+		if(FileOpen(&fd, path, 1)){
+			FileWrite(&fd, a_firm, AGB_SIZE, 0);
+			FileClose(&fd);
 		}else {
 			f_close(&firmfile);
 			return CONF_ERRNFIRM;
@@ -342,16 +338,16 @@ int InstallData(char* drive){
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create TWL patched firmware
-	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
+	f_read(&firmfile, WORKBUF, TWL_SIZE, &br);
 	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	if(t_firm){
 		if (applyPatch(t_firm, "/rxTools/system/patches/ctr/twl_firm.elf", &twl_info))
 			return CONF_ERRPATCH;
 
-		getFirmPath(tmpstr, TID_CTR_TWL_FIRM);
-		if(FileOpen(&tempfile, tmpstr, 1)){
-			FileWrite(&tempfile, t_firm, TWL_SIZE, 0);
-			FileClose(&tempfile);
+		getFirmPath(path, TID_CTR_TWL_FIRM);
+		if(FileOpen(&fd, path, 1)){
+			FileWrite(&fd, t_firm, TWL_SIZE, 0);
+			FileClose(&fd);
 			//FileCopy("0004013800000102.bin", tmpstr);
 		}else {
 			f_close(&firmfile);
@@ -365,11 +361,11 @@ int InstallData(char* drive){
 	}
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	sprintf(tmpstr, "%s:%s/data.bin", drive, DATAFOLDER);
-	if(FileOpen(&tempfile, tmpstr, 1)){
-		FileWrite(&tempfile, __DATE__, 12, 0);
-		FileWrite(&tempfile, __TIME__, 9, 12);
-		FileClose(&tempfile);
+	sprintf(path, "%s:%s/data.bin", drive, DATAFOLDER);
+	if(FileOpen(&fd, path, 1)){
+		FileWrite(&fd, __DATE__, 12, 0);
+		FileWrite(&fd, __TIME__, 9, 12);
+		FileClose(&fd);
 	}else {
 		f_close(&firmfile);
 		return CONF_CANTOPENFILE;
@@ -420,24 +416,26 @@ int CheckInstallationData(){
 }
 
 void InstallConfigData(){
+	char path[64], pathL[64], pathR[64];
+
 	if(CheckInstallationData() == 0)
 		return;
 
 	trySetLangFromTheme(0);
 	writeCfg();
 
-	sprintf(str, "/rxTools/Theme/%u/cfg0TOP.bin", cfgs[CFG_THEME].val.i);
-	DrawTopSplash(str, str, str);
-	sprintf(str, "/rxTools/Theme/%u/cfg0.bin", cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(str);
+	sprintf(path, "/rxTools/Theme/%u/cfg0TOP.bin", cfgs[CFG_THEME].val.i);
+	DrawTopSplash(path, path, path);
+	sprintf(path, "/rxTools/Theme/%u/cfg0.bin", cfgs[CFG_THEME].val.i);
+	DrawBottomSplash(path);
 
 	int res = InstallData("0");	//SD Card
-	sprintf(str, "/rxTools/Theme/%u/cfg1%c.bin", cfgs[CFG_THEME].val.i, res == 0 ? 'O' : 'E');
-	DrawBottomSplash(str);
-	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
-	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
-	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
-	DrawTopSplash(str, strl, strr);
+	sprintf(path, "/rxTools/Theme/%u/cfg1%c.bin", cfgs[CFG_THEME].val.i, res == 0 ? 'O' : 'E');
+	DrawBottomSplash(path);
+	sprintf(path, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
+	sprintf(pathL, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
+	sprintf(pathR, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
+	DrawTopSplash(path, pathL, pathR);
 
 	InputWait();
 }
