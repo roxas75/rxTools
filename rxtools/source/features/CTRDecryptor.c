@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "CTRDecryptor.h"
-#include "common.h"
 #include "screenshot.h"
 #include "fs.h"
 #include "fatfs/ff.h"

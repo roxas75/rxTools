@@ -18,8 +18,6 @@
 #ifndef PADGEN_H
 #define PADGEN_H
 
-#include "common.h"
-
 #define MAXENTRIES 1024
 
 typedef struct {

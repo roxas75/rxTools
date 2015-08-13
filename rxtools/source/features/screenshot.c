@@ -15,8 +15,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include "screenshot.h"
-#include "common.h"
 #include "console.h"
 #include "draw.h"
 #include "hid.h"

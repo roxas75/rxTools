@@ -15,8 +15,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdbool.h>
 #include "downgradeapp.h"
-#include "common.h"
 #include "screenshot.h"
 #include "fs.h"
 #include "fatfs/ff.h"

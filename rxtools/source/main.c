@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "common.h"
 #include "MainMenu.h"
 #include "crypto.h"
 #include "fs.h"
