@@ -22,11 +22,8 @@
 #include "nand.h"
 
 uint8_t NANDCTR[16];
-int sysversion = 0;
+int sysver;
 
-int GetSystemVersion() {
-	return sysversion;
-}
 /**CTR offsets with versions*/
 const uint8_t *fsVersionCTRs[] = {
 	(uint8_t *)0x080D7CAC, //4.x
