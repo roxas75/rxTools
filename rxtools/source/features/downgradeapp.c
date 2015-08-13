@@ -52,14 +52,6 @@ DIR myDir;
 char cntpath[256]; // Contains the NAND content path
 char tmdpath[256]; // Contains the NAND TMD path
 
-char* getContentAppPath(){
-	return (char*)&cntpath;
-}
-
-char* getTMDAppPath(){
-	return (char*)&tmdpath;
-}
-
 void sprint_sha256(wchar_t *str, unsigned char hash[32])
 {
 	int i;
