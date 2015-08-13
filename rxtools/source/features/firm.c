@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "firm.h"
-#include "common.h"
+#include "mpcore.h"
 #include "hid.h"
 #include "lang.h"
 #include "console.h"

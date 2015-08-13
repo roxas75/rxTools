@@ -26,6 +26,7 @@
 #include "console.h"
 #include "draw.h"
 #include "hid.h"
+#include "mpcore.h"
 #include "ncch.h"
 #include "crypto.h"
 #include "polarssl/aes.h"
