@@ -21,7 +21,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "common.h"
 
 typedef struct{
         unsigned int arm9Off;

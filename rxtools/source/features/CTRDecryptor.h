@@ -18,7 +18,8 @@
 #ifndef CTR_DECRYPTOR
 #define CTR_DECRYPTOR
 
-#include "common.h"
+#include <stddef.h>
+#include <stdint.h>
 
 typedef struct{
 	uint8_t* buffer;

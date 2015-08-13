@@ -15,9 +15,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <string.h>
 #include <wchar.h>
 #include "NandDumper.h"
-#include "common.h"
 #include "console.h"
 #include "draw.h"
 #include "lang.h"

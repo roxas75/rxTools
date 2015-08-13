@@ -20,6 +20,8 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
+#include <wchar.h>
+
 #define CONSOLE_SIZE			0x4000
 #define CONSOLE_WIDTH			BOT_SCREEN_WIDTH - FONT_WIDTH * 2
 #define CONSOLE_HEIGHT			SCREEN_HEIGHT - FONT_HEIGHT * 3

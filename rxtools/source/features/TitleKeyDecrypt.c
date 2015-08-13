@@ -15,6 +15,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdint.h>
+#include <string.h>
 #include "TitleKeyDecrypt.h"
 #include "console.h"
 #include "draw.h"
@@ -256,7 +258,7 @@ void DecryptTitleKeyFile(void) {
 	print(progressbar);
 	ConsoleShow();
 	rr = f_write(&dump, line, sizeof(line), &br);
-	if ((rr != FR_OK)||(br != sizeof(line))) 
+	if ((rr != FR_OK)||(br != sizeof(line)))
 	{
 		print(strings[STR_ERROR_WRITING], filename3);
 		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);

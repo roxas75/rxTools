@@ -17,7 +17,9 @@
 
 #pragma once
 
-#include "common.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include "fatfs/ff.h"
 #include "nand.h"
 #define File FIL

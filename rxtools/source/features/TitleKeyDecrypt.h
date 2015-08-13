@@ -18,8 +18,6 @@
 #ifndef TITLE_KEY_DECRYPT_H
 #define TITLE_KEY_DECRYPT_H
 
-#include "common.h"
-
 void DecryptTitleKeys();
 void DecryptTitleKeyFile(void);
 uint32_t DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index);

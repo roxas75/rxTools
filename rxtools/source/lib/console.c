@@ -22,7 +22,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "common.h"
 #include "configuration.h"
 #include "console.h"
 #include "draw.h"

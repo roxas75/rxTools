@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "common.h"
+#include <stdint.h>
 
 #define HID_STATE (*(volatile uint32_t*)0x10146000)
 
