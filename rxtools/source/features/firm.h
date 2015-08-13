@@ -33,11 +33,6 @@ typedef struct{
 } FirmInfo;
 
 typedef enum {
-	PLATFORM_3DS=1,
-	PLATFORM_N3DS=7,
-} Platform_UnitType;
-
-typedef enum {
         TID_CTR_NATIVE_FIRM = 0x00000002,
         TID_CTR_TWL_FIRM = 0x00000102,
         TID_CTR_AGB_FIRM = 0x00000202,
@@ -46,7 +41,6 @@ typedef enum {
 
 extern const char firmPathFmt[];
 
-Platform_UnitType Platform_CheckUnit(void);
 int DevMode();
 void FirmLoader();
 void rxModeWithSplash(int emu);
