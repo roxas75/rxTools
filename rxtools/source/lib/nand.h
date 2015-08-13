@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "common.h"
+#include <stdint.h>
 #include "fatfs/ff.h"
 #define File FIL
 
@@ -30,10 +30,11 @@ enum {
 	CTRNAND = 0x0B95CA00,
 } NAND_PARTITIONS;
 
-int GetSystemVersion();
+extern int sysver;
+
 void FSNandInitCrypto(void);
-int checkEmuNAND();
-void GetNANDCTR(u8 *ctr);
+unsigned int checkEmuNAND();
+void GetNANDCTR(uint8_t *ctr);
 void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);
 void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);
 void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition);

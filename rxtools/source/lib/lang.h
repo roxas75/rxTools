@@ -15,6 +15,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef LANG_H
+#define LANG_H
+
 #include <wchar.h>
 #include "configuration.h"
 
@@ -41,12 +44,15 @@ enum {
 	STR_OPENING,
 	STR_RESTORE,
 	STR_RESTORING,
+	STR_LOAD,
+	STR_DIRECTORY,
 	STR_MISSING,
 	STR_ERROR_OPENING,
 	STR_ERROR_CREATING,
 	STR_ERROR_READING,
 	STR_ERROR_WRITING,
 	STR_ERROR_COPYING,
+	STR_ERROR_LAUNCHING,
 	STR_WRONG,
 	STR_GOT,
 	STR_EXPECTED,
@@ -76,6 +82,7 @@ enum {
 	STR_TMD_VERSION,
 	STR_TMD_SIZE,
 	STR_HASH,
+	STR_FIRMWARE_FILE,
 	STR_CHECK_TMD_ONLY,
 	STR_INJECT_FBI,
 	STR_SYSTEM_TITLES,
@@ -153,4 +160,7 @@ extern wchar_t strings[STR_NUM][STR_MAX_LEN];
 
 void preloadStringsA(void);
 void preloadStringsU(void);
+void preloadStringsOnSwitch(void);
 int loadStrings(void);
+
+#endif

@@ -1,6 +1,8 @@
 /*
  * Myria's libkhax implementation in C
  */
+#include <memory.h>
+
 #include "mkhax.h"
 
 #include "svc.h"
@@ -9,7 +11,7 @@
 
 void rand_patt()
 {
-	void *src = (void *)0x18000000;
+	void *src = (void *)CTR_ARM9_VRAM_ADDR;
 	for (int i = 0; i < 3; i++) {  // Do it 3 times to be safe
 		compat.app.GSPGPU_FlushDataCache(src, 0x00038400);
 		compat.app.GX_SetTextureCopy(src, (void *)0x1F48F000, 0x00038400, 0, 0, 0, 0, 8);
@@ -20,19 +22,19 @@ void rand_patt()
 	}
 }
 
-void do_gshax_copy(void *dst, const void *src, unsigned int len)
+void do_gshax_copy(void *dst, void *src, unsigned int len)
 {
 	unsigned int i = 5;
 
 	do
 	{
-		compat.app.memcpy(0x18401000, 0x18401000, 0x10000);
+		compat.app.memcpy((void*)0x18401000, (void*)0x18401000, 0x10000);
 		compat.app.GSPGPU_FlushDataCache(src, len);
 		// src always 0x18402000
 		compat.app.GX_SetTextureCopy(src, dst, len, 0, 0, 0, 0, 8);
-		compat.app.GSPGPU_FlushDataCache(0x18401000, 16);
-		compat.app.GX_SetTextureCopy(dst, 0x18401000, 0x40, 0, 0, 0, 0, 8);
-		compat.app.memcpy(0x18401000, 0x18401000, 0x10000);
+		compat.app.GSPGPU_FlushDataCache((void*)0x18401000, 16);
+		compat.app.GX_SetTextureCopy(dst, (void*)0x18401000, 0x40, 0, 0, 0, 0, 8);
+		compat.app.memcpy((void*)0x18401000, (void*)0x18401000, 0x10000);
 	}while(--i > 0);
 }
 
@@ -63,8 +65,8 @@ void arm11_kernel_exploit_setup(void)
 	compat.app.svcControlMemory(&mem_hax_mem, 0, 0, 0x6000, 0x10003, 1 | 2);
 
 	void* tmp_addr;
-	compat.app.svcControlMemory(&tmp_addr, mem_hax_mem + 0x4000, 0, 0x1000, 1, 0); // free page
-	compat.app.svcControlMemory(&tmp_addr, mem_hax_mem + 0x1000, 0, 0x2000, 1, 0); // free page
+	compat.app.svcControlMemory(&tmp_addr, (int)(mem_hax_mem + 0x4000), 0, 0x1000, 1, 0); // free page
+	compat.app.svcControlMemory(&tmp_addr, (int)(mem_hax_mem + 0x1000), 0, 0x2000, 1, 0); // free page
 
 	unsigned int saved_heap_3[8];
 	do_gshax_copy(arm11_buffer, mem_hax_mem + 0x1000, 0x20u);
@@ -74,8 +76,8 @@ void arm11_kernel_exploit_setup(void)
 	do_gshax_copy(arm11_buffer, mem_hax_mem + 0x4000, 0x20u);
 	compat.app.memcpy(saved_heap_2, arm11_buffer, sizeof(saved_heap_2));
 
-	compat.app.svcControlMemory(&tmp_addr, mem_hax_mem + 0x1000, 0, 0x2000, 0x10003, 1 | 2);
-	compat.app.svcControlMemory(&tmp_addr, mem_hax_mem + 0x2000, 0, 0x1000, 1, 0); // free page
+	compat.app.svcControlMemory(&tmp_addr, (int)(mem_hax_mem + 0x1000), 0, 0x2000, 0x10003, 1 | 2);
+	compat.app.svcControlMemory(&tmp_addr, (int)(mem_hax_mem + 0x2000), 0, 0x1000, 1, 0); // free page
 
 	do_gshax_copy(arm11_buffer, mem_hax_mem + 0x2000, 0x20u);
 
@@ -91,7 +93,7 @@ void arm11_kernel_exploit_setup(void)
 	do_gshax_copy(mem_hax_mem + 0x2000, arm11_buffer, 0x10u);
 
 	// Trigger write to kernel
-	compat.app.svcControlMemory(&tmp_addr, mem_hax_mem + 0x1000, 0, 0x1000, 1, 0);
+	compat.app.svcControlMemory(&tmp_addr, (int)(mem_hax_mem + 0x1000), 0, 0x1000, 1, 0);
 
 	compat.app.memcpy(arm11_buffer, saved_heap_3, sizeof(saved_heap_3));
 	do_gshax_copy(mem_hax_mem + 0x1000, arm11_buffer, 0x20u);
@@ -124,7 +126,7 @@ void inline invalidate_dcache(void)
 }
 
 __attribute__((naked)) __attribute__((noinline))
-s32 patch_kernel(void)
+int patch_kernel(void)
 {
 	asm volatile
 	(
@@ -155,7 +157,7 @@ s32 patch_kernel(void)
 }
 
 __attribute__((naked)) __attribute__((noinline))
-s32 unpatch_pid(void)
+int unpatch_pid(void)
 {
 	asm volatile
 	(

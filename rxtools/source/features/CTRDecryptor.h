@@ -18,17 +18,18 @@
 #ifndef CTR_DECRYPTOR
 #define CTR_DECRYPTOR
 
-#include "common.h"
+#include <stddef.h>
+#include <stdint.h>
 
 typedef struct{
-	u8* buffer;
-	u8* keyY;
-	u8* ctr;
+	uint8_t* buffer;
+	uint8_t* keyY;
+	uint8_t* ctr;
 	size_t size;
-	u32 keyslot;
+	uint32_t keyslot;
 }PartitionInfo;  //This basic struct can be useful anytime, even if i'll add nand decryption/exploring
 
-u32 DecryptPartition(PartitionInfo* info);
+uint32_t DecryptPartition(PartitionInfo* info);
 void CTRDecryptor();
 
 #endif
