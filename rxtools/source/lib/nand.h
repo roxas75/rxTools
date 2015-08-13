@@ -30,7 +30,8 @@ enum {
 	CTRNAND = 0x0B95CA00,
 } NAND_PARTITIONS;
 
-int GetSystemVersion();
+extern int sysver;
+
 void FSNandInitCrypto(void);
 unsigned int checkEmuNAND();
 void GetNANDCTR(uint8_t *ctr);
