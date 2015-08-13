@@ -278,6 +278,9 @@ int rxMode(int emu)
 		sh_name = shstrtab + shdr.sh_name;
 
 		if (!strcmp(sh_name, ".rodata.keyx")) {
+			if (sysver >= 7)
+				continue;
+
 			if (f_open(&keyxFd, "slot0x25KeyX.bin", FA_READ) != FR_OK)
 				continue;
 
@@ -290,7 +293,8 @@ int rxMode(int emu)
 			memcpy(p, "RX-", 3);
 			((char *)p)[3] = sector ? 'E' : 'S';
 		} else if (shdr.sh_type == SHT_PROGBITS
-			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1)))
+			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1))
+			&& (sysver < 7 || strcmp(sh_name, ".patch.p9.keyx")))
 		{
 			if (f_lseek(&fd, shdr.sh_offset) != FR_OK)
 				continue;
