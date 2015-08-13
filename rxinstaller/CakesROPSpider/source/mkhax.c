@@ -1,6 +1,68 @@
 /*
- * Myria's libkhax implementation in C
- */
+* Based on:
+*
+* - bootstrap (https://github.com/shinyquagsire23/bootstrap) by shinyquagsire23 et al, licensed as follows:
+*   Copyright (c) 2015, shinyquagsire23 et al
+*   All rights reserved.
+*
+*   Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+*
+*   1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+*
+*   2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+*
+*   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*
+* - ctrulib (https://github.com/smealum/ctrulib) by smealum et al, licensed as follows:
+*   This software is provided 'as-is', without any express or implied
+*   warranty. In no event will the authors be held liable for any damages
+*   arising from the use of this software.
+*
+*   Permission is granted to anyone to use this software for any purpose,
+*   including commercial applications, and to alter it and redistribute it
+*   freely, subject to the following restrictions:
+*
+*   1. The origin of this software must not be misrepresented; you must not
+*      claim that you wrote the original software. If you use this software
+*      in a product, an acknowledgement in the product documentation would be
+*      appreciated but is not required.
+*   2. Altered source versions must be plainly marked as such, and must not be
+*      misrepresented as being the original software.
+*   3. This notice may not be removed or altered from any source distribution.
+*
+* - service-patch (https://github.com/yifanlu/service-patch/) by archshift and Yifan Lu, licensed as follows:
+*   Copyright 2015 archshift, Yifan Lu
+*
+*   Licensed under the Apache License, Version 2.0 (the "License");
+*   you may not use this file except in compliance with the License.
+*   You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*   Unless required by applicable law or agreed to in writing, software
+*   distributed under the License is distributed on an "AS IS" BASIS,
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*   See the License for the specific language governing permissions and
+*   limitations under the License.
+*
+* - Spider3DSTools (https://github.com/yifanlu/Spider3DSTools/) by Yifan Lu, licensed as follows:
+*   Copyright 2012 archshift, Yifan Lu
+*
+*   Licensed under the Apache License, Version 2.0 (the "License");
+*   you may not use this file except in compliance with the License.
+*   You may obtain a copy of the License at
+*
+*      http://www.apache.org/licenses/LICENSE-2.0
+*
+*   Unless required by applicable law or agreed to in writing, software
+*   distributed under the License is distributed on an "AS IS" BASIS,
+*   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*   See the License for the specific language governing permissions and
+*   limitations under the License.
+*
+*
+* Individual sections are marked in the code.
+*/
 #include <memory.h>
 
 #include "mkhax.h"
@@ -9,6 +71,7 @@
 #include "compat.h"
 #include "ctru.h"
 
+// Spider3DSTools (Yifan Lu)
 void rand_patt()
 {
 	void *src = (void *)CTR_ARM9_VRAM_ADDR;
@@ -22,6 +85,7 @@ void rand_patt()
 	}
 }
 
+// bootstrap (shinyquagsire23 et al)
 void do_gshax_copy(void *dst, void *src, unsigned int len)
 {
 	unsigned int i = 5;
@@ -38,6 +102,7 @@ void do_gshax_copy(void *dst, void *src, unsigned int len)
 	}while(--i > 0);
 }
 
+// bootstrap (shinyquagsire23 et al)
 // after running setup, run this to execute func in ARM11 kernel mode
 __attribute__((naked))
 int arm11_kernel_exploit_exec(int (*func)(void))
@@ -49,6 +114,7 @@ int arm11_kernel_exploit_exec(int (*func)(void))
 	);
 }
 
+// bootstrap (shinyquagsire23 et al), service-patch (archshift and Yifan Lu)
 // heap fixing thanks to Myria
 void arm11_kernel_exploit_setup(void)
 {
@@ -103,6 +169,7 @@ void arm11_kernel_exploit_setup(void)
 	rand_patt();
 }
 
+// bootstrap (shinyquagsire23 et al)
 void inline invalidate_icache(void)
 {
 	asm
@@ -115,6 +182,7 @@ void inline invalidate_icache(void)
 	);
 }
 
+// bootstrap (shinyquagsire23 et al)
 void inline invalidate_dcache(void)
 {
 	asm
@@ -128,12 +196,15 @@ void inline invalidate_dcache(void)
 __attribute__((naked)) __attribute__((noinline))
 int patch_kernel(void)
 {
+	// bootstrap (shinyquagsire23 et al)
 	asm volatile
 	(
 		"add sp, sp, #8\t\n" // add	sp, sp, #0xC <- had been patched out in kernel + a single pop
 		"stmfd sp!,{r0-r12,lr}\t\n"
 	);
 
+	// PID patching idea: service-patch (archshift and Yifan Lu)
+	// original code (covered by LICENSE file)
 	if(compat.firmver < 0x022C0600) // Less than ver 8.0.0
 	{
 		struct KProcess4 *me = *((struct KProcess4**)0xFFFF9004);
@@ -159,12 +230,14 @@ int patch_kernel(void)
 __attribute__((naked)) __attribute__((noinline))
 int unpatch_pid(void)
 {
+	// bootstrap (shinyquagsire23 et al)
 	asm volatile
 	(
 		"add sp, sp, #8\t\n"
 		"stmfd sp!,{r0-r12,lr}\t\n"
 	);
 
+	// bootstrap (shinyquagsire23 et al), original code (covered by LICENSE file)
 	// Fix up memory, unaligned so we have to copy by byte
 	u8* create_thread_patch = (u8*)(compat.create_thread_patch + 8);
 	create_thread_patch[0] = 0xE5;
@@ -175,6 +248,8 @@ int unpatch_pid(void)
 	// Allow all SVCs
 	*(u32 *)(compat.svc_patch) = 0;
 
+	// PID unpatching idea: service-patch (archshift and Yifan Lu)
+	// original code (covered by LICENSE file)
 	register u32 target_pid asm("r12");
 	if(compat.firmver < 0x022C0600) // Less than ver 8.0.0
 	{
@@ -187,6 +262,7 @@ int unpatch_pid(void)
 		me->pid = target_pid;
 	}
 
+	// bootstrap (shinyquagsire23 et al)
 	invalidate_icache();
 	invalidate_dcache();
 
@@ -198,6 +274,7 @@ int unpatch_pid(void)
 	);
 }
 
+// ctrulib (smealum et al), original code (covered by LICENSE file)
 int reinit_srv()
 {
 	Handle *srvHandle = (Handle *)compat.app.srv_handle;
@@ -219,6 +296,7 @@ int reinit_srv()
 	return cmdbuf[1];
 }
 
+// original code (covered by LICENSE file)
 void patch_srv_access()
 {
 	u32 old_pid;
@@ -227,6 +305,7 @@ void patch_srv_access()
 		svcExitThread();
 	}
 
+	// PID patching and unpatching idea: service-patch (archshift and Yifan Lu)
 	// Set pid to 0
 	arm11_kernel_exploit_exec(patch_kernel);
 

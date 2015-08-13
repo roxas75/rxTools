@@ -54,6 +54,7 @@ Make sure that the path to rxTools doesn't include space (' ').
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
 - Roxas75, myself, as the creator of rxTools
 - Gateway team, for their work
+- Reisyukaku for N3DS MSET 
 - Archshift, who wrote some useful libs I used: https://github.com/archshift
 - Many GBATemp users, who helped in the testing process
 - patois, who developed BRAHMA: https://github.com/patois/Brahma
