@@ -24,33 +24,47 @@
 uint8_t NANDCTR[16];
 int sysver;
 
-/**CTR offsets with versions*/
-const uint8_t *fsVersionCTRs[] = {
-	(uint8_t *)0x080D7CAC, //4.x
-	(uint8_t *)0x080D858C, //5.x
-	(uint8_t *)0x080D748C, //6.x
-	(uint8_t *)0x080D740C, //7.x
-	(uint8_t *)0x080D74CC, //8.x
-	(uint8_t *)0x080D794C, //9.x
-	(uint8_t *)0x080D8B8C  //9.x N3DS
+// Counter offsets for old 3DS
+static const uintptr_t fsCountersCtr[] = {
+	0x080D7CAC, //4.x
+	0x080D858C, //5.x
+	0x080D748C, //6.x
+	0x080D740C, //7.x
+	0x080D74CC, //8.x
+	0x080D794C, //9.x
 };
-const uint32_t fsVersionCTRsLength = sizeof(fsVersionCTRs) / sizeof(uint8_t *);
-/**Copy NAND Cypto to our region.*/
-uint8_t *FSNandFindCTR(void) {
-	for (uint32_t i = 0; i < fsVersionCTRsLength; i++)
-		if (*(uint32_t *)fsVersionCTRs[i] == 0x5C980) {
-			return (uint8_t *)(fsVersionCTRs[i] + 0x30);
+
+// The counter offset of 9.x on new 3DS
+static const uintptr_t fsCounter9Ktr = 0x080D8B8C;
+
+static void *findCounter(void)
+{
+	uint32_t i;
+
+	if (getMpInfo() == MPINFO_KTR) {
+		if (*(uint32_t *)fsCounter9Ktr == 0x5C980) {
+			sysver = 9;
+			return (void *)(fsCounter9Ktr + 0x30);
 		}
+	} else {
+		for (i = 0; i < sizeof(fsCountersCtr) / sizeof(uintptr_t); i++)
+			if (*(uint32_t *)fsCountersCtr[i] == 0x5C980) {
+				sysver = i + 3;
+				return (void *)(fsCountersCtr[i] + 0x30);
+			}
+	}
+
 	// If value not in previous list start memory scanning (test range)
-	for (uint8_t *c = (uint8_t *)0x080D8FFF; c > (uint8_t *)0x08000000; c--)
-		if (*(uint32_t *)c == 0x5C980 && *(uint32_t *)(c + 1) == 0x800005C9) {
-			return c + 0x30;
-		}
+	for (i = 0x080D8FFC; i > 0x08000000; i -= sizeof(uint32_t))
+		if (((uint32_t *)i)[0] == 0x5C980 && ((uint32_t *)i)[1] == 0x800005C9)
+			return (void *)(i + 0x30);
+
 	return NULL;
 }
+
 /**Copy NAND Cypto to our region.*/
 void FSNandInitCrypto(void) {
-	uint8_t *ctrStart = FSNandFindCTR();
+	uint8_t *ctrStart = findCounter();
 	uint8_t *ctrStore = NANDCTR;
 	uint8_t i = 16; //CTR length
 	if (!ctrStart) { return; } //Avoid copying from NULL
