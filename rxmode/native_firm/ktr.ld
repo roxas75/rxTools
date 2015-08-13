@@ -12,9 +12,6 @@ SECTIONS
 	. = 0x0801b3d4;
 	.patch.k9.flags : { *(.patch.k9.flags) }
 
-	. = 0x080288f8;
-	.patch.p9.keyx : { *(.patch.p9.keyx) }
-
 	. = 0x0805da98;
 	.patch.p9.sig.1 : { *(.patch.p9.sig.1) }
 

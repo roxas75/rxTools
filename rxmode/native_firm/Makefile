@@ -33,8 +33,7 @@ LD	:= arm-none-eabi-ld
 
 CFLAGS	:= -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
 
-PATCHES := $(BUILD)/payload/payload.elf	\
-	$(BUILD)/k9_fix_flags.elf $(BUILD)/p9_keyx_spoof.elf	\
+PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
 	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
 	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
 	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf
@@ -49,7 +48,8 @@ CFLAGS	+= -DPLATFORM_KTR
 else
 LDSCRIPT	:= ctr.ld
 
-PATCHES	+= $(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf	\
+PATCHES	+= $(BUILD)/p9_keyx_spoof.elf	\
+	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf
 
 PAYLOAD_OBJS	+= $(BUILD)/payload/arm9/myThread/FS.o	\
 	$(BUILD)/payload/arm9/myThread/handlers.o	\
@@ -95,9 +95,6 @@ $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.s $(BUILD)
 
 $(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.S $(BUILD)/payload/arm9
 	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
-
-$(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.s $(BUILD)/payload/arm9
-	$(AS) $< -o $@
 
 $(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S $(BUILD)/payload/arm11
 	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@

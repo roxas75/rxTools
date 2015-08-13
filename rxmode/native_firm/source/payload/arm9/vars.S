@@ -14,11 +14,13 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#ifndef PLATFORM_KTR
         .section .rodata.keyx, "a"
         .global keyx
         .type keyx, %object
 keyx:
         .skip 16, 0
+#endif
 
         .section .rodata.label, "a"
         .global label
