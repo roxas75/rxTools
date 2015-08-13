@@ -16,11 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stddef.h>
+#include <stdint.h>
 #include "crypto.h"
 
-void setup_aeskeyX(u8 keyslot, void* keyx)
+void setup_aeskeyX(uint8_t keyslot, void* keyx)
 {
-    u32 * _keyx = (u32*)keyx;
+    uint32_t * _keyx = (uint32_t*)keyx;
     *REG_AESKEYCNT = (*REG_AESKEYCNT >> 6 << 6) | keyslot| 0x80;
     *REG_AESKEYXFIFO = _keyx[0];
     *REG_AESKEYXFIFO = _keyx[1];
@@ -35,22 +37,22 @@ void decrypt(void* key, void* iv, void* inbuf, void* outbuf, size_t size)
     aes_decrypt(inbuf, outbuf, iv, size / AES_BLOCK_SIZE, AES_CTR_MODE);
 }
 
-void setup_aeskey(u32 keyno, int value, void* key)
+void setup_aeskey(uint32_t keyno, int value, void* key)
 {
-    volatile u32* aes_regs[] =
+    volatile uint32_t* aes_regs[] =
     {
-        (volatile u32*)0x19009060,
-        (volatile u32*)0x10009090,
-        (volatile u32*)0x100090C0,
-        (volatile u32*)0x100090F0
+        (volatile uint32_t*)0x19009060,
+        (volatile uint32_t*)0x10009090,
+        (volatile uint32_t*)0x100090C0,
+        (volatile uint32_t*)0x100090F0
     };
-    u32 * _key = (u32*)key;
+    uint32_t * _key = (uint32_t*)key;
     *REG_AESCNT = (*REG_AESCNT & ~(AES_CNT_INPUT_ENDIAN|AES_CNT_INPUT_ORDER)) | (value << 23);
     if (keyno > 3)
     {
         if (keyno > 0x3F)
             return;
-        *REG_AESKEYCNT = (*REG_AESKEYCNT >> 6 << 6) | (u8)keyno | 0x80;
+        *REG_AESKEYCNT = (*REG_AESKEYCNT >> 6 << 6) | (uint8_t)keyno | 0x80;
         *REG_AESKEYFIFO = _key[0];
         *REG_AESKEYFIFO = _key[1];
         *REG_AESKEYFIFO = _key[2];
@@ -58,7 +60,7 @@ void setup_aeskey(u32 keyno, int value, void* key)
     }
     else
     {
-        volatile u32* aes_reg = aes_regs[keyno];
+        volatile uint32_t* aes_reg = aes_regs[keyno];
         if (value & 0x4)
         {
             aes_reg[0] = _key[3];
@@ -76,7 +78,7 @@ void setup_aeskey(u32 keyno, int value, void* key)
     }
 }
 
-void use_aeskey(u32 keyno)
+void use_aeskey(uint32_t keyno)
 {
     if (keyno > 0x3F)
         return;
@@ -86,7 +88,7 @@ void use_aeskey(u32 keyno)
 
 void set_ctr(int mode, void* iv)
 {
-    u32 * _iv = (u32*)iv;
+    uint32_t * _iv = (uint32_t*)iv;
     *REG_AESCNT = (*REG_AESCNT & ~(AES_CNT_INPUT_ENDIAN|AES_CNT_INPUT_ORDER)) | (mode << 23);
     if (mode & AES_NORMAL_INPUT)
     {
@@ -104,11 +106,11 @@ void set_ctr(int mode, void* iv)
     }
 }
 
-void add_ctr(void* ctr, u32 carry)
+void add_ctr(void* ctr, uint32_t carry)
 {
-    u32 counter[4];
-    u8 *outctr = (u8 *) ctr;
-    u32 sum;
+    uint32_t counter[4];
+    uint8_t *outctr = (uint8_t *) ctr;
+    uint32_t sum;
     int32_t i;
 
     for(i=0; i<4; i++) {
@@ -136,10 +138,10 @@ void add_ctr(void* ctr, u32 carry)
     }
 }
 
-void aes_decrypt(void* inbuf, void* outbuf, void* iv, size_t size, u32 mode)
+void aes_decrypt(void* inbuf, void* outbuf, void* iv, size_t size, uint32_t mode)
 {
-    u32 in  = (u32)inbuf;
-    u32 out = (u32)outbuf;
+    uint32_t in  = (uint32_t)inbuf;
+    uint32_t out = (uint32_t)outbuf;
     size_t block_count = size;
     size_t blocks;
     while (block_count != 0)
@@ -152,7 +154,7 @@ void aes_decrypt(void* inbuf, void* outbuf, void* iv, size_t size, u32 mode)
     }
 }
 
-void _decrypt(u32 value, void* inbuf, void* outbuf, size_t blocks)
+void _decrypt(uint32_t value, void* inbuf, void* outbuf, size_t blocks)
 {
     *REG_AESCNT = 0;
     *REG_AESBLKCNT = blocks << 16;
@@ -169,8 +171,8 @@ void _decrypt(u32 value, void* inbuf, void* outbuf, size_t blocks)
 
 void aes_fifos(void* inbuf, void* outbuf, size_t blocks)
 {
-    u32 in  = (u32)inbuf;
-    u32 out = (u32)outbuf;
+    uint32_t in  = (uint32_t)inbuf;
+    uint32_t out = (uint32_t)outbuf;
     size_t curblock = 0;
     while (curblock != blocks)
     {
@@ -180,14 +182,14 @@ void aes_fifos(void* inbuf, void* outbuf, size_t blocks)
             int ii = 0;
             for (ii = in; ii != in + AES_BLOCK_SIZE; ii += 4)
             {
-                set_aeswrfifo( *(u32*)(ii) );
+                set_aeswrfifo( *(uint32_t*)(ii) );
             }
             if (out)
             {
                 while (aescnt_checkread()) ;
                 for (ii = out; ii != out + AES_BLOCK_SIZE; ii += 4)
                 {
-                    *(u32*)ii = read_aesrdfifo();
+                    *(uint32_t*)ii = read_aesrdfifo();
                 }
             }
         }
@@ -195,33 +197,33 @@ void aes_fifos(void* inbuf, void* outbuf, size_t blocks)
     }
 }
 
-void set_aeswrfifo(u32 value)
+void set_aeswrfifo(uint32_t value)
 {
     *REG_AESWRFIFO = value;
 }
 
-u32 read_aesrdfifo(void)
+uint32_t read_aesrdfifo(void)
 {
     return *REG_AESRDFIFO;
 }
 
-u32 aes_getwritecount()
+uint32_t aes_getwritecount()
 {
     return *REG_AESCNT & 0x1F;
 }
 
-u32 aes_getreadcount()
+uint32_t aes_getreadcount()
 {
     return (*REG_AESCNT >> 5) & 0x1F;
 }
 
-u32 aescnt_checkwrite()
+uint32_t aescnt_checkwrite()
 {
     size_t ret = aes_getwritecount();
     return (ret > 0xF);
 }
 
-u32 aescnt_checkread()
+uint32_t aescnt_checkread()
 {
     size_t ret = aes_getreadcount();
     return (ret <= 3);

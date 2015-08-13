@@ -15,8 +15,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdlib.h>
+#include <string.h>
 #include "screenshot.h"
-#include "common.h"
 #include "console.h"
 #include "draw.h"
 #include "hid.h"
@@ -41,7 +42,7 @@ void ScreenShot(){
 	static int bot_count = 0;
 	unsigned int written = 0;
 	char* bmp_cache; char* bmp_ptr;
-	u8 (*screen_ptr) [SCREEN_HEIGHT][BYTES_PER_PIXEL];
+	uint8_t (*screen_ptr) [SCREEN_HEIGHT][BYTES_PER_PIXEL];
 
 	f_mkdir ("Screenshot");
 
@@ -102,7 +103,7 @@ void ScreenShot(){
 }
 
 void TryScreenShot(){
-/*	u32 pad = */GetInput();
+/*	uint32_t pad = */GetInput();
 	//if(pad & BUTTON_L1 && pad & BUTTON_R1) ScreenShot();
 	//Disabled, i don't need any screenshot for now, but the function is here
 }

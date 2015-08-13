@@ -19,8 +19,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "cfw.h"
-#include "common.h"
+#include "firm.h"
+#include "mpcore.h"
 #include "hid.h"
 #include "lang.h"
 #include "console.h"
@@ -40,17 +40,11 @@
 
 #define FIRM_ADDR 0x24000000
 #define ARMBXR4	0x47204C00
-#define PLATFORM_REG_ADDR 0x10140FFC
+
+const char firmPathFmt[] = "rxTools/data/00040138%08X.bin";
 
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
-
-// @breif  Determine platform of the console.
-// @retval PLATFORM_N3DS for New3DS, and PLATFORM_3DS for Old3DS.
-// @note   Maybe modified to support more platforms
-Platform_UnitType Platform_CheckUnit(void) {
-	return *(u32 *)PLATFORM_REG_ADDR;
-}
 
 static FRESULT loadExecReboot()
 {
@@ -86,7 +80,7 @@ static int loadFirm(char *path)
 
 	f_close(&fd);
 
-	return *(u32 *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
+	return *(uint32_t *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
 }
 
 static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
@@ -131,22 +125,22 @@ int applyPatch(void *file, const char *patch, const FirmInfo *info)
 	return 0;
 }
 
-u8* decryptFirmTitleNcch(u8* title, unsigned int size){
+uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){
 	ctr_ncchheader NCCH;
-	u8 CTR[16];
+	uint8_t CTR[16];
 	PartitionInfo INFO;
 	NCCH = *((ctr_ncchheader*)title);
 	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
 	ncch_get_counter(NCCH, CTR, 2);
 	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*0x200; INFO.keyY = NCCH.signature; INFO.size = size; INFO.keyslot = 0x2C;
 	DecryptPartition(&INFO);
-	u8* firm = (u8*)(INFO.buffer + 0x200);
+	uint8_t* firm = (uint8_t*)(INFO.buffer + 0x200);
 	return firm;
 }
 
-u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
-	u8 key[0x10] = {0};
-	u8 iv[0x10] = {0};
+uint8_t* decryptFirmTitle(uint8_t* title, unsigned int size, unsigned int tid, int drive){
+	uint8_t key[0x10] = {0};
+	uint8_t iv[0x10] = {0};
 	GetTitleKey(&key[0], 0x00040138, tid, drive);
 	aes_context aes_ctxt;
 	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
@@ -157,8 +151,11 @@ u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
 static void setAgbBios()
 {
 	File agb_firm;
+	char path[64];
 	unsigned char svc = (cfgs[CFG_AGB].val.i ? 0x26 : 0x01);
-	if (FileOpen(&agb_firm, "rxtools/data/0004013800000202.bin", 0))
+
+	getFirmPath(path, TID_CTR_AGB_FIRM);
+	if (FileOpen(&agb_firm, path, 0))
 	{
 		FileWrite(&agb_firm, &svc, 1, 0xD7A12);
 		FileClose(&agb_firm);
@@ -200,8 +197,8 @@ int rxMode(int emu)
 
 	setAgbBios();
 
-	sprintf(path, "rxtools/data/00040138%s.bin",
-		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
+	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
+		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
 	r = loadFirm(path);
 	if (r) {
 		msg = L"Failed to load NATIVE_FIRM: %d\n"
@@ -209,14 +206,14 @@ int rxMode(int emu)
 		goto fail;
 	}
 
-	r = Platform_CheckUnit();
+	r = getMpInfo();
 	switch (r) {
-		case PLATFORM_N3DS:
+		case MPINFO_KTR:
 			info = &ktrInfo;
 			platformDir = "ktr";
 			break;
 
-		case PLATFORM_3DS:
+		case MPINFO_CTR:
 			info = &ctrInfo;
 			platformDir = "ctr";
 			break;
@@ -281,6 +278,9 @@ int rxMode(int emu)
 		sh_name = shstrtab + shdr.sh_name;
 
 		if (!strcmp(sh_name, ".rodata.keyx")) {
+			if (sysver >= 7)
+				continue;
+
 			if (f_open(&keyxFd, "slot0x25KeyX.bin", FA_READ) != FR_OK)
 				continue;
 
@@ -288,12 +288,13 @@ int rxMode(int emu)
 			f_close(&keyxFd);
 		} else if (!strcmp(sh_name, ".rodata.nand.sector")) {
 			if (sector)
-				*(u32 *)p = (sector / 0x200) - 1;
+				*(uint32_t *)p = (sector / 0x200) - 1;
 		} else if (!strcmp(sh_name, ".rodata.label")) {
 			memcpy(p, "RX-", 3);
 			((char *)p)[3] = sector ? 'E' : 'S';
 		} else if (shdr.sh_type == SHT_PROGBITS
-			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1)))
+			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1))
+			&& (sysver < 7 || strcmp(sh_name, ".patch.p9.keyx")))
 		{
 			if (f_lseek(&fd, shdr.sh_offset) != FR_OK)
 				continue;
@@ -341,12 +342,12 @@ void rxModeWithSplash(int emu)
 int DevMode(){
 	/*DevMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
-	u8* firm = (void*)0x24000000;
+	uint8_t* firm = (void*)0x24000000;
 	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
 	if (strncmp((char*)firm, "FIRM", 4))
 		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
 
-	if(Platform_CheckUnit() == PLATFORM_3DS)
+	if(getMpInfo() == MPINFO_CTR)
 	{
 		//o3ds patches
 		unsigned char sign1[] = { 0xC1, 0x17, 0x49, 0x1C, 0x31, 0xD0, 0x68, 0x46, 0x01, 0x78, 0x40, 0x1C, 0x00, 0x29, 0x10, 0xD1 };
@@ -366,10 +367,10 @@ int DevMode(){
 	else
 	{
 		//new 3ds patches
-		u8 patch1[] = { 0x6D, 0x20, 0xCE, 0x77 };
-		u8 patch2[] = { 0x5A, 0xC5, 0x73, 0xC1 };
-		memcpy((u32*)0x08052FD8, patch1, 4);
-		memcpy((u32*)0x08058804, patch2, 4);
+		uint8_t patch1[] = { 0x6D, 0x20, 0xCE, 0x77 };
+		uint8_t patch2[] = { 0x5A, 0xC5, 0x73, 0xC1 };
+		memcpy((uint32_t*)0x08052FD8, patch1, 4);
+		memcpy((uint32_t*)0x08058804, patch2, 4);
 	}
 
 	return loadExecReboot();

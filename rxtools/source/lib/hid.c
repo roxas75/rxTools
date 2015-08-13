@@ -15,27 +15,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdbool.h>
 #include "hid.h"
 #include "screenshot.h"
 
-u32 InputWait() {
-    u32 pad_state_old = HID_STATE;
+uint32_t InputWait() {
+    uint32_t pad_state_old = HID_STATE;
     while (true) {
-        u32 pad_state = HID_STATE;
+        uint32_t pad_state = HID_STATE;
         if (pad_state ^ pad_state_old)
             return ~pad_state;
     }
 }
 
-u32 GetInput() {
-    u32 pad_state = HID_STATE;
+uint32_t GetInput() {
+    uint32_t pad_state = HID_STATE;
     return ~pad_state;
 }
 
-void WaitForButton(u32 button){
+void WaitForButton(uint32_t button){
 	while (true) {
 		TryScreenShot(); //Maybe someone wanna take screenshots while waiting
-        u32 pad_state = InputWait();
+        uint32_t pad_state = InputWait();
         if (pad_state & button)
             return;
     }

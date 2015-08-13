@@ -20,8 +20,6 @@
 
 #define CFG_STR_MAX_LEN 16
 
-#include "common.h"
-
 typedef enum {
 	CFG_TYPE_INT,
 	CFG_TYPE_BOOLEAN,

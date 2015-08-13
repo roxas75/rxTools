@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "common.h"
 #include "MainMenu.h"
 #include "crypto.h"
 #include "fs.h"
@@ -27,7 +26,7 @@
 #include "draw.h"
 #include "hid.h"
 #include "screenshot.h"
-#include "cfw.h"
+#include "firm.h"
 #include "configuration.h"
 
 #define FONT_ADDRESS	(void*)0x27E00000
@@ -114,7 +113,7 @@ int Initialize()
 			DrawBottomSplash(str);
 
 			for (int i = 0; i < 0x333333 * 2; i++){
-				u32 pad = GetInput();
+				uint32_t pad = GetInput();
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
@@ -126,7 +125,7 @@ int Initialize()
 			ConsoleShow();
 
 			for (int i = 0; i < 0x333333 * 6; i++){
-				u32 pad = GetInput();
+				uint32_t pad = GetInput();
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
@@ -152,12 +151,12 @@ int main(){
 	File KeyFile;
 	const char *keyfile = "/slot0x25KeyX.bin";
 	if(FileOpen(&KeyFile, keyfile, 0)){
-		u8 keyX[16];
+		uint8_t keyX[16];
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
 	}else{
-		if(GetSystemVersion() < 3){
+		if (sysver < 7) {
 			ConsoleInit();
 			ConsoleSetTitle(strings[STR_WARNING]);
 			print(strings[STR_ERROR_OPENING], keyfile);
@@ -173,7 +172,7 @@ int main(){
 	MenuInit(&MainMenu);
 	MenuShow();
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
 		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
 		if (pad_state & BUTTON_A)    	{ OpenAnimation(); MenuSelect(); }

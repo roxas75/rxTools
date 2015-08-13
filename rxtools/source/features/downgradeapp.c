@@ -15,8 +15,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stdbool.h>
 #include "downgradeapp.h"
-#include "common.h"
 #include "screenshot.h"
 #include "fs.h"
 #include "fatfs/ff.h"
@@ -315,7 +315,7 @@ void downgradeMSET()
 
 	while( checkLoop < 1 )
 	{
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if ((pad_state & BUTTON_X))
 		{
 			switch(region){
@@ -408,8 +408,8 @@ void downgradeMSET()
 									FileRead(&dg, buf, dgsize, 0);
 
 									/* Downgrade pack decryption */
-									u8 iv[0x10] = {0};
-									u8 Key[0x10] = {0};
+									uint8_t iv[0x10] = {0};
+									uint8_t Key[0x10] = {0};
 
 									GetTitleKey(&Key[0], titleid_low, titleid_high[region], SYS_NAND);
 
@@ -509,7 +509,7 @@ void manageFBI(bool restore)
 
 		while(checkLoop < 1)
 		{
-			u32 pad_state = InputWait();
+			uint32_t pad_state = InputWait();
 			if (pad_state & BUTTON_Y)
 			{
 				noHalt = true;
@@ -681,7 +681,7 @@ void manageFBI(bool restore)
 
 														while (checkLoop < 1)
 														{
-															u32 pad_state = InputWait();
+															uint32_t pad_state = InputWait();
 															if (pad_state & BUTTON_B)
 															{
 																checkLoop = 1;
