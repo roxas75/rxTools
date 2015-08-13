@@ -17,13 +17,6 @@
 
 #pragma once
 
-#include <inttypes.h>
-#include <stddef.h>
-#include <stdbool.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-
 typedef enum {
 	MPINFO_CTR = 1,
 	MPINFO_KTR = 7,

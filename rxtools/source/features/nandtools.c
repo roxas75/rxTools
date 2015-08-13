@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "common.h"
+#include <stdlib.h>
 #include "menu.h"
 #include "nandtools.h"
 #include "console.h"
@@ -79,7 +79,7 @@ void dumpCoolFiles()
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }
-		if (pad_state & BUTTON_B) break; 
+		if (pad_state & BUTTON_B) break;
 		TryScreenShot();
 		MenuShow();
 	}

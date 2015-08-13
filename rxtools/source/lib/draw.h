@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include "common.h"
+#include <stdint.h>
+#include <wchar.h>
 
 //Screen Macros
 #define BYTES_PER_PIXEL	3  //Our color buffer accepts 24-bits color.
@@ -77,4 +78,3 @@ void OpenAnimation();
 //Unused functions.
 void DrawHex(uint8_t *screen, uint32_t hex, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor);
 void DrawHexWithName(uint8_t *screen, const wchar_t *str, uint32_t hex, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor);
-

@@ -18,8 +18,8 @@
 #ifndef MENU_H
 #define MENU_H
 
+#include <stdbool.h>
 #include <wchar.h>
-#include "common.h"
 #include "console.h"
 
 typedef struct{
