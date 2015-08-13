@@ -237,6 +237,7 @@ int readCfg()
 int InstallData(char* drive){
 	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0xD600, 0xE200, 0x08020000};
 	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0xD600, 0xE200, 0x08020000};
+	AppInfo appInfo;
 	FIL firmfile;
 	File fd;
 	unsigned int progressWidth, progressX;
@@ -298,12 +299,16 @@ int InstallData(char* drive){
 			/* If we cannot decrypt it from firmware.bin because of titlekey messed up,
 			it probably means that AGB has been modified in some way. */
 			//So we read it from his installed ncch...
-			FindApp(0x00040138, 0x00000202, 1);
-			if (!FileOpen(&fd, cntpath, 0) && checkEmuNAND())
+			appInfo.drive = 1;
+			appInfo.tidLo = 0x00040138;
+			appInfo.tidHi = 0x00000202;
+			FindApp(&appInfo);
+			if (!FileOpen(&fd, appInfo.content, 0) && checkEmuNAND())
 			{
 				/* Try with EmuNAND */
-				FindApp(0x00040138, 0x00000202, 2);
-				if (!FileOpen(&fd, cntpath, 0))
+				appInfo.drive = 2;
+				FindApp(&appInfo);
+				if (!FileOpen(&fd, appInfo.content, 0))
 				{
 					f_close(&firmfile);
 					return CONF_ERRNFIRM;
