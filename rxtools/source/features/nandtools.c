@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "common.h"
+#include <stdlib.h>
 #include "menu.h"
 #include "nandtools.h"
 #include "console.h"
@@ -32,7 +32,7 @@
 
 #define nCoolFiles sizeof(CoolFiles)/sizeof(CoolFiles[0])
 
-u32 selectedFile;
+uint32_t selectedFile;
 void SelectFile();
 
 static struct {
@@ -75,11 +75,11 @@ void dumpCoolFiles()
 
 	while (true)
 	{
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }
-		if (pad_state & BUTTON_B) break; 
+		if (pad_state & BUTTON_B) break;
 		TryScreenShot();
 		MenuShow();
 	}
@@ -156,7 +156,7 @@ void restoreCoolFiles()
 	MenuShow();
 	while (true)
 	{
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }

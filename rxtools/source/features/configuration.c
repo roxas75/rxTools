@@ -26,10 +26,11 @@
 #include "console.h"
 #include "draw.h"
 #include "hid.h"
+#include "mpcore.h"
 #include "ncch.h"
 #include "crypto.h"
 #include "polarssl/aes.h"
-#include "cfw.h"
+#include "firm.h"
 #include "downgradeapp.h"
 #include "stdio.h"
 #include "menu.h"
@@ -37,7 +38,7 @@
 
 #define DATAFOLDER	"rxtools/data"
 #define KEYFILENAME	"slot0x25KeyX.bin"
-#define WORKBUF		(u8*)0x21000000
+#define WORKBUF		(uint8_t*)0x21000000
 #define NAT_SIZE	0xEBC00
 #define AGB_SIZE	0xD9C00
 #define TWL_SIZE	0x1A1C00
@@ -249,7 +250,7 @@ int InstallData(char* drive){
 	wchar_t *progress = progressbar;
 	int i;
 
-	progressWidth = Platform_CheckUnit() == PLATFORM_3DS ? 7 : 3;
+	progressWidth = getMpInfo() == MPINFO_CTR ? 7 : 3;
 	progressX = (BOT_SCREEN_WIDTH - progressWidth * FONT_WIDTH) / 2;
 
 	for (i = 0; i < progressWidth; i++)
@@ -269,13 +270,13 @@ int InstallData(char* drive){
 
 	//Create decrypted native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
-	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
+	uint8_t* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	sprintf(tmpstr, "%s:%s/00040138%s.bin", drive, DATAFOLDER,
-		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
+	getFirmPath(tmpstr, getMpInfo() == MPINFO_KTR ?
+		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
 	if(FileOpen(&tempfile, tmpstr, 1)){
 		FileWrite(&tempfile, n_firm, NAT_SIZE, 0);
 		FileClose(&tempfile);
@@ -287,12 +288,12 @@ int InstallData(char* drive){
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	if (Platform_CheckUnit() != PLATFORM_3DS)
+	if (getMpInfo() != MPINFO_CTR)
 		goto end;
 
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
-	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
+	uint8_t* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
 	if (!a_firm && checkEmuNAND())
 	{
 		/* Try to get the Title Key from the EmuNAND */
@@ -325,7 +326,7 @@ int InstallData(char* drive){
 		if (applyPatch(a_firm, "/rxTools/system/patches/ctr/agb_firm.elf", &agb_info))
 			return CONF_ERRPATCH;
 
-		sprintf(tmpstr, "%s:%s/0004013800000202.bin", drive, DATAFOLDER);
+		getFirmPath(tmpstr, TID_CTR_TWL_FIRM);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, a_firm, AGB_SIZE, 0);
 			FileClose(&tempfile);
@@ -344,12 +345,12 @@ int InstallData(char* drive){
 
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
-	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
+	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	if(t_firm){
 		if (applyPatch(t_firm, "/rxTools/system/patches/ctr/twl_firm.elf", &twl_info))
 			return CONF_ERRPATCH;
 
-		sprintf(tmpstr, "%s:%s/0004013800000102.bin", drive, DATAFOLDER);
+		getFirmPath(tmpstr, TID_CTR_TWL_FIRM);
 		if(FileOpen(&tempfile, tmpstr, 1)){
 			FileWrite(&tempfile, t_firm, TWL_SIZE, 0);
 			FileClose(&tempfile);
@@ -388,24 +389,36 @@ int CheckInstallationData(){
 	File file;
 	char str[64];
 
-	sprintf(str, "rxTools/data/00040138%s.bin",
-		Platform_CheckUnit() == PLATFORM_N3DS ? "20000002" : "00000002");
-	if(!FileOpen(&file, str, 0)) return -1;
-	FileClose(&file);
+	switch (getMpInfo()) {
+		case MPINFO_CTR:
+			getFirmPath(str, TID_CTR_NATIVE_FIRM);
+			if(!FileOpen(&file, str, 0)) return -1;
+			FileClose(&file);
 
-	if (Platform_CheckUnit() == PLATFORM_3DS) {
-		if(!FileOpen(&file, "rxTools/data/0004013800000202.bin", 0)) return -2;
-		FileClose(&file);
-		if(!FileOpen(&file, "rxTools/data/0004013800000102.bin", 0)) return -3;
-		FileClose(&file);
-		if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
-		FileRead(&file, str, 32, 0);
-		FileClose(&file);
-		if(memcmp(str, __DATE__, 11)) return -5;
-		if(memcmp(&str[12], __TIME__, 8)) return -5;
+			getFirmPath(str, TID_CTR_TWL_FIRM);
+			if(!FileOpen(&file, str, 0)) return -2;
+			FileClose(&file);
+
+			getFirmPath(str, TID_CTR_AGB_FIRM);
+			if(!FileOpen(&file, str, 0)) return -3;
+			FileClose(&file);
+
+			if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
+			FileRead(&file, str, 32, 0);
+			FileClose(&file);
+			if(memcmp(str, __DATE__, 11)) return -5;
+			if(memcmp(&str[12], __TIME__, 8)) return -5;
+
+			return 0;
+
+		case MPINFO_KTR:
+			getFirmPath(str, TID_KTR_NATIVE_FIRM);
+			if(!FileOpen(&file, str, 0)) return -1;
+			FileClose(&file);
+
+		default:
+			return 0;
 	}
-
-	return 0;
 }
 
 void InstallConfigData(){

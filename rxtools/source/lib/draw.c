@@ -25,18 +25,18 @@
 #include "draw.h"
 #include "lang.h"
 
-u32 current_y = 1;
+uint32_t current_y = 1;
 
-u8 *tmpscreen = (u8*)0x26000000;
-const u16 (* fontaddr)[FONT_WIDTH] = (void *)font;
+uint8_t *tmpscreen = (uint8_t*)0x26000000;
+const uint16_t (* fontaddr)[FONT_WIDTH] = (void *)font;
 
-void ClearScreen(u8 *screen, u32 color)
+void ClearScreen(uint8_t *screen, uint32_t color)
 {
-	u32 i = SCREEN_SIZE/sizeof(u32);  //Surely this is an interger.
-	u32* tmpscr = (u32*)screen; //To avoid using array index which would decrease speed.
+	uint32_t i = SCREEN_SIZE/sizeof(uint32_t);  //Surely this is an interger.
+	uint32_t* tmpscr = (uint32_t*)screen; //To avoid using array index which would decrease speed.
 	color &= COLOR_MASK; //Ignore aplha
-	//Prepared 3 u32, that includes 4 24-bits color, cached. 4x(BGR)
-	u32 color0 = (color) | (color << 24),
+	//Prepared 3 uint32_t, that includes 4 24-bits color, cached. 4x(BGR)
+	uint32_t color0 = (color) | (color << 24),
 		color1 = (color << 16) | (color >> 8),
 		color2 = (color >> 16) | (color << 8);
 	while (i--) {
@@ -54,17 +54,17 @@ void DrawClearScreenAll(void) {
 	current_y = 0;
 }
 
-static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y, u32 color, u32 bgcolor)
+static void DrawCharacterOn1frame(void *screen, wchar_t character, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor)
 {
 	struct {
-		u8 a;
-		u8 r;
-		u8 g;
-		u8 b;
+		uint8_t a;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
 	} fore, back;
-	u8 (* pScreen)[SCREEN_HEIGHT][BYTES_PER_PIXEL];
-	u32 fontX, fontY;
-	u16 charVal;
+	uint8_t (* pScreen)[SCREEN_HEIGHT][BYTES_PER_PIXEL];
+	uint32_t fontX, fontY;
+	uint16_t charVal;
 
 	if (BOT_SCREEN_WIDTH < x + FONT_WIDTH || y < FONT_HEIGHT)
 		return;
@@ -105,7 +105,7 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, u32 x, u32 y,
 	}
 }
 
-void DrawCharacter(u8 *screen, wchar_t character, u32 x, u32 y, u32 color, u32 bgcolor)
+void DrawCharacter(uint8_t *screen, wchar_t character, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor)
 {
 	DrawCharacterOn1frame(screen, character, x, y, color, bgcolor);
 
@@ -113,18 +113,18 @@ void DrawCharacter(u8 *screen, wchar_t character, u32 x, u32 y, u32 color, u32 b
 		DrawCharacterOn1frame(BOT_SCREEN2, character, x, y, color, bgcolor);
 }
 
-void DrawString(u8 *screen, const wchar_t *str, u32 x, u32 y, u32 color, u32 bgcolor)
+void DrawString(uint8_t *screen, const wchar_t *str, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor)
 {
 	unsigned int dx = 0;
-	for (u32 i = 0; i < wcslen(str); i++){
+	for (uint32_t i = 0; i < wcslen(str); i++){
 		DrawCharacter(screen, str[i], x + dx, y, color, bgcolor);
 		dx+=str[i]<FONT_CJK_START?FONT_HWIDTH:FONT_WIDTH;
 	}
 }
 //[Unused]
-void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor)
+void DrawHex(uint8_t *screen, uint32_t hex, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor)
 {
-	u32 i = sizeof(hex)*2;
+	uint32_t i = sizeof(hex)*2;
 	wchar_t HexStr[sizeof(hex)*2+1] = {0,};
 	while (i){
 		HexStr[--i] = hex & 0x0F;
@@ -134,7 +134,7 @@ void DrawHex(u8 *screen, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor)
 	DrawString(screen, HexStr, x, y, color, bgcolor);
 }
 //[Unused]
-void DrawHexWithName(u8 *screen, const wchar_t *str, u32 hex, u32 x, u32 y, u32 color, u32 bgcolor)
+void DrawHexWithName(uint8_t *screen, const wchar_t *str, uint32_t hex, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor)
 {
 	DrawString(screen, str, x, y, color, bgcolor);
 	DrawHex(screen, hex, x + wcslen(str) * FONT_HWIDTH, y, color, bgcolor);
@@ -156,22 +156,22 @@ void Debug(const char *format, ...)
 	current_y += 10;
 }
 //No need to enter and exit again and again, isn't it
-inline void writeByte(u8 *address, u8 value) {
+inline void writeByte(uint8_t *address, uint8_t value) {
 	*(address) = value;
 }
 
-void DrawPixel(u8 *screen, u32 x, u32 y, u32 color){
+void DrawPixel(uint8_t *screen, uint32_t x, uint32_t y, uint32_t color){
 	if(x >= BOT_SCREEN_WIDTH || x < 0) return;
 	if(y >= SCREEN_HEIGHT || y < 0) return;
 	if(color & ALPHA_MASK){
-		u8 *address  = screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
+		uint8_t *address  = screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
 		writeByte(address, color);
 		writeByte(address+1, color >> 8);
 		writeByte(address+2, color >> 16);
 	}
 	if(screen == TOP_SCREEN && TOP_SCREEN2){
 		if(color & ALPHA_MASK){
-			u8 *address = TOP_SCREEN2 + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
+			uint8_t *address = TOP_SCREEN2 + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL;
 			writeByte(address, color);
 			writeByte(address+1, color >> 8);
 			writeByte(address+2, color >> 16);
@@ -179,8 +179,8 @@ void DrawPixel(u8 *screen, u32 x, u32 y, u32 color){
 	}
 }
 
-u32 GetPixel(u8 *screen, u32 x, u32 y){
-	return *(u32*)(screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL) & COLOR_MASK;
+uint32_t GetPixel(uint8_t *screen, uint32_t x, uint32_t y){
+	return *(uint32_t*)(screen + (SCREEN_HEIGHT * (x + 1) - y) * BYTES_PER_PIXEL) & COLOR_MASK;
 }
 
 
@@ -193,12 +193,12 @@ void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[])
 	{
 		//Load the spash image
 		bin_size = 0;
-		while ((n = FileRead(&SplashL, (void*)((u32)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+		while ((n = FileRead(&SplashL, (void*)((uint32_t)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
 			bin_size += n;
 		}
 		FileClose(&SplashL);
 		bin_size = 0;
-		while ((n = FileRead(&SplashR, (void*)((u32)TOP_SCREEN2 + bin_size), 0x100000, bin_size)) > 0) {
+		while ((n = FileRead(&SplashR, (void*)((uint32_t)TOP_SCREEN2 + bin_size), 0x100000, bin_size)) > 0) {
 			bin_size += n;
 		}
 		FileClose(&SplashR);
@@ -207,7 +207,7 @@ void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[])
 	{
 		//Load the spash image
 		bin_size = 0;
-		while ((n = FileRead(&Splash, (void*)((u32)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
+		while ((n = FileRead(&Splash, (void*)((uint32_t)TOP_SCREEN + bin_size), 0x100000, bin_size)) > 0) {
 			bin_size += n;
 		}
 		FileClose(&Splash);
@@ -225,14 +225,14 @@ void DrawBottomSplash(char splash_file[]) {
 	DrawSplash(BOT_SCREEN, splash_file);
 }
 
-void DrawSplash(u8 *screen, char splash_file[]) {
+void DrawSplash(uint8_t *screen, char splash_file[]) {
 	unsigned int n = 0, bin_size;
 	File Splash;
 	if(FileOpen(&Splash, splash_file, 0))
 	{
 		//Load the spash image
 		bin_size = 0;
-		while ((n = FileRead(&Splash, (void*)((u32)screen + bin_size), 0x100000, bin_size)) > 0) {
+		while ((n = FileRead(&Splash, (void*)((uint32_t)screen + bin_size), 0x100000, bin_size)) > 0) {
 			bin_size += n;
 		}
 		FileClose(&Splash);
@@ -245,9 +245,9 @@ void DrawSplash(u8 *screen, char splash_file[]) {
 	}
 }
 
-void DrawFadeScreen(u8 *screen, u16 Width, u16 Height, u32 f)
+void DrawFadeScreen(uint8_t *screen, uint16_t Width, uint16_t Height, uint32_t f)
 {
-	u32 *screen32 = (u32 *)screen;
+	uint32_t *screen32 = (uint32_t *)screen;
 	int i;
 	for (i = 0; i<Width*Height * 3 / 4; i++)
 	{

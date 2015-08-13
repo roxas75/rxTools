@@ -17,7 +17,7 @@
 .global ioDelay
 .type   ioDelay STT_FUNC
 
-@ioDelay ( u32 us )
+@ioDelay ( uint32_t us )
 ioDelay:
 	subs r0, #1
 	bgt ioDelay

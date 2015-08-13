@@ -15,34 +15,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CFW_H
-#define CFW_H
-
-#include <stddef.h>
-#include <stdint.h>
-#include "common.h"
-
-typedef struct{
-        unsigned int arm9Off;
-        size_t arm9Size;
-        uintptr_t arm9Entry;
-        unsigned int p9Off;
-        uintptr_t p9Start;
-        uintptr_t p9Entry;
-} FirmInfo;
+#pragma once
 
 typedef enum {
-	PLATFORM_3DS=1,
-	PLATFORM_N3DS=7,
-} Platform_UnitType;
+	MPINFO_CTR = 1,
+	MPINFO_KTR = 7,
+} MpInfo;
 
-Platform_UnitType Platform_CheckUnit(void);
-int DevMode();
-void FirmLoader();
-void rxModeWithSplash(int emu);
-int rxMode(int emu);
-u8* decryptFirmTitleNcch(u8* title, unsigned int size);
-u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive);
-int applyPatch(void *file, const char *patch, const FirmInfo *info);
-
-#endif
+static inline MpInfo getMpInfo()
+{
+        return *(MpInfo *)0x10140FFC;
+}
