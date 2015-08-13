@@ -40,7 +40,7 @@ static void returnHomeMenu(){
 }
 
 static void ShutDown(){
-	i2cWriteRegister(I2C_DEV_MCU, 0x20, (u8)(1<<0));
+	i2cWriteRegister(I2C_DEV_MCU, 0x20, (uint8_t)(1<<0));
 	while(1);
 }
 
@@ -115,7 +115,7 @@ void DecryptMenuInit(){
 	MenuInit(&DecryptMenu);
 	MenuShow();
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
@@ -129,7 +129,7 @@ void DumpMenuInit(){
 	MenuInit(&DumpMenu);
 	MenuShow();
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
@@ -143,7 +143,7 @@ void InjectMenuInit(){
 	MenuInit(&InjectMenu);
 	MenuShow();
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
@@ -157,7 +157,7 @@ void AdvancedMenuInit(){
 	MenuInit(&AdvancedMenu);
 	MenuShow();
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if(pad_state & BUTTON_DOWN) MenuNextSelection();
 		if(pad_state & BUTTON_UP)   MenuPrevSelection();
 		if(pad_state & BUTTON_A)    MenuSelect();
@@ -218,7 +218,7 @@ void SettingsMenuInit(){
 		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
 		MenuRefresh();
 
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP)   MenuPrevSelection();
 		if (pad_state & BUTTON_LEFT || pad_state & BUTTON_RIGHT)
@@ -338,7 +338,7 @@ void BootMenuInit(){
 	sprintf(str, "/rxTools/Theme/%u/boot0.bin", cfgs[CFG_THEME].val.i);//DRAW TOP SCREEN TO SEE THE NEW THEME
 	DrawBottomSplash(str);
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_Y) {
 			rxModeWithSplash(1);      //Boot emunand
 			DrawBottomSplash(str);

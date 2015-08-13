@@ -114,7 +114,7 @@ int Initialize()
 			DrawBottomSplash(str);
 
 			for (int i = 0; i < 0x333333 * 2; i++){
-				u32 pad = GetInput();
+				uint32_t pad = GetInput();
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
@@ -126,7 +126,7 @@ int Initialize()
 			ConsoleShow();
 
 			for (int i = 0; i < 0x333333 * 6; i++){
-				u32 pad = GetInput();
+				uint32_t pad = GetInput();
 				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 			}
 		}
@@ -152,7 +152,7 @@ int main(){
 	File KeyFile;
 	const char *keyfile = "/slot0x25KeyX.bin";
 	if(FileOpen(&KeyFile, keyfile, 0)){
-		u8 keyX[16];
+		uint8_t keyX[16];
 		FileRead(&KeyFile, keyX, 16, 0);
 		FileClose(&KeyFile);
 		setup_aeskeyX(0x25, keyX);
@@ -173,7 +173,7 @@ int main(){
 	MenuInit(&MainMenu);
 	MenuShow();
 	while (true) {
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
 		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
 		if (pad_state & BUTTON_A)    	{ OpenAnimation(); MenuSelect(); }

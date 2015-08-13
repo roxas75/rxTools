@@ -80,7 +80,7 @@ static int loadFirm(char *path)
 
 	f_close(&fd);
 
-	return *(u32 *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
+	return *(uint32_t *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
 }
 
 static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
@@ -125,22 +125,22 @@ int applyPatch(void *file, const char *patch, const FirmInfo *info)
 	return 0;
 }
 
-u8* decryptFirmTitleNcch(u8* title, unsigned int size){
+uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){
 	ctr_ncchheader NCCH;
-	u8 CTR[16];
+	uint8_t CTR[16];
 	PartitionInfo INFO;
 	NCCH = *((ctr_ncchheader*)title);
 	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
 	ncch_get_counter(NCCH, CTR, 2);
 	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*0x200; INFO.keyY = NCCH.signature; INFO.size = size; INFO.keyslot = 0x2C;
 	DecryptPartition(&INFO);
-	u8* firm = (u8*)(INFO.buffer + 0x200);
+	uint8_t* firm = (uint8_t*)(INFO.buffer + 0x200);
 	return firm;
 }
 
-u8* decryptFirmTitle(u8* title, unsigned int size, unsigned int tid, int drive){
-	u8 key[0x10] = {0};
-	u8 iv[0x10] = {0};
+uint8_t* decryptFirmTitle(uint8_t* title, unsigned int size, unsigned int tid, int drive){
+	uint8_t key[0x10] = {0};
+	uint8_t iv[0x10] = {0};
 	GetTitleKey(&key[0], 0x00040138, tid, drive);
 	aes_context aes_ctxt;
 	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
@@ -285,7 +285,7 @@ int rxMode(int emu)
 			f_close(&keyxFd);
 		} else if (!strcmp(sh_name, ".rodata.nand.sector")) {
 			if (sector)
-				*(u32 *)p = (sector / 0x200) - 1;
+				*(uint32_t *)p = (sector / 0x200) - 1;
 		} else if (!strcmp(sh_name, ".rodata.label")) {
 			memcpy(p, "RX-", 3);
 			((char *)p)[3] = sector ? 'E' : 'S';
@@ -338,7 +338,7 @@ void rxModeWithSplash(int emu)
 int DevMode(){
 	/*DevMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
-	u8* firm = (void*)0x24000000;
+	uint8_t* firm = (void*)0x24000000;
 	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
 	if (strncmp((char*)firm, "FIRM", 4))
 		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
@@ -363,10 +363,10 @@ int DevMode(){
 	else
 	{
 		//new 3ds patches
-		u8 patch1[] = { 0x6D, 0x20, 0xCE, 0x77 };
-		u8 patch2[] = { 0x5A, 0xC5, 0x73, 0xC1 };
-		memcpy((u32*)0x08052FD8, patch1, 4);
-		memcpy((u32*)0x08058804, patch2, 4);
+		uint8_t patch1[] = { 0x6D, 0x20, 0xCE, 0x77 };
+		uint8_t patch2[] = { 0x5A, 0xC5, 0x73, 0xC1 };
+		memcpy((uint32_t*)0x08052FD8, patch1, 4);
+		memcpy((uint32_t*)0x08058804, patch2, 4);
 	}
 
 	return loadExecReboot();

@@ -32,7 +32,7 @@
 
 #define nCoolFiles sizeof(CoolFiles)/sizeof(CoolFiles[0])
 
-u32 selectedFile;
+uint32_t selectedFile;
 void SelectFile();
 
 static struct {
@@ -75,7 +75,7 @@ void dumpCoolFiles()
 
 	while (true)
 	{
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }
@@ -156,7 +156,7 @@ void restoreCoolFiles()
 	MenuShow();
 	while (true)
 	{
-		u32 pad_state = InputWait();
+		uint32_t pad_state = InputWait();
 		if (pad_state & BUTTON_DOWN) MenuNextSelection();
 		if (pad_state & BUTTON_UP) MenuPrevSelection();
 		if (pad_state & BUTTON_A) { MenuSelect(); break; }

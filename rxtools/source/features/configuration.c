@@ -37,7 +37,7 @@
 
 #define DATAFOLDER	"rxtools/data"
 #define KEYFILENAME	"slot0x25KeyX.bin"
-#define WORKBUF		(u8*)0x21000000
+#define WORKBUF		(uint8_t*)0x21000000
 #define NAT_SIZE	0xEBC00
 #define AGB_SIZE	0xD9C00
 #define TWL_SIZE	0x1A1C00
@@ -269,7 +269,7 @@ int InstallData(char* drive){
 
 	//Create decrypted native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &tmpu32);
-	u8* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
+	uint8_t* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
@@ -292,7 +292,7 @@ int InstallData(char* drive){
 
 	//Create AGB patched firmware
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &tmpu32);
-	u8* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
+	uint8_t* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
 	if (!a_firm && checkEmuNAND())
 	{
 		/* Try to get the Title Key from the EmuNAND */
@@ -344,7 +344,7 @@ int InstallData(char* drive){
 
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &tmpu32);
-	u8* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
+	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	if(t_firm){
 		if (applyPatch(t_firm, "/rxTools/system/patches/ctr/twl_firm.elf", &twl_info))
 			return CONF_ERRPATCH;
