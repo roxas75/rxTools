@@ -60,9 +60,9 @@
 	"NONE": "nessuno",
 	"PRESS_BUTTON_ACTION": "Premi %ls per %ls\n",
 	"HOLD_BUTTON_ACTION": "Tieni premuto %ls per %ls\n",
-	"CANCEL": "annulla",
-	"CONTINUE": "continua",
-	"OPEN_MENU": "aprire il menu",
+	"CANCEL": "annullare",
+	"CONTINUE": "continuare",
+	"OPEN_MENU": " il menu",
 	"FAILED": "Fallito!\n",
 	"COMPLETED": "Completato!\n",
 	"SETTINGS": "Impostazioni",
@@ -71,10 +71,12 @@
 	"SHOW_AGB": "Mostra BIOS AGB_FIRM   %ls",
 	"ENABLE_3D_UI": "Attiva UI 3D           %ls",
 	"QUICK_BOOT": "Avvio rapido           %ls",
-	"AUTOBOOT": "AVVIO AUTOMATICO",
+	"ABSYSN": "Autoavvio in sysNAND   %ls",
+	"AUTOBOOT": "Avvio automatico",
 	"WARNING": "Avviso",
 	"REGION_": "Regione: %ls\n",
 	"REGION": "regione",
 	"YES": "Sì",
-	"NO": "No"
+	"NO": "No",
+	"MENU_LANGUAGE": "Lingua    %16ls"
 }
