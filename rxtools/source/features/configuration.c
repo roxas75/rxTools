@@ -325,7 +325,7 @@ int InstallData(char* drive){
 		if (applyPatch(a_firm, "/rxTools/system/patches/ctr/agb_firm.elf", &agb_info))
 			return CONF_ERRPATCH;
 
-		getFirmPath(path, TID_CTR_TWL_FIRM);
+		getFirmPath(path, TID_CTR_AGB_FIRM);
 		if(FileOpen(&fd, path, 1)){
 			FileWrite(&fd, a_firm, AGB_SIZE, 0);
 			FileClose(&fd);
