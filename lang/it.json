@@ -8,7 +8,7 @@
 	"DUMP": "Estrai %ls",
 	"DUMPING": "Sto estraendo %ls to\n%s...\n",
 	"INJECT": "Inietta %ls",
-	"INJECTING": "Sto iniettando %s to\n%ls...\n",
+	"INJECTING": "Sto iniettando\n%s\nto %ls...\n",
 	"DECRYPT": "Decripta %ls",
 	"DECRYPTING": "Sto decriptando %ls...\n",
 	"DECRYPTING_TO": "Sto decriptando %ls su\n%s...\n",
