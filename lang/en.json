@@ -8,7 +8,7 @@
 	"DUMP": "Dump %ls",
 	"DUMPING": "Dumping %ls to\n%s...\n",
 	"INJECT": "Inject %ls",
-	"INJECTING": "Injecting %s to\n%ls...\n",
+	"INJECTING": "Injecting\n%s\nto %ls...\n",
 	"DECRYPT": "Decrypt %ls",
 	"DECRYPTING": "Decrypting %ls...\n",
 	"DECRYPTING_TO": "Decrypting %ls to\n%s...\n",
