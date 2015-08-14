@@ -4,7 +4,7 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * version 2 as published by the Free Software Foundation
- *
+ *kee
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -672,10 +672,9 @@ void manageFBI(bool restore)
 												{
 													if (FSFileCopy(info.content, path2) == 0)
 													{
-//														print(L"\n\nWhat would you like to do?\nⒷ Keep %ls Data\nⓍ Delete %ls Data\n\n", restore ? L"backup": L"FBI injection", restore ? L"backup": L"FBI injection");
-														print(strings[STR_CHOOSE], "");
-														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_B], L"Keep" );
-														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_X], L"Delete" );
+														print(strings[STR_CHOOSE], strings[STR_SOURCE_ACTION]);
+														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_KEEP]);
+														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_X], strings[STR_DELETE]);
 														ConsoleShow();
 														checkLoop = 0;
 
