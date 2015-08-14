@@ -50,7 +50,7 @@
 	"HEALTH_AND_SAFETY": "Informações de Saúde & Segurança",
 	"CHECK_TMD_ONLY": "verificar apenas TMD",
 	"INJECT_FBI": "injetar FBI",
-	"SOURCE_ACTION": "Ação fonte",
+	"SOURCE_ACTION": "ação fonte",
 	"SYSTEM_TITLES": "aplicativos do sistema",
 	"SYSTEM_TITLES_WARNING": "Isso deve demorar muito, toda\na CTRNAND será escaneada.\nTenha paciência e aguarde até\nque a procura termine.\n",
 	"SYSTEM_TITLES_DECRYPT": "Toda a CTRNAND foi escaneada\ne %d aplicativos CTR foram\ndumpados.\nQuer descriptografar todos\neles?\n",
