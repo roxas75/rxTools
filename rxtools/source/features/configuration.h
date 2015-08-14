@@ -50,6 +50,7 @@ enum {
 	CFG_AGB,
 	CFG_3D,
 	CFG_SILENT,
+	CFG_ABSYSN,
 	CFG_LANG,
 
 	CFG_NUM
