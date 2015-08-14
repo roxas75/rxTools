@@ -84,6 +84,12 @@ License, v. 2.0.
 
 See CakeHax/LICENSE.txt for the details.
 
+###rxinstaller
+rxinstaller is based on CakesROP, licensed by zoogie, mid-kid, bilis,
+and Reisyukaku under the BSD 2-clause license.
+
+See rxinstaller/LICENSE for the details.
+
 ###PolarSSL
 Copyright (C) 2006-2010, Brainspark B.V.
 
