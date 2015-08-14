@@ -306,7 +306,7 @@ int rxMode(int emu)
 		}
 	}
 
-	f_open(&fd, "NATIVE_FIRM.BIN", FA_WRITE | FA_CREATE_ALWAYS);
+	f_open(&fd, "rxtools/data/NATIVE_FIRM.BIN", FA_WRITE | FA_CREATE_ALWAYS);
 	f_write(&fd, (void *)FIRM_ADDR, 0x200000, &br);
 	f_close(&fd);
 
