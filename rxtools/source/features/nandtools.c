@@ -170,11 +170,11 @@ void restoreCoolFiles()
 	ConsoleSetTitle(strings[STR_INJECT], strings[STR_FILES]);
 
 	char dest[256], tmpstr[sizeof(dest)];
-	wchar_t wsrc[sizeof(tmpstr)];
+	wchar_t wdest[sizeof(dest)];
 	sprintf(tmpstr, "rxTools/%s", CoolFiles[selectedFile].name);
 	sprintf(dest, "%d:%s/%s", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name);
-	mbstowcs(wsrc, tmpstr, sizeof(tmpstr));
-	print(strings[STR_INJECTING], wsrc, dest);
+	mbstowcs(wdest, dest, sizeof(dest));
+	print(strings[STR_INJECTING], tmpstr, wdest);
 	ConsoleShow();
 
 	unsigned int res = FSFileCopy(dest, tmpstr);
