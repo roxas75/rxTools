@@ -15,6 +15,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include "downgradeapp.h"
 #include "screenshot.h"
@@ -49,17 +50,6 @@ char tmpstr[256];
 FILINFO curInfo;
 DIR myDir;
 
-char cntpath[256]; // Contains the NAND content path
-char tmdpath[256]; // Contains the NAND TMD path
-
-char* getContentAppPath(){
-	return (char*)&cntpath;
-}
-
-char* getTMDAppPath(){
-	return (char*)&tmdpath;
-}
-
 void sprint_sha256(wchar_t *str, unsigned char hash[32])
 {
 	int i;
@@ -75,7 +65,7 @@ void sprint_sha256(wchar_t *str, unsigned char hash[32])
 }
 
 
-int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
+int FindApp(AppInfo *info)
 {
 	char *folder = (char*)&tmpstr;
 	memset(folder, 0, 256);
@@ -87,7 +77,8 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 	memset((unsigned char*)myInfo, 0, sizeof(FILINFO));
 	myInfo->fname[0] = 'A';
 
-	sprintf(folder, "%d:title/%08x/%08x/content", drive, tid_low, tid_high);
+	sprintf(folder, "%d:title/%08" PRIx32 "/%08" PRIx32 "/content",
+		info->drive, info->tidLo, info->tidHi);
 
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
 
@@ -156,8 +147,8 @@ int FindApp(unsigned int tid_low, unsigned int tid_high, int drive)
 					if (cur_ver == 0) is_v0 = true;
 
 					/* Save TMD and content paths */
-					sprintf(tmdpath, "%s/%s", folder, myInfo->fname);
-					sprintf(cntpath, "%s/%08x.app", folder, bswap_32(tmd_entry.id));
+					sprintf(info->tmd, "%s/%s", folder, myInfo->fname);
+					sprintf(info->content, "%s/%08x.app", folder, bswap_32(tmd_entry.id));
 				}
 			} else {
 				FileClose(&tmp);
@@ -292,12 +283,12 @@ void downgradeMSET()
 {
 	File dg;
 	char *dgpath = "0:msetdg.bin";
-	unsigned int titleid_low = 0x00040010;
 	unsigned int titleid_high[6] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0x2164C3C0, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned short mset_ver[10] = { 3074, 5127, 3078, 5128, 3075, 5127, 8, 1026, 2049, 8 };
 	unsigned short mset_dg_ver = 0;
 	unsigned int checkLoop = 0;
+	AppInfo info;
 
 	ConsoleInit();
 	ConsoleSetTitle(strings[STR_DOWNGRADE], strings[STR_MSET]);
@@ -375,9 +366,12 @@ void downgradeMSET()
 
 	if (CheckRegion(SYS_NAND) == 0)
 	{
-		if (FindApp(titleid_low, titleid_high[region], SYS_NAND)) // SysNAND only
+		info.drive = SYS_NAND;
+		info.tidLo = 0x00040010;
+		info.tidHi = titleid_high[region];
+		if (FindApp(&info)) // SysNAND only
 		{
-			if (FileOpen(&dg, tmdpath, 0))
+			if (FileOpen(&dg, info.tmd, 0))
 			{
 				/* Get the MSET TMD version */
 				unsigned short tmd_ver;
@@ -389,7 +383,7 @@ void downgradeMSET()
 				if (tmd_ver != mset_ver[mset_dg_ver])
 				{
 					/* Open MSET content file */
-					if (FileOpen(&dg, cntpath, 0))
+					if (FileOpen(&dg, info.content, 0))
 					{
 						unsigned int check_val;
 						FileRead(&dg, &check_val, 4, 0x130);
@@ -411,7 +405,7 @@ void downgradeMSET()
 									uint8_t iv[0x10] = {0};
 									uint8_t Key[0x10] = {0};
 
-									GetTitleKey(&Key[0], titleid_low, titleid_high[region], SYS_NAND);
+									GetTitleKey(&Key[0], info.tidLo, info.tidHi, info.drive);
 
 									aes_context aes_ctxt;
 									aes_setkey_dec(&aes_ctxt, Key, 0x80);
@@ -424,7 +418,7 @@ void downgradeMSET()
 									{
 										print(strings[STR_DOWNGRADING], L"");
 										ConsoleShow();
-										if (FSFileCopy(cntpath, dgpath) != 0)
+										if (FSFileCopy(info.content, dgpath) != 0)
 										{
 											print(strings[STR_FAILED]);
 										}
@@ -444,13 +438,13 @@ void downgradeMSET()
 							print(strings[STR_DOWNGRADING_NOT_NEEDED], strings[STR_MSET]);
 						}
 					} else {
-						print(strings[STR_ERROR_OPENING], cntpath);
+						print(strings[STR_ERROR_OPENING], info.content);
 					}
 				} else {
 					print(strings[STR_DOWNGRADING_NOT_NEEDED], strings[STR_MSET]);
 				}
 			} else {
-				print(strings[STR_ERROR_OPENING], tmdpath);
+				print(strings[STR_ERROR_OPENING], info.tmd);
 			}
 		} else {
 			print(strings[STR_MISSING], strings[STR_MSET]);
@@ -464,8 +458,6 @@ void downgradeMSET()
 
 void manageFBI(bool restore)
 {
-	int drive;
-	unsigned int titleid_low = 0x00040010;
 	unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
 	char *backup_path = "rxTools/h&s_backup";
 
@@ -490,7 +482,13 @@ void manageFBI(bool restore)
 	unsigned short checkLoop;
 	bool noHalt = true;
 
-	if ((drive = NandSwitch()) == UNK_NAND) return;
+	AppInfo info;
+
+	info.drive = NandSwitch();
+	if (info.drive == UNK_NAND)
+		return;
+
+	info.tidLo = 0x00040010;
 
 	ConsoleInit();
 	if (restore)
@@ -520,12 +518,13 @@ void manageFBI(bool restore)
 				noHalt = false;
 				checkLoop = 1;
 
-				CheckRegion(drive);
+				CheckRegion(info.drive);
 
-				if (FindApp(titleid_low, titleid_high[region], drive))
+				info.tidHi = titleid_high[region];
+				if (FindApp(&info))
 				{
 					/* Open the NAND H&S TMD */
-					FileOpen(&tmp, tmdpath, 0);
+					FileOpen(&tmp, info.tmd, 0);
 					FileRead(&tmp, buf, 0xB34, 0);
 					FileClose(&tmp);
 
@@ -540,12 +539,13 @@ void manageFBI(bool restore)
 	if(noHalt)
 	{
 
-		if (CheckRegion(drive) == 0)
+		if (CheckRegion(info.drive) == 0)
 		{
-			if (FindApp(titleid_low, titleid_high[region], drive))
+			info.tidHi = titleid_high[region];
+			if (FindApp(&info))
 			{
 				/* Open the NAND H&S TMD */
-				FileOpen(&tmp, tmdpath, 0);
+				FileOpen(&tmp, info.tmd, 0);
 				FileRead(&tmp, buf, 0xB34, 0);
 				FileClose(&tmp);
 
@@ -560,7 +560,7 @@ void manageFBI(bool restore)
 					unsigned int cntsize = (unsigned int)((buf[0xB10] << 24) | (buf[0xB11] << 16) | (buf[0xB12] << 8) | buf[0xB13]);
 
 					/* Open the NAND H&S content file and read it to the memory buffer */
-					FileOpen(&tmp, cntpath, 0);
+					FileOpen(&tmp, info.content, 0);
 					FileRead(&tmp, buf + 0x1000, cntsize, 0);
 					FileClose(&tmp);
 
@@ -578,7 +578,7 @@ void manageFBI(bool restore)
 					/* Backup the H&S TMD */
 					print(strings[STR_BACKING_UP], strings[STR_HEALTH_AND_SAFETY]);
 					ConsoleShow();
-					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
+					sprintf(path, "0:%s/%.12s", tmpstr, info.tmd+34);
 					if (FileOpen(&tmp, path, 1))
 					{
 						size = FileWrite(&tmp, buf, 0xB34, 0);
@@ -587,7 +587,7 @@ void manageFBI(bool restore)
 						{
 							/* Backup the H&S content file */
 							memset(&path, 0, 256);
-							sprintf(path, "0:%s/%.12s", tmpstr, cntpath+34);
+							sprintf(path, "0:%s/%.12s", tmpstr, info.content+34);
 							if (FileOpen(&tmp, path, 1))
 							{
 								size = FileWrite(&tmp, buf + 0x1000, cntsize, 0);
@@ -619,8 +619,8 @@ void manageFBI(bool restore)
 					/* Generate the H&S backup data paths */
 					memset(&tmpstr, 0, 256);
 					sprintf(tmpstr, "%s/%ls/v%u", backup_path, strings[STR_JAPAN+region], tmd_ver);
-					sprintf(path, "0:%s/%.12s", tmpstr, tmdpath+34);
-					sprintf(path2, "0:%s/%.12s", tmpstr, cntpath+34);
+					sprintf(path, "0:%s/%.12s", tmpstr, info.tmd+34);
+					sprintf(path2, "0:%s/%.12s", tmpstr, info.content+34);
 
 					print(strings[STR_RESTORING], strings[STR_HEALTH_AND_SAFETY]);
 				}
@@ -668,14 +668,13 @@ void manageFBI(bool restore)
 											if (memcmp(CntDataSum, TmdCntDataSum, 32) == 0)
 											{
 												/* Now we are ready to rock 'n roll */
-												if (FSFileCopy(tmdpath, path) == 0)
+												if (FSFileCopy(info.tmd, path) == 0)
 												{
-													if (FSFileCopy(cntpath, path2) == 0)
+													if (FSFileCopy(info.content, path2) == 0)
 													{
-//														print(L"\n\nWhat would you like to do?\nⒷ Keep %ls Data\nⓍ Delete %ls Data\n\n", restore ? L"backup": L"FBI injection", restore ? L"backup": L"FBI injection");
-														print(strings[STR_CHOOSE], "");
-														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_B], "LKeep" );
-														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_X], L"Delete" );
+														print(strings[STR_CHOOSE], strings[STR_SOURCE_ACTION]);
+														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_KEEP]);
+														print(strings[STR_BLANK_BUTTON_ACTION], strings[STR_BUTTON_X], strings[STR_DELETE]);
 														ConsoleShow();
 														checkLoop = 0;
 
@@ -698,10 +697,10 @@ void manageFBI(bool restore)
 															}
 														}
 													} else {
-														print(strings[STR_ERROR_COPYING], path2, cntpath);
+														print(strings[STR_ERROR_COPYING], path2, info.content);
 													}
 												} else {
-													print(strings[STR_ERROR_COPYING], path, tmdpath);
+													print(strings[STR_ERROR_COPYING], path, info.tmd);
 												}
 											} else {
 												print(strings[STR_WRONG], "", strings[STR_HASH]);

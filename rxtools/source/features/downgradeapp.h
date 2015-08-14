@@ -18,10 +18,19 @@
 #ifndef DOWNGRADEAPP_H
 #define DOWNGRADEAPP_H
 
+#include <stdint.h>
+
+typedef struct {
+        unsigned int drive;
+        uint32_t tidLo;
+        uint32_t tidHi;
+        char tmd[64];
+        char content[64];
+} AppInfo;
+
 //Utilities
-char* getContentAppPath();
-char* getTMDAppPath();
-int FindApp(unsigned int tid_low, unsigned int tid_high, int drive);
+// Fill drive, tidLo and tidHi before calling this.
+int FindApp(AppInfo *info);
 int CheckRegion(int drive);
 
 //Features
