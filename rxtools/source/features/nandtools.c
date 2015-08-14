@@ -190,9 +190,9 @@ void restoreCoolFiles()
 			sprintf(tmpstr, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
 			sprintf(dest, "%d:%s/%.20s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'A');
 		}
-		mbstowcs(wsrc, tmpstr, sizeof(wsrc));
+		mbstowcs(wdest, dest, sizeof(dest));
 		print(strings[STR_FAILED]);
-		print(strings[STR_INJECTING], wsrc, dest);
+		print(strings[STR_INJECTING], tmpstr, wdest);
 		ConsoleShow();
 		res = FSFileCopy(dest, tmpstr);
 	}
