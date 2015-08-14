@@ -49,6 +49,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	@cp LICENSE release
 	@cp LICENSE_JSMN release
 	@cp CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
+	@cp rxinstaller/LICENSE release/LICENSE_CakesROP
 
 	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
