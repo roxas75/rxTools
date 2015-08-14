@@ -51,6 +51,7 @@ Cfg cfgs[] = {
 	[CFG_AGB] = { "AGB", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_3D] = { "3D", CFG_TYPE_BOOLEAN, { .i = 1 } },
 	[CFG_SILENT] = { "Silent", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_ABSYSN] = { "Autoboot-sysNAND", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_LANG] = { "Language", CFG_TYPE_STRING, { .s = cfgLang } }
 };
 

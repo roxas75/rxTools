@@ -98,15 +98,16 @@ static Menu AdvancedMenu = {
 
 static Menu SettingsMenu = {
 	L"           SETTINGS",
-	.Option = (MenuEntry[6]){
+	.Option = (MenuEntry[7]){
 		{ L"Force UI boot               ", NULL, "app.bin" },
 		{ L"Selected theme:             ", NULL, "app.bin" },
 		{ L"Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
 		{ L"Enable 3D UI:               ", NULL, "app.bin" },
 		{ L"Quick boot:                 ", NULL, "app.bin" },
+		{ L"Autoboot into sysNAND:      ", NULL, "app.bin" },
 		{ L"Console language:           ", NULL, "app.bin" },
 	},
-	6,
+	7,
 	0,
 	0
 };
@@ -215,7 +216,8 @@ void SettingsMenuInit(){
 		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
 		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
 		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
+		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ABSYSN], cfgs[CFG_ABSYSN].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[6].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
 		MenuRefresh();
 
 		uint32_t pad_state = InputWait();
@@ -309,6 +311,10 @@ void SettingsMenuInit(){
 					cfgs[CFG_GUI].val.i = 0;
 			}
 			else if (MyMenu->Current == 5)
+			{
+				cfgs[CFG_ABSYSN].val.i ^= 1;
+			}
+			else if (MyMenu->Current == 6)
 			{
 				if (pad_state & BUTTON_LEFT && curLang > 0)
 					curLang--;
