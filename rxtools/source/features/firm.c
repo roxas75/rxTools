@@ -91,6 +91,9 @@ static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
 	if (addr >= info->p9Entry && addr <= info->p9Entry + info->arm9Size - info->p9Start)
 		return info->arm9Off + (addr - info->p9Entry) + info->p9Start;
 
+	if (addr >= info->arm11Entry && addr <= info->arm11Entry + info->arm11Size)
+	    return info->arm11Off + (addr - info->arm11Entry);
+
 	return 0;
 }
 
@@ -180,8 +183,8 @@ int rxMode(int emu)
 		DrawBottomSplash(s);
 	}
 
-	static const FirmInfo ktrInfo = { 0x66A00, 0x8A600, 0x08006000, 0x15B00, 0x16700, 0x08028000 };
-	static const FirmInfo ctrInfo = { 0x66000, 0x84A00, 0x08006800, 0x15B00, 0x16700, 0x08028000 };
+	static const FirmInfo ktrInfo = { 0x66A00, 0x8A600, 0x08006000, 0x33A00, 0x33000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000 };
+	static const FirmInfo ctrInfo = { 0x66000, 0x84A00, 0x08006800, 0x35000, 0x31000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000 };
 	static const char patchNandPrefix[] = ".patch.p9.nand";
 	unsigned int cur, off, shstrSize;
 	char path[64], shstrtab[512], *sh_name;

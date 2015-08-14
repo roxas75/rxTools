@@ -13,6 +13,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ * This software was originally licensed by zoogie, mid-kid, bilis, and Reisyukaku
+ * under the BSD 2-clause license. See LICENSE for the details.
  */
 
 #include <nds.h>
