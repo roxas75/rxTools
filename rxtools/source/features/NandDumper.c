@@ -26,12 +26,13 @@
 #include "screenshot.h"
 #include "padgen.h"
 #include "crypto.h"
+#include "mpcore.h"
 #include "ncch.h"
 #include "CTRDecryptor.h"
 #include "fatfs/sdmmc.h"
 #include "stdio.h"
 
-#define NAND_SIZE 0x3AF00000
+#define NAND_SIZE getMpInfo() == MPINFO_KTR ? 0x4D800000 : 0x3AF00000
 #define NAND_SECTOR_SIZE 0x200
 #define BUF1 (void*)0x21000000
 #define PROGRESS_WIDTH	16
@@ -121,7 +122,7 @@ void DumpNandPartitions(){
 	print(strings[STR_PROCESSING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND]);
 	char* p_name[] = { "twln.bin", "twlp.bin", "agb_save.bin", "firm0.bin", "firm1.bin", "ctrnand.bin" };
 	wchar_t* p_descr[] = { strings[STR_TWLN], strings[STR_TWLP], strings[STR_AGB_SAVE], strings[STR_FIRM0], strings[STR_FIRM1], strings[STR_CTRNAND] };
-	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, 0x2F3E3600 };
+	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, getMpInfo() == MPINFO_KTR ? 0x41D2D200 : 0x2F3E3600 };
 	unsigned int p_addr[] = { TWLN, TWLP, AGB_SAVE, FIRM0, FIRM1, CTRNAND };
 	int sect_row = 0x80;
 
@@ -154,7 +155,8 @@ void DumpNandPartitions(){
 }
 
 void GenerateNandXorpads(){
-	PadInfo myInfo = {.keyslot = 0x4, .setKeyY = 0, .size_mb = 760, .filename = "rxTools/nand.fat16.xorpad"};
+
+	PadInfo myInfo = { .keyslot = getMpInfo() == MPINFO_KTR ? 0x5 : 0x4, .setKeyY = 0, .size_mb = getMpInfo() == MPINFO_KTR ? 1055 : 758, .filename = "rxTools/nand.fat16.xorpad" };
 	GetNANDCTR(myInfo.CTR); add_ctr(myInfo.CTR, 0xB93000);
 
 	ConsoleInit();
@@ -223,7 +225,7 @@ void DumpNANDSystemTitles(){
 void RebuildNand(){
 	char* p_name[] = { "twln.bin", "twlp.bin", "agb_save.bin", "firm0.bin", "firm1.bin", "ctrnand.bin" };
 	wchar_t* p_descr[] = { strings[STR_TWLN], strings[STR_TWLP], strings[STR_AGB_SAVE], strings[STR_FIRM0], strings[STR_FIRM1], strings[STR_CTRNAND] };
-	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, 0x2F3E3600};
+	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, getMpInfo() == MPINFO_KTR ? 0x41D2D200 : 0x2F3E3600 };
 	unsigned int p_addr[] = { TWLN, TWLP, AGB_SAVE, FIRM0, FIRM1, CTRNAND };
 	int sect_row = 0x1;			//Slow, ok, but secure
 

@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include "fatfs/ff.h"
+
 #define File FIL
 
 enum {
@@ -28,6 +29,7 @@ enum {
 	FIRM0 = 0x0B130000,
 	FIRM1 = 0x0B530000,
 	CTRNAND = 0x0B95CA00,
+	KTR_CTRNAND = 0x0B95AE00,
 } NAND_PARTITIONS;
 
 extern int sysver;
