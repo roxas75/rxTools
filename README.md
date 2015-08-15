@@ -14,7 +14,7 @@ I do not support piracy in any way, all the data and information in my software 
 ## Current functionality
 ### General
 - Support for Web Browser (SPIDER) entrypoint for Old3DS (ver 4.1-9.2)
-- Support for System Settings (MSET) entrypoint for Old3DS (ver 4.1-4.5)
+- Support for System Settings (MSET) entrypoint for Old3DS (ver 4.1-4.5 and 6.0-6.4)
 - Support for System Settings (MSET) downgrading for Old3DS
 - Support for Ninjhax (Not Stable)
 - Hacking tools collection
