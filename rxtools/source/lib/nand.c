@@ -98,6 +98,7 @@ void GetNANDCTR(uint8_t *ctr) {
 void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
 	uint8_t myCtr[16];
+	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
@@ -108,6 +109,7 @@ void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, uns
 		case FIRM0    : info.keyslot = 0x6; break;
 		case FIRM1    : info.keyslot = 0x6; break;
 		case CTRNAND  : info.keyslot = 0x4; break;
+		case KTR_CTRNAND: info.keyslot = 0x5; break;
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
 	sdmmc_nand_readsectors(sector_no + partition / 0x200, numsectors, out);
@@ -117,16 +119,18 @@ void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, uns
 void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
 	uint8_t myCtr[16];
+	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
 	switch (partition) {
-		case TWLN	  : info.keyslot = 0x3; break;
-		case TWLP	  : info.keyslot = 0x3; break;
-		case AGB_SAVE : info.keyslot = 0x7; break;
-		case FIRM0    : info.keyslot = 0x6; break;
-		case FIRM1    : info.keyslot = 0x6; break;
-		case CTRNAND  : info.keyslot = 0x4; break;
+	case TWLN: info.keyslot = 0x3; break;
+	case TWLP: info.keyslot = 0x3; break;
+	case AGB_SAVE: info.keyslot = 0x7; break;
+	case FIRM0: info.keyslot = 0x6; break;
+	case FIRM1: info.keyslot = 0x6; break;
+	case CTRNAND: info.keyslot = 0x4; break;
+	case KTR_CTRNAND: info.keyslot = 0x5; break;
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
 	DecryptPartition(&info);
@@ -136,16 +140,18 @@ void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, un
 void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
 	uint8_t myCtr[16];
+	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
 	switch (partition) {
-		case TWLN	  : info.keyslot = 0x3; break;
-		case TWLP	  : info.keyslot = 0x3; break;
-		case AGB_SAVE : info.keyslot = 0x7; break;
-		case FIRM0    : info.keyslot = 0x6; break;
-		case FIRM1    : info.keyslot = 0x6; break;
-		case CTRNAND  : info.keyslot = 0x4; break;
+	case TWLN: info.keyslot = 0x3; break;
+	case TWLP: info.keyslot = 0x3; break;
+	case AGB_SAVE: info.keyslot = 0x7; break;
+	case FIRM0: info.keyslot = 0x6; break;
+	case FIRM1: info.keyslot = 0x6; break;
+	case CTRNAND: info.keyslot = 0x4; break;
+	case KTR_CTRNAND: info.keyslot = 0x5; break;
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
 	sdmmc_sdcard_readsectors(sector_no + partition / 0x200, numsectors, out);
@@ -155,16 +161,18 @@ void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, 
 void emunand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	PartitionInfo info;
 	uint8_t myCtr[16];
+	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
 	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
 	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
 	add_ctr(info.ctr, partition / 16);
 	switch (partition) {
-		case TWLN	  : info.keyslot = 0x3; break;
-		case TWLP	  : info.keyslot = 0x3; break;
-		case AGB_SAVE : info.keyslot = 0x7; break;
-		case FIRM0    : info.keyslot = 0x6; break;
-		case FIRM1    : info.keyslot = 0x6; break;
-		case CTRNAND  : info.keyslot = 0x4; break;
+	case TWLN: info.keyslot = 0x3; break;
+	case TWLP: info.keyslot = 0x3; break;
+	case AGB_SAVE: info.keyslot = 0x7; break;
+	case FIRM0: info.keyslot = 0x6; break;
+	case FIRM1: info.keyslot = 0x6; break;
+	case CTRNAND: info.keyslot = 0x4; break;
+	case KTR_CTRNAND: info.keyslot = 0x5; break;
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
 	DecryptPartition(&info);
