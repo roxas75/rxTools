@@ -16,3 +16,6 @@
 [submodule "CakeHax"]
 	path = CakeHax
 	url = https://github.com/mid-kid/CakeHax
+[submodule "CakesROP"]
+	path = CakesROP
+	url = https://github.com/mid-kid/CakesROP.git
