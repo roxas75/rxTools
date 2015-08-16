@@ -24,7 +24,7 @@ SET_INCDIR := INCDIR=$(INCDIR)
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(CODE_PATH)
 #CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE)
-CAKESROP = $(SET_DATNAME) DISPNAME=rxTools
+CAKESROP = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
 
 all: $(CODE_FILE)
 
