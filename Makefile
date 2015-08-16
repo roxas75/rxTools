@@ -16,6 +16,7 @@
 CODE_FILE := code.bin
 CODE_PATH := rxTools/system/
 SET_CODE_PATH := CODE_PATH=$(CODE_PATH)$(CODE_FILE)
+SET_DATNAME := DATNAME=$(CODE_PATH)$(CODE_FILE)
 
 INCDIR := -I$(CURDIR)/include
 SET_INCDIR := INCDIR=$(INCDIR)
@@ -23,6 +24,7 @@ SET_INCDIR := INCDIR=$(INCDIR)
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(CODE_PATH)
 #CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE)
+CAKESROP = $(SET_DATNAME) DISPNAME=rxTools
 
 all: $(CODE_FILE)
 
@@ -37,7 +39,8 @@ clean: distclean
 	@$(MAKE) -C reboot clean
 	@$(MAKE) $(SET_CODE_PATH) -C brahma clean
 	@$(MAKE) -C theme clean
-	@$(MAKE) $(SET_CODE_PATH) -C rxinstaller clean
+	@$(MAKE) $(CAKESROP) -C CakesROP clean
+	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider clean	
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
 	@rm -Rf payload.bin $(CODE_FILE)
 
@@ -49,13 +52,13 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	@cp LICENSE release
 	@cp LICENSE_JSMN release
 	@cp CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
-	@cp rxinstaller/LICENSE release/LICENSE_CakesROP
+	@cp CakesROP/LICENSE release/LICENSE_CakesROP
 
 	@mkdir -p release/mset release/ninjhax release/rxTools
 	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
-	@cp rxinstaller.nds release/mset/rxinstaller.nds
-	@cp rxinstaller/CakesROPSpider/code.bin release/mset/code.bin
+	@cp CakesROP/CakesROP.nds release/mset/rxinstaller.nds
+	@cp CakesROP/CakesROPSpider/code.bin release/mset/code.bin
 
 	@mkdir -p release/rxTools/system release/rxTools/theme
 
@@ -82,10 +85,11 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 
 $(CODE_FILE): rxtools/rxtools.bin
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax bigpayload
-	@dd if=rxtools/rxtools.bin of=$@ seek=272 conv=notrunc
+	@dd if=rxtools/rxtools.bin of=$@ seek=160 conv=notrunc
 
 rxinstaller.nds:
-	@$(MAKE) $(SET_CODE_PATH) $(SET_INCDIR) -C rxinstaller
+	@$(MAKE) $(CAKESROP) -C CakesROP
+	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
 
 all-target-brahma:
 	$(MAKE) $(SET_CODE_PATH) -C brahma
