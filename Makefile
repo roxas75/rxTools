@@ -54,9 +54,9 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	@cp CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
 	@cp CakesROP/LICENSE release/LICENSE_CakesROP
 
-	@mkdir -p release/mset release/ninjhax release/rxTools
-	@cp brahma/brahma.3dsx release/ninjhax/rxtools.3dsx
-	@cp brahma/brahma.smdh release/ninjhax/rxtools.smdh
+	@mkdir -p release/mset release/ninjhax/rxTools release/rxTools
+	@cp brahma/brahma.3dsx release/ninjhax/rxTools/rxtools.3dsx
+	@cp brahma/brahma.smdh release/ninjhax/rxTools/rxtools.smdh
 	@cp CakesROP/CakesROP.nds release/mset/rxinstaller.nds
 	@cp CakesROP/CakesROPSpider/code.bin release/mset/code.bin
 
