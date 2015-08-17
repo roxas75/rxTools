@@ -85,7 +85,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 
 $(CODE_FILE): rxtools/rxtools.bin
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax bigpayload
-	@dd if=rxtools/rxtools.bin of=$@ seek=160 conv=notrunc
+	@dd if=rxtools/rxtools.bin of=$@ seek=272 conv=notrunc
 
 rxinstaller.nds:
 	@$(MAKE) $(CAKESROP) -C CakesROP
