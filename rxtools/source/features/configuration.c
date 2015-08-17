@@ -248,7 +248,7 @@ int InstallData(char* drive){
 	char path[64];
 	int i;
 
-	progressWidth = getMpInfo() == MPINFO_CTR ? 7 : 3;
+	progressWidth = getMpInfo() == MPINFO_CTR ? 6 : 4;
 	progressX = (BOT_SCREEN_WIDTH - progressWidth * FONT_WIDTH) / 2;
 
 	for (i = 0; i < progressWidth; i++)
@@ -367,6 +367,7 @@ int InstallData(char* drive){
 	}
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
+end:
 	sprintf(path, "%s:%s/data.bin", drive, DATAFOLDER);
 	if(FileOpen(&fd, path, 1)){
 		FileWrite(&fd, __DATE__, 12, 0);
@@ -380,7 +381,6 @@ int InstallData(char* drive){
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-end:
 	f_close(&firmfile);
 	return 0;
 }
@@ -403,22 +403,26 @@ int CheckInstallationData(){
 			if(!FileOpen(&file, str, 0)) return -3;
 			FileClose(&file);
 
-			if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
-			FileRead(&file, str, 32, 0);
-			FileClose(&file);
-			if(memcmp(str, __DATE__, 11)) return -5;
-			if(memcmp(&str[12], __TIME__, 8)) return -5;
-
-			return 0;
+			break;
 
 		case MPINFO_KTR:
 			getFirmPath(str, TID_KTR_NATIVE_FIRM);
 			if(!FileOpen(&file, str, 0)) return -1;
 			FileClose(&file);
 
+			break;
+
 		default:
 			return 0;
 	}
+
+	if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
+	FileRead(&file, str, 32, 0);
+	FileClose(&file);
+	if(memcmp(str, __DATE__, 11)) return -5;
+	if(memcmp(&str[12], __TIME__, 8)) return -5;
+
+	return 0;
 }
 
 void InstallConfigData(){
