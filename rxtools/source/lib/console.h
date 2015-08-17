@@ -15,11 +15,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "draw.h"
-
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
+#include "draw.h"
 #include <wchar.h>
 
 #define CONSOLE_SIZE			0x4000
