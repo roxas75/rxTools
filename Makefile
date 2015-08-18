@@ -77,7 +77,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
 	@cp lang/* release/rxTools/lang/
-	@cp tools/cdn_firm.py tools/msetdg.py tools/readme.txt release/Tools
+	@cp tools/cdn_firm.py tools/readme.txt release/Tools
 	@cp -r tools/fbi_injection/* release/Tools/fbi_injection/
 	@cp tools/scripts/* release/Tools/scripts/
 
