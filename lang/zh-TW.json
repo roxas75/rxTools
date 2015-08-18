@@ -80,5 +80,8 @@
     "REGION_": "區域: %ls\n", 
     "REGION": "區域", 
     "YES": "是", 
-    "NO": "否"
+    "NO": "否", 
+    "MENU_LANGUAGE": "介面語言  %12ls", 
+    "SYSNAND": "真實系統", 
+    "EMUNAND": "虛擬系統"
 }
