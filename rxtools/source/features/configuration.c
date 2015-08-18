@@ -68,7 +68,7 @@ static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 int writeCfg()
 {
 	File fd;
-	char buf[128];
+	char buf[256];
 	const char *p;
 	char *jsonCur;
 	unsigned int i;
@@ -168,7 +168,7 @@ int readCfg()
 {
 	const size_t tokenNum = 1 + CFG_NUM * 2;
 	jsmntok_t t[tokenNum];
-	char buf[128];
+	char buf[256];
 	jsmn_parser parser;
 	File fd;
 	unsigned int i, j, k;
