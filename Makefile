@@ -58,7 +58,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 	@cp brahma/brahma.3dsx release/ninjhax/rxTools/rxtools.3dsx
 	@cp brahma/brahma.smdh release/ninjhax/rxTools/rxtools.smdh
 	@cp CakesROP/CakesROP.nds release/mset/rxinstaller.nds
-	@cp CakesROP/CakesROPSpider/code.bin release/mset/code.bin
+	@cp CakesROP/CakesROPSpider/code.bin release/mset/rxinstaller.bin
 
 	@mkdir -p release/rxTools/system release/rxTools/theme
 
@@ -85,7 +85,7 @@ release: $(CODE_FILE) rxtools/font.bin reboot/reboot.bin \
 
 $(CODE_FILE): rxtools/rxtools.bin
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax bigpayload
-	@dd if=rxtools/rxtools.bin of=$@ seek=272 conv=notrunc
+	@dd if=rxtools/rxtools.bin of=$@ seek=160 conv=notrunc
 
 rxinstaller.nds:
 	@$(MAKE) $(CAKESROP) -C CakesROP
