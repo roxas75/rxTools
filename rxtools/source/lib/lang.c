@@ -24,7 +24,7 @@
 #include "jsmn.h"
 #include "lang.h"
 
-wchar_t strings[STR_NUM][STR_MAX_LEN];
+wchar_t strings[STR_NUM][STR_MAX_LEN] = {};
 const char langPath[] = "/rxTools/lang";
 
 static const char *keys[STR_NUM] = {
