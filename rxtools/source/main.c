@@ -32,7 +32,7 @@
 
 #define FONT_ADDRESS	(void*)0x27E00000
 char *cfgLang = "en.json";
-const char *fontpath = "/rxTools/system/font.bin";
+const char *fontpath = SYSTEM_PATH "/font.bin";
 int fontLoaded = 1;
 
 void LoadFont(){
