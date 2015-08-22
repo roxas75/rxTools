@@ -50,7 +50,7 @@ ARCH	:=	-mthumb -mthumb-interwork
 CFLAGS	:=	-g -Wall -O2 -mtune=arm946e-s -fomit-frame-pointer -ffast-math	\
 		-std=c99 $(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9
+CFLAGS	+=	$(INCLUDE) -DARM9 -DSYSTEM_PATH=\"$(SYSTEM_PATH)\"
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
@@ -110,7 +110,7 @@ export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 .PHONY: $(BUILD) clean all
 
 #---------------------------------------------------------------------------------
-all: font.bin $(BUILD)
+all: $(BUILD)
 
 source/lib/font.h: font.bin
 	@dd if=$< of=font.tmp count=8
