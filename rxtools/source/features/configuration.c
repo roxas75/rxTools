@@ -261,7 +261,7 @@ int InstallData(char* drive){
 	f_mkdir(path);
 
 	//Read firmware data
-	if (f_open(&firmfile, "rxtools/system/firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
+	if (f_open(&firmfile, SYSTEM_PATH "/firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
@@ -323,7 +323,7 @@ int InstallData(char* drive){
 	}
 
 	if (a_firm) {
-		if (applyPatch(a_firm, "/rxTools/system/patches/ctr/agb_firm.elf", &agb_info))
+		if (applyPatch(a_firm, SYSTEM_PATH "/patches/ctr/agb_firm.elf", &agb_info))
 			return CONF_ERRPATCH;
 
 		getFirmPath(path, TID_CTR_AGB_FIRM);
@@ -347,7 +347,7 @@ int InstallData(char* drive){
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &br);
 	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	if(t_firm){
-		if (applyPatch(t_firm, "/rxTools/system/patches/ctr/twl_firm.elf", &twl_info))
+		if (applyPatch(t_firm, SYSTEM_PATH "/patches/ctr/twl_firm.elf", &twl_info))
 			return CONF_ERRPATCH;
 
 		getFirmPath(path, TID_CTR_TWL_FIRM);
