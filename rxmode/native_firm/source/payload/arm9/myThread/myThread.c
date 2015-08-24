@@ -194,7 +194,7 @@ static void *memcpy32(void *dst, const void *src, size_t n)
 
 		_dst++;
 		_src++;
-		n--;
+		n -= sizeof(int);
 	}
 
 	return dst;
@@ -209,7 +209,7 @@ static void findRegion()
 {
 	uintptr_t p;
 
-	for (p = 0x26980000; p < 0x27000000; p += 4)
+	for (p = 0x26960000; p < 0x26B00000; p += 4)
 		if (!memcmp32((void *)p, originalcode, sizeof(originalcode))) {
 			dest = (void *)p;
 			break;
