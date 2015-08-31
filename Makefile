@@ -14,7 +14,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 CODE_FILE := code.bin
-SYSTEM_PATH := rxTools/system
+SYSTEM_PATH := rxTools/sys
 SET_SYSTEM_PATH := SYSTEM_PATH=$(SYSTEM_PATH)
 SET_CODE_PATH := CODE_PATH=$(SYSTEM_PATH)/$(CODE_FILE)
 SET_DATNAME := DATNAME=$(SYSTEM_PATH)/$(CODE_FILE)
