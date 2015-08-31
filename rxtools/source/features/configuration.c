@@ -275,6 +275,7 @@ int InstallData(char* drive){
 
 	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
 		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
+	strcpy(path + strlen(path) - 4, "orig.bin");
 	if(FileOpen(&fd, path, 1)){
 		FileWrite(&fd, n_firm, NAT_SIZE, 0);
 		FileClose(&fd);

@@ -64,17 +64,16 @@ static FRESULT loadExecReboot()
 	_softreset();
 }
 
-static int loadFirm(char *path)
+static int loadFirm(char *path, UINT *fsz)
 {
 	FIL fd;
 	FRESULT r;
-	UINT br;
 
 	r = f_open(&fd, path, FA_READ);
 	if (r != FR_OK)
 		return r;
 
-	r = f_read(&fd, (void *)FIRM_ADDR, 0x200000, &br);
+	r = f_read(&fd, (void *)FIRM_ADDR, f_size(&fd), fsz);
 	if (r != FR_OK)
 		return r;
 
@@ -92,7 +91,7 @@ static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
 		return info->arm9Off + (addr - info->p9Entry) + info->p9Start;
 
 	if (addr >= info->arm11Entry && addr <= info->arm11Entry + info->arm11Size)
-	    return info->arm11Off + (addr - info->arm11Entry);
+		return info->arm11Off + (addr - info->arm11Entry);
 
 	return 0;
 }
@@ -196,13 +195,14 @@ int rxMode(int emu)
 	Elf32_Ehdr ehdr;
 	Elf32_Shdr shdr;
 	FIL fd, keyxFd;
-	UINT br;
+	UINT br, fsz;
 
 	setAgbBios();
 
 	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
 		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
-	r = loadFirm(path);
+    strcpy(path + strlen(path) - 4, "orig.bin");
+	r = loadFirm(path, &fsz);
 	if (r) {
 		msg = L"Failed to load NATIVE_FIRM: %d\n"
 			L"Reboot rxTools and try again.\n";
@@ -293,8 +293,7 @@ int rxMode(int emu)
 			if (sector)
 				*(uint32_t *)p = (sector / 0x200) - 1;
 		} else if (!strcmp(sh_name, ".rodata.label")) {
-			memcpy(p, "RX-", 3);
-			((char *)p)[3] = sector ? 'E' : 'S';
+			*(uint32_t *)p = sector ? 'E-XR' : 'S-XR';
 		} else if (shdr.sh_type == SHT_PROGBITS
 			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1))
 			&& (sysver < 7 || strcmp(sh_name, ".patch.p9.keyx")))
@@ -306,8 +305,10 @@ int rxMode(int emu)
 		}
 	}
 
-	f_open(&fd, "rxtools/data/NATIVE_FIRM.BIN", FA_WRITE | FA_CREATE_ALWAYS);
-	f_write(&fd, (void *)FIRM_ADDR, 0x200000, &br);
+	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
+		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
+	f_open(&fd, path, FA_WRITE | FA_CREATE_ALWAYS);
+	f_write(&fd, (void *)FIRM_ADDR, fsz, &br);
 	f_close(&fd);
 
 	r = loadExecReboot(); // This won't return if it succeeds.
@@ -384,7 +385,8 @@ void FirmLoader(){
 
 	if (!FileExplorerMain(firm_path, sizeof(firm_path)))
 	{
-		if (loadFirm(firm_path))
+		UINT fsz;
+		if (loadFirm(firm_path, &fsz))
 		{
 			ConsoleInit();
 			ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
