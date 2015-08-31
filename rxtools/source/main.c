@@ -121,7 +121,7 @@ int Initialize()
 
 			for (int i = 0; i < 0x333333 * 2; i++){
 				uint32_t pad = GetInput();
-				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
+				if (pad & BUTTON_R1 && i > 0x111111) goto rxTools_boot;
 			}
 		}
 		else
