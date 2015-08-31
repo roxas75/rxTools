@@ -47,7 +47,7 @@ FILES       := data/titlekey.bin data/reboot.bin data/patch.bin data/SplashScree
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork
 
-CFLAGS	:=	-g -Wall -O2 -mtune=arm946e-s -fomit-frame-pointer -ffast-math	\
+CFLAGS	:=	-g -Wall -Wno-multichar -O2 -mtune=arm946e-s -fomit-frame-pointer -ffast-math	\
 		-std=c99 $(ARCH)
 
 CFLAGS	+=	$(INCLUDE) -DARM9 -DSYSTEM_PATH=\"$(SYSTEM_PATH)\"
