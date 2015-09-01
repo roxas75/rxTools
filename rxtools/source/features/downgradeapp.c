@@ -261,6 +261,11 @@ static unsigned int HashGen(unsigned char* file, unsigned int size)
 	return ~crc;
 }
 
+int CheckHash(unsigned char* file, unsigned int size, unsigned int hash){ //BSD checksum		
+	if (HashGen(file, size) == hash) return 1;		
+	else return 0;		
+}
+
 int checkDgFile(char* path, unsigned int hash)
 {
 	unsigned char* buf = (unsigned char*)0x21000000;
@@ -271,7 +276,7 @@ int checkDgFile(char* path, unsigned int hash)
 	{
 		rb = FileRead(&fp, buf, fixedsize, 0);
 		FileClose(&fp);
-		if (HashGen(buf, rb) == hash) return 0;
+		if (!CheckHash(buf, rb, hash)) return 0;
 	} else {
 		return 0;
 	}
