@@ -80,5 +80,6 @@
 	"REGION_": "Region: %ls\n",
 	"REGION": "region",
 	"YES": "Yes",
-	"NO": "No"
+	"NO": "No",
+	"RANDOM_THEME": "Random theme"
 }

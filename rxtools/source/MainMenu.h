@@ -98,16 +98,17 @@ static Menu AdvancedMenu = {
 
 static Menu SettingsMenu = {
 	L"           SETTINGS",
-	.Option = (MenuEntry[7]){
+	.Option = (MenuEntry[8]){
 		{ L"Force UI boot               ", NULL, "app.bin" },
 		{ L"Selected theme:             ", NULL, "app.bin" },
+		{ L"Random theme:               ", NULL, "app.bin" },
 		{ L"Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
 		{ L"Enable 3D UI:               ", NULL, "app.bin" },
 		{ L"Quick boot:                 ", NULL, "app.bin" },
 		{ L"Autoboot into sysNAND:      ", NULL, "app.bin" },
 		{ L"Console language:           ", NULL, "app.bin" },
 	},
-	7,
+	8,
 	0,
 	0
 };
@@ -213,11 +214,12 @@ void SettingsMenuInit(){
 		swprintf(MyMenu->Name, CONSOLE_MAX_TITLE_LENGTH+1, strings[STR_SETTINGS]);
 		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
 		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SELECTED_THEME], theme_num + '0');
-		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ABSYSN], cfgs[CFG_ABSYSN].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
-		swprintf(MyMenu->Option[6].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
+		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_RANDOM], cfgs[CFG_RANDOM].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[3].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHOW_AGB], cfgs[CFG_AGB].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_QUICK_BOOT], cfgs[CFG_SILENT].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[6].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ABSYSN], cfgs[CFG_ABSYSN].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
+		swprintf(MyMenu->Option[7].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
 		MenuRefresh();
 
 		uint32_t pad_state = InputWait();
@@ -287,8 +289,9 @@ void SettingsMenuInit(){
 					trySetLangFromTheme(1);
 				}
 			}
-			else if (MyMenu->Current == 2) cfgs[CFG_AGB].val.i ^= 1;
-			else if (MyMenu->Current == 3)
+			else if (MyMenu->Current == 2) cfgs[CFG_RANDOM].val.i ^= 1;
+			else if (MyMenu->Current == 3) cfgs[CFG_AGB].val.i ^= 1;
+			else if (MyMenu->Current == 4)
 			{
 				cfgs[CFG_3D].val.i ^= 1;
 				sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
@@ -304,17 +307,17 @@ void SettingsMenuInit(){
 					DrawTopSplash(str, str, str);
 				}
 			}
-			else if (MyMenu->Current == 4)
+			else if (MyMenu->Current == 5)
 			{
 				cfgs[CFG_SILENT].val.i ^= 1;
 				if (cfgs[CFG_SILENT].val.i)
 					cfgs[CFG_GUI].val.i = 0;
 			}
-			else if (MyMenu->Current == 5)
+			else if (MyMenu->Current == 6)
 			{
 				cfgs[CFG_ABSYSN].val.i ^= 1;
 			}
-			else if (MyMenu->Current == 6)
+			else if (MyMenu->Current == 7)
 			{
 				if (pad_state & BUTTON_LEFT && curLang > 0)
 					curLang--;
