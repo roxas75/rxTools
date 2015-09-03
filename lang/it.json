@@ -78,5 +78,6 @@
 	"REGION": "regione",
 	"YES": "Sì",
 	"NO": "No",
-	"MENU_LANGUAGE": "Lingua    %16ls"
+	"MENU_LANGUAGE": "Lingua    %16ls",
+	"RANDOM_THEME": "Tema casuale"
 }

@@ -47,6 +47,7 @@ enum {
 enum {
 	CFG_GUI,
 	CFG_THEME,
+	CFG_RANDOM,
 	CFG_AGB,
 	CFG_3D,
 	CFG_SILENT,

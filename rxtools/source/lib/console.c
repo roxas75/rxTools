@@ -141,7 +141,6 @@ void ConsoleShow(){
 		if(lines == CONSOLE_MAX_LINES) break;
 	}
 	memcpy(BOT_SCREEN, tmpscreen, SCREEN_SIZE);
-	if (BOT_SCREEN2) memcpy(BOT_SCREEN2, tmpscreen, SCREEN_SIZE);
 }
 
 void ConsoleFlush(){

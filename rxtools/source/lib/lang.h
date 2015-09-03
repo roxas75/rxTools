@@ -156,6 +156,7 @@ enum {
 	STR_MSET6,
 	STR_YES,
 	STR_NO,
+	STR_RANDOM,
 	STR_NUM
 };
 

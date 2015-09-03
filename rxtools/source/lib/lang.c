@@ -159,7 +159,8 @@ static const char *keys[STR_NUM] = {
 	[STR_MSET4] = "MSET4",
 	[STR_MSET6] "MSET6",
 	[STR_YES] = "YES",
-	[STR_NO] = "NO"
+	[STR_NO] = "NO",
+	[STR_RANDOM] = "RANDOM_THEME"
 };
 
 void preloadStringsA()
