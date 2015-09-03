@@ -50,7 +50,6 @@ void DrawClearScreenAll(void) {
 	ClearScreen(TOP_SCREEN, RGB(0, 0, 0));
 	ClearScreen(TOP_SCREEN2, RGB(0, 0, 0));
 	ClearScreen(BOT_SCREEN, RGB(0, 0, 0));
-	ClearScreen(BOT_SCREEN2, RGB(0, 0, 0));
 	current_y = 0;
 }
 
@@ -108,9 +107,6 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, uint32_t x, u
 void DrawCharacter(uint8_t *screen, wchar_t character, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor)
 {
 	DrawCharacterOn1frame(screen, character, x, y, color, bgcolor);
-
-	if (screen == BOT_SCREEN && BOT_SCREEN2)
-		DrawCharacterOn1frame(BOT_SCREEN2, character, x, y, color, bgcolor);
 }
 
 void DrawString(uint8_t *screen, const wchar_t *str, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor)

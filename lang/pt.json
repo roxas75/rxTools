@@ -81,5 +81,6 @@
 	"VERSION_OF": "Versão do %ls: %u\n",
 	"WARNING": "Aviso",
 	"WRONG": "%s %ls incorreto!\n",
-	"YES": "Sim"
+	"YES": "Sim",
+	"RANDOM_THEME": "Tema aleatório"
 }
