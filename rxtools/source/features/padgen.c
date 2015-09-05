@@ -97,25 +97,31 @@ uint32_t SdPadgen()
 	SdInfo *info = (SdInfo*)0x20316000;
 
 	uint8_t movable_seed[0x120] = {0};
-	const char *filename = "/movable.sed";
-	wchar_t wfilename[13];
-	mbstowcs(wfilename, filename, 13);
-	// Load console 0x34 keyY from movable.sed if present on SD card
-	if (FileOpen(&fp, filename, 0)) {
-		bytesRead = FileRead(&fp, &movable_seed, 0x120, 0);
-		FileClose(&fp);
-		if (bytesRead != 0x120) {
-			print(strings[STR_WRONG], filename+1, strings[STR_SIZE]);
-			return 1;
+	const char *filename;
+	const char *filenames[] = { "movable.sed", "2:private/movable.sed", "1:private/movable.sed", 0 };
+	const char **pfilename;
+	wchar_t wfilename[64];
+	for(pfilename = filenames; *pfilename != 0; pfilename++)
+	{
+		filename = *pfilename;
+		mbstowcs(wfilename, filename, 64);
+		// Load console 0x34 keyY from movable.sed if present on SD card
+		if (FileOpen(&fp, filename, 0)) {
+			bytesRead = FileRead(&fp, &movable_seed, 0x120, 0);
+			FileClose(&fp);
+			if (bytesRead != 0x120) {
+				print(strings[STR_WRONG], filename, strings[STR_SIZE]);
+				return 1;
+			}
+			if (memcmp(movable_seed, "SEED", 4) != 0) {
+				print(strings[STR_WRONG], filename, strings[STR_CONTENT]);
+				return 1;
+			}
+			setup_aeskey(0x34, AES_BIG_INPUT|AES_NORMAL_INPUT, &movable_seed[0x110]);
+			use_aeskey(0x34);
+			break;
 		}
-		if (memcmp(movable_seed, "SEED", 4) != 0) {
-			print(strings[STR_WRONG], filename+1, strings[STR_CONTENT]);
-			return 1;
-		}
-		setup_aeskey(0x34, AES_BIG_INPUT|AES_NORMAL_INPUT, &movable_seed[0x110]);
-		use_aeskey(0x34);
 	}
-
 	filename = "/SDinfo.bin";
 	if (!FileOpen(&fp, filename, 0)) {
 		print(strings[STR_ERROR_OPENING], filename+1);
@@ -157,8 +163,8 @@ uint32_t CreatePad(PadInfo *info, int index)
 
 	if(info->filename[0] != 0 && info->filename[1] == 0 && info->filename[2] != 0 && info->filename[3] == 0)
 	{
-		char fname[90];
-		for(int i = 0; i < 90; ++i)
+		char fname[sizeof(info->filename) / 2];
+		for(int i = 0; i < sizeof(info->filename) / 2; ++i)
 		{
 			fname[i] = info->filename[i*2];
 			if(fname[i] == 0) break;
