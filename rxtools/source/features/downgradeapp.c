@@ -185,6 +185,7 @@ int CheckRegion(int drive)
 		}
 	}
 
+	ConsoleFlush();
 	print(strings[STR_COMPLETED]);
 	ConsoleShow();
 	FileRead(&secureinfo, &region, 1, 0x100);
@@ -460,6 +461,7 @@ void manageFBI(bool restore)
 {
 	unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
 	char *backup_path = "rxTools/h&s_backup";
+	char *fbi = "FBI";
 
 	File tmp;
 	char path[256] = {0};
@@ -576,6 +578,7 @@ void manageFBI(bool restore)
 					f_mkdir(tmpstr);
 
 					/* Backup the H&S TMD */
+					ConsoleFlush();
 					print(strings[STR_BACKING_UP], strings[STR_HEALTH_AND_SAFETY]);
 					ConsoleShow();
 					sprintf(path, "0:%s/%.12s", tmpstr, info.tmd+34);
@@ -614,7 +617,7 @@ void manageFBI(bool restore)
 					sprintf(path, "0:fbi_inject.tmd");
 					sprintf(path2, "0:fbi_inject.app");
 
-					print(strings[STR_INJECTING], "", strings[STR_FBI]);
+					print(strings[STR_INJECTING], fbi, strings[STR_HEALTH_AND_SAFETY]);
 				} else {
 					/* Generate the H&S backup data paths */
 					memset(&tmpstr, 0, 256);
