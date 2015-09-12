@@ -58,6 +58,7 @@ Make sure that the path to rxTools doesn't include space (' ').
 - Archshift, who wrote some useful libs I used: https://github.com/archshift
 - Many GBATemp users, who helped in the testing process
 - patois, who developed BRAHMA: https://github.com/patois/Brahma
+- WhoAmI? (Lavanoid) and nastys: Buildbot and server - lavanoid.no-ip.org
 - mid-kid and b1l1s, who developed CakeHax: https://github.com/mid-kid/CakeHax
 - Many other people who helped me in private
 - All the dudes who reversed and fucked up my project, who wasted their time on making useless keeping the sources private
