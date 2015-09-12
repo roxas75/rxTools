@@ -54,7 +54,6 @@ Make sure that the path to rxTools doesn't include space (' ').
 
  - BuildBot, aka Mr Wobot. 2 minute update interval (WhoAmI?): http://lavanoid.no-ip.org
  - Orkna's builds: https://j.mp/3ds-cfws
- - Nastys builds: https://mega.nz/#F!s8RDXbiJ!cxwQ4EvdIgoDI1OrwiAKFA
 
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
