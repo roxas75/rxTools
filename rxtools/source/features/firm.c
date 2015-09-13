@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "firm.h"
+#include "firmheaders.h"
 #include "mpcore.h"
 #include "hid.h"
 #include "lang.h"
@@ -96,8 +97,49 @@ static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
 	return 0;
 }
 
-int applyPatch(void *file, const char *patch, const FirmInfo *info)
+static void searchProcess9(const uint8_t *firm, FirmInfo *info) {
+	const uint8_t* start = firm + info->arm9Off;
+	const uint8_t* end = start + info->arm9Size;
+	const uint8_t* paddr = start;
+	for(; paddr < end; paddr += 0x100) {
+		if(*(const uint32_t*)paddr == 'HCCN' && *(const uint32_t*)(paddr + 0x100) == 'corP' && *(const uint32_t*)(paddr + 0x104) == '9sse') {
+			const uint8_t* addr = paddr - 0x100;
+			info->p9Off = addr - start;
+			addr += sizeof(ncch_header);
+			const exheader_header* header = (const exheader_header*)addr;
+			info->p9Entry = header->codesetinfo.text.address;
+			addr += sizeof(exheader_header) + sizeof(exefs_header);
+			info->p9Start = addr - start;
+			break;
+		}
+	}
+}
+
+static void makeFirmInfo(const uint8_t *firm, FirmInfo *info) {
+	memset(info, 0, sizeof(FirmInfo));
+	const firm_header* header = (const firm_header*)firm;
+	for(int i = 0; i < 4; ++i) {
+		if(header->section[i].offset == 0) continue;
+		switch(header->section[i].type) {
+		case 0:
+			info->arm9Entry = header->section[i].address;
+			info->arm9Off = header->section[i].offset;
+			info->arm9Size = header->section[i].size;
+			if(info->p9Off == 0) searchProcess9(firm, info);
+			break;
+		case 1:
+			info->arm11Entry = header->section[i].address;
+			info->arm11Off = header->section[i].offset;
+			info->arm11Size = header->section[i].size;
+			break;
+		}
+	}
+}
+
+
+int applyPatch(void *file, const char *patch)
 {
+	FirmInfo info;
 	File fd;
 	Elf32_Ehdr ehdr;
 	Elf32_Shdr shdr;
@@ -109,6 +151,8 @@ int applyPatch(void *file, const char *patch, const FirmInfo *info)
 	if (FileRead(&fd, &ehdr, sizeof(ehdr), 0) < 0)
 		return 1;
 
+	makeFirmInfo((const uint8_t*)file, &info);
+
 	cur = ehdr.e_shoff;
 	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
 		if (FileRead(&fd, &shdr, sizeof(shdr), cur) < 0)
@@ -117,7 +161,7 @@ int applyPatch(void *file, const char *patch, const FirmInfo *info)
 		if (shdr.sh_type != SHT_PROGBITS || !(shdr.sh_flags & SHF_ALLOC))
 			continue;
 
-		off = addrToOff(shdr.sh_addr, info);
+		off = addrToOff(shdr.sh_addr, &info);
 		if (off == 0)
 			continue;
 
@@ -182,13 +226,11 @@ int rxMode(int emu)
 		DrawBottomSplash(s);
 	}
 
-	static const FirmInfo ktrInfo = { 0x66A00, 0x8A600, 0x08006000, 0x33A00, 0x33000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000 };
-	static const FirmInfo ctrInfo = { 0x66000, 0x84A00, 0x08006800, 0x35000, 0x31000, 0x1FF80000, 0x15B00, 0x16700, 0x08028000 };
 	static const char patchNandPrefix[] = ".patch.p9.nand";
 	unsigned int cur, off, shstrSize;
 	char path[64], shstrtab[512], *sh_name;
 	const char *platformDir;
-	const FirmInfo *info;
+	FirmInfo info;
 	const wchar_t *msg;
 	int r, sector;
 	void *p;
@@ -201,23 +243,22 @@ int rxMode(int emu)
 
 	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
 		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
-    strcpy(path + strlen(path) - 4, "orig.bin");
+	strcpy(path + strlen(path) - 4, "orig.bin");
 	r = loadFirm(path, &fsz);
 	if (r) {
 		msg = L"Failed to load NATIVE_FIRM: %d\n"
 			L"Reboot rxTools and try again.\n";
 		goto fail;
 	}
+	makeFirmInfo((const uint8_t*)FIRM_ADDR, &info);
 
 	r = getMpInfo();
 	switch (r) {
 		case MPINFO_KTR:
-			info = &ktrInfo;
 			platformDir = "ktr";
 			break;
 
 		case MPINFO_CTR:
-			info = &ctrInfo;
 			platformDir = "ctr";
 			break;
 
@@ -273,7 +314,7 @@ int rxMode(int emu)
 		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
 			continue;
 
-		off = addrToOff(shdr.sh_addr, info);
+		off = addrToOff(shdr.sh_addr, &info);
 		if (off == 0)
 			continue;
 
