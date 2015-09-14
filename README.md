@@ -14,7 +14,7 @@ I do not support piracy in any way, all the data and information in my software 
 ## Current functionality
 ### General
 - Support for Web Browser (SPIDER) entrypoint for Old3DS (ver 4.1-9.2)
-- Support for System Settings (MSET) entrypoint for Old3DS (6.0-6.4)
+- Support for System Settings (MSET) entrypoint for Old3DS (ver 4.1-4.5, 6.0-6.4, and 9.2 with MSET downgraded to 6.x)
 - Support for System Settings (MSET) downgrading for Old3DS
 - Support for Ninjhax (Not Stable)
 - Hacking tools collection
@@ -45,6 +45,7 @@ Requirements for GNU/Linux:
 - [devkitPRO and devkitARM](http://3dbrew.org/wiki/Setting_up_Development_Environment) (follow the tutorial for Linux)
 - [ImageMagick](http://www.imagemagick.org) (on Debian/Ubuntu, [install it using apt](https://apps.ubuntu.com/cat/applications/imagemagick/))
 
+Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets. Add firmware.bin (run tools/cdn_firm.py to download it) to release/rxTools/sys, then copy the contents of the release folder to the root of your SD card.  
 If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)* error on Windows, look at your PATH and move any path with parenthesis to the end of it
 
 Make sure that the path to rxTools doesn't include space (' ').
