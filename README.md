@@ -31,7 +31,7 @@ I do not support piracy in any way, all the data and information in my software 
 - Dynamic RAM dumping (just for debug purposes)
 
 ## How to build
-Requires ImageMagick (6.8.9 >) - Do not use Ubuntu 14.04 as the package is outdated.
+Requires ImageMagick >= 6.8.9 - If you are using Ubuntu 14.04 or below, do not use the version in the official repositories, as it is outdated
 
 Requirements for Windows:
 - git, clone this repository with the following command: *git  clone --recursive https://github.com/roxas75/rxTools.git*
