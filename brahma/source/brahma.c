@@ -41,9 +41,10 @@ void do_gshax_copy (void *dst, void *src, u32 len) {
 	u32 check_mem = linearMemAlign(0x10000, 0x40);
 	s32 i = 0;
 
-	for (i = 0; i < 16; ++i) {
+	for (i = 0; i < 20; ++i) {
 		GSPGPU_FlushDataCache (NULL, src, len);
 		GX_SetTextureCopy(NULL, src, 0, dst, 0, len, 8);
+		svcSleepThread(0x400000LL);
 		GSPGPU_FlushDataCache (NULL, check_mem, 16);
 		GX_SetTextureCopy(NULL, src, 0, check_mem, 0, 0x40, 8);
 	}
@@ -119,13 +120,11 @@ void priv_write_four (u32 address) {
 // trick to clear icache
 void user_clear_icache (void) {
 	s32 i;
-	for(i = 0; i < 5; i++)
+	for(i = 0; i < 16; i++)
 	{
 		//Fills the top screen with random data
 		do_gshax_copy(0x14000000, 0x18000000, 0x46500);
-		svcSleepThread(0x400000LL);
 		do_gshax_copy(0x14046500, 0x18000000, 0x46500);
-		svcSleepThread(0x400000LL);
 	}
 }
 
