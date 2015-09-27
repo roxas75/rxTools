@@ -29,9 +29,3 @@ DisableInterrupts:
 EnableInterrupts:
 	msr cpsr_cx, r0
 	bx lr
-
-.global svcCorruptedCreateThread
-.type svcCorruptedCreateThread, %function
-svcCorruptedCreateThread:
-	svc 0x08
-	bx lr
