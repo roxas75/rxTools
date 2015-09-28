@@ -58,12 +58,9 @@ int Initialize()
 
 	preloadStringsA();
 
-	DrawString(BOT_SCREEN, strings[STR_INITIALIZING], FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
-
-	if(FSInit()){
-		DrawString(BOT_SCREEN, strings[STR_LOADING], BOT_SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, WHITE, BLACK);
-	}else{
-		DrawString(BOT_SCREEN, strings[STR_FAILED], BOT_SCREEN_WIDTH/2, SCREEN_HEIGHT-FONT_HEIGHT, RED, BLACK);
+	//Show error if FSInit is not successfull
+	if (!FSInit()){
+		DrawString(BOT_SCREEN, strings[STR_FAILED], BOT_SCREEN_WIDTH / 2, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
 		return 1;
 	}
 
@@ -73,17 +70,19 @@ int Initialize()
 	log(ll_info, "Initializing rxTools...");
 	*/
 
+	//Load the font
 	LoadFont();
 	if (fontLoaded){
-		swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), strings[STR_ERROR_OPENING], fontpath);
-		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT*2, RED, BLACK);
-	}else{
+		swprintf(wtmp, sizeof(wtmp) / sizeof(wtmp[0]), strings[STR_ERROR_OPENING], fontpath);
+		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT * 2, RED, BLACK);
+	}
+	else{
 		preloadStringsU();
 	}
 
 	//Console Stuff
 	ConsoleSetXY(15, 20);
-	ConsoleSetWH(BOT_SCREEN_WIDTH-30, SCREEN_HEIGHT-80);
+	ConsoleSetWH(BOT_SCREEN_WIDTH - 30, SCREEN_HEIGHT - 80);
 	ConsoleSetBorderColor(BLUE);
 	ConsoleSetTextColor(RGB(0, 141, 197));
 	ConsoleSetBackgroundColor(TRANSPARENT);
@@ -96,14 +95,17 @@ int Initialize()
 	InstallConfigData();
 	readCfg();
 
+	//Load strings
 	if (fontLoaded)
 		cfgs[CFG_LANG].val.s = cfgLang;
 	r = loadStrings();
 	if (r) {
 		sprintf(tmp, "%s/%s", langPath, cfgs[CFG_LANG].val.s);
-		swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), strings[STR_ERROR_OPENING], tmp);
-		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT-FONT_HEIGHT*3, RED, BLACK);
+		swprintf(wtmp, sizeof(wtmp) / sizeof(wtmp[0]), strings[STR_ERROR_OPENING], tmp);
+		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT * 3, RED, BLACK);
 	}
+
+	//Draw the top screen splash
 	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
 	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
 	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
@@ -112,38 +114,16 @@ int Initialize()
 	else
 		DrawTopSplash(str, str, str);
 
+	//If the GUI is not forced, show it only if L is hold, else directly boot rxMode (sys or emu)
 	if (!cfgs[CFG_GUI].val.i)
 	{
-		sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
-		DrawBottomSplash(str);
+		if ((~HID_STATE) & BUTTON_L1) return 0;
 
-		for (int i = 0; i < 0x333333 * 2; i++){
-			uint32_t pad = GetInput();
-			if (pad & BUTTON_R1 && i > 0x111111) goto rxTools_boot;
-		}
-		ConsoleInit();
-		ConsoleSetTitle(strings[STR_AUTOBOOT]);
-		print(strings[STR_HOLD_BUTTON_ACTION], strings[STR_BUTTON_R], strings[STR_OPEN_MENU]);
-		ConsoleShow();
-		for (int i = 0; i < 0x333333 * 6; i++){
-			uint32_t pad = GetInput();
-			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
-		}
-		if (cfgs[CFG_ABSYSN].val.i)
-			rxMode(0);
-		else
-			rxMode(1);
+		if (cfgs[CFG_ABSYSN].val.i) rxMode(0);
+		else rxMode(1);
 	}
-rxTools_boot:
-	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
-	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
-	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
-	if (cfgs[CFG_3D].val.i)
-		DrawTopSplash(str, strl, strr);
-	else
-		DrawTopSplash(str, str, str);
 
-	return 0;
+	return 0; //Boot rxTools menu
 }
 
 int main(){
