@@ -48,7 +48,6 @@ extern bool bootGUI;
 extern unsigned char Theme;
 extern bool agb_bios;
 extern bool theme_3d;
-extern bool silent_boot;
 extern unsigned char language;
 extern Menu* MyMenu;
 
