@@ -114,27 +114,20 @@ int Initialize()
 
 	if (!cfgs[CFG_GUI].val.i)
 	{
-		if(cfgs[CFG_SILENT].val.i)
-		{
-			sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
-			DrawBottomSplash(str);
+		sprintf(str, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+		DrawBottomSplash(str);
 
-			for (int i = 0; i < 0x333333 * 2; i++){
-				uint32_t pad = GetInput();
-				if (pad & BUTTON_R1 && i > 0x111111) goto rxTools_boot;
-			}
+		for (int i = 0; i < 0x333333 * 2; i++){
+			uint32_t pad = GetInput();
+			if (pad & BUTTON_R1 && i > 0x111111) goto rxTools_boot;
 		}
-		else
-		{
-			ConsoleInit();
-			ConsoleSetTitle(strings[STR_AUTOBOOT]);
-			print(strings[STR_HOLD_BUTTON_ACTION], strings[STR_BUTTON_R], strings[STR_OPEN_MENU]);
-			ConsoleShow();
-
-			for (int i = 0; i < 0x333333 * 6; i++){
-				uint32_t pad = GetInput();
-				if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
-			}
+		ConsoleInit();
+		ConsoleSetTitle(strings[STR_AUTOBOOT]);
+		print(strings[STR_HOLD_BUTTON_ACTION], strings[STR_BUTTON_R], strings[STR_OPEN_MENU]);
+		ConsoleShow();
+		for (int i = 0; i < 0x333333 * 6; i++){
+			uint32_t pad = GetInput();
+			if (pad & BUTTON_R1 && i > 0x333333) goto rxTools_boot;
 		}
 		if (cfgs[CFG_ABSYSN].val.i)
 			rxMode(0);
