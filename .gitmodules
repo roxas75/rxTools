@@ -19,3 +19,6 @@
 [submodule "CakesROP"]
 	path = CakesROP
 	url = https://github.com/mid-kid/CakesROP.git
+[submodule "brahma/source/libkhax"]
+	path = brahma/source/libkhax
+	url = git://github.com/Myriachan/libkhax
