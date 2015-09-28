@@ -24,8 +24,12 @@ SET_INCDIR := INCDIR=$(INCDIR)
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(SYSTEM_PATH)/
-#CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE)
-CAKESROP = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
+ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
+BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYSTEM_PATH)/ \
+			APP_TITLE="rxTools" \
+			APP_DESCRIPTION="Roxas75 3DS Toolkit & Custom Firmware" \
+			APP_AUTHOR="Patois, et al." \
+			ICON=$(abspath icon.png)
 
 all: $(CODE_FILE)
 
@@ -38,9 +42,9 @@ clean: distclean
 	@$(MAKE) $(SET_SYSTEM_PATH) -C rxtools clean
 	@$(MAKE) -C rxmode clean
 	@$(MAKE) -C reboot clean
-	@$(MAKE) $(SET_CODE_PATH) -C brahma clean
+	@$(MAKE) $(BRAHFLAGS) -C CakeBrah clean
 	@$(MAKE) -C theme clean
-	@$(MAKE) $(CAKESROP) -C CakesROP clean
+	@$(MAKE) $(ROPFLAGS) -C CakesROP clean
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider clean	
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
 	@rm -Rf payload.bin $(CODE_FILE)
@@ -91,9 +95,8 @@ release-mset:
 
 release-brahma:
 	@mkdir -p release/ninjhax/rxTools
-	@cp brahma/brahma.3dsx release/ninjhax/rxTools/rxtools.3dsx
-	@cp brahma/brahma.smdh release/ninjhax/rxTools/rxtools.smdh
-
+	@cp CakeBrah/code.bin.3dsx release/ninjhax/rxTools/rxtools.3dsx
+	@cp CakeBrah/code.bin.smdh release/ninjhax/rxTools/rxtools.smdh
 
 all-target-patches:	reboot/reboot.bin \
 	$(addprefix rxmode/build/,ktr/native_firm.elf \
@@ -104,11 +107,11 @@ $(CODE_FILE): rxtools/rxtools.bin
 	@dd if=rxtools/rxtools.bin of=$@ seek=160 conv=notrunc
 
 all-target-mset:
-	@$(MAKE) $(CAKESROP) -C CakesROP
+	@$(MAKE) $(ROPFLAGS) -C CakesROP
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
 
 all-target-brahma:
-	$(MAKE) $(SET_CODE_PATH) -C brahma
+	$(MAKE) $(BRAHFLAGS) -C CakeBrah
 
 reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
