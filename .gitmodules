@@ -19,3 +19,6 @@
 [submodule "CakesROP"]
 	path = CakesROP
 	url = https://github.com/mid-kid/CakesROP.git
+[submodule "CakeBrah"]
+	path = CakeBrah
+	url = https://github.com/mid-kid/CakeBrah.git
