@@ -407,9 +407,10 @@ int CheckInstallationData(){
 			break;
 
 		case MPINFO_KTR:
-			getFirmPath(str, TID_KTR_NATIVE_FIRM);
+			return 0;
+			/*getFirmPath(str, TID_KTR_NATIVE_FIRM);
 			if(!FileOpen(&file, str, 0)) return -1;
-			FileClose(&file);
+			FileClose(&file);*/
 
 			break;
 
