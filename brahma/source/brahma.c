@@ -41,13 +41,13 @@ void do_gshax_copy (void *dst, void *src, u32 len) {
 	u32 check_mem = linearMemAlign(0x10000, 0x40);
 	s32 i = 0;
 
-	for (i = 0; i < 16; ++i) {
+	for (i = 0; i < 20; ++i) {
 		GSPGPU_FlushDataCache (NULL, src, len);
 		GX_SetTextureCopy(NULL, src, 0, dst, 0, len, 8);
+		svcSleepThread(0x400000LL);
 		GSPGPU_FlushDataCache (NULL, check_mem, 16);
 		GX_SetTextureCopy(NULL, src, 0, check_mem, 0, 0x40, 8);
 	}
-	HB_FlushInvalidateCache();
 	linearFree(check_mem);
 	return;
 }
@@ -119,24 +119,13 @@ void priv_write_four (u32 address) {
 
 // trick to clear icache
 void user_clear_icache (void) {
-	s32 i, result = 0;
-	s32 (*nop_func)(void);
-	const u32 size_nopslide = 0x1000;	
-	u32 *nop_slide = memalign(0x1000, size_nopslide);
-	
-	if (nop_slide) { 			
-		HB_ReprotectMemory(nop_slide, 4, 7, &result);
-		for (i = 0; i < size_nopslide / sizeof(u32); i++) {
-			nop_slide[i] = ARM_NOP;
-		}
-		nop_slide[i-1] = ARM_RET;
-		nop_func = nop_slide;
-		HB_FlushInvalidateCache();
-	
-		nop_func();
-		free(nop_slide);
+	s32 i;
+	for(i = 0; i < 16; i++)
+	{
+		//Fills the top screen with random data
+		do_gshax_copy(0x14000000, 0x18000000, 0x46500);
+		do_gshax_copy(0x14046500, 0x18000000, 0x46500);
 	}
-	return;
 }
 
 /* get system dependent data and set up ARM11 structures */
@@ -443,7 +432,7 @@ s32 firm_reboot (void) {
 		fail_stage++; /* failure while trying to corrupt svcCreateThread() */
 		if (corrupt_svcCreateThread()) {
 			fail_stage++; /* Firmlaunch failure, ARM9 exploit failure*/
-			svcCorruptedCreateThread(priv_firm_reboot);
+				svcCorruptedCreateThread(priv_firm_reboot);
 		}
 	}
 

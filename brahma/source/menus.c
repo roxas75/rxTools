@@ -64,7 +64,7 @@ s32 print_main_menu (s32 idx, struct menu_t *menu) {
 	s32 newidx = 0;
 	consoleClear();
 
-	printf("\n* BRAHMA *\n\n\n");
+	printf("\n* BRAHMA II *\n\n\n");
 	printf("===========================\n");
 	newidx = print_menu(idx, menu);
 	printf("===========================\n\n");	
