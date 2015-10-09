@@ -35,7 +35,7 @@ static void rx_strcpy(char* dest, const char* source, unsigned int size, unsigne
 
 static inline unsigned int getHID()
 {
-	return ~*(unsigned int *)0x10146000;
+	return ~*(volatile unsigned int *)0x10146000;
 }
 
 static inline void svc_Backdoor(void *addr)
