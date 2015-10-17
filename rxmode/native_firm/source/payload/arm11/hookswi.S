@@ -24,11 +24,14 @@ reg = 0x1EF00000
 
 	.align	2
 hookSwi:
-	push	{ r0, r1 }
+	cpsid	aif
 
 	mov	r1, #ARM11_VRAM_PADDR
 	add	r0, r1, #reg - ARM11_VRAM_PADDR
+	ldr	r2, lcdWH
+	mov	r3, #1
 
+loop:
 	@ Set VRAM
 	str	r1, [r0, #0x468]
 	str	r1, [r0, #0x46C]
@@ -36,9 +39,8 @@ hookSwi:
 	str	r1, [r0, #0x56C]
 
 	@ Set LCD width and height
-	ldr	r1, lcdWH
-	str	r1, [r0, #0x45C]
-	str	r1, [r0, #0x55C]
+	str	r2, [r0, #0x45C]
+	str	r2, [r0, #0x55C]
 
 	@ Set LCD color format and turn off 3D
 	ldr	r1, [r0, #0x470]
@@ -52,13 +54,10 @@ hookSwi:
 	str	r1, [r0, #0x570]
 
 	@ Commit changes
-	mov	r1, #1
-	str	r1, [r0, #0x478]
-	str	r1, [r0, #0x578]
+	str	r3, [r0, #0x478]
+	str	r3, [r0, #0x578]
 
-	pop	{ r0, r1 }
-	ldr	pc, hookSwi - 4
-
+	b	loop
 lcdWH:
 	.word	0x14000F0	@ 320x240
 

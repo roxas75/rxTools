@@ -13,35 +13,18 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-.text
-
-.thumb
 .global fopen9
 .type fopen9, %function
-	fopen9:
-		push {r0-r6, lr}
-		ldr r4, =0x0805B181
-		blx r4
-		pop {r0-r6, pc}
-.pool
+.thumb_set fopen9, 0x0805B180
 
-.thumb
 .global fwrite9
 .type fwrite9, %function
-	fwrite9:
-		push {r4, lr}
-		ldr r4, =0x0805C4D1
-		blx r4
-		pop {r4, pc}
-.pool
+.thumb_set fwrite9, 0x0805C4D0
 
-.thumb
 .global fread9
 .type fread9, %function
-fread9 = 0x0804D9B1
-.pool
+.thumb_set fread9, 0x0804D9B0
 
-.thumb
 .global fclose9
 .type fclose9, %function
-fclose9 = 0x0805B26D
+.thumb_set fclose9, 0x0805B26C
