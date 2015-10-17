@@ -15,7 +15,7 @@ SECTIONS
 	. = 0x080282f8;
 	.patch.p9.keyx : { *(.patch.p9.keyx) }
 
-	. = 0x0805d63c;
+	. = 0x0805d628;
 	.patch.p9.sig.1 : { *(.patch.p9.sig.1) }
 
 	. = 0x080632b8;
