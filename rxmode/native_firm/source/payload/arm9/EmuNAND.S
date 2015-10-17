@@ -13,170 +13,54 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-.section .rodata.nand.sector, "a"
+	.section .rodata.nand.sector, "a"
 nandTopSector:
 	.word 0xAAAABBBB
 
-.arm
-.text
-.global EMUNAND_WRITE
-
+	.arm
+	.text
+	.global	nandHook
+nandHook:
+	stmib	sp, {r2-r3}
+	ldr	r7, [lr, #-1]
+	ldmib	r0, {r5-r6}
 #ifdef PLATFORM_KTR
-EntryPoint = 0x080D86F0
-Break_Func = 0x08062891
+	ldr	r4, =0x080D86F0
 #else
-EntryPoint = 0x080D8670
-Break_Func = 0x08062A29
+	ldr	r4, =0x080D8670
+#endif
+	cmp	r5, r4
+	beq	loc_801A310
+	mov	r5, r4
+	cmp	r6, #0
+	ldreq	r2, =nandTopSector
+	ldreq	r6, [r2]
+
+loc_801A310:
+	mov	r4, r0
+	movs	r0, r1, lsl #23
+	beq	loc_801A33C
+#ifdef PLATFORM_KTR
+	blx	0x08062890
+#else
+	blx	0x08062A28
 #endif
 
-EMUNAND_WRITE:
-				 STMFD   SP!, {R0-R3}
-                 MOV     R3, R0
-                 LDR     R1, =bytes1
-                 LDR     R2, [R3,#4]
-                 STR     R2, [R1,#4]
-                 LDR     R0, =EntryPoint
-                 CMP     R2, R0
-                 LDR     R2, [R3,#8]
-                 STR     R2, [R1]
-                 LDRNE   R1, =bytes2
-                 LDRNE   R1, [R1]
-                 CMPNE   R1, #0
-                 BEQ     loc_801A310
-                 LDR     R1, =EntryPoint
-                 STR     R1, [R3,#4]
-				 cmp     r2, #0
-				 ldreq   r2, =nandTopSector
-				 ldreq   r2, [r2]
-                 STR     R2, [R3,#8]
+loc_801A33C:
+	mov	r0, r1, lsr #9
+	add	r0, r0, r6
+	str	r0, [sp]
+	ldr	r1, [r5]
+	ldr	r1, [r1, #24]
+	blx	r1
+	mov	r3, r0
+	ldr	r0, [r5, #32]
+	cmp	r5, #0
+	moveq	r1, r5
+	addne	r1, r5, #8
+	add	r2, r4, #12
+	blx	r7
+	stmib	r4, {r5-r6}
+	ldmfd	sp!, {r1-r7, pc}
 
- loc_801A310:
-                 LDMFD   SP!, {R0-R3}
-                 MOVS    R4, R0
-                 MOVS    R5, R1
-                 MOVS    R7, R2
-                 MOVS    R6, R3
-                 MOVS    R0, R1,LSL#23
-                 BEQ     loc_801A33C
-                 STMFD   SP!, {R4}
-                 LDR     R4, =Break_Func
-                 BLX     R4
-                 LDMFD   SP!, {R4}
-
- loc_801A33C:
-                 LDR     R0, [R4,#4]
-                 LDR     R1, [R0]
-                 LDR     R1, [R1,#0x18]
-                 BLX     R1
-                 LDR     R1, [R4,#4]
-                 MOVS    R3, R0
-                 LDR     R0, [R1,#0x20]
-                 MOVS    R2, R5,LSR#9
-                 MOV     R12, R0
-                 LDR     R0, [R4,#8]
-                 STR     R7, [SP,#4]
-                 ADDS    R0, R0, R2
-                 CMP     R1, #0
-                 STR     R6, [SP,#8]
-                 STR     R0, [SP]
-                 BEQ     loc_801A380
-                 ADDS    R1, R1, #8
-
- loc_801A380:
-                 MOVS    R2, R4
-                 ADDS    R2, R2, #0xC
-                 MOV     R0, R12
-#ifdef PLATFORM_KTR
-                 LDR     R5, =0x080788C1
-#else
-                 LDR     R5, =0x08078971
-#endif
-                 BLX     R5
-                 STMFD   SP!, {R0-R3}
-                 ldr r2, =bytes1
-                 LDR     R1, [R2]
-                 STR     R1, [R4,#8]
-                 LDR     R1, [R2,#4]
-                 STR     R1, [R4,#4]
-                 LDMFD   SP!, {R0-R3}
-                 LDMFD   SP!, {R1-R7,PC}
-
-.global EMUNAND_READ
-EMUNAND_READ:
-				 STMFD   SP!, {R0-R3}
-                 MOV     R3, R0
-				 LDR r1, =bytes1
-                 LDR     R2, [R3,#4]
-                 STR     R2, [R1,#4]
-                 LDR     R0, =EntryPoint
-                 CMP     R2, R0
-                 LDR     R2, [R3,#8]
-                 STR     R2, [R1]
-                 LDRNE   R1, =bytes2
-                 LDRNE   R1, [R1]
-                 CMPNE   R1, #0
-                 BEQ     loc_801A40C
-                 LDR     R1, =EntryPoint
-                 STR     R1, [R3,#4]
-                 cmp     r2, #0
-				 ldreq   r2, =nandTopSector
-				 ldreq   r2, [r2]
-                 STR     R2, [R3,#8]
-
- loc_801A40C:
-                 LDMFD   SP!, {R0-R3}
-                 MOVS    R4, R0
-                 MOVS    R5, R1
-                 MOVS    R7, R2
-                 MOVS    R6, R3
-                 MOVS    R0, R1,LSL#23
-                 BEQ     loc_801A438
-                 STMFD   SP!, {R4}
-                 LDR     R4, =Break_Func
-                 BLX     R4
-                 LDMFD   SP!, {R4}
-
- loc_801A438:
-                 LDR     R0, [R4,#4]
-                 LDR     R1, [R0]
-                 LDR     R1, [R1,#0x18]
-                 BLX     R1
-                 LDR     R1, [R4,#4]
-                 MOVS    R3, R0
-                 LDR     R0, [R1,#0x20]
-                 MOVS    R2, R5,LSR#9
-                 MOV     R12, R0
-                 LDR     R0, [R4,#8]
-                 STR     R7, [SP,#4]
-                 ADDS    R0, R0, R2
-                 CMP     R1, #0
-                 STR     R6, [SP,#8]
-                 STR     R0, [SP]
-                 BEQ     loc_801A47C
-                 ADDS    R1, R1, #8
-
- loc_801A47C:
-                 MOVS    R2, R4
-                 ADDS    R2, R2, #0xC
-                 MOV     R0, R12
-#ifdef PLATFORM_KTR
-                 LDR     R5, =0x080786A1
-#else
-                 LDR     R5, =0x08078751
-#endif
-                 BLX     R5
-                 STMFD   SP!, {R0-R3}
-                 ldr r2, =bytes1
-                 LDR     R1, [R2]
-                 STR     R1, [R4,#8]
-                 LDR     R1, [R2,#4]
-                 STR     R1, [R4,#4]
-                 LDMFD   SP!, {R0-R3}
-                 LDMFD   SP!, {R1-R7,PC}
-
-bytes1:
-	.word 0
-	.word 0
-bytes2:
-	.word 1
-	.word 0
+	.size nandHook, . - nandHook

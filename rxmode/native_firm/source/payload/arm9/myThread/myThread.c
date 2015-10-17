@@ -30,24 +30,25 @@
 #include "lib.c"
 
 #ifdef DEBUG_DUMP_FCRAM
-void memdump(wchar_t* filename, unsigned char* buf, unsigned int size){
+static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
+{
+#ifndef PLATFORM_KTR
 	unsigned int handle[8];
-	unsigned int br;
-	int i;
+	unsigned int i;
 
-	for(i = 0; i < 0x600000; i++){
-		*(ARM9_VRAM_ADDR + i) = 0x77;			//Grey flush : Start Dumping
-	}
+	for (i = 0; i < 0x600000; i++)
+		((char *)ARM9_VRAM_ADDR)[i] = 0x77;			//Grey flush : Start Dumping
 
 	for (i = 0; i < sizeof(handle) / sizeof(unsigned int); i++)
 		handle[i] = 0;
 
 	fopen9(handle, filename, 6);
-	fwrite9(handle, &br, buf, size);
+	fwrite9(handle, &i, buf, size);
 	fclose9(handle);
-	for(i = 0; i < 0x600000; i++){
-		*(ARM9_VRAM_ADDR + i) = 0xFF;			//White flush : Finished Dumping
-	}
+
+	for (i = 0; i < 0x600000; i++)
+		((char *)ARM9_VRAM_ADDR)[i] = 0xFF;			//White flush : Finished Dumping
+#endif
 }
 #endif
 
@@ -262,16 +263,12 @@ _Noreturn void mainHandler(int regs[REG_NUM], const char *type)
 		__asm__ volatile ("msr cpsr_c, %0" :: "r"(origCpsr));
 
 		p = arm11Code;
-
-		*p = 0xFFFF0010 + getArmBoff(arm11Swi);
-		p++;
-
 		for (q = hookSwi; q != hookSwiBtm; q++) {
 			*p = *q;
 			p++;
 		}
 
-		writeArmB(arm11Swi, arm11Code + 1);
+		writeArmB(arm11Swi, arm11Code);
 
 		initScr();
 		scrPuts("\nException Information by rxTools\n\n\n\n"
