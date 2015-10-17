@@ -18,8 +18,3 @@
 .section .patch.p9.sig.2, "a"
 .thumb
 	mov	r0, #0
-#ifdef PLATFORM_KTR
-	b	0x8063866
-#else
-	b	0x80631AA
-#endif
