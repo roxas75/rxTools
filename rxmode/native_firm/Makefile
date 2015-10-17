@@ -31,7 +31,7 @@ TARGET	:= native_firm
 SOURCE	:= source
 LD	:= arm-none-eabi-ld
 
-CFLAGS	:= -Os -mcpu=arm946e-s -march=armv5te -mlittle-endian -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
+CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
 
 PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
 	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
@@ -82,25 +82,25 @@ $(BUILD)/$(TARGET)_unstrip.elf: $(PATCHES)
 	$(LD) -i -T$(LDSCRIPT) $^ -o $@
 
 $(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS) $(BUILD)/payload
-	$(LD) -T$(LDSCRIPT) $(PAYLOAD_OBJS) -o $@
+	$(LD) --use-blx -T$(LDSCRIPT) $(PAYLOAD_OBJS) -o $@
 
 $(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
 	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
 
 $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.c $(BUILD)/payload/arm9/myThread
-	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
+	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.s $(BUILD)/payload/arm9/myThread
 	$(AS) $< -o $@
 
 $(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.S $(BUILD)/payload/arm9
-	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
+	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S $(BUILD)/payload/arm11
-	$(CC) $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
+	$(CC) -mcpu=mpcore $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.S $(BUILD)
-	$(CC) $(CFLAGS) $< -c -o $@
+	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@
