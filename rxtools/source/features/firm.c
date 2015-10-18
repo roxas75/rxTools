@@ -81,23 +81,28 @@ static int loadFirm(char *path, UINT *fsz)
 	return *(uint32_t *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
 }
 
-static unsigned int addrToOff(Elf32_Addr addr, const FirmInfo *info)
+static uint32_t locateSecInFirm(const Elf32_Shdr *shdr, const FirmHdr *hdr)
 {
-	if (addr >= info->arm9Entry && addr <= info->arm9Entry + info->arm9Size)
-		return info->arm9Off + (addr - info->arm9Entry);
+	int i, offInSeg;
 
-	if (addr >= info->arm11Entry && addr <= info->arm11Entry + info->arm11Size)
-		return info->arm11Off + (addr - info->arm11Entry);
+	for (i = 0; i < FIRM_SEG_NUM; i++) {
+		offInSeg = shdr->sh_addr - hdr->segs[i].addr;
+		if (offInSeg >= 0 &&
+			shdr->sh_addr + shdr->sh_size < hdr->segs[i].addr + hdr->segs[i].size)
+		{
+			return hdr->segs[i].offset + offInSeg;
+		}
+	}
 
 	return 0;
 }
 
-int applyPatch(void *file, const char *patch, const FirmInfo *info)
+int applyPatch(void *file, const char *patch)
 {
 	File fd;
 	Elf32_Ehdr ehdr;
 	Elf32_Shdr shdr;
-	unsigned int cur, off;
+	unsigned int cur, offset;
 
 	if (!FileOpen(&fd, patch, 0))
 		return 1;
@@ -113,11 +118,12 @@ int applyPatch(void *file, const char *patch, const FirmInfo *info)
 		if (shdr.sh_type != SHT_PROGBITS || !(shdr.sh_flags & SHF_ALLOC))
 			continue;
 
-		off = addrToOff(shdr.sh_addr, info);
-		if (off == 0)
+		offset = locateSecInFirm(&shdr, (FirmHdr *)file);
+		if (offset == 0)
 			continue;
 
-		FileRead(&fd, (void *)((uintptr_t)file + off), shdr.sh_size, shdr.sh_offset);
+		FileRead(&fd, (void *)((uintptr_t)file + offset),
+			shdr.sh_size, shdr.sh_offset);
 	}
 
 	return 0;
@@ -178,13 +184,10 @@ int rxMode(int emu)
 		DrawBottomSplash(s);
 	}
 
-	static const FirmInfo ktrInfo = { 0x66A00, 0x8A600, 0x08006000, 0x33A00, 0x33000, 0x1FF80000 };
-	static const FirmInfo ctrInfo = { 0x66000, 0x84A00, 0x08006800, 0x35000, 0x31000, 0x1FF80000 };
 	static const char patchNandPrefix[] = ".patch.p9.nand";
-	unsigned int cur, off, shstrSize;
+	unsigned int cur, offset, shstrSize;
 	char path[64], shstrtab[512], *sh_name;
 	const char *platformDir;
-	const FirmInfo *info;
 	const wchar_t *msg;
 	int r, sector;
 	void *p;
@@ -208,12 +211,10 @@ int rxMode(int emu)
 	r = getMpInfo();
 	switch (r) {
 		case MPINFO_KTR:
-			info = &ktrInfo;
 			platformDir = "ktr";
 			break;
 
 		case MPINFO_CTR:
-			info = &ctrInfo;
 			platformDir = "ctr";
 			break;
 
@@ -269,11 +270,11 @@ int rxMode(int emu)
 		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
 			continue;
 
-		off = addrToOff(shdr.sh_addr, info);
-		if (off == 0)
+		offset = locateSecInFirm(&shdr, (FirmHdr *)FIRM_ADDR);
+		if (offset == 0)
 			continue;
 
-		p = (void *)(FIRM_ADDR + off);
+		p = (void *)(FIRM_ADDR + offset);
 		sh_name = shstrtab + shdr.sh_name;
 
 		if (!strcmp(sh_name, ".rodata.keyx")) {
