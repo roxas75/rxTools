@@ -43,7 +43,7 @@ typedef enum {
 
 extern const char firmPathFmt[];
 
-int DevMode();
+int PastaMode();
 void FirmLoader();
 void rxModeWithSplash(int emu);
 int rxMode(int emu);
