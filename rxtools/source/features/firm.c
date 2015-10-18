@@ -343,8 +343,8 @@ void rxModeWithSplash(int emu)
 }
 
 //Just patches signatures check, loads in sysnand
-int DevMode(){
-	/*DevMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
+int PastaMode(){
+	/*PastaMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
 	uint8_t* firm = (void*)0x24000000;
 	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
