@@ -236,8 +236,6 @@ int readCfg()
 }
 
 int InstallData(char* drive){
-	static const FirmInfo agb_info = { 0x8B800, 0x4CE00, 0x08006800, 0, 0, 0 };
-	static const FirmInfo twl_info = { 0x153600, 0x4D200, 0x08006800, 0, 0, 0 };
 	AppInfo appInfo;
 	FIL firmfile;
 	File fd;
@@ -324,7 +322,7 @@ int InstallData(char* drive){
 	}
 
 	if (a_firm) {
-		if (applyPatch(a_firm, SYSTEM_PATH "/patches/ctr/agb_firm.elf", &agb_info))
+		if (applyPatch(a_firm, SYSTEM_PATH "/patches/ctr/agb_firm.elf"))
 			return CONF_ERRPATCH;
 
 		getFirmPath(path, TID_CTR_AGB_FIRM);
@@ -348,7 +346,7 @@ int InstallData(char* drive){
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &br);
 	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
 	if(t_firm){
-		if (applyPatch(t_firm, SYSTEM_PATH "/patches/ctr/twl_firm.elf", &twl_info))
+		if (applyPatch(t_firm, SYSTEM_PATH "/patches/ctr/twl_firm.elf"))
 			return CONF_ERRPATCH;
 
 		getFirmPath(path, TID_CTR_TWL_FIRM);
