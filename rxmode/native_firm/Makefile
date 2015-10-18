@@ -30,6 +30,7 @@ include $(DEVKITARM)/base_rules
 TARGET	:= native_firm
 SOURCE	:= source
 LD	:= arm-none-eabi-ld
+OBJCOPY	:= arm-none-eabi-objcopy
 
 CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
 
@@ -75,10 +76,10 @@ $(BUILD)/payload/arm9/myThread:
 $(BUILD)/payload/arm11:
 	@[ -d $@ ] || mkdir -p $@
 
-%.elf: %_unstrip.elf
-	$(STRIP) $< -o $@
+%.elf: %_unadjust.elf
+	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$((0x0801CF00 - 0x08028000)) $< $@
 
-$(BUILD)/$(TARGET)_unstrip.elf: $(PATCHES)
+$(BUILD)/$(TARGET)_unadjust.elf: $(PATCHES)
 	$(LD) -i -T$(LDSCRIPT) $^ -o $@
 
 $(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS) $(BUILD)/payload
