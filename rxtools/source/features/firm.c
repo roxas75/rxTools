@@ -39,7 +39,6 @@
 #include "lang.h"
 
 #define FIRM_ADDR 0x24000000
-#define ARMBXR4	0x47204C00
 
 const char firmPathFmt[] = "rxTools/data/00040138%08X.bin";
 
