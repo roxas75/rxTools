@@ -45,16 +45,23 @@ Requirements for GNU/Linux:
 - [devkitPRO and devkitARM](http://3dbrew.org/wiki/Setting_up_Development_Environment) (follow the tutorial for Linux)
 - [ImageMagick](http://www.imagemagick.org) (on Debian/Ubuntu, [install it using apt](https://apps.ubuntu.com/cat/applications/imagemagick/))
 
-Just run **make** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets.
+Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets. Add firmware.bin (run tools/cdn_firm.py to download it) to release/rxTools/sys, then copy the contents of the release folder to the root of your SD card.  
+
 If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)* error on Windows, look at your PATH and move any path with parenthesis to the end of it
 
 Make sure that the path to rxTools doesn't include space (' ').
+
+## How to launch with Spider
+rxTools *now* stores its code.bin in rxTools/sys/code.bin (formerly /rxTools.dat). To launch rxTools using the Spider exploit visit https://dukesrg.github.io/?rxTools/sys/code.bin using the 3DS Internet Browser. (Requires ver 9.2 or older).
+
+## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
+Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
 
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
 - Roxas75, myself, as the creator of rxTools
 - Gateway team, for their work
-- Reisyukaku for N3DS MSET 
+- Reisyukaku for N3DS MSET
 - Archshift, who wrote some useful libs I used: https://github.com/archshift
 - Many GBATemp users, who helped in the testing process
 - patois, who developed BRAHMA: https://github.com/patois/Brahma
