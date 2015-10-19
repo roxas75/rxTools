@@ -14,7 +14,7 @@ I do not support piracy in any way, all the data and information in my software 
 ## Current functionality
 ### General
 - Support for Web Browser (SPIDER) entrypoint for Old3DS (ver 4.1-9.2)
-- Support for System Settings (MSET) entrypoint for Old3DS (ver 4.1-4.5 and 6.0-6.4)
+- Support for System Settings (MSET) entrypoint for Old3DS (ver 4.1-4.5, 6.0-6.4, and 9.2 with MSET downgraded to 6.x)
 - Support for System Settings (MSET) downgrading for Old3DS
 - Support for Ninjhax (Not Stable)
 - Hacking tools collection
@@ -53,6 +53,9 @@ Make sure that the path to rxTools doesn't include space (' ').
 
 ## How to launch with Spider
 rxTools *now* stores its code.bin in rxTools/sys/code.bin (formerly /rxTools.dat). To launch rxTools using the Spider exploit visit https://dukesrg.github.io/?rxTools/sys/code.bin using the 3DS Internet Browser. (Requires ver 9.2 or older).
+
+## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
+Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
 
 ## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
 Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
