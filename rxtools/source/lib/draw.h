@@ -31,8 +31,8 @@
 #define FONT_HWIDTH	(FONT_WIDTH>>1)
 #define FONT_CJK_START	0x2400
 #define TOP_SCREEN	(uint8_t*)(*(uint32_t*)0x080FFFC0)
-#define TOP_SCREEN2	(uint8_t*)(*(uint32_t*)0x080FFFC4)
-#define BOT_SCREEN	(uint8_t*)(*(uint32_t*)0x080FFFD4)
+#define TOP_SCREEN2	(uint8_t*)(*(uint32_t*)0x080FFFC8)
+#define BOT_SCREEN	(uint8_t*)(*(uint32_t*)0x080FFFD0)
 
 //Colors Macros
 #define ARGB(a,r,g,b)	(a<<24|r<<16|g<<8|b) //console asks for B,G,R in bytes
