@@ -88,7 +88,7 @@ static uint32_t locateSecInFirm(const Elf32_Shdr *shdr, const FirmHdr *hdr)
 	for (i = 0; i < FIRM_SEG_NUM; i++) {
 		offInSeg = shdr->sh_addr - hdr->segs[i].addr;
 		if (offInSeg >= 0 &&
-			shdr->sh_addr + shdr->sh_size < hdr->segs[i].addr + hdr->segs[i].size)
+			shdr->sh_addr + shdr->sh_size <= hdr->segs[i].addr + hdr->segs[i].size)
 		{
 			return hdr->segs[i].offset + offInSeg;
 		}
