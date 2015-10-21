@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "fatfs/ff.h"
 
 #define FIRM_SEG_NUM (4)
 
@@ -57,7 +58,7 @@ void rxModeWithSplash(int emu);
 int rxMode(int emu);
 uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size);
 uint8_t *decryptFirmTitle(uint8_t *title, unsigned int size, uint8_t key[16]);
-int applyPatch(void *file, const char *patch);
+FRESULT applyPatch(void *file, const char *patch);
 
 static inline int getFirmPath(char *s, FirmTid id)
 {

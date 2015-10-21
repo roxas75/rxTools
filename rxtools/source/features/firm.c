@@ -97,22 +97,32 @@ static uint32_t locateSecInFirm(const Elf32_Shdr *shdr, const FirmHdr *hdr)
 	return 0;
 }
 
-int applyPatch(void *file, const char *patch)
+FRESULT applyPatch(void *file, const char *patch)
 {
-	File fd;
 	Elf32_Ehdr ehdr;
 	Elf32_Shdr shdr;
+	FRESULT r;
+	FIL f;
+	UINT br;
 	unsigned int cur, offset;
 
-	if (!FileOpen(&fd, patch, 0))
-		return 1;
+	r = f_open(&f, patch, FA_READ);
+	if (r != FR_OK)
+		return r;
 
-	if (FileRead(&fd, &ehdr, sizeof(ehdr), 0) < 0)
-		return 1;
+	r = f_read(&f, &ehdr, sizeof(ehdr), &br);
+	if (br < sizeof(ehdr)) {
+		f_close(&f);
+		return r == FR_OK ? EOF : r;
+	}
 
 	cur = ehdr.e_shoff;
 	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
-		if (FileRead(&fd, &shdr, sizeof(shdr), cur) < 0)
+		if (f_lseek(&f, cur) != FR_OK)
+			continue;
+
+		f_read(&f, &shdr, sizeof(shdr), &br);
+		if (br < sizeof(shdr))
 			continue;
 
 		if (shdr.sh_type != SHT_PROGBITS || !(shdr.sh_flags & SHF_ALLOC))
@@ -122,11 +132,13 @@ int applyPatch(void *file, const char *patch)
 		if (offset == 0)
 			continue;
 
-		FileRead(&fd, (void *)((uintptr_t)file + offset),
-			shdr.sh_size, shdr.sh_offset);
+		if (f_lseek(&f, shdr.sh_offset) != FR_OK)
+			continue;
+
+		f_read(&f, (void *)((uintptr_t)file + offset), shdr.sh_size, &br);
 	}
 
-	return 0;
+	return FR_OK;
 }
 
 uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){

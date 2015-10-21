@@ -236,17 +236,18 @@ int readCfg()
 	return 0;
 }
 
-int InstallData(char* drive){
+static FRESULT InstallData()
+{
 	const uint32_t firmLoId = 0x00040138;
 	AppInfo appInfo;
-	FIL firmfile;
-	File fd;
+	FIL f, firmfile;
+	FRESULT r;
 	unsigned int progressWidth, progressX;
 	wchar_t progressbar[8] = {0,};
 	wchar_t *progress = progressbar;
 	uint8_t key[16];
 	uint32_t hiId;
-	UINT br;
+	UINT processed;
 	char path[64];
 	int i;
 
@@ -259,27 +260,26 @@ int InstallData(char* drive){
 	ConsolePrevLine();
 
 	//Create the workdir
-	sprintf(path, "%s:%s", drive, DATAFOLDER);
-	f_mkdir(path);
+	f_mkdir(DATAFOLDER);
 
 	//Read firmware data
-	if (f_open(&firmfile, SYS_PATH "/firmware.bin", FA_READ | FA_OPEN_EXISTING) != FR_OK) return CONF_NOFIRMBIN;
+	r = f_open(&firmfile, SYS_PATH "/firmware.bin", FA_READ | FA_OPEN_EXISTING);
+	if (r != FR_OK)
+		return r;
+
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create decrypted native_firm
-	f_read(&firmfile, WORKBUF, NAT_SIZE, &br);
+	f_read(&firmfile, WORKBUF, NAT_SIZE, &processed);
 
 	hiId = getMpInfo() == MPINFO_CTR ?
 		TID_CTR_NATIVE_FIRM : TID_KTR_NATIVE_FIRM;
 
-	if (getTitleKeyWithCetk(key, SYSTEM_PATH "/cetk")
-		&& getTitleKey(key, firmLoId, hiId, 1))
-	{
-		return CONF_ERRNFIRM;
-	}
-
+	r = getTitleKeyWithCetk(key, SYS_PATH "/cetk");
+	if (r && getTitleKey(key, firmLoId, hiId, 1))
+		return r;
 
 	uint8_t* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, key);
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
@@ -288,13 +288,14 @@ int InstallData(char* drive){
 
 	getFirmPath(path, hiId);
 	strcpy(path + strlen(path) - 4, "orig.bin");
-	if(FileOpen(&fd, path, 1)){
-		FileWrite(&fd, n_firm, NAT_SIZE, 0);
-		FileClose(&fd);
-	}else {
-		f_close(&firmfile);
-		return CONF_ERRNFIRM;
-	}
+
+	r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
+	if (r != FR_OK)
+		goto fail;
+
+	f_write(&f, n_firm, NAT_SIZE, &processed);
+	f_close(&f);
+
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
@@ -305,7 +306,7 @@ int InstallData(char* drive){
 	//Create AGB patched firmware
 	hiId = TID_CTR_AGB_FIRM;
 
-	f_read(&firmfile, WORKBUF, AGB_SIZE, &br);
+	f_read(&firmfile, WORKBUF, AGB_SIZE, &processed);
 	getTitleKey(key, firmLoId, hiId, 1);
 	uint8_t* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, key);
 	if (!a_firm && checkEmuNAND())
@@ -321,36 +322,38 @@ int InstallData(char* drive){
 			appInfo.tidLo = firmLoId;
 			appInfo.tidHi = hiId;
 			FindApp(&appInfo);
-			if (!FileOpen(&fd, appInfo.content, 0) && checkEmuNAND())
-			{
-				/* Try with EmuNAND */
-				appInfo.drive = 2;
-				FindApp(&appInfo);
-				if (!FileOpen(&fd, appInfo.content, 0))
-				{
-					f_close(&firmfile);
-					return CONF_ERRNFIRM;
-				}
+			r = f_open(&f, appInfo.content, FA_READ);
+			if (r != FR_OK) {
+				if (checkEmuNAND()) {
+					/* Try with EmuNAND */
+					appInfo.drive = 2;
+					FindApp(&appInfo);
+					r = f_open(&f, appInfo.content, FA_READ);
+					if (r != FR_OK)
+						goto fail;
+				} else
+					goto fail;
 			}
 
-			FileRead(&fd, WORKBUF, AGB_SIZE, 0);
-			FileClose(&fd);
+			f_read(&f, WORKBUF, AGB_SIZE, &processed);
+			f_close(&f);
 			a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
 		}
 	}
 
 	if (a_firm) {
-		if (applyPatch(a_firm, SYS_PATH "/patches/ctr/agb_firm.elf"))
-			return CONF_ERRPATCH;
+		r = applyPatch(a_firm, SYS_PATH "/patches/ctr/agb_firm.elf");
+		if (r != FR_OK)
+			goto fail;
 
 		getFirmPath(path, hiId);
-		if(FileOpen(&fd, path, 1)){
-			FileWrite(&fd, a_firm, AGB_SIZE, 0);
-			FileClose(&fd);
-		}else {
-			f_close(&firmfile);
-			return CONF_ERRNFIRM;
-		}
+		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
+		if (r != FR_OK)
+			goto fail;
+
+		f_write(&f, a_firm, AGB_SIZE, &processed);
+		f_close(&f);
+
 		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 		progress += wcslen(strings[STR_PROGRESS_OK]);
 	} else {
@@ -361,22 +364,22 @@ int InstallData(char* drive){
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create TWL patched firmware
-	f_read(&firmfile, WORKBUF, TWL_SIZE, &br);
+	f_read(&firmfile, WORKBUF, TWL_SIZE, &processed);
 	getTitleKey(key, firmLoId, TID_CTR_TWL_FIRM, 1);
 	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, key);
 	if(t_firm){
-		if (applyPatch(t_firm, SYS_PATH "/patches/ctr/twl_firm.elf"))
-			return CONF_ERRPATCH;
+		r = applyPatch(t_firm, SYS_PATH "/patches/ctr/twl_firm.elf");
+		if (r != FR_OK)
+			goto fail;
 
 		getFirmPath(path, TID_CTR_TWL_FIRM);
-		if(FileOpen(&fd, path, 1)){
-			FileWrite(&fd, t_firm, TWL_SIZE, 0);
-			FileClose(&fd);
-			//FileCopy("0004013800000102.bin", tmpstr);
-		}else {
-			f_close(&firmfile);
-			return CONF_ERRNFIRM;
-		}
+		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
+		if (r)
+			goto fail;
+
+		f_write(&f, t_firm, TWL_SIZE, &processed);
+		f_close(&f);
+
 		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 		progress += wcslen(strings[STR_PROGRESS_OK]);
 	}else{
@@ -386,21 +389,22 @@ int InstallData(char* drive){
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 end:
-	sprintf(path, "%s:%s/data.bin", drive, DATAFOLDER);
-	if(FileOpen(&fd, path, 1)){
-		FileWrite(&fd, __DATE__, 12, 0);
-		FileWrite(&fd, __TIME__, 9, 12);
-		FileClose(&fd);
-	}else {
-		f_close(&firmfile);
-		return CONF_CANTOPENFILE;
-	}
+	sprintf(path, "%s/data.bin", DATAFOLDER);
+	r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
+	if (r != FR_OK)
+		goto fail;
+
+	f_write(&f, __DATE__, sizeof(__DATE__), &processed);
+	f_write(&f, __TIME__, sizeof(__TIME__), &processed);
+	f_close(&f);
+
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
+fail:
 	f_close(&firmfile);
-	return 0;
+	return r;
 }
 
 int CheckInstallationData(){
@@ -458,7 +462,7 @@ void InstallConfigData(){
 	sprintf(path, "/rxTools/Theme/%u/cfg0.bin", cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(path);
 
-	int res = InstallData("0");	//SD Card
+	int res = InstallData();
 	sprintf(path, "/rxTools/Theme/%u/cfg1%c.bin", cfgs[CFG_THEME].val.i, res == 0 ? 'O' : 'E');
 	DrawBottomSplash(path);
 	sprintf(path, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);

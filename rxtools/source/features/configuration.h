@@ -37,14 +37,6 @@ typedef struct {
 } Cfg;
 
 enum {
-	CONF_NOKEYX = -1,
-	CONF_NOFIRMBIN = -2,
-	CONF_ERRNFIRM = -3,
-	CONF_CANTOPENFILE = -4,
-	CONF_ERRPATCH = -5
-};
-
-enum {
 	CFG_GUI,
 	CFG_THEME,
 	CFG_RANDOM,
@@ -58,7 +50,6 @@ enum {
 
 extern Cfg cfgs[];
 
-int InstallData(char* drive);
 void InstallConfigData();
 
 void trySetLangFromTheme(int onswitch);
