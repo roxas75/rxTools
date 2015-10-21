@@ -51,7 +51,7 @@ static FRESULT loadExecReboot()
 	FRESULT r;
 	UINT br;
 
-	r = f_open(&fd, SYSTEM_PATH "/reboot.bin", FA_READ);
+	r = f_open(&fd, SYS_PATH "/reboot.bin", FA_READ);
 	if (r != FR_OK)
 		return r;
 
@@ -222,7 +222,7 @@ int rxMode(int emu)
 			goto fail;
 	}
 
-	sprintf(path, SYSTEM_PATH "/patches/%s/native_firm.elf", platformDir);
+	sprintf(path, SYS_PATH "/patches/%s/native_firm.elf", platformDir);
 	r = f_open(&fd, path, FA_READ);
 	if (r != FR_OK)
 		goto patchFail;

@@ -14,18 +14,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 CODE_FILE := code.bin
-SYSTEM_PATH := rxTools/sys
-SET_SYSTEM_PATH := SYSTEM_PATH=$(SYSTEM_PATH)
-SET_CODE_PATH := CODE_PATH=$(SYSTEM_PATH)/$(CODE_FILE)
-SET_DATNAME := DATNAME=$(SYSTEM_PATH)/$(CODE_FILE)
+SYS_PATH := rxTools/sys
+SET_SYS_PATH := SYS_PATH=$(SYS_PATH)
+SET_CODE_PATH := CODE_PATH=$(SYS_PATH)/$(CODE_FILE)
+SET_DATNAME := DATNAME=$(SYS_PATH)/$(CODE_FILE)
 
 INCDIR := -I$(CURDIR)/include
 SET_INCDIR := INCDIR=$(INCDIR)
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
-CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(SYSTEM_PATH)/
+CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(SYS_PATH)/
 ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
-BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYSTEM_PATH)/ \
+BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
 			APP_TITLE="rxTools" \
 			APP_DESCRIPTION="Roxas75 3DS Toolkit & Custom Firmware" \
 			APP_AUTHOR="Patois, et al." \
@@ -39,7 +39,7 @@ distclean:
 
 .PHONY: clean
 clean: distclean
-	@$(MAKE) $(SET_SYSTEM_PATH) -C rxtools clean
+	@$(MAKE) $(SET_SYS_PATH) -C rxtools clean
 	@$(MAKE) -C rxmode clean
 	@$(MAKE) -C reboot clean
 	@$(MAKE) $(BRAHFLAGS) -C CakeBrah clean
@@ -61,25 +61,25 @@ release-licenses:
 	@cp CakesROP/LICENSE release/LICENSE_CakesROP
 
 release-code:
-	@mkdir -p release/$(SYSTEM_PATH)
-	@cp $(CODE_FILE) release/$(SYSTEM_PATH)
+	@mkdir -p release/$(SYS_PATH)
+	@cp $(CODE_FILE) release/$(SYS_PATH)
 
 release-doc:
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
 
 release-patches:
-	@mkdir -p release/$(SYSTEM_PATH)/patches/ctr release/$(SYSTEM_PATH)/patches/ktr
-	@cp reboot/reboot.bin release/$(SYSTEM_PATH)
-	@cp rxmode/build/ctr/native_firm.elf release/$(SYSTEM_PATH)/patches/ctr
-	@cp rxmode/build/ctr/agb_firm.elf release/$(SYSTEM_PATH)/patches/ctr
-	@cp rxmode/build/ctr/twl_firm.elf release/$(SYSTEM_PATH)/patches/ctr
-	@cp rxmode/build/ktr/native_firm.elf release/$(SYSTEM_PATH)/patches/ktr
+	@mkdir -p release/$(SYS_PATH)/patches/ctr release/$(SYS_PATH)/patches/ktr
+	@cp reboot/reboot.bin release/$(SYS_PATH)
+	@cp rxmode/build/ctr/native_firm.elf release/$(SYS_PATH)/patches/ctr
+	@cp rxmode/build/ctr/agb_firm.elf release/$(SYS_PATH)/patches/ctr
+	@cp rxmode/build/ctr/twl_firm.elf release/$(SYS_PATH)/patches/ctr
+	@cp rxmode/build/ktr/native_firm.elf release/$(SYS_PATH)/patches/ktr
 
 release-themes-langs:
-	@mkdir -p release/rxTools/theme/0 release/rxTools/lang release/$(SYSTEM_PATH)
+	@mkdir -p release/rxTools/theme/0 release/rxTools/lang release/$(SYS_PATH)
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
-	@cp rxtools/font.bin release/$(SYSTEM_PATH)
+	@cp rxtools/font.bin release/$(SYS_PATH)
 	@cp lang/* release/rxTools/lang/
 
 release-tools:
@@ -120,7 +120,7 @@ rxmode/build/%:
 	$(MAKE) $(SET_INCDIR) -C rxmode $(subst rxmode/,,$@)
 
 rxtools/rxtools.bin:
-	@$(MAKE) $(SET_SYSTEM_PATH) -C $(dir $@) all
+	@$(MAKE) $(SET_SYS_PATH) -C $(dir $@) all
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
 .PHONY: all-target-theme
