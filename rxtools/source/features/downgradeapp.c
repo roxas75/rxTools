@@ -406,7 +406,7 @@ void downgradeMSET()
 									uint8_t iv[0x10] = {0};
 									uint8_t Key[0x10] = {0};
 
-									GetTitleKey(&Key[0], info.tidLo, info.tidHi, info.drive);
+									getTitleKey(&Key[0], info.tidLo, info.tidHi, info.drive);
 
 									aes_context aes_ctxt;
 									aes_setkey_dec(&aes_ctxt, Key, 0x80);

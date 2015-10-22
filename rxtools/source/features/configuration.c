@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "TitleKeyDecrypt.h"
 #include "configuration.h"
 #include "lang.h"
 #include "screenshot.h"
@@ -236,12 +237,15 @@ int readCfg()
 }
 
 int InstallData(char* drive){
+	const uint32_t firmLoId = 0x00040138;
 	AppInfo appInfo;
 	FIL firmfile;
 	File fd;
 	unsigned int progressWidth, progressX;
 	wchar_t progressbar[8] = {0,};
 	wchar_t *progress = progressbar;
+	uint8_t key[16];
+	uint32_t hiId;
 	UINT br;
 	char path[64];
 	int i;
@@ -266,13 +270,23 @@ int InstallData(char* drive){
 
 	//Create decrypted native_firm
 	f_read(&firmfile, WORKBUF, NAT_SIZE, &br);
-	uint8_t* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, 0x00000002, 1);
+
+	hiId = getMpInfo() == MPINFO_CTR ?
+		TID_CTR_NATIVE_FIRM : TID_KTR_NATIVE_FIRM;
+
+	if (getTitleKeyWithCetk(key, SYSTEM_PATH "/cetk")
+		&& getTitleKey(key, firmLoId, hiId, 1))
+	{
+		return CONF_ERRNFIRM;
+	}
+
+
+	uint8_t* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, key);
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
-		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
+	getFirmPath(path, hiId);
 	strcpy(path + strlen(path) - 4, "orig.bin");
 	if(FileOpen(&fd, path, 1)){
 		FileWrite(&fd, n_firm, NAT_SIZE, 0);
@@ -289,19 +303,23 @@ int InstallData(char* drive){
 		goto end;
 
 	//Create AGB patched firmware
+	hiId = TID_CTR_AGB_FIRM;
+
 	f_read(&firmfile, WORKBUF, AGB_SIZE, &br);
-	uint8_t* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 1);
+	getTitleKey(key, firmLoId, hiId, 1);
+	uint8_t* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, key);
 	if (!a_firm && checkEmuNAND())
 	{
 		/* Try to get the Title Key from the EmuNAND */
-		a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, 0x00000202, 2);
+		getTitleKey(key, firmLoId, hiId, 2);
+		a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, key);
 		if (!a_firm) {
 			/* If we cannot decrypt it from firmware.bin because of titlekey messed up,
 			it probably means that AGB has been modified in some way. */
 			//So we read it from his installed ncch...
 			appInfo.drive = 1;
-			appInfo.tidLo = 0x00040138;
-			appInfo.tidHi = 0x00000202;
+			appInfo.tidLo = firmLoId;
+			appInfo.tidHi = hiId;
 			FindApp(&appInfo);
 			if (!FileOpen(&fd, appInfo.content, 0) && checkEmuNAND())
 			{
@@ -325,7 +343,7 @@ int InstallData(char* drive){
 		if (applyPatch(a_firm, SYSTEM_PATH "/patches/ctr/agb_firm.elf"))
 			return CONF_ERRPATCH;
 
-		getFirmPath(path, TID_CTR_AGB_FIRM);
+		getFirmPath(path, hiId);
 		if(FileOpen(&fd, path, 1)){
 			FileWrite(&fd, a_firm, AGB_SIZE, 0);
 			FileClose(&fd);
@@ -344,7 +362,8 @@ int InstallData(char* drive){
 
 	//Create TWL patched firmware
 	f_read(&firmfile, WORKBUF, TWL_SIZE, &br);
-	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, 0x00000102, 1);
+	getTitleKey(key, firmLoId, TID_CTR_TWL_FIRM, 1);
+	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, key);
 	if(t_firm){
 		if (applyPatch(t_firm, SYSTEM_PATH "/patches/ctr/twl_firm.elf"))
 			return CONF_ERRPATCH;
