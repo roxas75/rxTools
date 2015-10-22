@@ -37,7 +37,8 @@ CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
 PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
 	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
 	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
-	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf
+	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf	\
+	$(BUILD)/k11_codeset.elf
 
 PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
 	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/vars.o	\
