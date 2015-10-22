@@ -15,6 +15,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <inttypes.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -40,9 +41,6 @@
 #define DATAFOLDER	"rxtools/data"
 #define KEYFILENAME	"slot0x25KeyX.bin"
 #define WORKBUF		(uint8_t*)0x21000000
-#define NAT_SIZE	0xEBC00
-#define AGB_SIZE	0xD9C00
-#define TWL_SIZE	0x1A1C00
 
 static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
 
@@ -236,11 +234,41 @@ int readCfg()
 	return 0;
 }
 
+static void getOrgFirmPath(char *dst, uint32_t id, const char *suffix)
+{
+	if (suffix == NULL)
+		suffix = "";
+
+	sprintf(dst, "rxTools/firm/00040138%08" PRIX32 "%s.bin", id, suffix);
+}
+
+static FRESULT readOrgFirm(uint32_t id, DWORD *size)
+{
+	char path[64];
+	DWORD _size;
+	UINT read;
+	FRESULT r;
+	FIL f;
+
+	getOrgFirmPath(path, id, NULL);
+	r = f_open(&f, path, FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	_size = f_size(&f);
+	*size = _size;
+	r = f_read(&f, WORKBUF, _size, &read);
+	if (read < _size)
+		return r;
+
+	return f_close(&f);
+}
+
 static FRESULT InstallData()
 {
 	const uint32_t firmLoId = 0x00040138;
 	AppInfo appInfo;
-	FIL f, firmfile;
+	FIL f;
 	FRESULT r;
 	unsigned int progressWidth, progressX;
 	wchar_t progressbar[8] = {0,};
@@ -248,6 +276,7 @@ static FRESULT InstallData()
 	uint8_t key[16];
 	uint32_t hiId;
 	UINT processed;
+	DWORD firmSize;
 	char path[64];
 	int i;
 
@@ -262,26 +291,24 @@ static FRESULT InstallData()
 	//Create the workdir
 	f_mkdir(DATAFOLDER);
 
-	//Read firmware data
-	r = f_open(&firmfile, SYS_PATH "/firmware.bin", FA_READ | FA_OPEN_EXISTING);
-	if (r != FR_OK)
-		return r;
-
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create decrypted native_firm
-	f_read(&firmfile, WORKBUF, NAT_SIZE, &processed);
-
 	hiId = getMpInfo() == MPINFO_CTR ?
 		TID_CTR_NATIVE_FIRM : TID_KTR_NATIVE_FIRM;
 
-	r = getTitleKeyWithCetk(key, SYS_PATH "/cetk");
+	r = readOrgFirm(hiId, &firmSize);
+	if (r != FR_OK)
+		return r;
+
+	getOrgFirmPath(path, hiId, "_cetk");
+	r = getTitleKeyWithCetk(key, path);
 	if (r && getTitleKey(key, firmLoId, hiId, 1))
 		return r;
 
-	uint8_t* n_firm = decryptFirmTitle(WORKBUF, NAT_SIZE, key);
+	uint8_t* n_firm = decryptFirmTitle(WORKBUF, firmSize, key);
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
@@ -291,9 +318,9 @@ static FRESULT InstallData()
 
 	r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 	if (r != FR_OK)
-		goto fail;
+		return r;
 
-	f_write(&f, n_firm, NAT_SIZE, &processed);
+	f_write(&f, n_firm, firmSize, &processed);
 	f_close(&f);
 
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
@@ -305,17 +332,19 @@ static FRESULT InstallData()
 
 	//Create AGB patched firmware
 	hiId = TID_CTR_AGB_FIRM;
+	r = readOrgFirm(hiId, &firmSize);
+	if (r != FR_OK)
+		return r;
 
-	f_read(&firmfile, WORKBUF, AGB_SIZE, &processed);
 	getTitleKey(key, firmLoId, hiId, 1);
-	uint8_t* a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, key);
+	uint8_t* a_firm = decryptFirmTitle(WORKBUF, firmSize, key);
 	if (!a_firm && checkEmuNAND())
 	{
 		/* Try to get the Title Key from the EmuNAND */
 		getTitleKey(key, firmLoId, hiId, 2);
-		a_firm = decryptFirmTitle(WORKBUF, AGB_SIZE, key);
+		a_firm = decryptFirmTitle(WORKBUF, firmSize, key);
 		if (!a_firm) {
-			/* If we cannot decrypt it from firmware.bin because of titlekey messed up,
+			/* If we cannot decrypt it because of titlekey messed up,
 			it probably means that AGB has been modified in some way. */
 			//So we read it from his installed ncch...
 			appInfo.drive = 1;
@@ -330,28 +359,28 @@ static FRESULT InstallData()
 					FindApp(&appInfo);
 					r = f_open(&f, appInfo.content, FA_READ);
 					if (r != FR_OK)
-						goto fail;
+						return r;
 				} else
-					goto fail;
+					return r;
 			}
 
-			f_read(&f, WORKBUF, AGB_SIZE, &processed);
+			f_read(&f, WORKBUF, firmSize, &processed);
 			f_close(&f);
-			a_firm = decryptFirmTitleNcch(WORKBUF, AGB_SIZE);
+			a_firm = decryptFirmTitleNcch(WORKBUF, firmSize);
 		}
 	}
 
 	if (a_firm) {
 		r = applyPatch(a_firm, SYS_PATH "/patches/ctr/agb_firm.elf");
 		if (r != FR_OK)
-			goto fail;
+			return r;
 
 		getFirmPath(path, hiId);
 		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 		if (r != FR_OK)
-			goto fail;
+			return r;
 
-		f_write(&f, a_firm, AGB_SIZE, &processed);
+		f_write(&f, a_firm, firmSize, &processed);
 		f_close(&f);
 
 		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
@@ -364,20 +393,24 @@ static FRESULT InstallData()
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	//Create TWL patched firmware
-	f_read(&firmfile, WORKBUF, TWL_SIZE, &processed);
-	getTitleKey(key, firmLoId, TID_CTR_TWL_FIRM, 1);
-	uint8_t* t_firm = decryptFirmTitle(WORKBUF, TWL_SIZE, key);
+	hiId = TID_CTR_TWL_FIRM;
+	r = readOrgFirm(hiId, &firmSize);
+	if (r != FR_OK)
+		return r;
+
+	getTitleKey(key, firmLoId, hiId, 1);
+	uint8_t* t_firm = decryptFirmTitle(WORKBUF, firmSize, key);
 	if(t_firm){
 		r = applyPatch(t_firm, SYS_PATH "/patches/ctr/twl_firm.elf");
 		if (r != FR_OK)
-			goto fail;
+			return r;
 
-		getFirmPath(path, TID_CTR_TWL_FIRM);
+		getFirmPath(path, hiId);
 		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 		if (r)
-			goto fail;
+			return r;
 
-		f_write(&f, t_firm, TWL_SIZE, &processed);
+		f_write(&f, t_firm, firmSize, &processed);
 		f_close(&f);
 
 		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
@@ -392,7 +425,7 @@ end:
 	sprintf(path, "%s/data.bin", DATAFOLDER);
 	r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 	if (r != FR_OK)
-		goto fail;
+		return r;
 
 	f_write(&f, __DATE__, sizeof(__DATE__), &processed);
 	f_write(&f, __TIME__, sizeof(__TIME__), &processed);
@@ -402,9 +435,7 @@ end:
 	progress += wcslen(strings[STR_PROGRESS_OK]);
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-fail:
-	f_close(&firmfile);
-	return r;
+	return FR_OK;
 }
 
 int CheckInstallationData(){
