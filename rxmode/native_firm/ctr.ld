@@ -1,3 +1,6 @@
+codeSetHookInArm9 = 0x1FFACC00;
+codeSetHookInArm11 = 0xFFFF0C00;
+
 SECTIONS
 {
 	. = 0x0801a4c0;
@@ -38,4 +41,10 @@ SECTIONS
 
 	. = 0x08094454;
 	.patch.p9.reboot.body : { *(.patch.p9.reboot.body) }
+
+	. = codeSetHookInArm9;
+	.patch.k11.codeset.hook : { *(.patch.k11.codeset.hook) }
+
+	. = 0x1ff824f0;
+	.patch.k11.codeset.addr : { *(.patch.k11.codeset.addr) }
 }

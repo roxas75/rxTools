@@ -1,3 +1,6 @@
+codeSetHookInArm9 = 0x1FFADC00;
+codeSetHookInArm11 = 0xFFFF0C00;
+
 SECTIONS
 {
 	. = 0x0801a4c0;
@@ -29,4 +32,10 @@ SECTIONS
 
 	. = 0x080866e4;
 	.patch.p9.mythread.addr : { *(.patch.p9.mythread.addr) }
+
+	. = codeSetHookInArm9;
+	.patch.k11.codeset.hook : { *(.patch.k11.codeset.hook) }
+
+	. = 0x1ff824d8;
+	.patch.k11.codeset.addr : { *(.patch.k11.codeset.addr) }
 }

@@ -159,64 +159,6 @@ static void scrItoa(unsigned val, int base, int w)
                 scrPutc(buf[--i]);
 }
 
-static const unsigned int originalcode[] = { 0xE3550000, 0xE3A01001, 0xE1A00011, 0x0A000003 };
-static const unsigned int patchcode[] = { 0xE3A00001, 0xE8BD8070 };
-static int *dest = NULL;
-
-static int memcmp32(const void *p, const void *q, size_t n)
-{
-	const int *_p, *_q;
-	int i;
-
-	_p = p;
-	_q = q;
-	while (n) {
-		i = *_p - *_q;
-		if (i)
-			return i;
-
-		_p++;
-		_q++;
-		n -= sizeof(int);
-	}
-
-	return 0;
-}
-
-static void *memcpy32(void *dst, const void *src, size_t n)
-{
-	int *_dst;
-	const int *_src;
-
-	_dst = dst;
-	_src = src;
-	while (n) {
-		*_dst = *_src;
-
-		_dst++;
-		_src++;
-		n -= sizeof(int);
-	}
-
-	return dst;
-}
-
-static void patchregion()
-{
-	memcpy32(dest, patchcode, sizeof(patchcode));
-}
-
-static void findRegion()
-{
-	uintptr_t p;
-
-	for (p = 0x26960000; p < 0x26B00000; p += 4)
-		if (!memcmp32((void *)p, originalcode, sizeof(originalcode))) {
-			dest = (void *)p;
-			break;
-		}
-}
-
 static int getArmBoff(void *p)
 {
 	int i;
@@ -299,12 +241,6 @@ static void initExceptionHandler()
 void myThread(){
 #ifndef PLATFORM_KTR
 	initExceptionHandler();
-
-	do
-		findRegion();
-	while (dest == NULL);
-
-	svc_Backdoor(&patchregion);	// Edit just if the code is found, or the arm9 will get mad
 #endif
 
 	while (1) {
