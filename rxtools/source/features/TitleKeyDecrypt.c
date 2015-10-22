@@ -274,7 +274,7 @@ void DecryptTitleKeyFile(void) {
 	return;
 }
 
-int GetTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
+int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 	File tick;
 	uint32_t tid_low = ((low >> 24) & 0xff) | ((low << 8) & 0xff0000) | ((low >> 8) & 0xff00) | ((low << 24) & 0xff000000);
 	uint32_t tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
@@ -303,12 +303,63 @@ int GetTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 						DecryptTitleKey(titleid, Key, kindex);
 						memcpy(TitleKey, Key, 16);
 						FileClose(&tick);
-						return 1;
+						return 0;
 					}
 				}
 			}
 		}
 		FileClose(&tick);
 	}
-	return 0;
+	return 1;
+}
+
+static FRESULT seekRead(FIL *fp, DWORD ofs, void *buff, UINT btr)
+{
+	FRESULT r;
+	UINT br;
+
+	r = f_lseek(fp, ofs);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(fp, buff, btr, &br);
+	return br < btr ? (r == FR_OK ? EOF : r) : FR_OK;
+}
+
+#define CETK_MEMBER_SIZE(member) (sizeof(((TicketHdr *)NULL)->member))
+#define CETK_READ_MEMBER(fp, member, buff)	\
+	(seekRead((fp), 0x140 + offsetof(TicketHdr, member), buff,	\
+		CETK_MEMBER_SIZE(member)))
+
+int getTitleKeyWithCetk(uint8_t dst[16], const char *path)
+{
+	uint8_t id[CETK_MEMBER_SIZE(titleId)];
+	uint8_t index;
+	FRESULT r;
+	FIL f;
+
+	r = f_open(&f, path, FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = CETK_READ_MEMBER(&f, titleKey, dst);
+	if (r != FR_OK) {
+		f_close(&f);
+		return r;
+	}
+
+	r = CETK_READ_MEMBER(&f, titleId, id);
+	if (r != FR_OK) {
+		f_close(&f);
+		return r;
+	}
+
+	r = CETK_READ_MEMBER(&f, keyIndex, &index);
+	if (r != FR_OK) {
+		f_close(&f);
+		return r;
+	}
+
+	f_close(&f);
+	return DecryptTitleKey(id, dst, index);
 }
