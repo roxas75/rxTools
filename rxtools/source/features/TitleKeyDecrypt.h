@@ -47,7 +47,6 @@ typedef struct {
 
 void DecryptTitleKeys();
 void DecryptTitleKeyFile(void);
-uint32_t DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index);
 int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive);
 int getTitleKeyWithCetk(uint8_t dst[16], const char *path);
 
