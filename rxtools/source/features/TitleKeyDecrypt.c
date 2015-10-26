@@ -72,9 +72,12 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	set_ctr(AES_BIG_INPUT | AES_NORMAL_INPUT, ctr);
 
 	if (keyYList == NULL) {
-		for (p = 0x08080000; *(uint32_t *)p != 0x7F337BD0; p += 4)
+		p = 0x08080000;
+		while (*(uint32_t *)p != 0x7F337BD0) {
+			p += 4;
 			if (p >= 0x08100000)
 				return 1;
+		}
 
 		keyYList = (void *)p;
 	}
