@@ -287,6 +287,8 @@ int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 	uint32_t tick_size = 0x200;     //Chunk size
 
 	char path[64] = {0};
+	int r;
+
 	sprintf(path, "%d:dbs/ticket.db", drive);
 
 	if (FileOpen(&tick, path, 0)) {
@@ -306,10 +308,11 @@ int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 					uint32_t kindex = *(buf + j + 0xB1);
 					uint8_t Key[16]; memcpy(Key, buf + j + 0x7F, 16);
 					if (*((uint32_t *)titleid) == tid_low && *((uint32_t *)(titleid + 4)) == tid_high) {
-						DecryptTitleKey(titleid, Key, kindex);
-						memcpy(TitleKey, Key, 16);
+						r = DecryptTitleKey(titleid, Key, kindex);
+						if (!r)
+							memcpy(TitleKey, Key, 16);
 						FileClose(&tick);
-						return 0;
+						return r;
 					}
 				}
 			}
