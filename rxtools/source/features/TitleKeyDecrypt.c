@@ -73,9 +73,9 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 
 	if (keyYList == NULL) {
 		p = 0x08080000;
-		while (*(uint32_t *)p != 0x7F337BD0) {
-			p += 4;
-			if (p >= 0x08100000)
+		while (((uint8_t *)p)[0] != 0xD0 || ((uint8_t *)p)[1] != 0x7B) {
+			p++;
+			if (p >= 0x080A0000)
 				return 1;
 		}
 
