@@ -47,8 +47,10 @@ PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
 ifdef PLATFORM_KTR
 LDSCRIPT	:= ktr.ld
 CFLAGS	+= -DPLATFORM_KTR
+PROCESS9_CODE_ADDR	:= 0x0801C700
 else
 LDSCRIPT	:= ctr.ld
+PROCESS9_CODE_ADDR	:= 0x0801CF00
 
 PATCHES	+= $(BUILD)/p9_keyx_spoof.elf	\
 	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf
@@ -78,7 +80,7 @@ $(BUILD)/payload/arm11:
 	@[ -d $@ ] || mkdir -p $@
 
 %.elf: %_unadjust.elf
-	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$((0x0801CF00 - 0x08028000)) $< $@
+	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$(($(PROCESS9_CODE_ADDR) - 0x08028000)) $< $@
 
 $(BUILD)/$(TARGET)_unadjust.elf: $(PATCHES)
 	$(LD) -i -T$(LDSCRIPT) $^ -o $@

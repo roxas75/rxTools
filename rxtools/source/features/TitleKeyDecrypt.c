@@ -72,9 +72,12 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	set_ctr(AES_BIG_INPUT | AES_NORMAL_INPUT, ctr);
 
 	if (keyYList == NULL) {
-		for (p = 0x08080000; *(uint32_t *)p != 0x7F337BD0; p += 4)
-			if (p >= 0x08100000)
+		p = 0x08080000;
+		while (((uint8_t *)p)[0] != 0xD0 || ((uint8_t *)p)[1] != 0x7B) {
+			p++;
+			if (p >= 0x080A0000)
 				return 1;
+		}
 
 		keyYList = (void *)p;
 	}
@@ -287,6 +290,8 @@ int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 	uint32_t tick_size = 0x200;     //Chunk size
 
 	char path[64] = {0};
+	int r;
+
 	sprintf(path, "%d:dbs/ticket.db", drive);
 
 	if (FileOpen(&tick, path, 0)) {
@@ -306,10 +311,11 @@ int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 					uint32_t kindex = *(buf + j + 0xB1);
 					uint8_t Key[16]; memcpy(Key, buf + j + 0x7F, 16);
 					if (*((uint32_t *)titleid) == tid_low && *((uint32_t *)(titleid + 4)) == tid_high) {
-						DecryptTitleKey(titleid, Key, kindex);
-						memcpy(TitleKey, Key, 16);
+						r = DecryptTitleKey(titleid, Key, kindex);
+						if (!r)
+							memcpy(TitleKey, Key, 16);
 						FileClose(&tick);
-						return 0;
+						return r;
 					}
 				}
 			}
