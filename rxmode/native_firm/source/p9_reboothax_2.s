@@ -105,7 +105,7 @@
         MCR     p15, 0, R1,c7,c6, 0
         MCR     p15, 0, R1,c7,c10, 4
         LDR     R0, =buffer
-        MOV     R1, #0x1FFFFFFC
+        MOV     R1, #0x1FFFFFF8
         LDR     R2, [R0,#8]
         STR     R2, [R1]
         LDR     R0, [R0,#0xC]

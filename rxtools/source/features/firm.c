@@ -202,10 +202,13 @@ int rxMode(int emu)
 	const wchar_t *msg;
 	int r, sector;
 	void *p;
+	void (* reboot)();
 	Elf32_Ehdr ehdr;
 	Elf32_Shdr shdr;
 	FIL fd, keyxFd;
 	UINT br, fsz;
+
+	reboot = NULL;
 
 	setAgbBios();
 
@@ -310,6 +313,11 @@ int rxMode(int emu)
 				continue;
 
 			f_read(&fd, p, shdr.sh_size, &br);
+
+			if (!strcmp(sh_name, ".patch.p9.reboot.body")) {
+				reboot = (void *)shdr.sh_addr;
+				memcpy(reboot, p, br);
+			}
 		}
 	}
 
@@ -319,9 +327,14 @@ int rxMode(int emu)
 	f_write(&fd, (void *)FIRM_ADDR, fsz, &br);
 	f_close(&fd);
 
-	r = loadExecReboot(); // This won't return if it succeeds.
-	msg = L"Failed to load reboot.bin: %d\n"
-		L"Check your installation.\n";
+	if (reboot == NULL) {
+		msg = L"Rebooting code not found.\n"
+			"Check your installation.\n";
+		goto fail;
+	}
+
+	reboot();
+	__builtin_unreachable();
 
 fail:
 	ConsoleInit();
