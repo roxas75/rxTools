@@ -41,6 +41,7 @@ PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
 	$(BUILD)/k11_codeset.elf
 
 PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
+	$(BUILD)/payload/arm9/myThread/FS.o	\
 	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/vars.o	\
 	$(BUILD)/payload/arm9/myThread/myThread.o
 
@@ -55,7 +56,7 @@ PROCESS9_CODE_ADDR	:= 0x0801CF00
 PATCHES	+= $(BUILD)/p9_keyx_spoof.elf	\
 	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf
 
-PAYLOAD_OBJS	+= $(BUILD)/payload/arm9/myThread/FS.o	\
+PAYLOAD_OBJS	+= 	\
 	$(BUILD)/payload/arm9/myThread/handlers.o	\
 	$(BUILD)/payload/arm11/hookswi.o
 endif
@@ -64,49 +65,32 @@ endif
 
 all: $(BUILD)/$(TARGET).elf
 
-$(BUILD):
-	@[ -d $@ ] || mkdir -p $@
-
-$(BUILD)/payload:
-	@[ -d $@ ] || mkdir -p $@
-
-$(BUILD)/payload/arm9:
-	@[ -d $@ ] || mkdir -p $@
-
-$(BUILD)/payload/arm9/myThread:
-	@[ -d $@ ] || mkdir -p $@
-
-$(BUILD)/payload/arm11:
-	@[ -d $@ ] || mkdir -p $@
-
 %.elf: %_unadjust.elf
 	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$(($(PROCESS9_CODE_ADDR) - 0x08028000)) $< $@
 
 $(BUILD)/$(TARGET)_unadjust.elf: $(PATCHES)
 	$(LD) -i -T$(LDSCRIPT) $^ -o $@
 
-$(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS) $(BUILD)/payload
+$(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS)
 	$(LD) --use-blx -T$(LDSCRIPT) $(PAYLOAD_OBJS) -o $@
 
 $(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
 	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
 
-$(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.c $(BUILD)/payload/arm9/myThread
+$(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.c
+	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
-$(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.s $(BUILD)/payload/arm9/myThread
-	$(AS) $< -o $@
-
-$(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.S $(BUILD)/payload/arm9
-	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
-
-$(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S $(BUILD)/payload/arm11
+$(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S
+	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(CC) -mcpu=mpcore $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
-$(BUILD)/%.o: $(SOURCE)/%.S $(BUILD)
+$(BUILD)/%.o: $(SOURCE)/%.S
+	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
 
-$(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
+$(BUILD)/%.o: $(SOURCE)/%.s
+	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(AS) $< -o $@
 #---------------------------------------------------------------------------------
 clean:

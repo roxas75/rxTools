@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <memory.h>
-#ifndef PLATFORM_KTR
 #include <FS.h>
+#ifndef PLATFORM_KTR
 #include <handlers.h>
 #include "hookswi.h"
 #include "font.c"
@@ -32,7 +32,6 @@
 #ifdef DEBUG_DUMP_FCRAM
 static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
 {
-#ifndef PLATFORM_KTR
 	unsigned int handle[8];
 	unsigned int i;
 
@@ -48,7 +47,6 @@ static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
 
 	for (i = 0; i < 0x600000; i++)
 		((char *)ARM9_VRAM_ADDR)[i] = 0xFF;			//White flush : Finished Dumping
-#endif
 }
 #endif
 
