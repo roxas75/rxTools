@@ -15,16 +15,24 @@
 
 .global fopen9
 .type fopen9, %function
-.thumb_set fopen9, 0x0805B180
 
 .global fwrite9
 .type fwrite9, %function
-.thumb_set fwrite9, 0x0805C4D0
 
 .global fread9
 .type fread9, %function
-.thumb_set fread9, 0x0804D9B0
 
 .global fclose9
 .type fclose9, %function
+
+#ifdef PLATFORM_KTR
+.thumb_set fopen9, 0x0805B014
+.thumb_set fwrite9, 0x0805C378
+.thumb_set fread9, 0x0804D854
+.thumb_set fclose9, 0x0805B100
+#else
+.thumb_set fopen9, 0x0805B180
+.thumb_set fwrite9, 0x0805C4D0
+.thumb_set fread9, 0x0804D9B0
 .thumb_set fclose9, 0x0805B26C
+#endif
