@@ -37,6 +37,7 @@ CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
 PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
 	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
 	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
+	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf	\
 	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf	\
 	$(BUILD)/k11_codeset.elf
 
@@ -53,8 +54,7 @@ else
 LDSCRIPT	:= ctr.ld
 PROCESS9_CODE_ADDR	:= 0x0801CF00
 
-PATCHES	+= $(BUILD)/p9_keyx_spoof.elf	\
-	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf
+PATCHES	+= $(BUILD)/p9_keyx_spoof.elf
 
 PAYLOAD_OBJS	+= 	\
 	$(BUILD)/payload/arm9/myThread/handlers.o	\

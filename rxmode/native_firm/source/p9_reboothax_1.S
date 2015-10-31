@@ -18,11 +18,11 @@
 //TODO : Do not exclude other FIRMS to be opened. Not important until we patch them for emunand
 
 //----------------- GLOBALS -----------------------
-//Taken From NATIVE_FIRM 9.6
-.equ fopen9,        0x0805B180
-.equ fread9,        0x0804D9B0
-.equ fwrite9,       0x0805C4D0
+#ifdef PLATFORM_KTR
+.equ readpxi,       0x0805501C
+#else
 .equ readpxi,       0x08055178
+#endif
 .equ filehandle,    0x2000E000
 .equ byteswritten,  0x2000E100
 .equ buffer,        0x24000000
@@ -35,8 +35,7 @@
 		ldr r2, =filename
 		mov r1, #0x30
 		add r0, sp, #0x3A8-0x70
-		ldr r4, =0x080282CF @blx 0x080282CE
-		blx r4
+		blx 0x080282CE
 
     ClearWorkspace:
         ldr r0, =filehandle
@@ -83,7 +82,11 @@
         svc 0x7C
 
     GoToReboot:
-        ldr r0, =0x80FF4FC
+#ifdef PLATFORM_KTR
+	ldr r0, =0x0817F4FC
+#else
+        ldr r0, =0x080FF4FC
+#endif
         svc 0x7B
 
     InfiniteLoop:
