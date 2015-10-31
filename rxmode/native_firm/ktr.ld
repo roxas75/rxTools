@@ -15,6 +15,12 @@ SECTIONS
 	. = 0x0801b3d4;
 	.patch.k9.flags : { *(.patch.k9.flags) }
 
+	. = 0x08085958;
+	.patch.p9.reboot.entry : { *(.patch.p9.reboot.entry) }
+
+	. = 0x0809435C;
+	.patch.p9.reboot.body : { *(.patch.p9.reboot.body) }
+
 	. = 0x0805d498;
 	.patch.p9.sig.1 : { *(.patch.p9.sig.1) }
 
