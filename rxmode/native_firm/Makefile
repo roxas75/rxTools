@@ -47,12 +47,12 @@ PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
 	$(BUILD)/payload/arm9/myThread/myThread.o
 
 ifdef PLATFORM_KTR
-LDSCRIPT	:= ktr.ld
+LDSCRIPT_ROM	:= ktr_rom.ld
+LDSCRIPT_RAM	:= ktr_ram.ld
 CFLAGS	+= -DPLATFORM_KTR
-PROCESS9_CODE_ADDR	:= 0x0801CD00
 else
-LDSCRIPT	:= ctr.ld
-PROCESS9_CODE_ADDR	:= 0x0801CF00
+LDSCRIPT_ROM	:= ctr_rom.ld
+LDSCRIPT_RAM	:= ctr_ram.ld
 
 PATCHES	+= $(BUILD)/p9_keyx_spoof.elf
 
@@ -70,17 +70,17 @@ all: $(BUILD)/$(TARGET).elf
 %/D:
 	mkdir -p $@
 
-%.elf: %_unadjust.elf
-	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$(($(PROCESS9_CODE_ADDR) - 0x08028000)) $< $@
+%.elf: %_unstrip.elf
+	$(OBJCOPY) -S $< $@
 
-$(BUILD)/$(TARGET)_unadjust.elf: $(PATCHES)
-	$(LD) -i -T$(LDSCRIPT) $^ -o $@
+$(BUILD)/$(TARGET)_unstrip.elf: $(PATCHES)
+	$(LD) -i -T$(LDSCRIPT_ROM) $^ -o $@
 
 $(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS)
-	$(LD) --use-blx -T$(LDSCRIPT) $(PAYLOAD_OBJS) -o $@
+	$(LD) --use-blx -T$(LDSCRIPT_RAM) $(PAYLOAD_OBJS) -o $@
 
 $(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
-	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
+	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT_RAM) $< -o $@
 
 $(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.c
 	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
