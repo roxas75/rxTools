@@ -15,12 +15,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FS_H
-#define FS_H
-#include <stdio.h>
-extern unsigned int fopen9(void *handle, wchar_t* name, unsigned int flag);
-extern void fwrite9(void* handle, unsigned int* bytesWritten, void* dst, unsigned int size);
-extern void fread9(void* handle, unsigned int* bytesRead, void *src, unsigned int size);
-extern void fclose9(void *handle);
+#ifndef PROCESS9_H
+#define PROCESS9_H
+#include <stdint.h>
+
+typedef uint32_t P9File[8];
+
+static inline void p9FileInit(P9File f)
+{
+	unsigned int i;
+
+	for (i = 0; i < sizeof(P9File); i += sizeof(uint32_t)) {
+		*f = 0;
+		f++;
+	}
+}
+
+unsigned int p9Open(P9File, const wchar_t *name, unsigned int flag);
+void p9Write(P9File, size_t *bytesWritten, const void *src, size_t size);
+void p9Read(P9File, size_t *bytesRead, void *dst, size_t size);
+void p9Close(P9File);
+int p9RecvPxi(void);
 
 #endif

@@ -15,34 +15,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CFW_H
-#define CFW_H
+#ifndef FIRMHDR_H
+#define FIRMHDR_H
 
-#include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
-#include "fatfs/ff.h"
 
-typedef enum {
-        TID_CTR_NATIVE_FIRM = 0x00000002,
-        TID_CTR_TWL_FIRM = 0x00000102,
-        TID_CTR_AGB_FIRM = 0x00000202,
-        TID_KTR_NATIVE_FIRM = 0x20000002
-} FirmTid;
+#define FIRM_SEG_NUM (4)
 
-extern const char firmPathFmt[];
+typedef struct {
+	uint32_t offset;
+	uint32_t addr;
+	uint32_t size;
+	uint32_t isArm11;
+	uint8_t hash[32];
+} FirmSeg;
 
-int PastaMode();
-void FirmLoader();
-void rxModeWithSplash(int emu);
-int rxMode(int emu);
-uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size);
-uint8_t *decryptFirmTitle(uint8_t *title, unsigned int size, uint8_t key[16]);
-FRESULT applyPatch(void *file, const char *patch);
-
-static inline int getFirmPath(char *s, FirmTid id)
-{
-	return sprintf(s, firmPathFmt, id);
-}
+typedef struct {
+	uint32_t magic;
+	uint32_t unused0;
+	uint32_t arm11Entry;
+	uint32_t arm9Entry;
+	uint8_t unused1[48];
+	FirmSeg segs[FIRM_SEG_NUM];
+	uint8_t sig[256];
+} FirmHdr;
 
 #endif
