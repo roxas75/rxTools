@@ -20,7 +20,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <memory.h>
-#include <FS.h>
+#include <svc.h>
+#include <process9.h>
 #ifndef PLATFORM_KTR
 #include <handlers.h>
 #include "hookswi.h"
@@ -32,18 +33,16 @@
 #ifdef DEBUG_DUMP_FCRAM
 static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
 {
-	unsigned int handle[8];
 	unsigned int i;
+	P9File f;
 
 	for (i = 0; i < 0x600000; i++)
 		((char *)ARM9_VRAM_ADDR)[i] = 0x77;			//Grey flush : Start Dumping
 
-	for (i = 0; i < sizeof(handle) / sizeof(unsigned int); i++)
-		handle[i] = 0;
-
-	fopen9(handle, filename, 6);
-	fwrite9(handle, &i, buf, size);
-	fclose9(handle);
+	p9FileInit(f);
+	p9Open(f, filename, 6);
+	p9Write(f, &i, buf, size);
+	p9Close(f);
 
 	for (i = 0; i < 0x600000; i++)
 		((char *)ARM9_VRAM_ADDR)[i] = 0xFF;			//White flush : Finished Dumping
@@ -253,7 +252,7 @@ void myThread(){
 #endif
 		if (!patchLabel()) {
 #if !defined(DEBUG_DATA_ABORT) && !defined(DEBUG_DUMP_FCRAM)
-			__asm__ volatile ("svc #9");
+			svcExitThread();
 #endif
 		}
 	}

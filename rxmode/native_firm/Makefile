@@ -32,17 +32,17 @@ SOURCE	:= source
 LD	:= arm-none-eabi-ld
 OBJCOPY	:= arm-none-eabi-objcopy
 
-CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
+CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/include
 
 PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
 	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
 	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
-	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf	\
+	$(BUILD)/p9_reboothax_entry.elf $(BUILD)/p9_reboothax_body.elf	\
 	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf	\
 	$(BUILD)/k11_codeset.elf
 
 PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
-	$(BUILD)/payload/arm9/myThread/FS.o	\
+	$(BUILD)/payload/arm9/process9.o	\
 	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/vars.o	\
 	$(BUILD)/payload/arm9/myThread/myThread.o
 
@@ -82,11 +82,11 @@ $(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS)
 $(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
 	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT_RAM) $< -o $@
 
-$(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.c
-	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
-
 $(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S
-	$(CC) -mcpu=mpcore $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
+	$(CC) -mcpu=mpcore $(CFLAGS) $< -c -o $@
+
+$(BUILD)/%.o: $(SOURCE)/%.c
+	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.S
 	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@

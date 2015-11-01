@@ -31,7 +31,10 @@ SECTIONS
 	.patch.p9.reboot.entry : { *(.patch.p9.reboot.entry) }
 
 	. = reboot;
-	.patch.p9.reboot.body : { *(.patch.p9.reboot.body) }
+	.patch.p9.reboot.body : {
+		*(.patch.p9.reboot.body.top)
+		*(.patch.p9.reboot.body)
+	}
 
 	. = codeSetHook;
 	.patch.k11.codeset.hook : { *(.patch.k11.codeset.hook) }

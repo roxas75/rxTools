@@ -19,6 +19,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <firmhdr.h>
+#include <memory.h>
 #include "firm.h"
 #include "mpcore.h"
 #include "hid.h"
@@ -37,8 +39,6 @@
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
 #include "lang.h"
-
-#define FIRM_ADDR 0x24000000
 
 const char firmPathFmt[] = "rxTools/data/00040138%08X.bin";
 
@@ -354,7 +354,7 @@ void rxModeWithSplash(int emu)
 int PastaMode(){
 	/*PastaMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
-	uint8_t* firm = (void*)0x24000000;
+	uint8_t* firm = (void*)FIRM_ADDR;
 	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
 	if (strncmp((char*)firm, "FIRM", 4))
 		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);

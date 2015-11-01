@@ -19,8 +19,7 @@ SET_SYS_PATH := SYS_PATH=$(SYS_PATH)
 SET_CODE_PATH := CODE_PATH=$(SYS_PATH)/$(CODE_FILE)
 SET_DATNAME := DATNAME=$(SYS_PATH)/$(CODE_FILE)
 
-INCDIR := -I$(CURDIR)/include
-SET_INCDIR := INCDIR=$(INCDIR)
+export INCDIR := -I$(CURDIR)/include
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(SYS_PATH)/
@@ -117,7 +116,7 @@ reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
 
 rxmode/build/%:
-	$(MAKE) $(SET_INCDIR) -C rxmode $(subst rxmode/,,$@)
+	$(MAKE) -C rxmode $(subst rxmode/,,$@)
 
 rxtools/rxtools.bin:
 	@$(MAKE) $(SET_SYS_PATH) -C $(dir $@) all

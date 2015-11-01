@@ -18,7 +18,9 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#define ARM9_VRAM_ADDR 0x18000000
+#define ARM9_VRAM_ADDR (0x18000000)
 #define ARM11_VRAM_PADDR ARM9_VRAM_ADDR
+
+#define FIRM_ADDR (0x24000000)
 
 #endif
