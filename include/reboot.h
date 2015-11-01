@@ -15,12 +15,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FIRMHDR_H
-#define FIRMHDR_H
+#ifndef REBOOT_H
+#define REBOOT_H
 
 #include <stdint.h>
+#include <elf.h>
 
 #define FIRM_SEG_NUM (4)
+
+#define FIRM_PATH_FMT "rxTools/data/%08X%08X.bin"
+#define FIRM_PATCH_PATH_FMT PATCHES_PATH "/%08X%08X.elf"
+
+#define REBOOT_CTX ((RebootCtx *)0x24000000)
 
 typedef struct {
 	uint32_t offset;
@@ -39,5 +45,25 @@ typedef struct {
 	FirmSeg segs[FIRM_SEG_NUM];
 	uint8_t sig[256];
 } FirmHdr;
+
+typedef struct {
+	uint8_t keyx[16];
+	union {
+		uint32_t u32;
+		char c[4];
+	} label;
+	uint32_t sector;
+} PatchCtx;
+
+typedef struct {
+	union {
+		FirmHdr hdr;
+		uint8_t b[0x100000];
+	} firm;
+	union {
+		Elf32_Ehdr hdr;
+		uint8_t b[0x2000];
+	} patch;
+} RebootCtx;
 
 #endif

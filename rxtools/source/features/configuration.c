@@ -38,7 +38,7 @@
 #include "menu.h"
 #include "jsmn.h"
 
-#define DATAFOLDER	"rxtools/data"
+#define DATA_PATH	"rxtools/data"
 #define KEYFILENAME	"slot0x25KeyX.bin"
 #define WORKBUF		(uint8_t*)0x21000000
 
@@ -289,7 +289,7 @@ static FRESULT InstallData()
 	ConsolePrevLine();
 
 	//Create the workdir
-	f_mkdir(DATAFOLDER);
+	f_mkdir(DATA_PATH);
 
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
@@ -314,8 +314,6 @@ static FRESULT InstallData()
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 	getFirmPath(path, hiId);
-	strcpy(path + strlen(path) - 4, "orig.bin");
-
 	r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 	if (r != FR_OK)
 		return r;
@@ -330,7 +328,7 @@ static FRESULT InstallData()
 	if (getMpInfo() != MPINFO_CTR)
 		goto end;
 
-	//Create AGB patched firmware
+	//Create AGB decrypted firmware
 	hiId = TID_CTR_AGB_FIRM;
 	r = readOrgFirm(hiId, &firmSize);
 	if (r != FR_OK)
@@ -371,10 +369,6 @@ static FRESULT InstallData()
 	}
 
 	if (a_firm) {
-		r = applyPatch(a_firm, SYS_PATH "/patches/ctr/agb_firm.elf");
-		if (r != FR_OK)
-			return r;
-
 		getFirmPath(path, hiId);
 		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 		if (r != FR_OK)
@@ -392,7 +386,7 @@ static FRESULT InstallData()
 
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-	//Create TWL patched firmware
+	//Create TWL decrypted firmware
 	hiId = TID_CTR_TWL_FIRM;
 	r = readOrgFirm(hiId, &firmSize);
 	if (r != FR_OK)
@@ -401,10 +395,6 @@ static FRESULT InstallData()
 	getTitleKey(key, firmLoId, hiId, 1);
 	uint8_t* t_firm = decryptFirmTitle(WORKBUF, firmSize, key);
 	if(t_firm){
-		r = applyPatch(t_firm, SYS_PATH "/patches/ctr/twl_firm.elf");
-		if (r != FR_OK)
-			return r;
-
 		getFirmPath(path, hiId);
 		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 		if (r)
@@ -422,14 +412,8 @@ static FRESULT InstallData()
 	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 end:
-	sprintf(path, "%s/data.bin", DATAFOLDER);
-	r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
-	if (r != FR_OK)
-		return r;
-
-	f_write(&f, __DATE__, sizeof(__DATE__), &processed);
-	f_write(&f, __TIME__, sizeof(__TIME__), &processed);
-	f_close(&f);
+	if (f_stat(DATA_PATH "/data.bin", 0) == FR_OK)
+		f_unlink(DATA_PATH "/data.bin");
 
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
@@ -459,10 +443,9 @@ int CheckInstallationData(){
 			break;
 
 		case MPINFO_KTR:
-			return 0;
-			/*getFirmPath(str, TID_KTR_NATIVE_FIRM);
+			getFirmPath(str, TID_KTR_NATIVE_FIRM);
 			if(!FileOpen(&file, str, 0)) return -1;
-			FileClose(&file);*/
+			FileClose(&file);
 
 			break;
 
@@ -470,11 +453,8 @@ int CheckInstallationData(){
 			return 0;
 	}
 
-	if(!FileOpen(&file, "rxTools/data/data.bin", 0)) return -4;
-	FileRead(&file, str, 32, 0);
-	FileClose(&file);
-	if(memcmp(str, __DATE__, 11)) return -5;
-	if(memcmp(&str[12], __TIME__, 8)) return -5;
+	if (f_stat("rxTools/data/data.bin", 0) == FR_OK)
+		return -4;
 
 	return 0;
 }
