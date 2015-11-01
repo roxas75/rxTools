@@ -13,10 +13,6 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-	.section .rodata.nand.sector, "a"
-nandTopSector:
-	.word 0xAAAABBBB
-
 	.arm
 	.text
 	.global	nandHook
@@ -33,7 +29,7 @@ nandHook:
 	beq	loc_801A310
 	mov	r5, r4
 	cmp	r6, #0
-	ldreq	r2, =nandTopSector
+	ldreq	r2, =patchCtx + 20
 	ldreq	r6, [r2]
 
 loc_801A310:

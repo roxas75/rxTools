@@ -50,7 +50,7 @@ ARCH	:=	-mthumb -mthumb-interwork
 CFLAGS	:=	-g -Wall -Wno-multichar -O2 -mtune=arm946e-s -fomit-frame-pointer -ffast-math	\
 		-std=c99 $(ARCH)
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -DSYS_PATH=\"$(SYS_PATH)\"
+CFLAGS	+=	$(INCLUDE) -DARM9 -DSYS_PATH=\"$(SYS_PATH)\" -DPATCHES_PATH=\"$(PATCHES_PATH)\"
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
@@ -103,7 +103,7 @@ export OFILES	:= $(addsuffix .o,$(BINFILES)) \
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
+			$(INCDIR) -I$(CURDIR)/$(BUILD)
 
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 

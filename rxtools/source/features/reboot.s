@@ -13,18 +13,37 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-.global fopen9
-.type fopen9, %function
-.thumb_set fopen9, 0x0805B180
+line = 32
 
-.global fwrite9
-.type fwrite9, %function
-.thumb_set fwrite9, 0x0805C4D0
+	.arm
+	.global	execReboot
+	.type	execReboot, %function
+execReboot:
+	mov	r4, #0x08000000
+	orr	r4, #0x29
+	mcr	p15, 0, r4, c6, c2, 0
 
-.global fread9
-.type fread9, %function
-.thumb_set fread9, 0x0804D9B0
+	add	r4, r1, r3
+loop:
+	ldr	r5, [r2], #4
+	str	r5, [r1], #4
+	tst	r1, #line - 1
+	bleq	flushInLoop
+	cmp	r1, r4
+	blo	loop
 
-.global fclose9
-.type fclose9, %function
-.thumb_set fclose9, 0x0805B26C
+	tst	r1, #line - 1
+	bicne	r5, r1, #line - 1
+	blne	flush
+
+	mov	r1, #0x1FFFFFF8
+	sub	pc, r4, r3
+
+flushInLoop:
+	sub	r5, r1, #line
+flush:
+	mcr	p15, 0, r5, c7, c10, 1
+	mcr	p15, 0, r5, c7, c5, 1
+	bx	lr
+
+	.size	execReboot, . - execReboot

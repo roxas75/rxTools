@@ -19,13 +19,14 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <elf.h>
+#include <reboot.h>
 #include "firm.h"
 #include "mpcore.h"
 #include "hid.h"
 #include "lang.h"
 #include "console.h"
 #include "polarssl/aes.h"
-#include "elf.h"
 #include "fatfs/ff.h"
 #include "fatfs/sdmmc.h"
 #include "fs.h"
@@ -38,12 +39,13 @@
 #include "configuration.h"
 #include "lang.h"
 
-#define FIRM_ADDR 0x24000000
-
-const char firmPathFmt[] = "rxTools/data/00040138%08X.bin";
+const char firmPathFmt[] = FIRM_PATH_FMT;
+const char firmPatchPathFmt[] = FIRM_PATCH_PATH_FMT;
 
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
+
+_Noreturn void execReboot(const PatchCtx *, void *, const void *, size_t);
 
 static FRESULT loadExecReboot()
 {
@@ -72,73 +74,13 @@ static int loadFirm(char *path, UINT *fsz)
 	if (r != FR_OK)
 		return r;
 
-	r = f_read(&fd, (void *)FIRM_ADDR, f_size(&fd), fsz);
+	r = f_read(&fd, REBOOT_CTX->firm.b, f_size(&fd), fsz);
 	if (r != FR_OK)
 		return r;
 
 	f_close(&fd);
 
-	return *(uint32_t *)FIRM_ADDR == 0x4D524946 ? 0 : -1;
-}
-
-static uint32_t locateSecInFirm(const Elf32_Shdr *shdr, const FirmHdr *hdr)
-{
-	int i, offInSeg;
-
-	for (i = 0; i < FIRM_SEG_NUM; i++) {
-		offInSeg = shdr->sh_addr - hdr->segs[i].addr;
-		if (offInSeg >= 0 &&
-			shdr->sh_addr + shdr->sh_size <= hdr->segs[i].addr + hdr->segs[i].size)
-		{
-			return hdr->segs[i].offset + offInSeg;
-		}
-	}
-
-	return 0;
-}
-
-FRESULT applyPatch(void *file, const char *patch)
-{
-	Elf32_Ehdr ehdr;
-	Elf32_Shdr shdr;
-	FRESULT r;
-	FIL f;
-	UINT br;
-	unsigned int cur, offset;
-
-	r = f_open(&f, patch, FA_READ);
-	if (r != FR_OK)
-		return r;
-
-	r = f_read(&f, &ehdr, sizeof(ehdr), &br);
-	if (br < sizeof(ehdr)) {
-		f_close(&f);
-		return r == FR_OK ? EOF : r;
-	}
-
-	cur = ehdr.e_shoff;
-	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
-		if (f_lseek(&f, cur) != FR_OK)
-			continue;
-
-		f_read(&f, &shdr, sizeof(shdr), &br);
-		if (br < sizeof(shdr))
-			continue;
-
-		if (shdr.sh_type != SHT_PROGBITS || !(shdr.sh_flags & SHF_ALLOC))
-			continue;
-
-		offset = locateSecInFirm(&shdr, (FirmHdr *)file);
-		if (offset == 0)
-			continue;
-
-		if (f_lseek(&f, shdr.sh_offset) != FR_OK)
-			continue;
-
-		f_read(&f, (void *)((uintptr_t)file + offset), shdr.sh_size, &br);
-	}
-
-	return FR_OK;
+	return REBOOT_CTX->firm.hdr.magic == 0x4D524946 ? 0 : -1;
 }
 
 uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){
@@ -179,54 +121,45 @@ static void setAgbBios()
 
 int rxMode(int emu)
 {
-	if (!checkEmuNAND() && emu)
-	{
-		ConsoleInit();
-		ConsoleSetTitle(L"EMUNAND NOT FOUND!");
-		print(L"The emunand was not found on\n");
-		print(L"your SDCard. \n");
-		print(L"\n");
-		print(L"Press A to boot SYSNAND\n");
-		ConsoleShow();
-		WaitForButton(BUTTON_A);
-		emu = 0;
-		char s[32];
-		sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
-		DrawBottomSplash(s);
-	}
-
-	static const char patchNandPrefix[] = ".patch.p9.nand";
-	unsigned int cur, offset, shstrSize;
-	char path[64], shstrtab[512], *sh_name;
-	const char *platformDir;
+	char path[64];
+	const char *shstrtab;
 	const wchar_t *msg;
+	void (* reboot)();
+	PatchCtx ctx;
+	uint32_t tid;
 	int r, sector;
 	void *p;
-	Elf32_Ehdr ehdr;
-	Elf32_Shdr shdr;
-	FIL fd, keyxFd;
+	Elf32_Shdr *shdr, *btm;
+	FIL fd;
 	UINT br, fsz;
 
-	setAgbBios();
+	if (emu) {
+		sector = checkEmuNAND();
+		if (sector == 0) {
+			ConsoleInit();
+			ConsoleSetTitle(L"EMUNAND NOT FOUND!");
+			print(L"The emunand was not found on\n");
+			print(L"your SDCard. \n");
+			print(L"\n");
+			print(L"Press A to boot SYSNAND\n");
+			ConsoleShow();
 
-	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
-		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
-    strcpy(path + strlen(path) - 4, "orig.bin");
-	r = loadFirm(path, &fsz);
-	if (r) {
-		msg = L"Failed to load NATIVE_FIRM: %d\n"
-			L"Reboot rxTools and try again.\n";
-		goto fail;
-	}
+			WaitForButton(BUTTON_A);
+
+			sprintf(path, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+			DrawBottomSplash(path);
+		}
+	} else
+		sector = 0;
 
 	r = getMpInfo();
 	switch (r) {
 		case MPINFO_KTR:
-			platformDir = "ktr";
+			tid = TID_KTR_NATIVE_FIRM;
 			break;
 
 		case MPINFO_CTR:
-			platformDir = "ctr";
+			tid = TID_CTR_NATIVE_FIRM;
 			break;
 
 		default:
@@ -234,95 +167,50 @@ int rxMode(int emu)
 			goto fail;
 	}
 
-	sprintf(path, SYS_PATH "/patches/%s/native_firm.elf", platformDir);
+	setAgbBios();
+
+	if (sysver < 7 && f_open(&fd, "slot0x25KeyX.bin", FA_READ) == FR_OK) {
+		f_read(&fd, ctx.keyx, sizeof(ctx.keyx), &br);
+		f_close(&fd);
+	} else
+		ctx.keyx[0] = 0;
+
+	ctx.sector = sector;
+	ctx.label.u32 = sector ? 'E-XR' : 'S-XR';
+
+	getFirmPath(path, tid);
+	r = loadFirm(path, &fsz);
+	if (r) {
+		msg = L"Failed to load NATIVE_FIRM: %d\n"
+			L"Reboot rxTools and try again.\n";
+		goto fail;
+	}
+
+	getFirmPatchPath(path, tid);
 	r = f_open(&fd, path, FA_READ);
 	if (r != FR_OK)
 		goto patchFail;
 
-	r = f_read(&fd, &ehdr, sizeof(ehdr), &br);
+	p = REBOOT_CTX->patch.b;
+	r = f_read(&fd, p, sizeof(REBOOT_CTX->patch), &br);
 	if (r != FR_OK)
 		goto patchFail;
 
-	r = f_lseek(&fd, ehdr.e_shoff + ehdr.e_shstrndx * sizeof(Elf32_Shdr));
-	if (r != FR_OK)
-		goto patchFail;
+	f_close(&fd);
 
-	r = f_read(&fd, &shdr, sizeof(shdr), &br);
-	if (r != FR_OK)
-		goto patchFail;
-
-	r = f_lseek(&fd, shdr.sh_offset);
-	if (r != FR_OK)
-		goto patchFail;
-
-	r = f_read(&fd, shstrtab, shdr.sh_size > sizeof(shstrtab) ?
-		sizeof(shstrtab) : shdr.sh_size, &shstrSize);
-	if (r != FR_OK)
-		goto patchFail;
-
-	if (emu) {
-		sector = checkEmuNAND();
-		if (sector == 0) {
-			msg = L"Failed to find EmuNAND.\n"
-				L"Check your EmuNAND.\n";
-			goto fail;
-		}
-	} else
-		sector = 0;
-
-	cur = ehdr.e_shoff;
-	for (; ehdr.e_shnum; ehdr.e_shnum--, cur += sizeof(shdr)) {
-		if (f_lseek(&fd, cur) != FR_OK)
-			continue;
-
-		if (f_read(&fd, &shdr, sizeof(shdr), &br) != FR_OK)
-			continue;
-
-		if (!(shdr.sh_flags & SHF_ALLOC) || shdr.sh_name >= shstrSize)
-			continue;
-
-		offset = locateSecInFirm(&shdr, (FirmHdr *)FIRM_ADDR);
-		if (offset == 0)
-			continue;
-
-		p = (void *)(FIRM_ADDR + offset);
-		sh_name = shstrtab + shdr.sh_name;
-
-		if (!strcmp(sh_name, ".rodata.keyx")) {
-			if (sysver >= 7)
-				continue;
-
-			if (f_open(&keyxFd, "slot0x25KeyX.bin", FA_READ) != FR_OK)
-				continue;
-
-			f_read(&keyxFd, p, shdr.sh_size, &br);
-			f_close(&keyxFd);
-		} else if (!strcmp(sh_name, ".rodata.nand.sector")) {
-			if (sector)
-				*(uint32_t *)p = (sector / 0x200) - 1;
-		} else if (!strcmp(sh_name, ".rodata.label")) {
-			*(uint32_t *)p = sector ? 'E-XR' : 'S-XR';
-		} else if (shdr.sh_type == SHT_PROGBITS
-			&& (sector || memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1))
-			&& (sysver < 7 || strcmp(sh_name, ".patch.p9.keyx")))
-		{
-			if (f_lseek(&fd, shdr.sh_offset) != FR_OK)
-				continue;
-
-			f_read(&fd, p, shdr.sh_size, &br);
+	reboot = (void *)REBOOT_CTX->patch.hdr.e_entry;
+	shdr = (void *)(REBOOT_CTX->patch.b + REBOOT_CTX->patch.hdr.e_shoff);
+	shstrtab = (char *)REBOOT_CTX->patch.b + shdr[REBOOT_CTX->patch.hdr.e_shstrndx].sh_offset;
+	for (btm = shdr + REBOOT_CTX->patch.hdr.e_shnum; shdr != btm; shdr++) {
+		if (!strcmp(shstrtab + shdr->sh_name, ".patch.p9.reboot.body")) {
+			execReboot(&ctx, reboot,
+				REBOOT_CTX->patch.b + shdr->sh_offset, shdr->sh_size);
+			__builtin_unreachable();
 		}
 	}
 
-	getFirmPath(path, getMpInfo() == MPINFO_KTR ?
-		TID_KTR_NATIVE_FIRM : TID_CTR_NATIVE_FIRM);
-	f_open(&fd, path, FA_WRITE | FA_CREATE_ALWAYS);
-	f_write(&fd, (void *)FIRM_ADDR, fsz, &br);
-	f_close(&fd);
-
-	r = loadExecReboot(); // This won't return if it succeeds.
-	msg = L"Failed to load reboot.bin: %d\n"
-		L"Check your installation.\n";
-
+	msg = L".patch.p9.reboot.body not found\n"
+		L"Please check your installation.\n";
 fail:
 	ConsoleInit();
 	ConsoleSetTitle(L"rxMode");
@@ -336,7 +224,7 @@ fail:
 	return r;
 
 patchFail:
-	msg = L"Failed to load native_firm.elf: %d\n"
+	msg = L"Failed to load the patch: %d\n"
 		L"Check your installation.\n";
 	goto fail;
 }
@@ -354,7 +242,7 @@ void rxModeWithSplash(int emu)
 int PastaMode(){
 	/*PastaMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
-	uint8_t* firm = (void*)0x24000000;
+	uint8_t* firm = (void*)REBOOT_CTX->firm.b;
 	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
 	if (strncmp((char*)firm, "FIRM", 4))
 		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);

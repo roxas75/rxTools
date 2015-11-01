@@ -16,11 +16,11 @@
 CODE_FILE := code.bin
 SYS_PATH := rxTools/sys
 SET_SYS_PATH := SYS_PATH=$(SYS_PATH)
+export PATCHES_PATH := $(SYS_PATH)/patches
 SET_CODE_PATH := CODE_PATH=$(SYS_PATH)/$(CODE_FILE)
 SET_DATNAME := DATNAME=$(SYS_PATH)/$(CODE_FILE)
 
-INCDIR := -I$(CURDIR)/include
-SET_INCDIR := INCDIR=$(INCDIR)
+export INCDIR := -I$(CURDIR)/include
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(SYS_PATH)/
@@ -67,13 +67,13 @@ release-code:
 release-doc:
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
 
-release-patches:
-	@mkdir -p release/$(SYS_PATH)/patches/ctr release/$(SYS_PATH)/patches/ktr
+release-patches: reboot/reboot.bin all-target-patches
+	@mkdir -p release/$(SYS_PATH) release/$(PATCHES_PATH)
 	@cp reboot/reboot.bin release/$(SYS_PATH)
-	@cp rxmode/build/ctr/native_firm.elf release/$(SYS_PATH)/patches/ctr
-	@cp rxmode/build/ctr/agb_firm.elf release/$(SYS_PATH)/patches/ctr
-	@cp rxmode/build/ctr/twl_firm.elf release/$(SYS_PATH)/patches/ctr
-	@cp rxmode/build/ktr/native_firm.elf release/$(SYS_PATH)/patches/ktr
+	@cp rxmode/build/ctr/native_firm.elf release/$(PATCHES_PATH)/0004013800000002.elf
+	@cp rxmode/build/ctr/twl_firm.elf release/$(PATCHES_PATH)/0004013800000102.elf
+	@cp rxmode/build/ctr/agb_firm.elf release/$(PATCHES_PATH)/0004013800000202.elf
+	@cp rxmode/build/ktr/native_firm.elf release/$(PATCHES_PATH)/0004013820000002.elf
 
 release-themes-langs:
 	@mkdir -p release/rxTools/theme/0 release/rxTools/lang release/$(SYS_PATH)
@@ -117,7 +117,7 @@ reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
 
 rxmode/build/%:
-	$(MAKE) $(SET_INCDIR) -C rxmode $(subst rxmode/,,$@)
+	$(MAKE) -C rxmode $(subst rxmode/,,$@)
 
 rxtools/rxtools.bin:
 	@$(MAKE) $(SET_SYS_PATH) -C $(dir $@) all

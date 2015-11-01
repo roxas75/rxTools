@@ -16,9 +16,10 @@
  */
 
 	.section .patch.k11.codeset.addr, "a"
-	.word	codeSetHookInArm11
+	.word	hook
 
 	.section .patch.k11.codeset.hook, "a"
+hook:
 	push	{r0-r5}
 	ldr	r0, [r1, #4]
 	cmp	r0, #0
@@ -49,9 +50,9 @@ end:
 	pop	{r0-r5}
 	@ Call the original function
 #ifdef PLATFORM_KTR
-	ldr	pc, =0xFFF036F8
+	b	0xFFF036F8
 #else
-	ldr	pc, =0xFFF036E8
+	b	0xFFF036E8
 #endif
 
 word_menu:
