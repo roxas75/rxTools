@@ -98,7 +98,10 @@ void NandDumper(){
 				DrawString(BOT_SCREEN, strings[STR_PROGRESS_OK], x+(FONT_WIDTH*(progress++)), y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 			}
 			unsigned int pad = GetInput();
-			if(pad & BUTTON_B) break;
+			if (pad & BUTTON_B) {
+				FileClose(&myFile);
+				goto end;
+			}
 		}
 		if(isEmuNand){
 			sdmmc_sdcard_readsectors(checkEmuNAND()/0x200, 1, buf);
@@ -111,6 +114,8 @@ void NandDumper(){
 		print(strings[STR_FAILED]);
 		ConsoleShow();
 	}
+
+end:
 	print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 	ConsoleShow();
 	WaitForButton(BUTTON_A);
