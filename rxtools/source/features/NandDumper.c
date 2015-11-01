@@ -32,10 +32,14 @@
 #include "fatfs/sdmmc.h"
 #include "stdio.h"
 
-#define NAND_SIZE getMpInfo() == MPINFO_KTR ? 0x4D800000 : 0x3AF00000
 #define NAND_SECTOR_SIZE 0x200
 #define BUF1 (void*)0x21000000
 #define PROGRESS_WIDTH	16
+
+static size_t getNandSize()
+{
+	return getMpInfo() == MPINFO_KTR ? 0x4D800000 : 0x3AF00000;
+}
 
 int NandSwitch(){
 	if(!checkEmuNAND()) return  0; //If No EmuNAND, we force to work on SysNAND
@@ -83,14 +87,14 @@ void NandDumper(){
 		swprintf(tmpstr, STR_MAX_LEN, strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_B], strings[STR_CANCEL]);
 		DrawString(BOT_SCREEN, tmpstr, x, y + FONT_HEIGHT*2, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-		for(int count = 0; count < NAND_SIZE/NAND_SECTOR_SIZE/nsectors; count++){
+		for(int count = 0; count < getNandSize()/NAND_SECTOR_SIZE/nsectors; count++){
 
 			if(isEmuNand) sdmmc_sdcard_readsectors(count*nsectors, nsectors, buf);
 			else sdmmc_nand_readsectors(count*nsectors, nsectors, buf);
 
 			FileWrite(&myFile, buf, nsectors*NAND_SECTOR_SIZE, count*NAND_SECTOR_SIZE*nsectors);
 			TryScreenShot();
-			if((count % (int)(NAND_SIZE/NAND_SECTOR_SIZE/nsectors/PROGRESS_WIDTH)) == 0 && count != 0){
+			if((count % (int)(getNandSize()/NAND_SECTOR_SIZE/nsectors/PROGRESS_WIDTH)) == 0 && count != 0){
 				DrawString(BOT_SCREEN, strings[STR_PROGRESS_OK], x+(FONT_WIDTH*(progress++)), y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 			}
 			unsigned int pad = GetInput();
