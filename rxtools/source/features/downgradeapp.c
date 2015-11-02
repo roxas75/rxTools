@@ -50,18 +50,17 @@ char tmpstr[256];
 FILINFO curInfo;
 DIR myDir;
 
-void sprint_sha256(wchar_t *str, unsigned char hash[32])
-{
-	int i;
-	for (i = 0; i < sizeof(hash); i++)
-	{
-		if ( (i & 0x10) == 0){
-			swprintf(str, 2, L"\n");
-			str++;
-		}
-		swprintf(str, 3, L"%02X", hash[i]);
-		str+=2;
-	}
+wchar_t sprint_sha256_char(char val) {
+    if (val < 10) return val + L'0';
+    else return val - 10 + L'A';
+}
+void sprint_sha256(wchar_t *str, unsigned char hash[32]) {
+    uint32_t i=0;
+    for (i=0;i<32;i++) {
+        if ((i)&&((i%8)==0)) {*str = L'\n'; str ++;}
+        *str = sprint_sha256_char(hash[i]>> 4); str ++;
+        *str = sprint_sha256_char(hash[i]&0xF); str ++;
+    }
 }
 
 

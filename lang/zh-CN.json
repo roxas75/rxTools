@@ -83,5 +83,6 @@
     "NO": "否", 
     "MENU_LANGUAGE": "菜单语言  %12ls", 
     "SYSNAND": "真实系统", 
-    "EMUNAND": "虚拟系统"
+    "EMUNAND": "虚拟系统",
+    "RANDOM_THEME": "随机主题"
 }
