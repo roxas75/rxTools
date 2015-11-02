@@ -78,7 +78,7 @@ elif [ "$1" = "makeprev" ]; then
 			makep1 TOP.png menu$i.png
 		done
 
-		for i in `seq 0 3`; do
+		for i in `seq 0 4`; do
 			makep1 TOP.png adv$i.png
 		done
 
@@ -90,7 +90,7 @@ elif [ "$1" = "makeprev" ]; then
 			makep1 TOP.png fil$i.png
 		done
 
-		for i in `seq 0 2`; do
+		for i in `seq 0 3`; do
 			makep1 TOP.png dmp$i.png
 		done
 
