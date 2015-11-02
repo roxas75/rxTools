@@ -115,7 +115,7 @@ if exist TOP.png (
 	for /l %%x in (0, 1, 6) do (
 		call :makep1 TOP.png menu%%x.png
 	)
-	for /l %%x in (0, 1, 3) do (
+	for /l %%x in (0, 1, 4) do (
 		call :makep1 TOP.png adv%%x.png
 	)
 	for /l %%x in (0, 1, 5) do (
@@ -124,7 +124,7 @@ if exist TOP.png (
 	for /l %%x in (0, 1, 4) do (
 		call :makep1 TOP.png fil%%x.png
 	)
-	for /l %%x in (0, 1, 2) do (
+	for /l %%x in (0, 1, 3) do (
 		call :makep1 TOP.png dmp%%x.png
 	)
 	for /l %%x in (0, 1, 1) do (
@@ -145,20 +145,20 @@ convert -delay %delay% -loop 0 menu0.png menu1.png menu2.png menu3.png menu4.png
 convert -delay %delay% -loop 0 Preview/menu0.png Preview/menu1.png Preview/menu2.png Preview/menu3.png Preview/menu4.png Preview/menu5.png Preview/menu6.png Preview/menuprev-1.gif
 convert -delay %delay% -loop 0 boot.png bootE.png Preview/boot-0.gif
 convert -delay %delay% -loop 0 Preview/boot.png Preview/bootE.png Preview/boot-1.gif
-convert -delay %delay% -loop 0 adv0.png adv1.png adv2.png adv3.png Preview/adv-0.gif
-convert -delay %delay% -loop 0 Preview/adv0.png Preview/adv1.png Preview/adv2.png Preview/adv3.png Preview/adv-1.gif
+convert -delay %delay% -loop 0 adv0.png adv1.png adv2.png adv3.png adv4.png Preview/adv-0.gif
+convert -delay %delay% -loop 0 Preview/adv0.png Preview/adv1.png Preview/adv2.png Preview/adv3.png Preview/adv4.png Preview/adv-1.gif
 convert -delay %delay% -loop 0 dec0.png dec1.png dec2.png dec3.png dec4.png dec5.png Preview/dec-0.gif
 convert -delay %delay% -loop 0 Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/dec5.png Preview/dec-1.gif
-convert -delay %delay% -loop 0 dmp0.png dmp1.png dmp2.png Preview/dmp-0.gif
-convert -delay %delay% -loop 0 Preview/dmp0.png Preview/dmp1.png Preview/dmp2.png Preview/dmp-1.gif
+convert -delay %delay% -loop 0 dmp0.png dmp1.png dmp2.png dmp3.png Preview/dmp-0.gif
+convert -delay %delay% -loop 0 Preview/dmp0.png Preview/dmp1.png Preview/dmp2.png Preview/dmp3.png Preview/dmp-1.gif
 convert -delay %delay% -loop 0 fil0.png fil1.png fil2.png fil3.png fil4.png Preview/fil-0.gif
 convert -delay %delay% -loop 0 Preview/fil0.png Preview/fil1.png Preview/fil2.png Preview/fil3.png Preview/fil4.png Preview/fil-1.gif
 convert -delay %delay% -loop 0 inj0.png inj1.png Preview/inj-0.gif
 convert -delay %delay% -loop 0 Preview/inj0.png Preview/inj1.png Preview/inj-1.gif
 convert -delay %delay% -loop 0 cfg0.png cfg1E.png cfg1O.png Preview/cfg-0.gif
 convert -delay %delay% -loop 0 Preview/cfg0.png Preview/cfg1E.png Preview/cfg1O.png Preview/cfg-1.gif
-convert -delay %delay% -loop 0 menu0.png boot.png bootE.png menu1.png dec0.png dec1.png dec2.png dec3.png dec4.png dec5.png menu2.png dmp0.png dmp1.png dmp2.png dec0.png dec1.png dec2.png dec3.png dec4.png menu3.png inj0.png inj1.png menu4.png adv0.png adv1.png adv2.png adv3.png menu5.png app.png menu6.png credits.png Preview/menuprev-aio-0.gif
-convert -delay %delay% -loop 0 Preview/menu0.png Preview/boot.png Preview/bootE.png Preview/menu1.png Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/dec5.png Preview/menu2.png Preview/dmp0.png Preview/dmp1.png Preview/dmp2.png Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/menu3.png Preview/inj0.png Preview/inj1.png Preview/menu4.png Preview/adv0.png Preview/adv1.png Preview/adv2.png Preview/adv3.png Preview/menu5.png Preview/app.png Preview/menu6.png Preview/credits.png Preview/menuprev-aio-1.gif
+convert -delay %delay% -loop 0 menu0.png boot.png bootE.png menu1.png dec0.png dec1.png dec2.png dec3.png dec4.png dec5.png menu2.png dmp0.png dmp1.png dmp2.png dmp3.png menu3.png inj0.png inj1.png menu4.png adv0.png adv1.png adv2.png adv3.png adv4.png menu5.png app.png menu6.png credits.png Preview/menuprev-aio-0.gif
+convert -delay %delay% -loop 0 Preview/menu0.png Preview/boot.png Preview/bootE.png Preview/menu1.png Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/dec5.png Preview/menu2.png Preview/dmp0.png Preview/dmp1.png Preview/dmp2.png Preview/dmp3.png Preview/menu3.png Preview/inj0.png Preview/inj1.png Preview/menu4.png Preview/adv0.png Preview/adv1.png Preview/adv2.png Preview/adv3.png Preview/adv4.png Preview/menu5.png Preview/app.png Preview/menu6.png Preview/credits.png Preview/menuprev-aio-1.gif
 cd Preview
 move menuprev-aio*.gif Animations/AIO
 move menuprev-?.gif Animations/Menu
