@@ -61,9 +61,14 @@ PAYLOAD_OBJS	+= 	\
 	$(BUILD)/payload/arm11/hookswi.o
 endif
 
+$(foreach f,$(BUILD) $(PATCHES) $(PAYLOAD_OBJS),$(eval $f : | $(dir $f)D))
+
 .PHONY: clean all
 
 all: $(BUILD)/$(TARGET).elf
+
+%/D:
+	mkdir -p $@
 
 %.elf: %_unadjust.elf
 	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$(($(PROCESS9_CODE_ADDR) - 0x08028000)) $< $@
@@ -78,19 +83,15 @@ $(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
 	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
 
 $(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.c
-	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S
-	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(CC) -mcpu=mpcore $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.S
-	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s
-	@[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	$(AS) $< -o $@
 #---------------------------------------------------------------------------------
 clean:
