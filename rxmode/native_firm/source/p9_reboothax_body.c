@@ -15,9 +15,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <stddef.h>
 #include <stdint.h>
-#include <firmhdr.h>
-#include <memory.h>
+#include <reboot.h>
+#include <elf.h>
+#include <ctx.h>
 
 #define SET_MPU_REGION(id, base, size, enable)	{	\
 	__asm__ volatile ("mcr p15, 0, %0, c6, c" #id ", 0\n"	\
@@ -33,8 +35,7 @@
 	__asm__("mcr p15, 0, %0, c5, c0, " type "\n" :: "r"(v));	\
 }
 
-static void __attribute__((section(".patch.p9.reboot.body")))
-SET_MPU_PERM_RWFORALL(uint32_t *v, uint8_t area)
+static void SET_MPU_PERM_RWFORALL(uint32_t *v, uint8_t area)
 {
 	const uint8_t bits = 4;
 	uint8_t shift;
@@ -55,26 +56,22 @@ SET_MPU_PERM_RWFORALL(uint32_t *v, uint8_t area)
 	__asm__ volatile ("mcr p15, 0, %0, " type ", c0, " id "\n" :: "r"(v));	\
 }
 
-static void __attribute__((section(".patch.p9.reboot.body")))
-drainEntireDcache()
+static void drainEntireDcache()
 {
 	__asm__ volatile ("mcr p15, 0, %0, c7, c6, 4\n" :: "r"(0));
 }
 
-static void __attribute__((section(".patch.p9.reboot.body")))
-cleanDcacheLine(uintptr_t p)
+static void cleanDcacheLine(void *p)
 {
 	__asm__ volatile ("mcr p15, 0, %0, c7, c10, 1\n" :: "r"(p));
 }
 
-static void __attribute__((section(".patch.p9.reboot.body")))
-flushIcacheLine(uintptr_t p)
+static void flushIcacheLine(void *p)
 {
 	__asm__ volatile ("mcr p15, 0, %0, c7, c5, 1\n" :: "r"(p));
 }
 
-static void __attribute__((section(".patch.p9.reboot.body")))
-setupMpu()
+static void setupMpu()
 {
 	uint32_t i;
 
@@ -101,62 +98,124 @@ setupMpu()
 	WRITE_MPU_CACHABLE(i | (1 << 4) | (1 << 5), MPU_DCACHE, WRITE);
 }
 
-static void __attribute__((section(".patch.p9.reboot.body")))
-loadFirm()
+static void *memcpy32(void *dst, const void *src, size_t n)
 {
-	uintptr_t srcTop, srcCur, dstTop, dstBtm, dstCur;
+	const uint32_t *_src;
+	uint32_t *_dst;
+	uintptr_t btm;
+
+	_dst = dst;
+	_src = src;
+	btm = (uintptr_t)dst + n;
+	while ((uintptr_t)_dst < btm) {
+		*_dst = *_src;
+		_dst++;
+		_src++;
+	}
+
+	return _dst;
+}
+
+static void loadFirm()
+{
 	const FirmSeg *seg;
 	unsigned int i;
 
-	seg = ((FirmHdr *)FIRM_ADDR)->segs;
+	seg = REBOOT_CTX->firm.hdr.segs;
 	for (i = 0; i < FIRM_SEG_NUM; i++) {
-		srcTop = FIRM_ADDR + seg->offset;
-		dstTop = seg->addr;
-		dstBtm = dstTop + seg->size;
+		memcpy32((void *)seg->addr, REBOOT_CTX->firm.b + seg->offset, seg->size);
+		seg++;
+	}
+}
 
-		srcCur = srcTop;
-		dstCur = dstTop;
-		while (dstCur < dstBtm) {
-			*(uint32_t *)dstCur = *(uint32_t *)srcCur;
-			srcCur += sizeof(uint32_t);
-			dstCur += sizeof(uint32_t);
+static int memcmp(const void *s1, const void *s2, size_t n)
+{
+	int d;
+
+	while (n > 0) {
+		d = *(unsigned char *)s1 - *(unsigned char *)s2;
+		if (d)
+			return d;
+
+		s1 = (unsigned char *)s1 + 1;
+		s2 = (unsigned char *)s2 + 1;
+		n--;
+	}
+
+	return 0;
+}
+
+static void patchFirm()
+{
+	static const char patchNandPrefix[] = ".patch.p9.nand";
+#ifndef PLATFORM_KTR
+	static const char patchKeyxStr[] = ".patch.p9.keyx";
+#endif
+	Elf32_Shdr *shdr, *btm;
+	const char *shstrtab, *sh_name;
+
+	shdr = (void *)(REBOOT_CTX->patch.b + REBOOT_CTX->patch.hdr.e_shoff);
+	shstrtab = REBOOT_CTX->patch.b + shdr[REBOOT_CTX->patch.hdr.e_shstrndx].sh_offset;
+	for (btm = shdr + REBOOT_CTX->patch.hdr.e_shnum; shdr != btm; shdr++) {
+		if (!(shdr->sh_flags & SHF_ALLOC) || shdr->sh_type != SHT_PROGBITS)
+			continue;
+
+		sh_name = shstrtab + shdr->sh_name;
+		if ((patchCtx.sector == 0 && !memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1))
+#ifndef PLATFORM_KTR
+			|| (patchCtx.keyx[0] == 0 && !memcmp(sh_name, patchKeyxStr, sizeof(patchKeyxStr)))
+#endif
+			)
+		{
+			continue;
 		}
 
-		for (dstCur = dstTop; dstCur < dstBtm; dstCur += 32) {
-			cleanDcacheLine(dstCur);
+		memcpy32((void *)shdr->sh_addr,
+			REBOOT_CTX->patch.b + shdr->sh_offset,
+			shdr->sh_size);
+	}
+}
+
+static void flushFirm()
+{
+	uintptr_t dstCur, dstBtm;
+	const FirmSeg *seg;
+	unsigned int i;
+
+	seg = REBOOT_CTX->firm.hdr.segs;
+	for (i = 0; i < FIRM_SEG_NUM; i++) {
+		dstCur = seg->addr;
+		for (dstBtm = seg->addr + seg->size; dstCur < dstBtm; dstCur += 32) {
+			cleanDcacheLine((void *)dstCur);
 
 			if (!seg->isArm11)
-				flushIcacheLine(dstCur);
+				flushIcacheLine((void *)dstCur);
 		}
 
 		seg++;
 	}
 }
 
-static void __attribute__((section(".patch.p9.reboot.body")))
-arm11Enter()
+static void arm11Enter(uint32_t *arm11EntryDst)
 {
-	const uintptr_t arm11Entry = 0x1FFFFFFC;
-
-	*(uint32_t *)arm11Entry = ((FirmHdr *)FIRM_ADDR)->arm11Entry;
-	cleanDcacheLine(arm11Entry);
+	*arm11EntryDst = REBOOT_CTX->firm.hdr.arm11Entry;
+	cleanDcacheLine(arm11EntryDst);
 }
 
-static _Noreturn void __attribute__((section(".patch.p9.reboot.body")))
-arm9Enter()
+static _Noreturn void arm9Enter()
 {
 	__asm__ volatile ("b 0x801B01C\n");
 	__builtin_unreachable();
 }
 
-_Noreturn void __attribute__((section(".patch.p9.reboot.body.top")))
-rebootFunc()
+_Noreturn void __attribute__((section(".text.start")))
+rebootFunc(const PatchCtx *ctx, uint32_t *arm11EntryDst)
 {
-	// Enter system mode and disable IRQ and FIQ
-	__asm__ volatile ("msr CPSR_c, #0xDF\n");
-
 	setupMpu();
 	loadFirm();
-	arm11Enter();
+	memcpy32(&patchCtx, ctx, sizeof(patchCtx));
+	patchFirm();
+	flushFirm();
+	arm11Enter(arm11EntryDst);
 	arm9Enter();
 }

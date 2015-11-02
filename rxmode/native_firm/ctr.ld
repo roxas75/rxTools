@@ -1,6 +1,9 @@
 payload = 0x0801A4C0;
 INCLUDE payload.ld
 
+rebootRam = 0x080FF604;
+ENTRY(rebootRam)
+
 SECTIONS
 {
 	. = 0x0801B564;
@@ -28,12 +31,15 @@ SECTIONS
 	.patch.p9.mythread.addr : { *(.patch.p9.mythread.addr) }
 
 	. = process9 + 0x5D9EC;
-	.patch.p9.reboot.entry : { *(.patch.p9.reboot.entry) }
+	.patch.p9.reboot.entry : {
+		*(.patch.p9.reboot.entry.top)
+		*(.patch.p9.reboot.entry)
+	}
 
 	. = reboot;
 	.patch.p9.reboot.body : {
-		*(.patch.p9.reboot.body.top)
-		*(.patch.p9.reboot.body)
+		*(.patch.p9.reboot.body.text.start)
+		*(.patch.p9.reboot.body*)
 	}
 
 	. = codeSetHook;

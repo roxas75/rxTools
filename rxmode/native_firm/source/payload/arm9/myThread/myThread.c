@@ -27,7 +27,7 @@
 #include "hookswi.h"
 #include "font.c"
 #endif
-#include "vars.h"
+#include "ctx.h"
 #include "lib.c"
 
 #ifdef DEBUG_DUMP_FCRAM
@@ -61,7 +61,7 @@ static int patchLabel()
 	{
 		//System Settings label
 		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
-			rx_strcpy((char*)p, label, 4, 2, 1);
+			rx_strcpy((char*)p, patchCtx.label.c, sizeof(patchCtx.label), 2, 1);
 			return 0;
 		}
 	}

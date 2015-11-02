@@ -24,13 +24,18 @@
 #include "fatfs/ff.h"
 
 typedef enum {
+	TID_HI_FIRM = 0x00040138
+} TitleIdHi;
+
+typedef enum {
         TID_CTR_NATIVE_FIRM = 0x00000002,
         TID_CTR_TWL_FIRM = 0x00000102,
         TID_CTR_AGB_FIRM = 0x00000202,
         TID_KTR_NATIVE_FIRM = 0x20000002
-} FirmTid;
+} TitleIdLo;
 
 extern const char firmPathFmt[];
+extern const char firmPatchPathFmt[];
 
 int PastaMode();
 void FirmLoader();
@@ -40,9 +45,14 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size);
 uint8_t *decryptFirmTitle(uint8_t *title, unsigned int size, uint8_t key[16]);
 FRESULT applyPatch(void *file, const char *patch);
 
-static inline int getFirmPath(char *s, FirmTid id)
+static inline int getFirmPath(char *s, TitleIdLo id)
 {
-	return sprintf(s, firmPathFmt, id);
+	return sprintf(s, firmPathFmt, TID_HI_FIRM, id);
+}
+
+static inline int getFirmPatchPath(char *s, TitleIdLo id)
+{
+	return sprintf(s, firmPatchPathFmt, TID_HI_FIRM, id);
 }
 
 #endif

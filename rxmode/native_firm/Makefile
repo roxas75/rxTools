@@ -32,19 +32,17 @@ SOURCE	:= source
 LD	:= arm-none-eabi-ld
 OBJCOPY	:= arm-none-eabi-objcopy
 
-CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/include
+CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/include -DPATCHES_PATH=\"$(PATCHES_PATH)\"
 
-PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
-	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
-	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
-	$(BUILD)/p9_reboothax_entry.elf $(BUILD)/p9_reboothax_body.elf	\
-	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf	\
-	$(BUILD)/k11_codeset.elf
-
-PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
+OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
 	$(BUILD)/payload/arm9/process9.o	\
-	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/vars.o	\
-	$(BUILD)/payload/arm9/myThread/myThread.o
+	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/ctx.o	\
+	$(BUILD)/payload/arm9/myThread/myThread.o $(BUILD)/k9_fix_flags.o	\
+	$(BUILD)/p9_emunand_hook_1.o $(BUILD)/p9_emunand_hook_2.o	\
+	$(BUILD)/p9_mythread_hook_1.o $(BUILD)/p9_mythread_hook_2.o	\
+	$(BUILD)/p9_reboothax_entry.o $(BUILD)/p9_reboothax_body_prefix.o	\
+	$(BUILD)/p9_signatures_spoof_1.o $(BUILD)/p9_signatures_spoof_2.o	\
+	$(BUILD)/k11_codeset.o
 
 ifdef PLATFORM_KTR
 LDSCRIPT_ROM	:= ktr_rom.ld
@@ -54,14 +52,12 @@ else
 LDSCRIPT_ROM	:= ctr_rom.ld
 LDSCRIPT_RAM	:= ctr_ram.ld
 
-PATCHES	+= $(BUILD)/p9_keyx_spoof.elf
-
-PAYLOAD_OBJS	+= 	\
-	$(BUILD)/payload/arm9/myThread/handlers.o	\
-	$(BUILD)/payload/arm11/hookswi.o
+OBJS	+= $(BUILD)/payload/arm9/myThread/handlers.o	\
+	$(BUILD)/payload/arm11/hookswi.o	\
+	$(BUILD)/p9_keyx_spoof.o
 endif
 
-$(foreach f,$(BUILD) $(PATCHES) $(PAYLOAD_OBJS),$(eval $f : | $(dir $f)D))
+$(foreach f,$(BUILD)/$(TARGET).elf $(OBJS),$(eval $f : | $(dir $f)D))
 
 .PHONY: clean all
 
@@ -71,16 +67,16 @@ all: $(BUILD)/$(TARGET).elf
 	mkdir -p $@
 
 %.elf: %_unstrip.elf
-	$(OBJCOPY) -S $< $@
+	$(OBJCOPY) -S -R .ARM.attributes -R .comment $< $@
 
-$(BUILD)/$(TARGET)_unstrip.elf: $(PATCHES)
-	$(LD) -i -T$(LDSCRIPT_ROM) $^ -o $@
+%_unstrip.elf: %_ram.elf
+	$(LD) -i -T$(LDSCRIPT_ROM) $< -o $@
 
-$(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS)
-	$(LD) --use-blx -T$(LDSCRIPT_RAM) $(PAYLOAD_OBJS) -o $@
+$(BUILD)/$(TARGET)_ram.elf: $(OBJS)
+	$(LD) --use-blx -T$(LDSCRIPT_RAM) $^ -o $@
 
-$(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
-	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT_RAM) $< -o $@
+$(BUILD)/p9_reboothax_body_prefix.o: $(BUILD)/p9_reboothax_body.o
+	$(OBJCOPY) --prefix-alloc-sections .patch.p9.reboot.body $< $@
 
 $(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S
 	$(CC) -mcpu=mpcore $(CFLAGS) $< -c -o $@

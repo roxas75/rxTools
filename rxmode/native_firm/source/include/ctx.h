@@ -15,10 +15,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef VARS_H
+#define VARS_H
 
-#define ARM9_VRAM_ADDR (0x18000000)
-#define ARM11_VRAM_PADDR ARM9_VRAM_ADDR
+#include <reboot.h>
+
+extern PatchCtx patchCtx;
 
 #endif
