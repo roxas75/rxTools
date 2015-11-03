@@ -19,9 +19,9 @@ line = 32
 	.global	execReboot
 	.type	execReboot, %function
 execReboot:
-	mov	r4, #0x08000000
-	orr	r4, #0x29
-	mcr	p15, 0, r4, c6, c2, 0
+	mov	r4, #0x08000000	@ Address
+	orr	r4, #0x29	@ Size: 2^0x28 = 2M, Enable
+	mcr	p15, 0, r4, c6, c2, 0	@ Set MPU area 2
 
 	add	r4, r1, r3
 loop:
@@ -42,8 +42,8 @@ loop:
 flushInLoop:
 	sub	r5, r1, #line
 flush:
-	mcr	p15, 0, r5, c7, c10, 1
-	mcr	p15, 0, r5, c7, c5, 1
+	mcr	p15, 0, r5, c7, c10, 1	@ Clean Dcache
+	mcr	p15, 0, r5, c7, c5, 1	@ Flush Icache
 	bx	lr
 
 	.size	execReboot, . - execReboot
