@@ -37,6 +37,8 @@ loop:
 	blne	flush
 
 	mov	r1, #0x1FFFFFF8
+	mov	r2, #0
+	mcr	p15, 0, r2, c7, c10, 4	@ Drain write buffer
 	sub	pc, r4, r3
 
 flushInLoop:

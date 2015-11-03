@@ -56,9 +56,9 @@ static void SET_MPU_PERM_RWFORALL(uint32_t *v, uint8_t area)
 	__asm__ volatile ("mcr p15, 0, %0, " type ", c0, " id "\n" :: "r"(v));	\
 }
 
-static void drainEntireDcache()
+static void drainWriteBuffer()
 {
-	__asm__ volatile ("mcr p15, 0, %0, c7, c6, 4\n" :: "r"(0));
+	__asm__ volatile ("mcr p15, 0, %0, c7, c10, 4\n" :: "r"(0));
 }
 
 static void cleanDcacheLine(void *p)
@@ -75,7 +75,6 @@ static void setupMpu()
 {
 	uint32_t i;
 
-	drainEntireDcache();
 	SET_MPU_REGION(3, 0x10000000, 52, 1);
 
 	READ_MPU_PERM(&i, PERM_DATA);
@@ -176,7 +175,7 @@ static void patchFirm()
 	}
 }
 
-static void flushFirm()
+static void flushFirmData()
 {
 	uintptr_t dstCur, dstBtm;
 	const FirmSeg *seg;
@@ -185,12 +184,27 @@ static void flushFirm()
 	seg = REBOOT_CTX->firm.hdr.segs;
 	for (i = 0; i < FIRM_SEG_NUM; i++) {
 		dstCur = seg->addr;
-		for (dstBtm = seg->addr + seg->size; dstCur < dstBtm; dstCur += 32) {
+		for (dstBtm = seg->addr + seg->size; dstCur < dstBtm; dstCur += 32)
 			cleanDcacheLine((void *)dstCur);
 
+		seg++;
+	}
+
+	drainWriteBuffer();
+}
+
+static void flushFirmInstr()
+{
+	uintptr_t dstCur, dstBtm;
+	const FirmSeg *seg;
+	unsigned int i;
+
+	seg = REBOOT_CTX->firm.hdr.segs;
+	for (i = 0; i < FIRM_SEG_NUM; i++) {
+		dstCur = seg->addr;
+		for (dstBtm = seg->addr + seg->size; dstCur < dstBtm; dstCur += 32)
 			if (!seg->isArm11)
 				flushIcacheLine((void *)dstCur);
-		}
 
 		seg++;
 	}
@@ -200,6 +214,7 @@ static void arm11Enter(uint32_t *arm11EntryDst)
 {
 	*arm11EntryDst = REBOOT_CTX->firm.hdr.arm11Entry;
 	cleanDcacheLine(arm11EntryDst);
+	drainWriteBuffer();
 }
 
 static _Noreturn void arm9Enter()
@@ -215,7 +230,8 @@ rebootFunc(const PatchCtx *ctx, uint32_t *arm11EntryDst)
 	loadFirm();
 	memcpy32(&patchCtx, ctx, sizeof(patchCtx));
 	patchFirm();
-	flushFirm();
+	flushFirmData();
 	arm11Enter(arm11EntryDst);
+	flushFirmInstr();
 	arm9Enter();
 }
