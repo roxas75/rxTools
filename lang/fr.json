@@ -74,12 +74,13 @@
 	"SHOW_AGB": "Afficher le BIOS GBA   %ls",
 	"ENABLE_3D_UI": "Activer UI 3D          %ls",
 	"QUICK_BOOT": "Démarrage rapide       %ls",
-	"MENU_LANGUAGE": "Langue      %16ls",
-	"AUTOBOOT": "DÉMARRAGE AUTOMATIQUE",
+	"ABSYSN": "Démarrer en sysNAND    %ls",
+	"AUTOBOOT": "Démarrage automatique",
 	"WARNING": "Attention",
 	"REGION_": "Région: %ls\n",
 	"REGION": "région",
 	"YES": "Oui",
 	"NO": "Non",
+	"MENU_LANGUAGE": "Langue    %16ls",
 	"RANDOM_THEME": "Thème aléatoire"
 }
