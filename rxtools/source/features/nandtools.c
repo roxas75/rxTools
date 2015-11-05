@@ -44,6 +44,7 @@ static struct {
     {"LocalFriendCodeSeed_B", "rw/sys"},
     {"rand_seed", "rw/sys"},
     {"ticket.db", "dbs"},
+    {"import.db", "dbs"},
 };
 
 static Menu CoolFilesMenu = {
@@ -54,6 +55,7 @@ static Menu CoolFilesMenu = {
 		{ L" LocalFriendCodeSeed_B", &SelectFile, "fil2.bin" },
 		{ L" rand_seed", &SelectFile, "fil3.bin" },
 		{ L" ticket.db", &SelectFile, "fil4.bin" },
+		{ L" import.db", &SelectFile, "fil5.bin" },
 	},
 	nCoolFiles,
 	0,
