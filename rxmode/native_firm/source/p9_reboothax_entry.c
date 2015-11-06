@@ -66,16 +66,16 @@ loadExecReboot(int r0, int r1, int r2, uint32_t hiId, uint32_t loId)
 {
 	const size_t pathLen = 64;
 	wchar_t path[pathLen];
-	size_t written;
+	size_t read;
 	P9File f;
 
 	swprintf(path, pathLen, L"sdmc:/" FIRM_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
-	p9Read(f, &written, REBOOT_CTX->firm.b, sizeof(REBOOT_CTX->firm));
+	p9Read(f, &read, REBOOT_CTX->firm.b, sizeof(REBOOT_CTX->firm));
 
 	swprintf(path, pathLen, L"sdmc:/" FIRM_PATCH_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
-	p9Read(f, &written, REBOOT_CTX->patch.b, sizeof(REBOOT_CTX->patch));
+	p9Read(f, &read, REBOOT_CTX->patch.b, sizeof(REBOOT_CTX->patch));
 
 	while (p9RecvPxi() == 0x44846);
 	svcKernelSetState(SVC_KERNEL_STATE_INIT, hiId, loId,
