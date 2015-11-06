@@ -220,10 +220,11 @@ static void flushFirmInstr()
 
 	seg = REBOOT_CTX->firm.hdr.segs;
 	for (i = 0; i < FIRM_SEG_NUM; i++) {
-		dstCur = seg->addr;
-		for (dstBtm = seg->addr + seg->size; dstCur < dstBtm; dstCur += 32)
-			if (!seg->isArm11)
+		if (!seg->isArm11) {
+			dstCur = seg->addr;
+			for (dstBtm = seg->addr + seg->size; dstCur < dstBtm; dstCur += 32)
 				flushIcacheLine((void *)dstCur);
+		}
 
 		seg++;
 	}
