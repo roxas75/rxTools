@@ -64,15 +64,16 @@ execReboot()
 _Noreturn void __attribute__((section(".patch.p9.reboot.entry.top")))
 loadExecReboot(int r0, int r1, int r2, uint32_t hiId, uint32_t loId)
 {
-	wchar_t path[64];
+	const size_t pathLen = 64;
+	wchar_t path[pathLen];
 	size_t written;
 	P9File f;
 
-	swprintf(path, sizeof(path), L"sdmc:/" FIRM_PATH_FMT, hiId, loId);
+	swprintf(path, pathLen, L"sdmc:/" FIRM_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
 	p9Read(f, &written, REBOOT_CTX->firm.b, sizeof(REBOOT_CTX->firm));
 
-	swprintf(path, sizeof(path), L"sdmc:/" FIRM_PATCH_PATH_FMT, hiId, loId);
+	swprintf(path, pathLen, L"sdmc:/" FIRM_PATCH_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
 	p9Read(f, &written, REBOOT_CTX->patch.b, sizeof(REBOOT_CTX->patch));
 
