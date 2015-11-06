@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-echo "rxTools AIO Theme Tool v1.0.1"
+echo "rxTools AIO Theme Tool v1.0.1 rev.1"
 command -v convert >/dev/null 2>&1 || { echo "Please install ImageMagick in order to use this script." ; exit 1; }
 if [ "$1" = "help" ]; then
 	echo "This tool is meant for theme creators. Available commands:"
@@ -78,7 +78,7 @@ elif [ "$1" = "makeprev" ]; then
 			makep1 TOP.png menu$i.png
 		done
 
-		for i in `seq 0 3`; do
+		for i in `seq 0 4`; do
 			makep1 TOP.png adv$i.png
 		done
 
@@ -90,7 +90,7 @@ elif [ "$1" = "makeprev" ]; then
 			makep1 TOP.png fil$i.png
 		done
 
-		for i in `seq 0 2`; do
+		for i in `seq 0 3`; do
 			makep1 TOP.png dmp$i.png
 		done
 
