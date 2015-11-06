@@ -64,7 +64,7 @@ $(foreach f,$(BUILD)/$(TARGET).elf $(OBJS),$(eval $f : | $(dir $f)D))
 all: $(BUILD)/$(TARGET).elf
 
 %/D:
-	mkdir -p $@
+	mkdir -p $(dir $@)
 
 %.elf: %_unstrip.elf
 	$(OBJCOPY) -S -R .ARM.attributes -R .comment $< $@
