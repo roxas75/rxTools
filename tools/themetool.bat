@@ -121,7 +121,7 @@ if exist TOP.png (
 	for /l %%x in (0, 1, 5) do (
 		call :makep1 TOP.png dec%%x.png
 	)
-	for /l %%x in (0, 1, 4) do (
+	for /l %%x in (0, 1, 5) do (
 		call :makep1 TOP.png fil%%x.png
 	)
 	for /l %%x in (0, 1, 2) do (
@@ -151,8 +151,8 @@ convert -delay %delay% -loop 0 dec0.png dec1.png dec2.png dec3.png dec4.png dec5
 convert -delay %delay% -loop 0 Preview/dec0.png Preview/dec1.png Preview/dec2.png Preview/dec3.png Preview/dec4.png Preview/dec5.png Preview/dec-1.gif
 convert -delay %delay% -loop 0 dmp0.png dmp1.png dmp2.png Preview/dmp-0.gif
 convert -delay %delay% -loop 0 Preview/dmp0.png Preview/dmp1.png Preview/dmp2.png Preview/dmp-1.gif
-convert -delay %delay% -loop 0 fil0.png fil1.png fil2.png fil3.png fil4.png Preview/fil-0.gif
-convert -delay %delay% -loop 0 Preview/fil0.png Preview/fil1.png Preview/fil2.png Preview/fil3.png Preview/fil4.png Preview/fil-1.gif
+convert -delay %delay% -loop 0 fil0.png fil1.png fil2.png fil3.png fil4.png fil5.png Preview/fil-0.gif
+convert -delay %delay% -loop 0 Preview/fil0.png Preview/fil1.png Preview/fil2.png Preview/fil3.png Preview/fil4.png Preview/fil5.png Preview/fil-1.gif
 convert -delay %delay% -loop 0 inj0.png inj1.png Preview/inj-0.gif
 convert -delay %delay% -loop 0 Preview/inj0.png Preview/inj1.png Preview/inj-1.gif
 convert -delay %delay% -loop 0 cfg0.png cfg1E.png cfg1O.png Preview/cfg-0.gif
