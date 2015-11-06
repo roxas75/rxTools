@@ -86,7 +86,7 @@ elif [ "$1" = "makeprev" ]; then
 			makep1 TOP.png dec$i.png
 		done
 
-		for i in `seq 0 4`; do
+		for i in `seq 0 5`; do
 			makep1 TOP.png fil$i.png
 		done
 
