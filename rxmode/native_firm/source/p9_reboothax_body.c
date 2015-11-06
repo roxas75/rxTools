@@ -97,6 +97,24 @@ static void setupMpu()
 	WRITE_MPU_CACHABLE(i | (1 << 4) | (1 << 5), MPU_DCACHE, WRITE);
 }
 
+static void *memcpy16(void *dst, const void *src, size_t n)
+{
+	const uint16_t *_src;
+	uint16_t *_dst;
+	uintptr_t btm;
+
+	_dst = dst;
+	_src = src;
+	btm = (uintptr_t)dst + n;
+	while ((uintptr_t)_dst < btm) {
+		*_dst = *_src;
+		_dst++;
+		_src++;
+	}
+
+	return _dst;
+}
+
 static void *memcpy32(void *dst, const void *src, size_t n)
 {
 	const uint32_t *_src;
@@ -152,6 +170,7 @@ static void patchFirm()
 #endif
 	Elf32_Shdr *shdr, *btm;
 	const char *shstrtab, *sh_name;
+	uintptr_t dst, src;
 
 	shdr = (void *)(REBOOT_CTX->patch.b + REBOOT_CTX->patch.hdr.e_shoff);
 	shstrtab = REBOOT_CTX->patch.b + shdr[REBOOT_CTX->patch.hdr.e_shstrndx].sh_offset;
@@ -169,7 +188,7 @@ static void patchFirm()
 			continue;
 		}
 
-		memcpy32((void *)shdr->sh_addr,
+		memcpy16((void *)shdr->sh_addr,
 			REBOOT_CTX->patch.b + shdr->sh_offset,
 			shdr->sh_size);
 	}
