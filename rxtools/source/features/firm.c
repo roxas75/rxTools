@@ -186,6 +186,8 @@ int rxMode(int emu)
 		goto fail;
 	}
 
+	REBOOT_CTX->firm.hdr.arm9Entry = 0x0801B01C;
+
 	getFirmPatchPath(path, tid);
 	r = f_open(&fd, path, FA_READ);
 	if (r != FR_OK)
