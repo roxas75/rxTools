@@ -39,10 +39,10 @@ all: $(BUILD)/$(TARGET).elf
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
-%.elf: %_unadjust.elf
-	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$((0x08014A00 - 0x08020000)) $< $@
+%.elf: %_unstrip.elf
+	$(OBJCOPY) -S $< $@
 
-$(BUILD)/$(TARGET)_unadjust.elf: $(BUILD)/p9_signatures_spoof.o
+$(BUILD)/$(TARGET)_unstrip.elf: $(BUILD)/p9_signatures_spoof.o
 	$(LD) -i -Tscript.ld $^ -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
