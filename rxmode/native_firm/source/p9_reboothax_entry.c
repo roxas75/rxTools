@@ -81,7 +81,7 @@ loadExecReboot(int r0, int r1, int r2, uint32_t hiId, uint32_t loId)
 	p9Read(f, &read, REBOOT_CTX->patch.b, sizeof(REBOOT_CTX->patch));
 	p9Close(f);
 
-	while (p9RecvPxi() == 0x44846);
+	while (p9RecvPxi() != 0x44846);
 	svcKernelSetState(SVC_KERNEL_STATE_INIT, hiId, loId,
 		SVC_KERNEL_STATE_TITLE_COMPAT);
 
