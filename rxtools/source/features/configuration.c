@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <reboot.h>
 #include "TitleKeyDecrypt.h"
 #include "configuration.h"
 #include "lang.h"

@@ -22,6 +22,8 @@
 #include <ctx.h>
 #include <process9.h>
 
+static int isNative = 0;
+
 static void *memcpy32(void *dst, const void *src, size_t n)
 {
 	const uint32_t *_src;
@@ -51,13 +53,16 @@ execReboot()
 #else
 	sp = 0x080FF000;
 #endif
-	sp -= sizeof(patchCtx);
-	memcpy32((void *)sp, &patchCtx, sizeof(patchCtx));
+	if (isNative) {
+		sp -= sizeof(patchCtx);
+		memcpy32((void *)sp, &patchCtx, sizeof(patchCtx));
+		r0 = sp;
+	} else
+		r0 = 0;
 
-	r0 = sp;
 	__asm__ volatile ("mov r1, #0x1FFFFFFC\n"
-		"mov sp, r0\n"
-		"b rebootFunc\n" :: "r"(r0));
+		"mov sp, %0\n"
+		"b rebootFunc\n" :: "r"(sp), "r"(r0));
 	__builtin_unreachable();
 }
 
@@ -80,6 +85,9 @@ loadExecReboot(int r0, int r1, int r2, uint32_t hiId, uint32_t loId)
 	p9Open(f, path, 1);
 	p9Read(f, &read, REBOOT_CTX->patch.b, sizeof(REBOOT_CTX->patch));
 	p9Close(f);
+
+	if (loId == TID_CTR_NATIVE_FIRM || loId == TID_KTR_NATIVE_FIRM)
+		isNative = 1;
 
 	while (p9RecvPxi() != 0x44846);
 	svcKernelSetState(SVC_KERNEL_STATE_INIT, hiId, loId,

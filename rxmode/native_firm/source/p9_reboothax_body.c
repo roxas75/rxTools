@@ -248,7 +248,8 @@ rebootFunc(const PatchCtx *ctx, uint32_t *arm11EntryDst)
 {
 	setupMpu();
 	loadFirm();
-	memcpy32(&patchCtx, ctx, sizeof(patchCtx));
+	if (ctx != NULL)
+		memcpy32(&patchCtx, ctx, sizeof(patchCtx));
 	patchFirm();
 	flushFirmData();
 	arm11Enter(arm11EntryDst);
