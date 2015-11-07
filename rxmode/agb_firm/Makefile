@@ -40,7 +40,7 @@ $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
 %.elf: %_unstrip.elf
-	$(OBJCOPY) -S $< $@
+	$(OBJCOPY) -S -R .text -R .data -R .bss -R .ARM.attributes $< $@
 
 $(BUILD)/$(TARGET)_unstrip.elf: $(BUILD)/p9_signatures_spoof.o
 	$(LD) -i -Tscript.ld $^ -o $@
