@@ -22,6 +22,19 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "fatfs/ff.h"
+#include "crypto.h"
+
+typedef struct {
+	uint8_t keyX[AES_BLOCK_SIZE];
+	uint8_t keyY[AES_BLOCK_SIZE];
+	uint8_t ctr[AES_BLOCK_SIZE];
+	char size[8];
+	uint8_t pad[8];
+	uint8_t control[AES_BLOCK_SIZE];
+	uint8_t unk[16];
+	uint8_t keyX_0x16[AES_BLOCK_SIZE];
+	
+} Arm9Hdr;
 
 typedef enum {
 	TID_HI_FIRM = 0x00040138

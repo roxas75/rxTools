@@ -98,11 +98,35 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){
 
 uint8_t *decryptFirmTitle(uint8_t *title, unsigned int size, uint8_t key[16])
 {
-	uint8_t iv[0x10] = {0};
+	PartitionInfo info;
+	Arm9Hdr *hdr;
+	uint8_t *firm;
 	aes_context aes_ctxt;
+
+	uint8_t iv[16] = { 0 };
 	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
 	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
-	return decryptFirmTitleNcch(title, size);
+	firm = decryptFirmTitleNcch(title, size);
+
+	if (getMpInfo() == MPINFO_KTR) {
+		hdr = (void *)(firm + ((FirmHdr *)firm)->segs[2].offset);
+
+		use_aeskey(0x11);
+		aes_decrypt(hdr->keyX_0x16, hdr->keyX_0x16, NULL,
+			1, AES_ECB_DECRYPT_MODE);
+
+		setup_aeskeyX(0x16, hdr->keyX_0x16);
+
+		info.ctr = hdr->ctr;
+		info.buffer = (uint8_t *)hdr + 0x800;
+		info.keyY = hdr->keyY;
+		info.size = atoi(hdr->size);
+		info.keyslot = 0x16;
+		DecryptPartition(&info);
+
+	}
+
+	return firm;
 }
 
 static void setAgbBios()
