@@ -42,8 +42,11 @@ $(BUILD):
 %.elf: %_unstrip.elf
 	$(OBJCOPY) -S -R .text -R .data -R .bss -R .ARM.attributes $< $@
 
-$(BUILD)/$(TARGET)_unstrip.elf: $(BUILD)/p9_signatures_spoof.o
-	$(LD) -i -Tscript.ld $^ -o $@
+%_unstrip.elf: %_linked.elf
+	$(LD) -i -Tscript.ld $< -o $@
+
+$(BUILD)/$(TARGET)_linked.elf: $(BUILD)/p9_signatures_spoof.o
+	$(LD) -Tscript.ld $^ -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@
