@@ -38,12 +38,6 @@ static inline unsigned int getHID()
 	return ~*(volatile unsigned int *)0x10146000;
 }
 
-static inline void svc_Backdoor(void *addr)
-{
-    register void *_r0 __asm ("r0") = addr;
-    __asm volatile ( "SVC 0x7B" : : "r"(_r0) );
-}
-
 //hid
 #define BUTTON_A      (1 << 0)
 #define BUTTON_B      (1 << 1)

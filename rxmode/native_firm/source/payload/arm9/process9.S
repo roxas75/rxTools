@@ -13,18 +13,35 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-.global fopen9
-.type fopen9, %function
-.thumb_set fopen9, 0x0805B180
+.global p9Open
+.type p9Open, %function
 
-.global fwrite9
-.type fwrite9, %function
-.thumb_set fwrite9, 0x0805C4D0
+.global p9Write
+.type p9Write, %function
 
-.global fread9
-.type fread9, %function
-.thumb_set fread9, 0x0804D9B0
+.global p9Read
+.type p9Read, %function
 
-.global fclose9
-.type fclose9, %function
-.thumb_set fclose9, 0x0805B26C
+.global p9Close
+.type p9Close, %function
+
+.global p9RecvPxi
+.type p9RecvPxi, %function
+
+.global swprintf
+.type swprintf, %function
+
+#ifdef PLATFORM_KTR
+.thumb_set p9Open, 0x0805B014
+.thumb_set p9Write, 0x0805C378
+.thumb_set p9Read, 0x0804D854
+.thumb_set p9Close, 0x0805B100
+.thumb_set p9RecvPxi, 0x0805501C
+#else
+.thumb_set p9Open, 0x0805B180
+.thumb_set p9Write, 0x0805C4D0
+.thumb_set p9Read, 0x0804D9B0
+.thumb_set p9Close, 0x0805B26C
+.thumb_set p9RecvPxi, 0x08055178
+#endif
+.thumb_set swprintf, 0x080282CE

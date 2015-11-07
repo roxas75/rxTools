@@ -19,12 +19,10 @@
 .thumb
 .align 2
 
+	blx	nandHook
 #ifdef PLATFORM_KTR
-	ldr	r4, =nandHook
-	blx	r4
 	.word	0x080788C1
 #else
-	blx	nandHook
 	.word	0x08078971
 #endif
 

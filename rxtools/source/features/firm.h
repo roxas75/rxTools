@@ -23,34 +23,19 @@
 #include <stdio.h>
 #include "fatfs/ff.h"
 
-#define FIRM_SEG_NUM (4)
-
-typedef struct {
-	uint32_t offset;
-	uint32_t addr;
-	uint32_t size;
-	uint32_t type;
-	uint8_t hash[32];
-} FirmSeg;
-
-typedef struct {
-	uint32_t magic;
-	uint32_t unused0;
-	uint32_t arm11Entry;
-	uint32_t arm9Entry;
-	uint8_t unused1[48];
-	FirmSeg segs[FIRM_SEG_NUM];
-	uint8_t sig[256];
-} FirmHdr;
+typedef enum {
+	TID_HI_FIRM = 0x00040138
+} TitleIdHi;
 
 typedef enum {
         TID_CTR_NATIVE_FIRM = 0x00000002,
         TID_CTR_TWL_FIRM = 0x00000102,
         TID_CTR_AGB_FIRM = 0x00000202,
         TID_KTR_NATIVE_FIRM = 0x20000002
-} FirmTid;
+} TitleIdLo;
 
 extern const char firmPathFmt[];
+extern const char firmPatchPathFmt[];
 
 int PastaMode();
 void FirmLoader();
@@ -60,9 +45,14 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size);
 uint8_t *decryptFirmTitle(uint8_t *title, unsigned int size, uint8_t key[16]);
 FRESULT applyPatch(void *file, const char *patch);
 
-static inline int getFirmPath(char *s, FirmTid id)
+static inline int getFirmPath(char *s, TitleIdLo id)
 {
-	return sprintf(s, firmPathFmt, id);
+	return sprintf(s, firmPathFmt, TID_HI_FIRM, id);
+}
+
+static inline int getFirmPatchPath(char *s, TitleIdLo id)
+{
+	return sprintf(s, firmPatchPathFmt, TID_HI_FIRM, id);
 }
 
 #endif

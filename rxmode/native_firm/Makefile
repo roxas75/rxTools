@@ -32,81 +32,62 @@ SOURCE	:= source
 LD	:= arm-none-eabi-ld
 OBJCOPY	:= arm-none-eabi-objcopy
 
-CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR)
+CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/include -DPATCHES_PATH=\"$(PATCHES_PATH)\"
 
-PATCHES := $(BUILD)/payload/payload.elf $(BUILD)/k9_fix_flags.elf	\
-	$(BUILD)/p9_emunand_hook_1.elf $(BUILD)/p9_emunand_hook_2.elf	\
-	$(BUILD)/p9_mythread_hook_1.elf $(BUILD)/p9_mythread_hook_2.elf	\
-	$(BUILD)/p9_signatures_spoof_1.elf $(BUILD)/p9_signatures_spoof_2.elf	\
-	$(BUILD)/k11_codeset.elf
-
-PAYLOAD_OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
-	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/vars.o	\
-	$(BUILD)/payload/arm9/myThread/myThread.o
+OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o	\
+	$(BUILD)/payload/arm9/process9.o	\
+	$(BUILD)/payload/arm9/CreateThread.o $(BUILD)/payload/arm9/ctx.o	\
+	$(BUILD)/payload/arm9/myThread/myThread.o $(BUILD)/k9_fix_flags.o	\
+	$(BUILD)/p9_emunand_hook_1.o $(BUILD)/p9_emunand_hook_2.o	\
+	$(BUILD)/p9_mythread_hook_1.o $(BUILD)/p9_mythread_hook_2.o	\
+	$(BUILD)/p9_reboothax_entry.o $(BUILD)/p9_reboothax_body_prefix.o	\
+	$(BUILD)/p9_signatures_spoof_1.o $(BUILD)/p9_signatures_spoof_2.o	\
+	$(BUILD)/k11_codeset.o
 
 ifdef PLATFORM_KTR
-LDSCRIPT	:= ktr.ld
+LDSCRIPT_ROM	:= ktr_rom.ld
+LDSCRIPT_RAM	:= ktr_ram.ld
 CFLAGS	+= -DPLATFORM_KTR
-PROCESS9_CODE_ADDR	:= 0x0801C700
 else
-LDSCRIPT	:= ctr.ld
-PROCESS9_CODE_ADDR	:= 0x0801CF00
+LDSCRIPT_ROM	:= ctr_rom.ld
+LDSCRIPT_RAM	:= ctr_ram.ld
 
-PATCHES	+= $(BUILD)/p9_keyx_spoof.elf	\
-	$(BUILD)/p9_reboothax_1.elf $(BUILD)/p9_reboothax_2.elf
-
-PAYLOAD_OBJS	+= $(BUILD)/payload/arm9/myThread/FS.o	\
-	$(BUILD)/payload/arm9/myThread/handlers.o	\
-	$(BUILD)/payload/arm11/hookswi.o
+OBJS	+= $(BUILD)/payload/arm9/myThread/handlers.o	\
+	$(BUILD)/payload/arm11/hookswi.o	\
+	$(BUILD)/p9_keyx_spoof.o
 endif
+
+$(foreach f,$(BUILD)/$(TARGET).elf $(OBJS),$(eval $f : | $(dir $f)D))
 
 .PHONY: clean all
 
 all: $(BUILD)/$(TARGET).elf
 
-$(BUILD):
-	@[ -d $@ ] || mkdir -p $@
+%/D:
+	mkdir -p $(dir $@)
 
-$(BUILD)/payload:
-	@[ -d $@ ] || mkdir -p $@
+%.elf: %_unstrip.elf
+	$(OBJCOPY) -S -R .ARM.attributes -R .comment $< $@
 
-$(BUILD)/payload/arm9:
-	@[ -d $@ ] || mkdir -p $@
+%_unstrip.elf: %_ram.elf
+	$(LD) -i -T$(LDSCRIPT_ROM) $< -o $@
 
-$(BUILD)/payload/arm9/myThread:
-	@[ -d $@ ] || mkdir -p $@
+$(BUILD)/$(TARGET)_ram.elf: $(OBJS)
+	$(LD) --use-blx -T$(LDSCRIPT_RAM) $^ -o $@
 
-$(BUILD)/payload/arm11:
-	@[ -d $@ ] || mkdir -p $@
+$(BUILD)/p9_reboothax_body_prefix.o: $(BUILD)/p9_reboothax_body.o
+	$(OBJCOPY) --prefix-alloc-sections .patch.p9.reboot.body $< $@
 
-%.elf: %_unadjust.elf
-	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$(($(PROCESS9_CODE_ADDR) - 0x08028000)) $< $@
+$(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S
+	$(CC) -mcpu=mpcore $(CFLAGS) $< -c -o $@
 
-$(BUILD)/$(TARGET)_unadjust.elf: $(PATCHES)
-	$(LD) -i -T$(LDSCRIPT) $^ -o $@
-
-$(BUILD)/payload/payload.elf: $(PAYLOAD_OBJS) $(BUILD)/payload
-	$(LD) --use-blx -T$(LDSCRIPT) $(PAYLOAD_OBJS) -o $@
-
-$(BUILD)/%.elf: $(BUILD)/%.o $(BUILD)/payload/payload.elf
-	$(LD) -s -R $(BUILD)/payload/payload.elf -T$(LDSCRIPT) $< -o $@
-
-$(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.c $(BUILD)/payload/arm9/myThread
-	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
-
-$(BUILD)/payload/arm9/myThread/%.o: $(SOURCE)/payload/arm9/myThread/%.s $(BUILD)/payload/arm9/myThread
-	$(AS) $< -o $@
-
-$(BUILD)/payload/arm9/%.o: $(SOURCE)/payload/arm9/%.S $(BUILD)/payload/arm9
-	$(CC) -mcpu=arm946e-s $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
-
-$(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S $(BUILD)/payload/arm11
-	$(CC) -mcpu=mpcore $(CFLAGS) -I$(SOURCE)/payload/include $< -c -o $@
-
-$(BUILD)/%.o: $(SOURCE)/%.S $(BUILD)
+$(BUILD)/%.o: $(SOURCE)/%.c
 	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
 
-$(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
+$(BUILD)/%.o: $(SOURCE)/%.S
+	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
+
+$(BUILD)/%.o: $(SOURCE)/%.s
 	$(AS) $< -o $@
 #---------------------------------------------------------------------------------
 clean:
