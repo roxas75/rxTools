@@ -28,6 +28,17 @@
 
 #define REBOOT_CTX ((RebootCtx *)0x24000000)
 
+typedef enum {
+	TID_HI_FIRM = 0x00040138
+} TitleIdHi;
+
+typedef enum {
+        TID_CTR_NATIVE_FIRM = 0x00000002,
+        TID_CTR_TWL_FIRM = 0x00000102,
+        TID_CTR_AGB_FIRM = 0x00000202,
+        TID_KTR_NATIVE_FIRM = 0x20000002
+} TitleIdLo;
+
 typedef struct {
 	uint32_t offset;
 	uint32_t addr;

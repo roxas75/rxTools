@@ -21,6 +21,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <reboot.h>
 #include "fatfs/ff.h"
 #include "crypto.h"
 
@@ -35,17 +36,6 @@ typedef struct {
 	uint8_t keyX_0x16[AES_BLOCK_SIZE];
 	
 } Arm9Hdr;
-
-typedef enum {
-	TID_HI_FIRM = 0x00040138
-} TitleIdHi;
-
-typedef enum {
-        TID_CTR_NATIVE_FIRM = 0x00000002,
-        TID_CTR_TWL_FIRM = 0x00000102,
-        TID_CTR_AGB_FIRM = 0x00000202,
-        TID_KTR_NATIVE_FIRM = 0x20000002
-} TitleIdLo;
 
 extern const char firmPathFmt[];
 extern const char firmPatchPathFmt[];

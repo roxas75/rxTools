@@ -24,11 +24,14 @@ all: $(BUILD)/$(TARGET).elf
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 
-%.elf: %_unadjust.elf
-	$(OBJCOPY) -S --change-section-address .patch.p9.*+$$((0x08014A00 - 0x08020000)) $< $@
+%.elf: %_unstrip.elf
+	$(OBJCOPY) -S -R .text -R .data -R .bss -R .ARM.attributes $< $@
 
-$(BUILD)/$(TARGET)_unadjust.elf: $(BUILD)/p9_signatures_spoof.o
-	$(LD) -i -Tscript.ld $^ -o $@
+%_unstrip.elf: %_linked.elf
+	$(LD) -i -Tscript.ld $< -o $@
+
+$(BUILD)/$(TARGET)_linked.elf: $(BUILD)/p9_signatures_spoof.o
+	$(LD) -Tscript.ld $^ -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
 	$(AS) $< -o $@

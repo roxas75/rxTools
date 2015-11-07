@@ -239,7 +239,7 @@ static void arm11Enter(uint32_t *arm11EntryDst)
 
 static _Noreturn void arm9Enter()
 {
-	__asm__ volatile ("b 0x801B01C\n");
+	__asm__ volatile ("ldr pc, %0\n" :: "m"(REBOOT_CTX->firm.hdr.arm9Entry));
 	__builtin_unreachable();
 }
 
@@ -248,7 +248,8 @@ rebootFunc(const PatchCtx *ctx, uint32_t *arm11EntryDst)
 {
 	setupMpu();
 	loadFirm();
-	memcpy32(&patchCtx, ctx, sizeof(patchCtx));
+	if (ctx != NULL)
+		memcpy32(&patchCtx, ctx, sizeof(patchCtx));
 	patchFirm();
 	flushFirmData();
 	arm11Enter(arm11EntryDst);
