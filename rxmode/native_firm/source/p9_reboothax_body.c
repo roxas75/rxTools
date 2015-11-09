@@ -138,9 +138,9 @@ static void loadFirm()
 	const FirmSeg *seg;
 	unsigned int i;
 
-	seg = REBOOT_CTX->firm.hdr.segs;
+	seg = ((FirmHdr *)FIRM_ADDR)->segs;
 	for (i = 0; i < FIRM_SEG_NUM; i++) {
-		memcpy32((void *)seg->addr, REBOOT_CTX->firm.b + seg->offset, seg->size);
+		memcpy32((void *)seg->addr, (void *)FIRM_ADDR + seg->offset, seg->size);
 		seg++;
 	}
 }
@@ -168,13 +168,15 @@ static void patchFirm()
 #ifndef PLATFORM_KTR
 	static const char patchKeyxStr[] = ".patch.p9.keyx";
 #endif
-	Elf32_Shdr *shdr, *btm;
+	const Elf32_Ehdr *ehdr;
+	const Elf32_Shdr *shdr, *btm;
 	const char *shstrtab, *sh_name;
 	uintptr_t dst, src;
 
-	shdr = (void *)(REBOOT_CTX->patch.b + REBOOT_CTX->patch.hdr.e_shoff);
-	shstrtab = REBOOT_CTX->patch.b + shdr[REBOOT_CTX->patch.hdr.e_shstrndx].sh_offset;
-	for (btm = shdr + REBOOT_CTX->patch.hdr.e_shnum; shdr != btm; shdr++) {
+	ehdr = (void *)PATCH_ADDR;
+	shdr = (void *)(PATCH_ADDR + ehdr->e_shoff);
+	shstrtab = (char *)PATCH_ADDR + shdr[ehdr->e_shstrndx].sh_offset;
+	for (btm = shdr + ehdr->e_shnum; shdr != btm; shdr++) {
 		if (!(shdr->sh_flags & SHF_ALLOC) || shdr->sh_type != SHT_PROGBITS)
 			continue;
 
@@ -189,7 +191,7 @@ static void patchFirm()
 		}
 
 		memcpy16((void *)shdr->sh_addr,
-			REBOOT_CTX->patch.b + shdr->sh_offset,
+			(void *)PATCH_ADDR + shdr->sh_offset,
 			shdr->sh_size);
 	}
 }
@@ -200,7 +202,7 @@ static void flushFirmData()
 	const FirmSeg *seg;
 	unsigned int i;
 
-	seg = REBOOT_CTX->firm.hdr.segs;
+	seg = ((FirmHdr *)FIRM_ADDR)->segs;
 	for (i = 0; i < FIRM_SEG_NUM; i++) {
 		dstCur = seg->addr;
 		for (dstBtm = seg->addr + seg->size; dstCur < dstBtm; dstCur += 32)
@@ -218,7 +220,7 @@ static void flushFirmInstr()
 	const FirmSeg *seg;
 	unsigned int i;
 
-	seg = REBOOT_CTX->firm.hdr.segs;
+	seg = ((FirmHdr *)FIRM_ADDR)->segs;
 	for (i = 0; i < FIRM_SEG_NUM; i++) {
 		if (!seg->isArm11) {
 			dstCur = seg->addr;
@@ -232,14 +234,14 @@ static void flushFirmInstr()
 
 static void arm11Enter(uint32_t *arm11EntryDst)
 {
-	*arm11EntryDst = REBOOT_CTX->firm.hdr.arm11Entry;
+	*arm11EntryDst = ((FirmHdr *)FIRM_ADDR)->arm11Entry;
 	cleanDcacheLine(arm11EntryDst);
 	drainWriteBuffer();
 }
 
 static _Noreturn void arm9Enter()
 {
-	__asm__ volatile ("ldr pc, %0\n" :: "m"(REBOOT_CTX->firm.hdr.arm9Entry));
+	__asm__ volatile ("ldr pc, %0\n" :: "m"(((FirmHdr *)FIRM_ADDR)->arm9Entry));
 	__builtin_unreachable();
 }
 

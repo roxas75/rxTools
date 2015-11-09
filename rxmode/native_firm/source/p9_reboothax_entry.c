@@ -77,13 +77,13 @@ loadExecReboot(int r0, int r1, int r2, uint32_t hiId, uint32_t loId)
 	p9FileInit(f);
 	swprintf(path, pathLen, L"sdmc:/" FIRM_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
-	p9Read(f, &read, REBOOT_CTX->firm.b, sizeof(REBOOT_CTX->firm));
+	p9Read(f, &read, (void *)FIRM_ADDR, FIRM_SIZE);
 	p9Close(f);
 
 	p9FileInit(f);
 	swprintf(path, pathLen, L"sdmc:/" FIRM_PATCH_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
-	p9Read(f, &read, REBOOT_CTX->patch.b, sizeof(REBOOT_CTX->patch));
+	p9Read(f, &read, (void *)PATCH_ADDR, PATCH_SIZE);
 	p9Close(f);
 
 	if (loId == TID_CTR_NATIVE_FIRM || loId == TID_KTR_NATIVE_FIRM)

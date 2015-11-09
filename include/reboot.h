@@ -26,7 +26,11 @@
 #define FIRM_PATH_FMT "rxTools/data/%08X%08X.bin"
 #define FIRM_PATCH_PATH_FMT PATCHES_PATH "/%08X%08X.elf"
 
-#define REBOOT_CTX ((RebootCtx *)0x24000000)
+#define FIRM_ADDR (0x24000000)
+#define FIRM_SIZE (33554432)
+
+#define PATCH_ADDR (0x01FF8000)
+#define PATCH_SIZE (8192)
 
 typedef enum {
 	TID_HI_FIRM = 0x00040138
@@ -65,16 +69,5 @@ typedef struct {
 	} label;
 	uint32_t sector;
 } PatchCtx;
-
-typedef struct {
-	union {
-		FirmHdr hdr;
-		uint8_t b[0x100000];
-	} firm;
-	union {
-		Elf32_Ehdr hdr;
-		uint8_t b[0x2000];
-	} patch;
-} RebootCtx;
 
 #endif
