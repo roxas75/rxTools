@@ -19,7 +19,10 @@
 #include <stdint.h>
 #include <reboot.h>
 #include <elf.h>
-#include <ctx.h>
+#include <emunand.h>
+#ifndef PLATFORM_KTR
+#include <keyx.h>
+#endif
 
 #define SET_MPU_REGION(id, base, size, enable)	{	\
 	__asm__ volatile ("mcr p15, 0, %0, c6, c" #id ", 0\n"	\
@@ -162,7 +165,7 @@ static int memcmp(const void *s1, const void *s2, size_t n)
 	return 0;
 }
 
-static void patchFirm()
+static void patchFirm(uint32_t sector, const void *pkeyx)
 {
 	static const char patchNandPrefix[] = ".patch.p9.nand";
 #ifndef PLATFORM_KTR
@@ -181,9 +184,9 @@ static void patchFirm()
 			continue;
 
 		sh_name = shstrtab + shdr->sh_name;
-		if ((patchCtx.sector == 0 && !memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1))
+		if ((sector <= 0 && !memcmp(sh_name, patchNandPrefix, sizeof(patchNandPrefix) - 1))
 #ifndef PLATFORM_KTR
-			|| (patchCtx.keyx[0] == 0 && !memcmp(sh_name, patchKeyxStr, sizeof(patchKeyxStr)))
+			|| (pkeyx == NULL && !memcmp(sh_name, patchKeyxStr, sizeof(patchKeyxStr)))
 #endif
 			)
 		{
@@ -194,6 +197,14 @@ static void patchFirm()
 			(void *)PATCH_ADDR + shdr->sh_offset,
 			shdr->sh_size);
 	}
+
+	if (sector > 0)
+		nandSector = sector;
+
+#ifndef PLATFORM_KTR
+	if (pkeyx != NULL)
+		memcpy32(keyx, pkeyx, sizeof(keyx));
+#endif
 }
 
 static void flushFirmData()
@@ -246,13 +257,11 @@ static _Noreturn void arm9Enter()
 }
 
 _Noreturn void __attribute__((section(".text.start")))
-rebootFunc(const PatchCtx *ctx, uint32_t *arm11EntryDst)
+rebootFunc(uint32_t sector, const void *pkeyx, uint32_t *arm11EntryDst)
 {
 	setupMpu();
 	loadFirm();
-	if (ctx != NULL)
-		memcpy32(&patchCtx, ctx, sizeof(patchCtx));
-	patchFirm();
+	patchFirm(sector, pkeyx);
 	flushFirmData();
 	arm11Enter(arm11EntryDst);
 	flushFirmInstr();

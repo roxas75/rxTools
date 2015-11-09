@@ -54,7 +54,7 @@ CFLAGS	+=	$(INCLUDE) -DARM9 -DSYS_PATH=\"$(SYS_PATH)\" -DPATCHES_PATH=\"$(PATCHE
 
 CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
-ASFLAGS	:=	-g $(ARCH)
+ASFLAGS	:=	$(CFLAGS)
 LDFLAGS	=	-nostartfiles -g $(ARCH) -Wl,-T../stub.ld,-Map,$(TARGET).map
 
 LIBS	:=

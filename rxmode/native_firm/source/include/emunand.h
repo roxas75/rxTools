@@ -15,11 +15,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef VARS_H
-#define VARS_H
+#ifndef EMUNAND_H
+#define EMUNAND_H
 
-#include <reboot.h>
+#include <stdint.h>
 
-extern PatchCtx patchCtx;
+extern uint32_t nandSector;
 
 #endif

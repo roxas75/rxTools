@@ -45,7 +45,7 @@ const char firmPatchPathFmt[] = FIRM_PATCH_PATH_FMT;
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 
-_Noreturn void execReboot(const PatchCtx *, uintptr_t, uintptr_t, size_t);
+_Noreturn void execReboot(uint32_t, void *, uintptr_t, const Elf32_Shdr *);
 
 static FRESULT loadExecReboot()
 {
@@ -148,11 +148,12 @@ int rxMode(int emu)
 	char path[64];
 	const char *shstrtab;
 	const wchar_t *msg;
-	PatchCtx ctx;
+	uint8_t keyx[16];
 	uint32_t tid;
 	int r, sector;
 	Elf32_Ehdr *ehdr;
 	Elf32_Shdr *shdr, *btm;
+	void *keyxArg;
 	FIL fd;
 	UINT br, fsz;
 
@@ -193,13 +194,11 @@ int rxMode(int emu)
 	setAgbBios();
 
 	if (sysver < 7 && f_open(&fd, "slot0x25KeyX.bin", FA_READ) == FR_OK) {
-		f_read(&fd, ctx.keyx, sizeof(ctx.keyx), &br);
+		f_read(&fd, keyx, sizeof(keyx), &br);
 		f_close(&fd);
+		keyxArg = keyx;
 	} else
-		ctx.keyx[0] = 0;
-
-	ctx.sector = sector;
-	ctx.label.u32 = sector ? 'E-XR' : 'S-XR';
+		keyxArg = NULL;
 
 	getFirmPath(path, tid);
 	r = loadFirm(path, &fsz);
@@ -227,7 +226,7 @@ int rxMode(int emu)
 	shstrtab = (char *)PATCH_ADDR + shdr[ehdr->e_shstrndx].sh_offset;
 	for (btm = shdr + ehdr->e_shnum; shdr != btm; shdr++) {
 		if (!strcmp(shstrtab + shdr->sh_name, ".patch.p9.reboot.body")) {
-			execReboot(&ctx, ehdr->e_entry, PATCH_ADDR + shdr->sh_offset, shdr->sh_size);
+			execReboot(sector, keyxArg, ehdr->e_entry, shdr);
 			__builtin_unreachable();
 		}
 	}
