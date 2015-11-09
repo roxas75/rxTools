@@ -47,7 +47,7 @@ loop:
 	mov	r2, #0x1FFFFFF8
 	mov	r3, #0
 	mcr	p15, 0, r3, c7, c10, 4	@ Drain write buffer
-	sub	pc, r2, r4
+	sub	pc, r5, r4
 
 flushInLoop:
 	sub	r6, r2, #line
