@@ -63,7 +63,7 @@ rxTools *now* stores its code.bin in rxTools/sys/code.bin (formerly /rxTools.dat
 ## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
 Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
 
-## How to launch with Ninjhax-like *Hax (requires <= ver 9.2)
+## How to launch with Ninjhax-like Hax (requires <= ver 9.2)
 Use 3rd party loader : CtrBootMananger(http://gbatemp.net/threads/ctrbootmanager-3ds-boot-manager-loader-homemenuhax.398383/) or BootCtr(https://gbatemp.net/threads/re-release-bootctr-a-simple-boot-manager-for-3ds.401630/)
 
 ## Credits
