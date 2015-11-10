@@ -35,10 +35,6 @@
 #include "configuration.h"
 #include "lang.h"
 
-static void returnHomeMenu(){
-	i2cWriteRegister(I2C_DEV_MCU, 0x20, (unsigned char)(1<<2));
-}
-
 static void ShutDown(){
 	i2cWriteRegister(I2C_DEV_MCU, 0x20, (uint8_t)(1<<0));
 	while(1);

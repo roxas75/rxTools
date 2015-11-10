@@ -111,12 +111,6 @@ static _Noreturn void mainLoop()
 			ShutDown();
 		}
 
-		if (pad & BUTTON_START) {
-			fadeOut();
-			returnHomeMenu();
-		}
-
-		TryScreenShot();
 		MenuShow();
 	}
 }
