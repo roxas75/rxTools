@@ -141,7 +141,6 @@ enum {
 	STR_INITIALIZING,
 	STR_LOADING,
 	STR_WARNING,
-	STR_WARNING_KEYFILE,
 	STR_PROGRESS,
 	STR_PROGRESS_OK,
 	STR_PROGRESS_FAIL,
@@ -160,12 +159,13 @@ enum {
 	STR_NUM
 };
 
+extern int fontIsLoaded;
 extern const char langPath[];
 extern wchar_t strings[STR_NUM][STR_MAX_LEN];
 
 void preloadStringsA(void);
 void preloadStringsU(void);
-void preloadStringsOnSwitch(void);
+void switchStrings(void);
 int loadStrings(void);
 
 #endif

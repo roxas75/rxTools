@@ -503,8 +503,7 @@ void trySetLangFromTheme(int onswitch) {
 		cfgs[CFG_LANG].val.s[i] = 0;
 
 		if(onswitch)
-			preloadStringsOnSwitch();
-		loadStrings();
+			switchStrings();
 	}
 	FileClose(&MyFile);
 }

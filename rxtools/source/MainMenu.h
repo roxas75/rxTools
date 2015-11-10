@@ -315,8 +315,7 @@ void SettingsMenuInit(){
 					curLang++;
 
 				strcpy(cfgs[CFG_LANG].val.s, langs[curLang]);
-				preloadStringsOnSwitch();
-				loadStrings();
+				switchStrings();
 			}
 		}
 		if (pad_state & BUTTON_B)
