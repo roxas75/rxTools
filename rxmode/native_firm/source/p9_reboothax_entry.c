@@ -19,10 +19,8 @@
 #include <wchar.h>
 #include <reboot.h>
 #include <svc.h>
-#include <ctx.h>
+#include <emunand.h>
 #include <process9.h>
-
-static int isNative = 0;
 
 static void *memcpy32(void *dst, const void *src, size_t n)
 {
@@ -45,24 +43,19 @@ static void *memcpy32(void *dst, const void *src, size_t n)
 static _Noreturn void __attribute__((section(".patch.p9.reboot.entry")))
 execReboot()
 {
-	register uintptr_t r0 __asm__("r0");
-	uintptr_t sp;
-
+	__asm__ volatile (
+		"ldr r0, %0\n"
+		"mov r1, #0\n"
+		"mov r2, #0x1FFFFFFC\n"
 #ifdef PLATFORM_KTR
-	sp = 0x0817F000;
+		"mov sp, #0x08100000\n"
+		"orr sp, #0x0007F000\n"
 #else
-	sp = 0x080FF000;
+		"mov sp, #0x08000000\n"
+		"orr sp, #0x000FF000\n"
 #endif
-	if (isNative) {
-		sp -= sizeof(patchCtx);
-		memcpy32((void *)sp, &patchCtx, sizeof(patchCtx));
-		r0 = sp;
-	} else
-		r0 = 0;
-
-	__asm__ volatile ("mov r1, #0x1FFFFFFC\n"
-		"mov sp, %0\n"
-		"b rebootFunc\n" :: "r"(sp), "r"(r0));
+		"b rebootFunc\n"
+		:: "m"(nandSector));
 	__builtin_unreachable();
 }
 
@@ -77,21 +70,21 @@ loadExecReboot(int r0, int r1, int r2, uint32_t hiId, uint32_t loId)
 	p9FileInit(f);
 	swprintf(path, pathLen, L"sdmc:/" FIRM_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
-	p9Read(f, &read, REBOOT_CTX->firm.b, sizeof(REBOOT_CTX->firm));
+	p9Read(f, &read, (void *)FIRM_ADDR, FIRM_SIZE);
 	p9Close(f);
 
 	p9FileInit(f);
 	swprintf(path, pathLen, L"sdmc:/" FIRM_PATCH_PATH_FMT, hiId, loId);
 	p9Open(f, path, 1);
-	p9Read(f, &read, REBOOT_CTX->patch.b, sizeof(REBOOT_CTX->patch));
+	p9Read(f, &read, (void *)PATCH_ADDR, PATCH_SIZE);
 	p9Close(f);
-
-	if (loId == TID_CTR_NATIVE_FIRM || loId == TID_KTR_NATIVE_FIRM)
-		isNative = 1;
 
 	while (p9RecvPxi() != 0x44846);
 	svcKernelSetState(SVC_KERNEL_STATE_INIT, hiId, loId,
 		SVC_KERNEL_STATE_TITLE_COMPAT);
+
+	if (loId != TID_CTR_NATIVE_FIRM && loId != TID_KTR_NATIVE_FIRM)
+		nandSector = 0;
 
 	svcBackdoor((void *)execReboot);
 	__builtin_unreachable();

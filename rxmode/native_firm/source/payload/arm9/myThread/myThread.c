@@ -21,13 +21,13 @@
 #include <stdint.h>
 #include <memory.h>
 #include <svc.h>
+#include <emunand.h>
 #include <process9.h>
 #ifndef PLATFORM_KTR
 #include <handlers.h>
 #include "hookswi.h"
 #include "font.c"
 #endif
-#include "ctx.h"
 #include "lib.c"
 
 #ifdef DEBUG_DUMP_FCRAM
@@ -61,7 +61,7 @@ static int patchLabel()
 	{
 		//System Settings label
 		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
-			rx_strcpy((char*)p, patchCtx.label.c, sizeof(patchCtx.label), 2, 1);
+			rx_strcpy((char*)p, nandSector > 0 ? "RX-E" : "RX-S", 4, 2, 1);
 			return 0;
 		}
 	}

@@ -29,8 +29,7 @@ nandHook:
 	beq	loc_801A310
 	mov	r5, r4
 	cmp	r6, #0
-	ldreq	r2, =patchCtx + 20
-	ldreq	r6, [r2]
+	ldreq	r6, nandSector
 
 loc_801A310:
 	mov	r4, r0
@@ -60,3 +59,9 @@ loc_801A33C:
 	ldmfd	sp!, {r1-r7, pc}
 
 	.size nandHook, . - nandHook
+
+	.global	nandSector
+	.type	nandSector, %object
+nandSector:
+	.word	0
+	.size	nandSector, . - nandSector

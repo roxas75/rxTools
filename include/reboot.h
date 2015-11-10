@@ -18,15 +18,21 @@
 #ifndef REBOOT_H
 #define REBOOT_H
 
-#include <stdint.h>
-#include <elf.h>
-
 #define FIRM_SEG_NUM (4)
 
 #define FIRM_PATH_FMT "rxTools/data/%08X%08X.bin"
 #define FIRM_PATCH_PATH_FMT PATCHES_PATH "/%08X%08X.elf"
 
-#define REBOOT_CTX ((RebootCtx *)0x24000000)
+#define FIRM_ADDR (0x24000000)
+#define FIRM_SIZE (33554432)
+
+#define PATCH_ADDR (0x01FF8000)
+#define PATCH_SIZE (8192)
+
+#ifndef ASM
+
+#include <stdint.h>
+#include <elf.h>
 
 typedef enum {
 	TID_HI_FIRM = 0x00040138
@@ -57,24 +63,6 @@ typedef struct {
 	uint8_t sig[256];
 } FirmHdr;
 
-typedef struct {
-	uint8_t keyx[16];
-	union {
-		uint32_t u32;
-		char c[4];
-	} label;
-	uint32_t sector;
-} PatchCtx;
-
-typedef struct {
-	union {
-		FirmHdr hdr;
-		uint8_t b[0x100000];
-	} firm;
-	union {
-		Elf32_Ehdr hdr;
-		uint8_t b[0x2000];
-	} patch;
-} RebootCtx;
+#endif
 
 #endif

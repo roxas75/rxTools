@@ -45,7 +45,7 @@ const char firmPatchPathFmt[] = FIRM_PATCH_PATH_FMT;
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 
-_Noreturn void execReboot(const PatchCtx *, void *, const void *, size_t);
+_Noreturn void execReboot(uint32_t, void *, uintptr_t, const Elf32_Shdr *);
 
 static FRESULT loadExecReboot()
 {
@@ -74,13 +74,13 @@ static int loadFirm(char *path, UINT *fsz)
 	if (r != FR_OK)
 		return r;
 
-	r = f_read(&fd, REBOOT_CTX->firm.b, f_size(&fd), fsz);
+	r = f_read(&fd, (void *)FIRM_ADDR, f_size(&fd), fsz);
 	if (r != FR_OK)
 		return r;
 
 	f_close(&fd);
 
-	return REBOOT_CTX->firm.hdr.magic == 0x4D524946 ? 0 : -1;
+	return ((FirmHdr *)FIRM_ADDR)->magic == 0x4D524946 ? 0 : -1;
 }
 
 uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){
@@ -148,12 +148,12 @@ int rxMode(int emu)
 	char path[64];
 	const char *shstrtab;
 	const wchar_t *msg;
-	void (* reboot)();
-	PatchCtx ctx;
+	uint8_t keyx[16];
 	uint32_t tid;
 	int r, sector;
-	void *p;
+	Elf32_Ehdr *ehdr;
 	Elf32_Shdr *shdr, *btm;
+	void *keyxArg;
 	FIL fd;
 	UINT br, fsz;
 
@@ -194,13 +194,11 @@ int rxMode(int emu)
 	setAgbBios();
 
 	if (sysver < 7 && f_open(&fd, "slot0x25KeyX.bin", FA_READ) == FR_OK) {
-		f_read(&fd, ctx.keyx, sizeof(ctx.keyx), &br);
+		f_read(&fd, keyx, sizeof(keyx), &br);
 		f_close(&fd);
+		keyxArg = keyx;
 	} else
-		ctx.keyx[0] = 0;
-
-	ctx.sector = sector;
-	ctx.label.u32 = sector ? 'E-XR' : 'S-XR';
+		keyxArg = NULL;
 
 	getFirmPath(path, tid);
 	r = loadFirm(path, &fsz);
@@ -210,27 +208,25 @@ int rxMode(int emu)
 		goto fail;
 	}
 
-	REBOOT_CTX->firm.hdr.arm9Entry = 0x0801B01C;
+	((FirmHdr *)FIRM_ADDR)->arm9Entry = 0x0801B01C;
 
 	getFirmPatchPath(path, tid);
 	r = f_open(&fd, path, FA_READ);
 	if (r != FR_OK)
 		goto patchFail;
 
-	p = REBOOT_CTX->patch.b;
-	r = f_read(&fd, p, sizeof(REBOOT_CTX->patch), &br);
+	r = f_read(&fd, (void *)PATCH_ADDR, PATCH_SIZE, &br);
 	if (r != FR_OK)
 		goto patchFail;
 
 	f_close(&fd);
 
-	reboot = (void *)REBOOT_CTX->patch.hdr.e_entry;
-	shdr = (void *)(REBOOT_CTX->patch.b + REBOOT_CTX->patch.hdr.e_shoff);
-	shstrtab = (char *)REBOOT_CTX->patch.b + shdr[REBOOT_CTX->patch.hdr.e_shstrndx].sh_offset;
-	for (btm = shdr + REBOOT_CTX->patch.hdr.e_shnum; shdr != btm; shdr++) {
+	ehdr = (void *)PATCH_ADDR;
+	shdr = (void *)(PATCH_ADDR + ehdr->e_shoff);
+	shstrtab = (char *)PATCH_ADDR + shdr[ehdr->e_shstrndx].sh_offset;
+	for (btm = shdr + ehdr->e_shnum; shdr != btm; shdr++) {
 		if (!strcmp(shstrtab + shdr->sh_name, ".patch.p9.reboot.body")) {
-			execReboot(&ctx, reboot,
-				REBOOT_CTX->patch.b + shdr->sh_offset, shdr->sh_size);
+			execReboot(sector, keyxArg, ehdr->e_entry, shdr);
 			__builtin_unreachable();
 		}
 	}
@@ -268,7 +264,7 @@ void rxModeWithSplash(int emu)
 int PastaMode(){
 	/*PastaMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
-	uint8_t* firm = (void*)REBOOT_CTX->firm.b;
+	uint8_t* firm = (void*)FIRM_ADDR;
 	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
 	if (strncmp((char*)firm, "FIRM", 4))
 		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);

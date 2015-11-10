@@ -13,6 +13,9 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#define ASM
+#include <reboot.h>
+
 line = 32
 
 	.arm
@@ -23,29 +26,34 @@ execReboot:
 	orr	r4, #0x29	@ Size: 2^0x28 = 2M, Enable
 	mcr	p15, 0, r4, c6, c2, 0	@ Set MPU area 2
 
-	add	r4, r1, r3
+	ldr	r4, [r3, #20]
+	add	r5, r2, r4
+
+	ldr	r3, [r3, #16]
+	add	r3, #PATCH_ADDR & 0xFFF00000
+	add	r3, #PATCH_ADDR & 0x000FFFFF
 loop:
-	ldr	r5, [r2], #4
-	str	r5, [r1], #4
-	tst	r1, #line - 1
+	ldr	r6, [r3], #4
+	str	r6, [r2], #4
+	tst	r2, #line - 1
 	bleq	flushInLoop
-	cmp	r1, r4
+	cmp	r2, r5
 	blo	loop
 
-	tst	r1, #line - 1
-	bicne	r5, r1, #line - 1
+	tst	r2, #line - 1
+	bicne	r6, r2, #line - 1
 	blne	flush
 
-	mov	r1, #0x1FFFFFF8
-	mov	r2, #0
-	mcr	p15, 0, r2, c7, c10, 4	@ Drain write buffer
-	sub	pc, r4, r3
+	mov	r2, #0x1FFFFFF8
+	mov	r3, #0
+	mcr	p15, 0, r3, c7, c10, 4	@ Drain write buffer
+	sub	pc, r5, r4
 
 flushInLoop:
-	sub	r5, r1, #line
+	sub	r6, r2, #line
 flush:
-	mcr	p15, 0, r5, c7, c10, 1	@ Clean Dcache
-	mcr	p15, 0, r5, c7, c5, 1	@ Flush Icache
+	mcr	p15, 0, r6, c7, c10, 1	@ Clean Dcache
+	mcr	p15, 0, r6, c7, c5, 1	@ Flush Icache
 	bx	lr
 
 	.size	execReboot, . - execReboot

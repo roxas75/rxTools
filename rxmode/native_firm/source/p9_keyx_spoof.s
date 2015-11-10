@@ -15,11 +15,14 @@
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 @ p9 keyx spoof
+	.global	keyx
+	.comm	keyx, 16, 1
+
 .section .patch.p9.keyx, "a"
 .thumb
 .align 2
 
-	ldr 	r2, =patchCtx
+	ldr 	r2, =keyx
 	mov	    r1, #5
 	mov 	r0, #0x25
 	bl		0x080575B4

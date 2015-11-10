@@ -15,7 +15,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <reboot.h>
-#include <ctx.h>
+#ifndef KEYX_H
+#define KEYX_H
 
-PatchCtx patchCtx;
+#include <stdint.h>
+
+extern uint8_t keyx[16];
+
+#endif
