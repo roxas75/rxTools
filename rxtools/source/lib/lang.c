@@ -24,6 +24,7 @@
 #include "jsmn.h"
 #include "lang.h"
 
+int fontIsLoaded = 0;
 wchar_t strings[STR_NUM][STR_MAX_LEN] = {};
 const char langPath[] = "/rxTools/lang";
 
@@ -145,7 +146,6 @@ static const char *keys[STR_NUM] = {
 	[STR_INITIALIZING] = "INITIALIZING",
 	[STR_LOADING] = "LOADING",
 	[STR_WARNING] = "WARNING",
-	[STR_WARNING_KEYFILE] = "WARNING_KEYFILE",
 	[STR_CURSOR] = "CURSOR",
 	[STR_NO_CURSOR] = "NO_CURSOR",
 	[STR_ENABLED] = "ENABLED",
@@ -176,7 +176,6 @@ void preloadStringsA()
 	wcscpy(strings[STR_PRESS_BUTTON_ACTION], L"Press %ls to %ls\n");
 	wcscpy(strings[STR_HOLD_BUTTON_ACTION], L"Hold %ls to %ls\n");
 	wcscpy(strings[STR_CONTINUE], L"continue");
-	wcscpy(strings[STR_WARNING_KEYFILE], L"If\nyour firmware version is less than\n7.X, some titles decryption will\nfail, and some EmuNANDs will not\nboot.\n");
 //Strings with button names
 	wcscpy(strings[STR_BUTTON_A], L"[A]");
 	wcscpy(strings[STR_BUTTON_B], L"[B]");
@@ -246,11 +245,14 @@ void preloadStringsU()
 	wcscpy(strings[STR_PROGRESS_FAIL], L"✖");
 }
 
-void preloadStringsOnSwitch(void)
+void switchStrings()
 {
-	extern int fontLoaded;
-	preloadStringsA();
-	if(!fontLoaded) preloadStringsU();
+	if (fontIsLoaded) {
+		preloadStringsA();
+		preloadStringsU();
+		loadStrings();
+	} else
+		mbstowcs(strings[STR_LANG_NAME], cfgs[CFG_LANG].val.s, STR_MAX_LEN);
 }
 
 int loadStrings()
@@ -264,7 +266,7 @@ int loadStrings()
 	int l, r, len;
 	File fd;
 
-	sprintf(buf, "%s/%s", langPath, cfgs[CFG_LANG].val.s);
+	sprintf(buf, "%s/%s", langPath, fontIsLoaded ? cfgs[CFG_LANG].val.s : "en.json");
 	if (!FileOpen(&fd, buf, 0))
 		return 1;
 

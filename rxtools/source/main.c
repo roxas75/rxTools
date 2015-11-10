@@ -16,6 +16,7 @@
  */
 
 #include <string.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
@@ -30,57 +31,12 @@
 #include "configuration.h"
 #include "log.h"
 
-#define FONT_ADDRESS	(void*)0x27E00000
-char *cfgLang = "en.json";
-const char *fontpath = SYS_PATH "/font.bin";
-int fontLoaded = 1;
+#define FONT_NAME "font.bin"
 
-void LoadFont(){
-	File MyFile;
-	if (FileOpen(&MyFile, fontpath, 0))
-	{
-		FileRead(&MyFile, FONT_ADDRESS, 0x200000, 0);
-		fontaddr = FONT_ADDRESS;
-  		fontLoaded = 0;
-	}else{
-		fontLoaded = 1;
-	}
-}
+static int warned = 0;
 
-int Initialize()
+static void setConsole()
 {
-	char str[100];
-	char strl[100];
-	char strr[100];
-	char tmp[256];
-	wchar_t wtmp[256];
-	int r;
-
-	preloadStringsA();
-
-	//Show error if FSInit is not successfull
-	if (!FSInit()){
-		DrawString(BOT_SCREEN, strings[STR_FAILED], BOT_SCREEN_WIDTH / 2, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
-		return 1;
-	}
-
-	/* Set log level here for code debug/trace */
-	/*
-	set_loglevel(ll_info);
-	log(ll_info, "Initializing rxTools...");
-	*/
-
-	//Load the font
-	LoadFont();
-	if (fontLoaded){
-		swprintf(wtmp, sizeof(wtmp) / sizeof(wtmp[0]), strings[STR_ERROR_OPENING], fontpath);
-		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT * 2, RED, BLACK);
-	}
-	else{
-		preloadStringsU();
-	}
-
-	//Console Stuff
 	ConsoleSetXY(15, 20);
 	ConsoleSetWH(BOT_SCREEN_WIDTH - 30, SCREEN_HEIGHT - 80);
 	ConsoleSetBorderColor(BLUE);
@@ -89,82 +45,165 @@ int Initialize()
 	ConsoleSetSpecialColor(BLUE);
 	ConsoleSetSpacing(2);
 	ConsoleSetBorderWidth(3);
-	//Check that the data is installed
+}
+
+static void install()
+{
 	f_mkdir("rxTools");
 	f_mkdir("rxTools/nand");
 	InstallConfigData();
-	readCfg();
-
-	//Load strings
-	if (fontLoaded)
-		cfgs[CFG_LANG].val.s = cfgLang;
-	r = loadStrings();
-	if (r) {
-		sprintf(tmp, "%s/%s", langPath, cfgs[CFG_LANG].val.s);
-		swprintf(wtmp, sizeof(wtmp) / sizeof(wtmp[0]), strings[STR_ERROR_OPENING], tmp);
-		DrawString(BOT_SCREEN, wtmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT * 3, RED, BLACK);
-	}
-
-	//Draw the top screen splash
-	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
-	sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
-	sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
-	if (cfgs[CFG_3D].val.i)
-		DrawTopSplash(str, strl, strr);
-	else
-		DrawTopSplash(str, str, str);
-
-	//If the GUI is not forced, show it only if L is hold, else directly boot rxMode (sys or emu)
-	if (!cfgs[CFG_GUI].val.i)
-	{
-		if ((~HID_STATE) & BUTTON_L1) return 0;
-
-		if (cfgs[CFG_ABSYSN].val.i) rxMode(0);
-		else rxMode(1);
-	}
-
-	return 0; //Boot rxTools menu
 }
 
-int main(){
-	if (Initialize())
-		while (1);
+static void drawTop()
+{
+	char str[64];
+	char strl[64];
+	char strr[64];
 
-	//7.X Keys stuff
-	File KeyFile;
-	const char *keyfile = "/slot0x25KeyX.bin";
-	if(FileOpen(&KeyFile, keyfile, 0)){
-		uint8_t keyX[16];
-		FileRead(&KeyFile, keyX, 16, 0);
-		FileClose(&KeyFile);
-		setup_aeskeyX(0x25, keyX);
-	}else{
-		if (sysver < 7) {
-			ConsoleInit();
-			ConsoleSetTitle(strings[STR_WARNING]);
-			print(strings[STR_ERROR_OPENING], keyfile);
-			print(strings[STR_WARNING_KEYFILE]);
-			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
+	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
+	if (cfgs[CFG_3D].val.i) {
+		sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
+		sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
+		DrawTopSplash(str, strl, strr);
+	} else
+		DrawTopSplash(str, str, str);
+}
+
+static FRESULT initKeyX()
+{
+	uint8_t buff[AES_BLOCK_SIZE];
+	UINT br;
+	FRESULT r;
+	FIL f;
+
+	r = f_open(&f, "slot0x25KeyX.bin", FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&f, buff, sizeof(buff), &br);
+	if (br < sizeof(buff))
+		return r == FR_OK ? EOF : r;
+
+	f_close(&f);
+	setup_aeskeyX(0x25, buff);
+	return 0;
+}
+
+static _Noreturn void mainLoop()
+{
+	uint32_t pad;
+
+	while (true) {
+		pad = InputWait();
+		if (pad & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1))
+			MenuNextSelection();
+
+		if (pad & (BUTTON_UP | BUTTON_LEFT | BUTTON_L1))
+			MenuPrevSelection();
+
+		if (pad & BUTTON_A) {
+			OpenAnimation();
+			MenuSelect();
 		}
+
+		if (pad & BUTTON_SELECT) {
+			fadeOut();
+			ShutDown();
+		}
+
+		MenuShow();
+	}
+}
+
+static void warn(const wchar_t *format, ...)
+{
+	va_list va;
+
+	if (!warned) {
+		ConsoleInit();
+		ConsoleSetTitle(strings[STR_WARNING]);
+		warned = 1;
 	}
 
-	//That's the Main Menu initialization, easy and cool
+	va_start(va, format);
+	vprint(format, va);
+	va_end(va);
+
+	ConsoleShow();
+}
+
+_Noreturn void _start()
+{
+	static const char fontPath[] = SYS_PATH "/" FONT_NAME;
+	void *fontBuf;
+	UINT btr, br;
+	int r;
+	FIL f;
+
+	preloadStringsA();
+
+	if (!FSInit()) {
+		DrawString(BOT_SCREEN, strings[STR_FAILED],
+			BOT_SCREEN_WIDTH / 2, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+		while (1);
+	}
+
+	/*
+	set_loglevel(ll_info);
+	log(ll_info, "Initializing rxTools...");
+	*/
+
+	setConsole();
+
+	fontIsLoaded = 0;
+	r = f_open(&f, fontPath, FA_READ);
+	if (r == FR_OK) {
+		btr = f_size(&f);
+		fontBuf = __builtin_alloca(btr);
+		r = f_read(&f, fontBuf, btr, &br);
+		if (r == FR_OK)
+			fontIsLoaded = 1;
+
+		f_close(&f);
+		fontaddr = fontBuf;
+	}
+
+	if (fontIsLoaded)
+		preloadStringsU();
+	else
+		warn(L"Failed to load " FONT_NAME ": %d\n", r);
+
+	install();
+	readCfg();
+
+	r = loadStrings();
+	if (r)
+		warn(L"Failed to load strings: %d\n", r);
+
+	drawTop();
+
+	if (!cfgs[CFG_GUI].val.i && HID_STATE & BUTTON_L1)
+		rxMode(cfgs[CFG_ABSYSN].val.i ? 0 : 1);
+
+	if (sysver < 7) {
+		r = initKeyX();
+		if (r != FR_OK)
+			warn(L"Failed to load key X for slot 0x25\n"
+				"  Code: %d\n"
+				"  If your firmware version is less\n"
+				"  than 7.X, some titles decryption\n"
+				"  will fail, and some EmuNANDs\n"
+				"  will not boot.\n", r);
+	}
+
+	if (warned) {
+		warn(strings[STR_PRESS_BUTTON_ACTION],
+			strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+		WaitForButton(BUTTON_A);
+	}
+
 	OpenAnimation();
 	MenuInit(&MainMenu);
 	MenuShow();
-	while (true) {
-		uint32_t pad_state = InputWait();
-		if (pad_state & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1)) MenuNextSelection(); //I try to support every theme style
-		if (pad_state & (BUTTON_UP   | BUTTON_LEFT  | BUTTON_L1)) MenuPrevSelection();
-		if (pad_state & BUTTON_A)    	{ OpenAnimation(); MenuSelect(); }
-		if (pad_state & BUTTON_SELECT)	{ fadeOut(); ShutDown(); }
-		if (pad_state & BUTTON_START)	{ fadeOut(); returnHomeMenu(); }
-		TryScreenShot();
-		MenuShow();
-	}
-
-	FSDeInit();
-	return 0;
+	mainLoop();
 }

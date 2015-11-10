@@ -16,12 +16,29 @@
  */
 
 #include <stdbool.h>
+#include "draw.h"
 #include "hid.h"
+#include "i2c.h"
 #include "screenshot.h"
+
+static void bgWork()
+{
+	TryScreenShot();
+
+	// Check whether HOME or POWER button has been pressed
+	if (*(volatile uint8_t *)0x10147021 == 13) {
+		fadeOut();
+		// Return to HOME menu
+		i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
+		while (1);
+	}
+}
 
 uint32_t InputWait() {
     uint32_t pad_state_old = HID_STATE;
     while (true) {
+        bgWork();
+
         uint32_t pad_state = HID_STATE;
         if (pad_state ^ pad_state_old)
             return ~pad_state;
@@ -35,7 +52,8 @@ uint32_t GetInput() {
 
 void WaitForButton(uint32_t button){
 	while (true) {
-		TryScreenShot(); //Maybe someone wanna take screenshots while waiting
+		bgWork();
+
         uint32_t pad_state = InputWait();
         if (pad_state & button)
             return;

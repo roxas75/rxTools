@@ -13,50 +13,26 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-@---------------------------------------------------------------------------------
 	.section ".init"
-@---------------------------------------------------------------------------------
-	.global _start
-	.extern main
-	.align	4
+	.align	2
 	.arm
 
-_vectors:
-	ldr pc, =InfiniteLoop
-	.pool
-	ldr pc, =InfiniteLoop
-	.pool
-	ldr pc, =InfiniteLoop
-	.pool
-	ldr pc, =InfiniteLoop
-	.pool
-	ldr pc, =InfiniteLoop
-	.pool
-	ldr pc, =InfiniteLoop
-	.pool
-@---------------------------------------------------------------------------------
-_start:
-@---------------------------------------------------------------------------------
-	mrc p15, 0, r0, c5, c0, 2
-	ldr r0, =0x33333333
-	mcr p15, 0, r0, c5, c0, 2
-	synchronize_kernels:
-		ldr r1, =0x10000
-		waitLoop9:
-			sub r1, #1
-			cmp r1, #0
-			bgt waitLoop9
-		ldr r1, =0x10000
-		waitLoop92:
-			sub r1, #1
-			cmp r1, #0
-			bgt waitLoop92
+	@ Vector Table
+	b	.
+	b	.
+	b	.
+	b	.
+	b	.
+	b	.
+	b	.
+	b	.
+	b	.
+	b	.
+	b	.
 
-	jump_to_code:
-		ldr	r3, =main
-		blx r3
+perm:
+	.word	0x33333333
 
-InfiniteLoop:
-	b InfiniteLoop
-
-.pool
+	ldr	r0, perm
+	mcr	p15, 0, r0, c5, c0, 2
+	blx	_start

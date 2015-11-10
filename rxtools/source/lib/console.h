@@ -18,8 +18,9 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#include "draw.h"
+#include <stdarg.h>
 #include <wchar.h>
+#include "draw.h"
 
 #define CONSOLE_SIZE			0x4000
 #define CONSOLE_WIDTH			BOT_SCREEN_WIDTH - FONT_WIDTH * 2
@@ -56,4 +57,5 @@ void ConsoleSetSpacing(int space);
 int ConsoleGetSpacing();
 
 void print(const wchar_t *format, ...);
+void vprint(const wchar_t *format, va_list va);
 #endif

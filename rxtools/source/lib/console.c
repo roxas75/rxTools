@@ -162,13 +162,19 @@ void ConsoleAddText(wchar_t* str){
 	}
 }
 
-void print(const wchar_t *format, ...){
-	wchar_t str[256];
+void print(const wchar_t *format, ...)
+{
 	va_list va;
 
 	va_start(va, format);
-	vswprintf(str, sizeof(str)/sizeof(str[0]), format, va);
+	vprint(format, va);
 	va_end(va);
+}
+
+void vprint(const wchar_t *format, va_list va)
+{
+	wchar_t str[256];
+	vswprintf(str, sizeof(str) / sizeof(str[0]), format, va);
 	ConsoleAddText(str);
 }
 
