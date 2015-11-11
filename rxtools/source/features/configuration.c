@@ -280,19 +280,19 @@ static int processFirm(uint32_t lo)
 
 	sprintf(path, pathFmt, lo, "_cetk");
 	if (!getTitleKeyWithCetk(key, path)) {
-		firm = decryptFirmTitle(buff, size, key);
+		firm = decryptFirmTitle(buff, size, &size, key);
 		if (firm != NULL)
 			return saveFirm(lo, firm, size);
 	}
 
 	if (!getTitleKey(key, hi, lo, 1)) {
-		firm = decryptFirmTitle(buff, size, key);
+		firm = decryptFirmTitle(buff, size, &size, key);
 		if (firm != NULL)
 			return saveFirm(lo, firm, size);
 	}
 
 	if (!getTitleKey(key, hi, lo, 2)) {
-		firm = decryptFirmTitle(buff, size, key);
+		firm = decryptFirmTitle(buff, size, &size, key);
 		if (firm != NULL)
 			return saveFirm(lo, firm, size);
 	}
@@ -314,7 +314,7 @@ static int processFirm(uint32_t lo)
 	if (r != FR_OK)
 		return r;
 
-	firm = decryptFirmTitleNcch(buff, size);
+	firm = decryptFirmTitleNcch(buff, &size);
 	return firm == NULL ? -1 : saveFirm(lo, firm, size);
 }
 
