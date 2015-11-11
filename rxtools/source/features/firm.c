@@ -84,13 +84,14 @@ static int loadFirm(char *path, UINT *fsz)
 }
 
 uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){
+	const size_t sector = 512;
 	ctr_ncchheader NCCH;
 	uint8_t CTR[16];
 	PartitionInfo INFO;
 	NCCH = *((ctr_ncchheader*)title);
 	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
 	ncch_get_counter(NCCH, CTR, 2);
-	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*0x200; INFO.keyY = NCCH.signature; INFO.size = size; INFO.keyslot = 0x2C;
+	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*sector; INFO.keyY = NCCH.signature; INFO.size = getle32(NCCH.exefssize)*sector; INFO.keyslot = 0x2C;
 	DecryptPartition(&INFO);
 	uint8_t* firm = (uint8_t*)(INFO.buffer + 0x200);
 	return firm;
