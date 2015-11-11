@@ -77,7 +77,7 @@ int FindApp(AppInfo *info)
 	myInfo->fname[0] = 'A';
 
 	sprintf(folder, "%d:title/%08" PRIx32 "/%08" PRIx32 "/content",
-		info->drive, info->tidLo, info->tidHi);
+		info->drive, info->tidHi, info->tidLo);
 
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
 
@@ -283,7 +283,7 @@ void downgradeMSET()
 {
 	File dg;
 	char *dgpath = "0:msetdg.bin";
-	unsigned int titleid_high[6] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000 }; //JPN, USA, EUR, CHN, KOR, TWN
+	unsigned int titleid_low[6] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0x2164C3C0, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned short mset_ver[10] = { 3074, 5127, 3078, 5128, 3075, 5127, 8, 1026, 2049, 8 };
 	unsigned short mset_dg_ver = 0;
@@ -367,8 +367,8 @@ void downgradeMSET()
 	if (CheckRegion(SYS_NAND) == 0)
 	{
 		info.drive = SYS_NAND;
-		info.tidLo = 0x00040010;
-		info.tidHi = titleid_high[region];
+		info.tidLo = titleid_low[region];
+		info.tidHi = 0x00040010;
 		if (FindApp(&info)) // SysNAND only
 		{
 			if (FileOpen(&dg, info.tmd, 0))
@@ -405,7 +405,7 @@ void downgradeMSET()
 									uint8_t iv[0x10] = {0};
 									uint8_t Key[0x10] = {0};
 
-									getTitleKey(&Key[0], info.tidLo, info.tidHi, info.drive);
+									getTitleKey(&Key[0], info.tidHi, info.tidLo, info.drive);
 
 									aes_context aes_ctxt;
 									aes_setkey_dec(&aes_ctxt, Key, 0x80);
@@ -458,7 +458,7 @@ void downgradeMSET()
 
 void manageFBI(bool restore)
 {
-	unsigned int titleid_high[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
+	unsigned int titleid_low[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
 	char *backup_path = "rxTools/h&s_backup";
 	char *fbi = "FBI";
 
@@ -489,7 +489,7 @@ void manageFBI(bool restore)
 	if (info.drive == UNK_NAND)
 		return;
 
-	info.tidLo = 0x00040010;
+	info.tidHi = 0x00040010;
 
 	ConsoleInit();
 	if (restore)
@@ -521,7 +521,7 @@ void manageFBI(bool restore)
 
 				CheckRegion(info.drive);
 
-				info.tidHi = titleid_high[region];
+				info.tidLo = titleid_low[region];
 				if (FindApp(&info))
 				{
 					/* Open the NAND H&S TMD */
@@ -542,7 +542,7 @@ void manageFBI(bool restore)
 
 		if (CheckRegion(info.drive) == 0)
 		{
-			info.tidHi = titleid_high[region];
+			info.tidLo = titleid_low[region];
 			if (FindApp(&info))
 			{
 				/* Open the NAND H&S TMD */
