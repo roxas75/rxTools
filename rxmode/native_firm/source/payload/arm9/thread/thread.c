@@ -49,21 +49,47 @@ static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
 }
 #endif
 
+#define VER_LEN 4
+
 static int patchLabel()
 {
-	uintptr_t p;
+	static const char verOrig[VER_LEN] = "Ver.";
+	static const char verEmu[VER_LEN] = "RX-E";
+	static const char verSys[VER_LEN] = "RX-S";
+	uintptr_t top, btm;
+	wchar_t *p;
+	const char *src;
+	unsigned int i;
 
 #ifdef PLATFORM_KTR
-	for (p = 0x27500000; p < 0x27b00000; p++)
+	top = 0x27500000;
+	btm = 0x27B00000;
 #else
-	for (p = 0x23A00000; p < 0x24000000; p++)
+	top = 0x23A00000;
+	btm = 0x24000000;
 #endif
-	{
-		//System Settings label
-		if(rx_strcmp((char *)p, "Ver.", 4, 2, 1)){
-			rx_strcpy((char*)p, nandSector > 0 ? "RX-E" : "RX-S", 4, 2, 1);
-			return 0;
-		}
+
+	p = (wchar_t *)top;
+	while ((uintptr_t)(p + VER_LEN) < btm) {
+		if (*p == verOrig[0]) {
+			i = 0;
+			while (*p == verOrig[i]) {
+				i++;
+				if (i == VER_LEN) {
+					src = nandSector > 0 ? verEmu : verSys;
+					while (i > 0) {
+						i--;
+						*p = src[i];
+						p--;
+					}
+
+					return 0;
+				}
+
+				p++;
+			}
+		} else
+			p++;
 	}
 
 	return 1;
@@ -235,7 +261,8 @@ static void initExceptionHandler()
 
 #endif
 
-void myThread(){
+_Noreturn void thread()
+{
 #ifndef PLATFORM_KTR
 	initExceptionHandler();
 #endif

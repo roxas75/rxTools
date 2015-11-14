@@ -16,23 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-static int rx_strcmp(char* s1, char* s2, unsigned int size, unsigned int w1, unsigned int w2){
-	int i;
-
-	for(i = 0; i < size; i++){
-		if(s1[i*w1] != s2[i*w2]) return 0;
-	}
-	return 1;
-}
-
-static void rx_strcpy(char* dest, const char* source, unsigned int size, unsigned int w1, unsigned int w2){
-	int i;
-
-	for(i = 0; i < size; i++){
-		dest[i*w1] = source[i*w2];
-	}
-}
-
 static inline unsigned int getHID()
 {
 	return ~*(volatile unsigned int *)0x10146000;

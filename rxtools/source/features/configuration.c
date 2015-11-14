@@ -41,7 +41,6 @@
 
 #define DATA_PATH	"rxtools/data"
 #define KEYFILENAME	"slot0x25KeyX.bin"
-#define WORKBUF		(uint8_t*)0x21000000
 
 static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
 
@@ -235,192 +234,170 @@ int readCfg()
 	return 0;
 }
 
-static void getOrgFirmPath(char *dst, uint32_t id, const char *suffix)
-{
-	if (suffix == NULL)
-		suffix = "";
-
-	sprintf(dst, "rxTools/firm/00040138%08" PRIX32 "%s.bin", id, suffix);
-}
-
-static FRESULT readOrgFirm(uint32_t id, DWORD *size)
+static FRESULT saveFirm(uint32_t id, const void *p, DWORD n)
 {
 	char path[64];
-	DWORD _size;
-	UINT read;
+	UINT bw;
 	FRESULT r;
 	FIL f;
 
-	getOrgFirmPath(path, id, NULL);
-	r = f_open(&f, path, FA_READ);
-	if (r != FR_OK)
-		return r;
-
-	_size = f_size(&f);
-	*size = _size;
-	r = f_read(&f, WORKBUF, _size, &read);
-	if (read < _size)
-		return r;
-
-	return f_close(&f);
-}
-
-static FRESULT InstallData()
-{
-	const uint32_t firmLoId = 0x00040138;
-	AppInfo appInfo;
-	FIL f;
-	FRESULT r;
-	unsigned int progressWidth, progressX;
-	wchar_t progressbar[8] = {0,};
-	wchar_t *progress = progressbar;
-	uint8_t key[16];
-	uint32_t hiId;
-	UINT processed;
-	DWORD firmSize;
-	char path[64];
-	int i;
-
-	progressWidth = getMpInfo() == MPINFO_CTR ? 6 : 4;
-	progressX = (BOT_SCREEN_WIDTH - progressWidth * FONT_WIDTH) / 2;
-
-	for (i = 0; i < progressWidth; i++)
-		wcscat(progressbar, strings[STR_PROGRESS]);
-	print(L"%ls", progressbar);
-	ConsolePrevLine();
-
-	//Create the workdir
-	f_mkdir(DATA_PATH);
-
-	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-
-	//Create decrypted native_firm
-	hiId = getMpInfo() == MPINFO_CTR ?
-		TID_CTR_NATIVE_FIRM : TID_KTR_NATIVE_FIRM;
-
-	r = readOrgFirm(hiId, &firmSize);
-	if (r != FR_OK)
-		return r;
-
-	getOrgFirmPath(path, hiId, "_cetk");
-	r = getTitleKeyWithCetk(key, path);
-	if (r && getTitleKey(key, firmLoId, hiId, 1))
-		return r;
-
-	uint8_t* n_firm = decryptFirmTitle(WORKBUF, firmSize, key);
-	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-
-	getFirmPath(path, hiId);
+	getFirmPath(path, id);
 	r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
 	if (r != FR_OK)
 		return r;
 
-	f_write(&f, n_firm, firmSize, &processed);
+	r = f_write(&f, p, n, &bw);
 	f_close(&f);
 
-	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	return r;
+}
 
-	if (getMpInfo() != MPINFO_CTR)
-		goto end;
+static int processFirm(uint32_t lo)
+{
+	static const char pathFmt[] = "rxTools/firm/00040138%08" PRIX32 "%s.bin";
+	const uint32_t hi = 0x00040138;
+	uint8_t key[AES_BLOCK_SIZE];
+	char path[64];
+	void *buff, *firm;
+	AppInfo appInfo;
+	UINT size;
+	FRESULT r;
+	FIL f;
 
-	//Create AGB decrypted firmware
-	hiId = TID_CTR_AGB_FIRM;
-	r = readOrgFirm(hiId, &firmSize);
+	sprintf(path, pathFmt, lo, "");
+	r = f_open(&f, path, FA_READ);
 	if (r != FR_OK)
 		return r;
 
-	getTitleKey(key, firmLoId, hiId, 1);
-	uint8_t* a_firm = decryptFirmTitle(WORKBUF, firmSize, key);
-	if (!a_firm && checkEmuNAND())
-	{
-		/* Try to get the Title Key from the EmuNAND */
-		getTitleKey(key, firmLoId, hiId, 2);
-		a_firm = decryptFirmTitle(WORKBUF, firmSize, key);
-		if (!a_firm) {
-			/* If we cannot decrypt it because of titlekey messed up,
-			it probably means that AGB has been modified in some way. */
-			//So we read it from his installed ncch...
-			appInfo.drive = 1;
-			appInfo.tidLo = firmLoId;
-			appInfo.tidHi = hiId;
-			FindApp(&appInfo);
-			r = f_open(&f, appInfo.content, FA_READ);
-			if (r != FR_OK) {
-				if (checkEmuNAND()) {
-					/* Try with EmuNAND */
-					appInfo.drive = 2;
-					FindApp(&appInfo);
-					r = f_open(&f, appInfo.content, FA_READ);
-					if (r != FR_OK)
-						return r;
-				} else
-					return r;
-			}
 
-			f_read(&f, WORKBUF, firmSize, &processed);
-			f_close(&f);
-			a_firm = decryptFirmTitleNcch(WORKBUF, firmSize);
-		}
+	size = f_size(&f);
+	buff = __builtin_alloca(size + sizeof(uint32_t));
+	r = f_read(&f, buff, size, &size);
+	if (r != FR_OK)
+		return r;
+
+	f_close(&f);
+
+	sprintf(path, pathFmt, lo, "_cetk");
+	if (!getTitleKeyWithCetk(key, path)) {
+		firm = decryptFirmTitle(buff, size, &size, key);
+		if (firm != NULL)
+			return saveFirm(lo, firm, size);
 	}
 
-	if (a_firm) {
-		getFirmPath(path, hiId);
-		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
+	if (!getTitleKey(key, hi, lo, 1)) {
+		firm = decryptFirmTitle(buff, size, &size, key);
+		if (firm != NULL)
+			return saveFirm(lo, firm, size);
+	}
+
+	if (!getTitleKey(key, hi, lo, 2)) {
+		firm = decryptFirmTitle(buff, size, &size, key);
+		if (firm != NULL)
+			return saveFirm(lo, firm, size);
+	}
+
+	appInfo.drive = 1;
+	appInfo.tidLo = lo;
+	appInfo.tidHi = hi;
+	FindApp(&appInfo);
+	if (f_open(&f, appInfo.content, FA_READ) != FR_OK) {
+		appInfo.drive = 2;
+		FindApp(&appInfo);
+		r = f_open(&f, appInfo.content, FA_READ);
 		if (r != FR_OK)
 			return r;
-
-		f_write(&f, a_firm, firmSize, &processed);
-		f_close(&f);
-
-		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-		progress += wcslen(strings[STR_PROGRESS_OK]);
-	} else {
-		wcsncpy(progress, strings[STR_PROGRESS_FAIL], wcslen(strings[STR_PROGRESS_FAIL]));
-		progress += wcslen(strings[STR_PROGRESS_FAIL]); //If we get here, then we'll play without AGB, lol
 	}
 
-	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
-
-	//Create TWL decrypted firmware
-	hiId = TID_CTR_TWL_FIRM;
-	r = readOrgFirm(hiId, &firmSize);
+	r = f_read(&f, buff, size, &size);
+	f_close(&f);
 	if (r != FR_OK)
 		return r;
 
-	getTitleKey(key, firmLoId, hiId, 1);
-	uint8_t* t_firm = decryptFirmTitle(WORKBUF, firmSize, key);
-	if(t_firm){
-		getFirmPath(path, hiId);
-		r = f_open(&f, path, FA_WRITE | FA_CREATE_ALWAYS);
+	firm = decryptFirmTitleNcch(buff, &size);
+	return firm == NULL ? -1 : saveFirm(lo, firm, size);
+}
+
+typedef struct {
+	wchar_t str[16];
+	wchar_t *cur;
+	unsigned int x;
+} Bar;
+
+static void initBar(Bar *b, size_t n)
+{
+	const wchar_t *src;
+	wchar_t *dst;
+
+	b->cur = b->str;
+	b->x = (BOT_SCREEN_WIDTH - n * FONT_WIDTH) / 2;
+
+	dst = b->str;
+	while (n > 0) {
+		for (src = strings[STR_PROGRESS]; *src != 0; src++) {
+			*dst = *src;
+			dst++;
+		}
+
+		n--;
+	}
+
+	*dst = 0;
+	print(b->str);
+	ConsolePrevLine();
+}
+
+static void incBar(Bar *b)
+{
+	const wchar_t *p;
+
+	for (p = strings[STR_PROGRESS_OK]; *p != 0; p++) {
+		*b->cur = *p;
+		b->cur++;
+	}
+
+	DrawString(BOT_SCREEN, b->str, b->x, 50,
+		ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+}
+
+static int InstallData()
+{
+	static const char date[] = DATA_PATH "/data.bin";
+	Bar b;
+	int r;
+
+	initBar(&b, getMpInfo() == MPINFO_CTR ? 5 : 3);
+
+	f_mkdir(DATA_PATH);
+	incBar(&b);
+
+	r = processFirm(getMpInfo() == MPINFO_CTR ?
+		TID_CTR_NATIVE_FIRM : TID_KTR_NATIVE_FIRM);
+	if (r)
+		return r;
+
+	incBar(&b);
+
+	if (getMpInfo() == MPINFO_CTR) {
+		r = processFirm(TID_CTR_AGB_FIRM);
 		if (r)
 			return r;
 
-		f_write(&f, t_firm, firmSize, &processed);
-		f_close(&f);
+		incBar(&b);
 
-		wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-		progress += wcslen(strings[STR_PROGRESS_OK]);
-	}else{
-		wcsncpy(progress, strings[STR_PROGRESS_FAIL], wcslen(strings[STR_PROGRESS_FAIL]));
-		progress += wcslen(strings[STR_PROGRESS_FAIL]);
+		r = processFirm(TID_CTR_TWL_FIRM);
+		if (r != FR_OK)
+			return r;
+
+		incBar(&b);
 	}
-	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-end:
-	if (f_stat(DATA_PATH "/data.bin", 0) == FR_OK)
-		f_unlink(DATA_PATH "/data.bin");
+	if (f_stat(date, NULL) == FR_OK)
+		f_unlink(date);
 
-	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
-	progress += wcslen(strings[STR_PROGRESS_OK]);
-	DrawString(BOT_SCREEN, progressbar, progressX, 50, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+	incBar(&b);
 
-	return FR_OK;
+	return 0;
 }
 
 int CheckInstallationData(){

@@ -28,10 +28,7 @@ SECTIONS
 	}
 
 	. = process9 + 0x5E0B0;
-	.patch.p9.mythread.ldr : { *(.patch.p9.mythread.ldr) }
-
-	. = process9 + 0x5E0E4;
-	.patch.p9.mythread.addr : { *(.patch.p9.mythread.addr) }
+	.patch.p9.thread : { *(.patch.p9.thread) }
 
 	. = reboot;
 	.patch.p9.reboot.body : {

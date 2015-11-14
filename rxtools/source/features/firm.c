@@ -83,20 +83,27 @@ static int loadFirm(char *path, UINT *fsz)
 	return ((FirmHdr *)FIRM_ADDR)->magic == 0x4D524946 ? 0 : -1;
 }
 
-uint8_t* decryptFirmTitleNcch(uint8_t* title, unsigned int size){
+uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
+{
+	const size_t sector = 512;
+	const size_t header = 512;
 	ctr_ncchheader NCCH;
 	uint8_t CTR[16];
 	PartitionInfo INFO;
 	NCCH = *((ctr_ncchheader*)title);
 	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
 	ncch_get_counter(NCCH, CTR, 2);
-	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*0x200; INFO.keyY = NCCH.signature; INFO.size = size; INFO.keyslot = 0x2C;
+	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*sector; INFO.keyY = NCCH.signature; INFO.size = getle32(NCCH.exefssize)*sector; INFO.keyslot = 0x2C;
 	DecryptPartition(&INFO);
-	uint8_t* firm = (uint8_t*)(INFO.buffer + 0x200);
+
+	if (size != NULL)
+		*size = INFO.size - header;
+
+	uint8_t* firm = (uint8_t*)(INFO.buffer + header);
 	return firm;
 }
 
-uint8_t *decryptFirmTitle(uint8_t *title, unsigned int size, uint8_t key[16])
+uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
 {
 	PartitionInfo info;
 	Arm9Hdr *hdr;
@@ -106,7 +113,7 @@ uint8_t *decryptFirmTitle(uint8_t *title, unsigned int size, uint8_t key[16])
 	uint8_t iv[16] = { 0 };
 	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
 	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
-	firm = decryptFirmTitleNcch(title, size);
+	firm = decryptFirmTitleNcch(title, firmSize);
 
 	if (getMpInfo() == MPINFO_KTR) {
 		hdr = (void *)(firm + ((FirmHdr *)firm)->segs[2].offset);
