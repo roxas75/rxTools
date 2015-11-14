@@ -35,10 +35,10 @@ OBJCOPY	:= arm-none-eabi-objcopy
 CFLAGS	:= -Os -fshort-wchar -fno-zero-initialized-in-bss $(INCDIR) -I$(SOURCE)/include -DPATCHES_PATH=\"$(PATCHES_PATH)\"
 
 OBJS	:= $(BUILD)/payload/arm9/EmuNAND.o $(BUILD)/payload/arm9/process9.o	\
-	$(BUILD)/payload/arm9/CreateThread.o	\
-	$(BUILD)/payload/arm9/myThread/myThread.o $(BUILD)/k9_fix_flags.o	\
+	$(BUILD)/payload/arm9/create_thread.o	\
+	$(BUILD)/payload/arm9/thread/thread.o $(BUILD)/k9_fix_flags.o	\
 	$(BUILD)/p9_emunand_hook_1.o $(BUILD)/p9_emunand_hook_2.o	\
-	$(BUILD)/p9_mythread_hook_1.o $(BUILD)/p9_mythread_hook_2.o	\
+	$(BUILD)/p9_thread_hook.o	\
 	$(BUILD)/p9_reboothax_entry.o $(BUILD)/p9_reboothax_body_prefix.o	\
 	$(BUILD)/p9_signatures_spoof_1.o $(BUILD)/p9_signatures_spoof_2.o	\
 	$(BUILD)/k11_codeset.o
@@ -51,7 +51,7 @@ else
 LDSCRIPT_ROM	:= ctr_rom.ld
 LDSCRIPT_RAM	:= ctr_ram.ld
 
-OBJS	+= $(BUILD)/payload/arm9/myThread/handlers.o	\
+OBJS	+= $(BUILD)/payload/arm9/thread/handlers.o	\
 	$(BUILD)/payload/arm11/hookswi.o	\
 	$(BUILD)/p9_keyx_spoof.o
 endif

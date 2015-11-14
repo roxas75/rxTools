@@ -25,10 +25,7 @@ SECTIONS
 	.patch.p9.nand.read : { *(.patch.p9.nand.read) }
 
 	. = process9 + 0x5E140;
-	.patch.p9.mythread.ldr : { *(.patch.p9.mythread.ldr) }
-
-	. = process9 + 0x5E174;
-	.patch.p9.mythread.addr : { *(.patch.p9.mythread.addr) }
+	.patch.p9.thread : { *(.patch.p9.thread) }
 
 	. = process9 + 0x5D9EC;
 	.patch.p9.reboot.entry : {

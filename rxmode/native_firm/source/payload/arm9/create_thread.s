@@ -14,11 +14,18 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-@ p9 mythread hook
-.section .patch.p9.mythread.ldr, "a"
-.arm
-.align 2
+	.arm
+	.text
+	.global	createThread
+	.type	createThread, %function
+createThread:
+	mov	r0, #0x3F @ Priority
+	ldr	r1, =thread @ Address
+	mov	r2, #0 @ Argument Address
+	mov	r3, #0x08000000	@ The top of the stack
+	orr	r3, #0xC00
+	mov	r4, #0xFFFFFFFE	@ Affinity Mask
+	svc	8	@ Create thread
 
-	.word 0xE59FF02C	//ldr	pc, =0x0801A6E0
-
-.pool
+	ldr	r0, [lr, #48]
+	bx	lr
