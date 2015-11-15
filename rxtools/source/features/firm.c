@@ -296,10 +296,11 @@ int PastaMode(){
 	else
 	{
 		//new 3ds patches
-		uint8_t patch1[] = { 0x6D, 0x20, 0xCE, 0x77 };
-		uint8_t patch2[] = { 0x5A, 0xC5, 0x73, 0xC1 };
-		memcpy((uint32_t*)0x08052FD8, patch1, 4);
-		memcpy((uint32_t*)0x08058804, patch2, 4);
+		arm9Decrypt(FIRM_ADDR);
+		uint8_t patch0[] = { 0x00, 0x20, 0x3B, 0xE0 };
+        uint8_t patch1[] = { 0x00, 0x20, 0x08, 0xE0 };
+        memcpy((uint32_t*)(FIRM_ADDR + 0xB39D8), patch0, 4);
+		memcpy((uint32_t*)(FIRM_ADDR + 0xB9204), patch1, 4);
 	}
 
 	return loadExecReboot();
