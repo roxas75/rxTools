@@ -148,14 +148,8 @@ void ConsoleFlush(){
 }
 
 void ConsoleAddText(wchar_t* str){
-	for(int i = 0; *str != 0x00; i++){
-		if(!(*str == L'\\' && *(str+1) == L'n')){	//we just handle the '\n' case, who cares of the rest
-			console[cursor++] = *str++;
-		}else{
-			console[cursor++] = L'\n';
-			str += 2;
-		}
-	}
+	for(int i = 0; *str != 0x00; i++)
+		console[cursor++] = *str++;
 }
 
 void print(const wchar_t *format, ...)
