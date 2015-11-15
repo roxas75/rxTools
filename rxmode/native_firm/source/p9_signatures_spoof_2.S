@@ -19,7 +19,7 @@
 .thumb
 	mov	r0, #0
 #ifdef PLATFORM_KTR
-	b	0x8063866
+	b	0x8063266
 #else
 	b	0x80631AA
 #endif
