@@ -136,6 +136,17 @@ void ConsoleAddText(wchar_t* str)
 		c = *str;
 
 		switch (c) {
+			case 0x1B:
+				str++;
+				if (*str != '[')
+					break;
+
+				str++;
+				if (*str == 'K')
+					memset(console[cursor.row] + cursor.col, 0,
+						(CONSOLE_MAX_LINE_LENGTH - cursor.col) * sizeof(wchar_t));
+				break;
+
 			case '\b':
 				if (cursor.col > 0)
 					cursor.col--;

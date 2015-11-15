@@ -194,7 +194,7 @@ uint32_t CreatePad(PadInfo *info, int index)
 			add_ctr(ctr, 1);
 		}
 
-		print(L"\r%i : %i%%", index, (i+j)/size_100);
+		print(L"\r\033[K%i : %i%%", index, (i+j)/size_100);
 		ConsoleShow();
 		FileWrite(&pf, (void*)BUFFER_ADDR, j, seekpos);
 		seekpos += j;
