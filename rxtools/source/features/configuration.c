@@ -343,8 +343,8 @@ static void initBar(Bar *b, size_t n)
 	}
 
 	*dst = 0;
-	print(b->str);
-	ConsolePrevLine();
+	DrawString(BOT_SCREEN, b->str, b->x, 50,
+		ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 }
 
 static void incBar(Bar *b)

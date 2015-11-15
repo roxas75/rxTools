@@ -185,6 +185,7 @@ uint32_t CreatePad(PadInfo *info, int index)
 	uint32_t size_bytes = info->size_mb*1024*1024;
 	uint32_t size_100 = size_bytes/100;
 	uint32_t seekpos = 0;
+	print(strings[STR_GENERATING], strings[STR_PAD]);
 	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
 		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
@@ -193,10 +194,7 @@ uint32_t CreatePad(PadInfo *info, int index)
 			add_ctr(ctr, 1);
 		}
 
-		print(strings[STR_GENERATING], strings[STR_PAD]);
-		print(L"%i : %i%%", index, (i+j)/size_100);
-		ConsolePrevLine();
-		ConsolePrevLine();
+		print(L"\r%i : %i%%", index, (i+j)/size_100);
 		ConsoleShow();
 		FileWrite(&pf, (void*)BUFFER_ADDR, j, seekpos);
 		seekpos += j;

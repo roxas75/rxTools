@@ -135,14 +135,26 @@ void ConsoleAddText(wchar_t* str)
 	for(int i = 0; *str != 0x00; i++) {
 		c = *str;
 
-		if (c == '\n') {
-			if (cursor.row < CONSOLE_MAX_LINES - 1) {
+		switch (c) {
+			case '\b':
+				if (cursor.col > 0)
+					cursor.col--;
+				break;
+
+			case '\n':
+				if (cursor.row >= CONSOLE_MAX_LINES - 1)
+					break;
+
 				cursor.row++;
+			case '\r':
 				cursor.col = 0;
-			}
-		} else if (cursor.col < CONSOLE_MAX_LINE_LENGTH) {
-			console[cursor.row][cursor.col] = c;
-			cursor.col++;
+				break;
+
+			default:
+				if (cursor.col < CONSOLE_MAX_LINE_LENGTH) {
+					console[cursor.row][cursor.col] = c;
+					cursor.col++;
+				}
 		}
 
 		str++;
@@ -163,28 +175,6 @@ void vprint(const wchar_t *format, va_list va)
 	wchar_t str[256];
 	vswprintf(str, sizeof(str) / sizeof(str[0]), format, va);
 	ConsoleAddText(str);
-}
-
-void ConsoleNextLine()
-{
-	if (cursor.row <= CONSOLE_MAX_LINES - 1)
-		cursor.row++;
-}
-
-void ConsolePrevLine()
-{
-	if (cursor.row > 0)
-		cursor.row--;
-}
-
-void ConsoleNext(){
-	if (console[cursor.row][cursor.col] != 0)
-		cursor.col++;
-}
-
-void ConsolePrev(){
-	if (cursor.col > 0)
-		cursor.col--;
 }
 
 void ConsoleSetBackgroundColor(int color){
