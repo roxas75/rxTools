@@ -38,7 +38,6 @@ int Spacing = 2;
 unsigned int ConsoleX = CONSOLE_X, ConsoleY = CONSOLE_Y, ConsoleW = CONSOLE_WIDTH, ConsoleH = CONSOLE_HEIGHT;
 unsigned int BorderWidth = 1;
 unsigned int cursor = 0;
-unsigned int linecursor = 0;
 unsigned int consoleInited = 0;
 
 void ConsoleInit(){
@@ -146,16 +145,13 @@ void ConsoleShow(){
 void ConsoleFlush(){
 	memset(console, 0, CONSOLE_SIZE*sizeof(console[0]));
 	cursor = 0;
-	linecursor = 0;
 }
 
 void ConsoleAddText(wchar_t* str){
 	for(int i = 0; *str != 0x00; i++){
 		if(!(*str == L'\\' && *(str+1) == L'n')){	//we just handle the '\n' case, who cares of the rest
 			console[cursor++] = *str++;
-			linecursor++;
 		}else{
-			linecursor = 0;
 			console[cursor++] = L'\n';
 			str += 2;
 		}
