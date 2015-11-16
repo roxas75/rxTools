@@ -1,7 +1,7 @@
 cdn_firm.exe :
     Use this tool the first time you use rxTools.
-    It will generate 'firm' directory, containing files necessary for the toolkit to work.
-    Once it gets successfully generated, copy it in rxTools directory.
+    It will generate 'firm' directory for both consoles (use only the 'firm' directory for your console type), containing files necessary for the toolkit to work.
+    Once it gets successfully generated, copy the correct 'firm' directory in your rxTools directory (being sd:/rxtools).
 
 msetdg.exe :
     Use this tool if you want to downgrade your System Settings app in your sysNand.
