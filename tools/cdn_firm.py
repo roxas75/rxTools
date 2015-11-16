@@ -11,16 +11,10 @@ ktrfirmdir = "N3DS_firm_files"
 def f(title, download,type):
 
 	if(type=="ctr"):
-		urllib.urlretrieve("http://nus.cdn.c.shop.nintendowifi.net/ccs/download/%016X/cetk"
-			% (title),
-			ctrfirmdir+"/"+firmdir + "/%016X_cetk.bin" % (title))
 		return urllib.urlretrieve("http://nus.cdn.c.shop.nintendowifi.net/ccs/download/%016X/%08X"
 			% (title, download),
 			ctrfirmdir+"/"+firmdir + "/%016X.bin" % (title))
 	else:
-		urllib.urlretrieve("http://nus.cdn.c.shop.nintendowifi.net/ccs/download/%016X/cetk"
-			% (title),
-			ktrfirmdir+"/"+firmdir + "/%016X_cetk.bin" % (title))
 		return urllib.urlretrieve("http://nus.cdn.c.shop.nintendowifi.net/ccs/download/%016X/%08X"
 			% (title, download),
 			ktrfirmdir+ "/"+firmdir + "/%016X.bin" % (title))
