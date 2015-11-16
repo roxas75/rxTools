@@ -252,14 +252,13 @@ static FRESULT saveFirm(uint32_t id, const void *p, DWORD n)
 	return r;
 }
 
-static int processFirm(uint32_t lo)
+static int processFirmFile(uint32_t lo)
 {
 	static const char pathFmt[] = "rxTools/firm/00040138%08" PRIX32 "%s.bin";
 	const uint32_t hi = 0x00040138;
 	uint8_t key[AES_BLOCK_SIZE];
 	char path[64];
 	void *buff, *firm;
-	AppInfo appInfo;
 	UINT size;
 	FRESULT r;
 	FIL f;
@@ -269,14 +268,12 @@ static int processFirm(uint32_t lo)
 	if (r != FR_OK)
 		return r;
 
-
 	size = f_size(&f);
 	buff = __builtin_alloca(size + sizeof(uint32_t));
 	r = f_read(&f, buff, size, &size);
+	f_close(&f);
 	if (r != FR_OK)
 		return r;
-
-	f_close(&f);
 
 	sprintf(path, pathFmt, lo, "_cetk");
 	if (!getTitleKeyWithCetk(key, path)) {
@@ -297,9 +294,20 @@ static int processFirm(uint32_t lo)
 			return saveFirm(lo, firm, size);
 	}
 
+	return -1;
+}
+
+static int processFirmInstalled(uint32_t lo)
+{
+	void *buff, *firm;
+	AppInfo appInfo;
+	UINT size;
+	FRESULT r;
+	FIL f;
+
 	appInfo.drive = 1;
 	appInfo.tidLo = lo;
-	appInfo.tidHi = hi;
+	appInfo.tidHi = TID_HI_FIRM;
 	FindApp(&appInfo);
 	if (f_open(&f, appInfo.content, FA_READ) != FR_OK) {
 		appInfo.drive = 2;
@@ -309,6 +317,9 @@ static int processFirm(uint32_t lo)
 			return r;
 	}
 
+	size = f_size(&f);
+	buff = __builtin_alloca(size);
+
 	r = f_read(&f, buff, size, &size);
 	f_close(&f);
 	if (r != FR_OK)
@@ -316,6 +327,17 @@ static int processFirm(uint32_t lo)
 
 	firm = decryptFirmTitleNcch(buff, &size);
 	return firm == NULL ? -1 : saveFirm(lo, firm, size);
+}
+
+static int processFirm(uint32_t lo)
+{
+	int r;
+
+	r = processFirmFile(lo);
+	if (r && processFirmInstalled(lo))
+		return r;
+
+	return 0;
 }
 
 typedef struct {
