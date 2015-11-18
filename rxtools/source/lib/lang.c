@@ -292,9 +292,14 @@ int loadStrings()
 				len = t[i].end - t[i].start;
 				s = buf + t[i].start;
 				for (k = 0; k + 1 < STR_MAX_LEN && len > 0; k++) {
-					l = mbtowc(strings[j] + k, s, len);
-					if (l < 0)
-						break;
+					if (s[0] == '\\' && s[1] == 'n') {
+						strings[j][k] = '\n';
+						l = 2;
+					} else {
+						l = mbtowc(strings[j] + k, s, len);
+						if (l < 0)
+							break;
+					}
 
 					len -= l;
 					s += l;

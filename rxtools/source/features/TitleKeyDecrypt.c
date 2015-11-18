@@ -204,12 +204,12 @@ void DecryptTitleKeyFile(void) {
 
 	print(progressbar);
 	ConsoleShow();
-	ConsolePrevLine();
 
 	f_lseek(&dump, 0x10);
 	for (i = 0; i < keycount; i ++) {
 		rr = f_read(&tick, line, sizeof(line), &br);
 		if ((rr != FR_OK)||(br != sizeof(line))) {
+			print(L"\n");
 			print(strings[STR_ERROR_READING], filename);
 			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 			ConsoleShow();
@@ -220,6 +220,7 @@ void DecryptTitleKeyFile(void) {
 		memcpy(titleid, line + 2, 8);
 		rr = f_read(&tick, line, sizeof(line), &br);
 		if ((rr != FR_OK)||(br != sizeof(line))) {
+			print(L"\n");
 			print(strings[STR_ERROR_READING], filename);
 			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 			ConsoleShow();
@@ -235,6 +236,7 @@ void DecryptTitleKeyFile(void) {
 		memcpy(line + 2, titleid, 8);
 		rr = f_write(&dump, line, sizeof(line), &br);
 		if ((rr != FR_OK)||(br != sizeof(line))) {
+			print(L"\n");
 			print(strings[STR_ERROR_WRITING], filename3);
 			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 			ConsoleShow();
@@ -244,6 +246,7 @@ void DecryptTitleKeyFile(void) {
 		DecryptTitleKey(titleid, key, kindex);
 		rr = f_write(&dump, key, sizeof(key), &br);
 		if ((rr != FR_OK)||(br != sizeof(key))) {
+			print(L"\n");
 			print(strings[STR_ERROR_WRITING], filename3);
 			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 			ConsoleShow();
@@ -256,15 +259,14 @@ void DecryptTitleKeyFile(void) {
 			percent++;
 			wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 			progress += wcslen(strings[STR_PROGRESS_OK]);
-			print(progressbar);
+			print(L"\r%s", progressbar);
 			ConsoleShow();
-			ConsolePrevLine();
 		}
 	}
 	percent++;
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
-	print(progressbar);
+	print(L"\r%s\n", progressbar);
 	ConsoleShow();
 	rr = f_write(&dump, line, sizeof(line), &br);
 	if ((rr != FR_OK)||(br != sizeof(line)))

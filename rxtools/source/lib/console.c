@@ -27,7 +27,7 @@
 #include "draw.h"
 #include "menu.h"
 
-wchar_t console[CONSOLE_SIZE];
+wchar_t console[CONSOLE_MAX_LINES][CONSOLE_MAX_LINE_LENGTH + 1];
 wchar_t consoletitle[CONSOLE_MAX_TITLE_LENGTH+1] = L"";
 
 int BackgroundColor = WHITE;
@@ -37,9 +37,12 @@ int SpecialColor = RED;
 int Spacing = 2;
 unsigned int ConsoleX = CONSOLE_X, ConsoleY = CONSOLE_Y, ConsoleW = CONSOLE_WIDTH, ConsoleH = CONSOLE_HEIGHT;
 unsigned int BorderWidth = 1;
-unsigned int cursor = 0;
-unsigned int linecursor = 0;
 unsigned int consoleInited = 0;
+
+static struct {
+	unsigned int col;
+	unsigned int row;
+} cursor = { 0, 0 };
 
 void ConsoleInit(){
 	consoleInited = 1;
@@ -76,21 +79,14 @@ void ConsoleSetTitle(const wchar_t* format, ...){
 	va_end(va);
 }
 
-int countLines(){
-	int cont = 0;
-	for(int i = 0; i < CONSOLE_SIZE; i++){
-		if(console[i] == L'\n'); cont++;
-	}
-	return cont;
+int countLines()
+{
+	int i;
+
+	for (i = 0; i < CONSOLE_MAX_LINES && console[i][0] != 0; i++);
+	return i;
 }
 
-int findCursorLine(){
-	int cont = 0;
-	for(int i = 0; i < cursor; i++){
-		if(console[i] == L'\n'); cont++;
-	}
-	return cont;
-}
 void ConsoleShow(){
 	char str[100];
 
@@ -116,49 +112,63 @@ void ConsoleShow(){
 	int titlespace = 2*FONT_HEIGHT-2*BorderWidth;
 	DrawString(tmpscreen, consoletitle, ConsoleX + BorderWidth + 2 * FONT_HWIDTH, ConsoleY + (titlespace - FONT_HEIGHT) / 2 + BorderWidth, TextColor, ConsoleGetBackgroundColor());
 
-	wchar_t tmp[256], *point;
-        if(findCursorLine() < CONSOLE_MAX_LINES) point = &console[0];
-	else{
-		int cont = 0;
-		int tmp1;
-		for(tmp1 = cursor; tmp1 >= 0 && cont <= CONSOLE_MAX_LINES + 1; tmp1--){
-			if(console[tmp1] == L'\n') cont++;
-		}
-		while(console[tmp1] != 0x00 && console[tmp1] != L'\n') tmp1--;
-		point = &console[tmp1+1];
-	}
-	int lines = 0;
-	for(int i = 0; i < CONSOLE_SIZE; i++){
-		int linelen = 0;
-		memset(tmp, 0, sizeof(tmp));
-		while(1){
-			if(*point == 0x00)  break;
-			if(*point == L'\n'){ point++; break; }
-			tmp[linelen++] = *point++;
-		}
-		DrawString(tmpscreen, tmp, ConsoleX + FONT_HWIDTH*Spacing, lines++ * FONT_HEIGHT + ConsoleY + 15 + FONT_HEIGHT*(Spacing - 1) + titley, TextColor, ConsoleGetBackgroundColor());
-		if(!*point) break;
-		if(lines == CONSOLE_MAX_LINES) break;
-	}
+	for (int i = 0; i < CONSOLE_MAX_LINES; i++)
+		DrawString(tmpscreen, console[i],
+			ConsoleX + FONT_HWIDTH * Spacing,
+			i * FONT_HEIGHT + ConsoleY + 15 + FONT_HEIGHT * (Spacing - 1) + titley,
+			TextColor, ConsoleGetBackgroundColor());
+
 	memcpy(BOT_SCREEN, tmpscreen, SCREEN_SIZE);
 }
 
-void ConsoleFlush(){
-	memset(console, 0, CONSOLE_SIZE*sizeof(console[0]));
-	cursor = 0;
-	linecursor = 0;
+void ConsoleFlush()
+{
+	memset(console, 0, sizeof(console));
+	cursor.col = 0;
+	cursor.row = 0;
 }
 
-void ConsoleAddText(wchar_t* str){
-	for(int i = 0; *str != 0x00; i++){
-		if(!(*str == L'\\' && *(str+1) == L'n')){	//we just handle the '\n' case, who cares of the rest
-			console[cursor++] = *str++;
-			linecursor++;
-		}else{
-			linecursor = 0;
-			console[cursor++] = L'\n';
-			str += 2;
+void ConsoleAddText(wchar_t* str)
+{
+	wchar_t c;
+
+	for(int i = 0; *str != 0x00; i++) {
+		c = *str;
+
+		switch (c) {
+			case 0x1B:
+				str++;
+				if (*str != '[')
+					break;
+
+				str++;
+				if (*str == 'K')
+					memset(console[cursor.row] + cursor.col, 0,
+						(CONSOLE_MAX_LINE_LENGTH - cursor.col) * sizeof(wchar_t));
+				break;
+
+			case '\b':
+				if (cursor.col > 0)
+					cursor.col--;
+				break;
+
+			case '\n':
+				if (cursor.row >= CONSOLE_MAX_LINES - 1)
+					break;
+
+				cursor.row++;
+			case '\r':
+				cursor.col = 0;
+				break;
+
+			default:
+				if (cursor.col < CONSOLE_MAX_LINE_LENGTH) {
+					console[cursor.row][cursor.col] = c;
+					cursor.col++;
+				}
 		}
+
+		str++;
 	}
 }
 
@@ -176,37 +186,6 @@ void vprint(const wchar_t *format, va_list va)
 	wchar_t str[256];
 	vswprintf(str, sizeof(str) / sizeof(str[0]), format, va);
 	ConsoleAddText(str);
-}
-
-void ConsoleNextLine(){
-	while(console[cursor] != L'\n'){
-		if(console[cursor] == 0x00){
-			cursor-=2;
-			break;
-		}
-		cursor++;
-	}
-	cursor++;
-}
-
-void ConsolePrevLine(){
-	if(console[cursor-1] == L'\n') cursor-=2;
-	while(console[cursor] != L'\n'){
-		if(cursor == 0){
-			break;
-		}
-		cursor--;
-	}
-	if(cursor) cursor++;
-	if(cursor < 0) cursor = 0;
-}
-
-void ConsoleNext(){
-	if(console[cursor + 1] != 0x00) cursor++;
-}
-
-void ConsolePrev(){
-	if(cursor - 1 >= 0 ) cursor--;
 }
 
 void ConsoleSetBackgroundColor(int color){

@@ -164,9 +164,8 @@ int ProcessCTR(char* path){
 			myInfo.ctr = CTR;
 			myInfo.keyY = NCCH.signature;
 			for(int i = 0; i < (getle32(NCCH.romfssize) * mediaunitsize + BLOCK_SIZE - 1) / BLOCK_SIZE; i++){
-				print(L"%3d%%", (int)((i*BLOCK_SIZE)/(getle32(NCCH.romfssize) * mediaunitsize/ 100)));
-				for(int j = 0; j < 4; j++) ConsolePrev();
-				ConsoleShow();
+				print(L"%3d%%\b\b\b\b",
+					(int)((i*BLOCK_SIZE)/(getle32(NCCH.romfssize) * mediaunitsize/ 100)));
 				size_t bytesRead = FileRead(&myFile, BUFFER_ADDR, i*BLOCK_SIZE <= (getle32(NCCH.romfssize) * mediaunitsize) ? BLOCK_SIZE : (getle32(NCCH.romfssize) * mediaunitsize) % BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
 				myInfo.size = bytesRead;
 				DecryptPartition(&myInfo);
