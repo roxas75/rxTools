@@ -83,6 +83,29 @@ static int loadFirm(char *path, UINT *fsz)
 	return ((FirmHdr *)FIRM_ADDR)->magic == 0x4D524946 ? 0 : -1;
 }
 
+static void decryptFirmKtrArm9(void *p)
+{
+	PartitionInfo info;
+	Arm9Hdr *hdr;
+
+	hdr = (void *)(p + ((FirmHdr *)p)->segs[2].offset);
+
+	info.ctr = hdr->ctr;
+	info.buffer = (uint8_t *)hdr + 0x800;
+	info.keyY = hdr->keyY;
+	info.size = atoi(hdr->size);
+	info.keyslot = *(uint32_t *)hdr->keyX_0x16 == 0xFFFFFFFF ? 0x15 : 0x16;
+
+	use_aeskey(0x11);
+	if (info.keyslot == 0x16) {
+		aes_decrypt(hdr->keyX_0x16, hdr->keyX_0x16, NULL,
+			1, AES_ECB_DECRYPT_MODE);
+		setup_aeskeyX(info.keyslot, hdr->keyX_0x16);
+	}
+
+	DecryptPartition(&info);
+}
+
 uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
 {
 	const size_t sector = 512;
@@ -105,8 +128,6 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
 
 uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
 {
-	PartitionInfo info;
-	Arm9Hdr *hdr;
 	uint8_t *firm;
 	aes_context aes_ctxt;
 
@@ -115,23 +136,8 @@ uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t
 	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
 	firm = decryptFirmTitleNcch(title, firmSize);
 
-	if (getMpInfo() == MPINFO_KTR) {
-		hdr = (void *)(firm + ((FirmHdr *)firm)->segs[2].offset);
-
-		use_aeskey(0x11);
-		aes_decrypt(hdr->keyX_0x16, hdr->keyX_0x16, NULL,
-			1, AES_ECB_DECRYPT_MODE);
-
-		setup_aeskeyX(0x16, hdr->keyX_0x16);
-
-		info.ctr = hdr->ctr;
-		info.buffer = (uint8_t *)hdr + 0x800;
-		info.keyY = hdr->keyY;
-		info.size = atoi(hdr->size);
-		info.keyslot = 0x16;
-		DecryptPartition(&info);
-
-	}
+	if (getMpInfo() == MPINFO_KTR)
+		decryptFirmKtrArm9(firm);
 
 	return firm;
 }
