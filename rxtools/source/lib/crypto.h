@@ -69,5 +69,3 @@ uint32_t aes_getwritecount();
 uint32_t aes_getreadcount();
 uint32_t aescnt_checkwrite();
 uint32_t aescnt_checkread();
-
-unsigned int arm9Decrypt(void *FIRM);

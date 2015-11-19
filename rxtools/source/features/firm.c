@@ -302,7 +302,7 @@ int PastaMode(){
 	else
 	{
 		//new 3ds patches
-		arm9Decrypt(FIRM_ADDR);
+		decryptFirmKtrArm9((void *)FIRM_ADDR);
 		uint8_t patch0[] = { 0x00, 0x20, 0x3B, 0xE0 };
         uint8_t patch1[] = { 0x00, 0x20, 0x08, 0xE0 };
         memcpy((uint32_t*)(FIRM_ADDR + 0xB39D8), patch0, 4);
