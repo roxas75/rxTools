@@ -32,9 +32,13 @@ typedef struct {
 	char size[8];
 	uint8_t pad[8];
 	uint8_t control[AES_BLOCK_SIZE];
-	uint8_t unk[16];
-	uint8_t keyX_0x16[AES_BLOCK_SIZE];
-	
+	union {
+		uint32_t pad[8];
+		struct {
+			uint8_t unk[16];
+			uint8_t keyX_0x16[AES_BLOCK_SIZE];
+		} s;
+	} ext;
 } Arm9Hdr;
 
 extern const char firmPathFmt[];

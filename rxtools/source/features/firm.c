@@ -94,13 +94,13 @@ static void decryptFirmKtrArm9(void *p)
 	info.buffer = (uint8_t *)hdr + 0x800;
 	info.keyY = hdr->keyY;
 	info.size = atoi(hdr->size);
-	info.keyslot = *(uint32_t *)hdr->keyX_0x16 == 0xFFFFFFFF ? 0x15 : 0x16;
+	info.keyslot = hdr->ext.pad[0] == 0xFFFFFFFF ? 0x15 : 0x16;
 
 	use_aeskey(0x11);
 	if (info.keyslot == 0x16) {
-		aes_decrypt(hdr->keyX_0x16, hdr->keyX_0x16, NULL,
+		aes_decrypt(hdr->ext.s.keyX_0x16, hdr->ext.s.keyX_0x16, NULL,
 			1, AES_ECB_DECRYPT_MODE);
-		setup_aeskeyX(info.keyslot, hdr->keyX_0x16);
+		setup_aeskeyX(info.keyslot, hdr->ext.s.keyX_0x16);
 	}
 
 	DecryptPartition(&info);
@@ -123,23 +123,21 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
 		*size = INFO.size - header;
 
 	uint8_t* firm = (uint8_t*)(INFO.buffer + header);
-	return firm;
-}
-
-uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
-{
-	uint8_t *firm;
-	aes_context aes_ctxt;
-
-	uint8_t iv[16] = { 0 };
-	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
-	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
-	firm = decryptFirmTitleNcch(title, firmSize);
 
 	if (getMpInfo() == MPINFO_KTR)
 		decryptFirmKtrArm9(firm);
 
 	return firm;
+}
+
+uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
+{
+	aes_context aes_ctxt;
+
+	uint8_t iv[16] = { 0 };
+	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
+	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
+	return decryptFirmTitleNcch(title, firmSize);
 }
 
 static void setAgbBios()
@@ -302,7 +300,7 @@ int PastaMode(){
 	else
 	{
 		//new 3ds patches
-		arm9Decrypt(FIRM_ADDR);
+		decryptFirmKtrArm9((void *)FIRM_ADDR);
 		uint8_t patch0[] = { 0x00, 0x20, 0x3B, 0xE0 };
         uint8_t patch1[] = { 0x00, 0x20, 0x08, 0xE0 };
         memcpy((uint32_t*)(FIRM_ADDR + 0xB39D8), patch0, 4);
