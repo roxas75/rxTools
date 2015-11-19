@@ -123,23 +123,21 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
 		*size = INFO.size - header;
 
 	uint8_t* firm = (uint8_t*)(INFO.buffer + header);
-	return firm;
-}
-
-uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
-{
-	uint8_t *firm;
-	aes_context aes_ctxt;
-
-	uint8_t iv[16] = { 0 };
-	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
-	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
-	firm = decryptFirmTitleNcch(title, firmSize);
 
 	if (getMpInfo() == MPINFO_KTR)
 		decryptFirmKtrArm9(firm);
 
 	return firm;
+}
+
+uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
+{
+	aes_context aes_ctxt;
+
+	uint8_t iv[16] = { 0 };
+	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
+	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
+	return decryptFirmTitleNcch(title, firmSize);
 }
 
 static void setAgbBios()
