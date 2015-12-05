@@ -83,27 +83,36 @@ static int loadFirm(char *path, UINT *fsz)
 	return ((FirmHdr *)FIRM_ADDR)->magic == 0x4D524946 ? 0 : -1;
 }
 
-static void decryptFirmKtrArm9(void *p)
+static int decryptFirmKtrArm9(void *p)
 {
+	uint8_t key[AES_BLOCK_SIZE];
 	PartitionInfo info;
 	Arm9Hdr *hdr;
+	FirmSeg *seg, *btm;
 
-	hdr = (void *)(p + ((FirmHdr *)p)->segs[2].offset);
+	seg = ((FirmHdr *)p)->segs;
+	for (btm = seg + FIRM_SEG_NUM; seg->isArm11; seg++)
+		 if (seg == btm)
+			 return -1;
+
+	hdr = (void *)(p + seg->offset);
 
 	info.ctr = hdr->ctr;
 	info.buffer = (uint8_t *)hdr + 0x800;
 	info.keyY = hdr->keyY;
 	info.size = atoi(hdr->size);
-	info.keyslot = hdr->ext.pad[0] == 0xFFFFFFFF ? 0x15 : 0x16;
 
 	use_aeskey(0x11);
-	if (info.keyslot == 0x16) {
-		aes_decrypt(hdr->ext.s.keyX_0x16, hdr->ext.s.keyX_0x16, NULL,
-			1, AES_ECB_DECRYPT_MODE);
-		setup_aeskeyX(info.keyslot, hdr->ext.s.keyX_0x16);
+	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
+		info.keyslot = 0x15;
+		aes_decrypt(hdr->keyX, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+	} else {
+		info.keyslot = 0x16;
+		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
 	}
 
-	DecryptPartition(&info);
+	setup_aeskeyX(info.keyslot, key);
+	return DecryptPartition(&info);
 }
 
 uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
@@ -125,7 +134,8 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
 	uint8_t* firm = (uint8_t*)(INFO.buffer + header);
 
 	if (getMpInfo() == MPINFO_KTR)
-		decryptFirmKtrArm9(firm);
+	    if (decryptFirmKtrArm9(firm))
+			return NULL;
 
 	return firm;
 }
