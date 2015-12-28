@@ -23,7 +23,6 @@ SET_DATNAME := DATNAME=$(SYS_PATH)/$(CODE_FILE)
 export INCDIR := -I$(CURDIR)/include
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
-CAKEFLAGS = dir_out=$(CURDIR) name=$(CODE_FILE) filepath=$(SYS_PATH)/
 ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
 BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
 			APP_TITLE="rxTools" \
@@ -31,13 +30,17 @@ BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
 			APP_AUTHOR="Patois, et al." \
 			ICON=$(abspath icon.png)
 
-all: $(CODE_FILE)
+.PHONY: rxtools/build/$(CODE_FILE) clean distclean release all-target-patches	\
+	all-target-mset	all-target-brahma all-target-theme release-licenses	\
+	release-code release-doc release-patches release-themes-langs	\
+	release-tools release-mset release-brahma
 
-.PHONY: distclean
+rxtools/build/$(CODE_FILE):
+	@$(MAKE) $(SET_SYS_PATH) -C rxtools $(susbst rxtools/,,$@)
+
 distclean:
 	@rm -rf release
 
-.PHONY: clean
 clean: distclean
 	@$(MAKE) $(SET_SYS_PATH) -C rxtools clean
 	@$(MAKE) -C rxmode clean
@@ -46,10 +49,8 @@ clean: distclean
 	@$(MAKE) -C theme clean
 	@$(MAKE) $(ROPFLAGS) -C CakesROP clean
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider clean	
-	@$(MAKE) $(CAKEFLAGS) -C CakeHax clean
-	@rm -Rf payload.bin $(CODE_FILE)
 
-release: $(CODE_FILE) all-target-patches all-target-mset all-target-brahma all-target-theme \
+release: all-target-patches all-target-mset all-target-brahma all-target-theme \
 	release-licenses release-code release-doc release-patches release-themes-langs \
 	release-tools release-mset release-brahma
 
@@ -60,9 +61,9 @@ release-licenses:
 	@cp CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
 	@cp CakesROP/LICENSE release/LICENSE_CakesROP
 
-release-code:
+release-code: rxtools/build/$(CODE_FILE)
 	@mkdir -p release/$(SYS_PATH)
-	@cp $(CODE_FILE) release/$(SYS_PATH)
+	@cp $< release/$(SYS_PATH)
 
 release-doc:
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
@@ -102,10 +103,6 @@ all-target-patches:	reboot/reboot.bin \
 	$(addprefix rxmode/build/,ktr/native_firm.elf \
 		ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
 
-$(CODE_FILE): rxtools/build/rxtools.bin
-	@$(MAKE) $(CAKEFLAGS) -C CakeHax bigpayload
-	@dd if=rxtools/build/rxtools.bin of=$@ seek=160 conv=notrunc
-
 all-target-mset:
 	@$(MAKE) $(ROPFLAGS) -C CakesROP
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
@@ -118,10 +115,6 @@ reboot/reboot.bin:
 
 rxmode/build/%:
 	$(MAKE) -C rxmode $(subst rxmode/,,$@)
-
-rxtools/build/rxtools.bin:
-	@$(MAKE) $(SET_SYS_PATH) -C rxtools $(susbst rxtools/,,$@)
-	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
 .PHONY: all-target-theme
 all-target-theme:

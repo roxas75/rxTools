@@ -61,8 +61,11 @@ NEED_DIRS := $(BUILD)/rxtools.elf $(BUILD)/font.bin $(OBJS) $(DEPS)
 
 MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 
-.PHONY: all clean
-all: $(BUILD)/rxtools.bin
+.PHONY: $(BUILD)/code.bin clean
+
+$(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
+	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(BUILD) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload
+	$(call Q,DD,$@)dd if=$< bs=896K conv=sync,notrunc | dd of=$@ seek=160 conv=notrunc
 
 %.bin: %.elf
 	$(call Q,OBJCOPY,$@)$(OBJCOPY) -O binary $< $@
