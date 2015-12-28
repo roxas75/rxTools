@@ -35,14 +35,8 @@ RELEASE := build/release
 
 .PHONY: all-target-patches all-target-theme all-target-mset all-target-brahma	\
 	reboot/reboot.bin clean distclean release	\
-	release-licenses release-code release-doc release-lang release-patches	\
+	release-licenses release-doc release-lang release-patches	\
 	release-theme release-tools release-mset release-brahma
-
-build/rxtools/%: rxtools
-	@$(MAKE) $(SET_SYS_PATH) BUILD=$(CURDIR)/build/rxtools -C $< $(CURDIR)/$@
-
-build/rxmode/%: rxmode
-	@$(MAKE) BUILD=$(CURDIR)/build/rxmode -C $< $(CURDIR)/$@
 
 all-target-brahma:
 	@$(MAKE) $(BRAHFLAGS) -C CakeBrah
@@ -51,9 +45,11 @@ all-target-mset:
 	@$(MAKE) $(ROPFLAGS) -C CakesROP
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
 
-all-target-patches:	reboot/reboot.bin \
-	$(addprefix build/rxmode/,ktr/native_firm.elf \
-		ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
+all-target-patches: rxmode
+	@$(MAKE) BUILD=$(CURDIR)/build/rxmode -C $<
+
+all-target-rxtools: rxtools
+	@$(MAKE) $(SET_SYS_PATH) BUILD=$(CURDIR)/build/rxtools -C $<
 
 all-target-theme:
 	@$(MAKE) -C theme
@@ -72,8 +68,8 @@ clean:
 	@$(MAKE) $(ROPFLAGS) -C CakesROP clean
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider clean	
 
-release: release-licenses release-code release-doc release-lang release-patches	\
-	release-theme release-tools release-mset release-brahma
+release: release-licenses release-rxtools release-doc release-lang	\
+	release-patches release-theme release-tools release-mset release-brahma
 
 release-licenses:
 	@mkdir -p $(RELEASE)
@@ -82,16 +78,12 @@ release-licenses:
 	@cp rxtools/CakeHax/LICENSE.txt $(RELEASE)/LICENSE_CakeHax.txt
 	@cp CakesROP/LICENSE $(RELEASE)/LICENSE_CakesROP
 
-release-code: build/rxtools/$(CODE_FILE)
+release-rxtools: all-target-rxtools
 	@mkdir -p $(RELEASE)/$(SYS_PATH)
-	@cp $< $(RELEASE)/$(SYS_PATH)
+	@cp build/rxtools/code.bin build/rxtools/font.bin $(RELEASE)/$(SYS_PATH)
 
 release-doc:
 	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf $(RELEASE)
-
-release-font: build/rxtools/font.bin
-	@mkdir $(RELEASE)/$(SYS_PATH)
-	@cp $< $(RELEASE)/$(SYS_PATH)
 
 release-lang:
 	mkdir -p $(RELEASE)/rxTools/lang
