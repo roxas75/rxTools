@@ -13,22 +13,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+ifeq ($(strip $(RXTOOLSMK)),)
+$(error "Please run `make` at the top directory")
 endif
-
-ifeq ($(V),1)
-Q =
-else
-Q = @echo '	$1	$2';
-endif
-
-include $(DEVKITARM)/base_rules
 
 BUILD := build
 DEPS_DIR := $(BUILD)/.deps
 SOURCE := source
-INCLUDES := $(SOURCE) $(SOURCE)/lib $(SOURCE)/features
+
+all: $(BUILD)/code.bin
+
+include $(RXTOOLSMK)
 
 LD := $(CC)
 
@@ -57,11 +52,11 @@ CCOBJS := $(addprefix $(BUILD)/,main.o features/CTRDecryptor.o	\
 OBJS	:= $(CCOBJS) $(addprefix $(BUILD)/, start.o lib/fatfs/sdmc.o font_ascii.o)
 DEPS	:= $(subst $(BUILD)/,$(DEPS_DIR)/,$(CCOBJS))
 
-NEED_DIRS := $(BUILD)/rxtools.elf $(BUILD)/font.bin $(OBJS) $(DEPS)
+$(call DEPDIR,$(BUILD)/rxtools.elf $(BUILD)/font.bin $(OBJS) $(DEPS))
 
 MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 
-.PHONY: $(BUILD)/code.bin clean
+.PHONY: $(BUILD)/code.bin all clean
 
 $(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
 	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(BUILD) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload

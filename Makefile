@@ -21,6 +21,7 @@ SET_CODE_PATH := CODE_PATH=$(SYS_PATH)/$(CODE_FILE)
 SET_DATNAME := DATNAME=$(SYS_PATH)/$(CODE_FILE)
 
 export INCDIR := -I$(CURDIR)/include
+export RXTOOLSMK := $(CURDIR)/common.mk
 
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo

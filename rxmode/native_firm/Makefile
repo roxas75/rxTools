@@ -13,17 +13,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
-
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+ifeq ($(strip $(RXTOOLSMK)),)
+$(error "Please run `make` at the top directory")
 endif
 
-ifndef BUILD
-$(error "Please set BUILD")
-endif
+include $(RXTOOLSMK)
 
 include $(DEVKITARM)/base_rules
 
@@ -56,39 +50,35 @@ OBJS	+= $(BUILD)/payload/arm9/thread/handlers.o	\
 	$(BUILD)/p9_keyx_spoof.o
 endif
 
-$(foreach f,$(BUILD)/$(TARGET).elf $(OBJS),$(eval $f : | $(dir $f)D))
+$(call DEPDIR,$(BUILD)/$(TARGET).elf $(OBJS))
 
 .PHONY: clean all
 
 all: $(BUILD)/$(TARGET).elf
 
-%/D:
-	mkdir -p $(dir $@)
-
 %.elf: %_unstrip.elf
-	$(OBJCOPY) -S -R .ARM.attributes -R .comment $< $@
+	$(call Q,OBJCOPY,$@)$(OBJCOPY) -S -R .ARM.attributes -R .comment $< $@
 
 %_unstrip.elf: %_ram.elf
-	$(LD) -i -T$(LDSCRIPT_ROM) $< -o $@
+	$(call Q,LINK,$@)$(LD) -i -T$(LDSCRIPT_ROM) $< -o $@
 
 $(BUILD)/$(TARGET)_ram.elf: $(OBJS)
-	$(LD) --use-blx -T$(LDSCRIPT_RAM) $^ -o $@
+	$(call Q,LINK,$@)$(LD) --use-blx -T$(LDSCRIPT_RAM) $^ -o $@
 
 $(BUILD)/p9_reboothax_body_prefix.o: $(BUILD)/p9_reboothax_body.o
-	$(OBJCOPY) --prefix-alloc-sections .patch.p9.reboot.body $< $@
+	$(call Q,OBJCOPY,$@)$(OBJCOPY) --prefix-alloc-sections .patch.p9.reboot.body $< $@
 
 $(BUILD)/payload/arm11/%.o: $(SOURCE)/payload/arm11/%.S
-	$(CC) -mcpu=mpcore $(CFLAGS) $< -c -o $@
+	$(call Q,CPPAS,$@)$(CC) -mcpu=mpcore $(CFLAGS) $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.c
-	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
+	$(call Q,CC,$@)$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.S
-	$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
+	$(call Q,CPPAS,$@)$(CC) -mcpu=arm946e-s $(CFLAGS) $< -c -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s
-	$(AS) $< -o $@
+	$(call Q,AS,$@)$(AS) $< -o $@
 #---------------------------------------------------------------------------------
 clean:
-	@echo clean ...
-	@rm -fr $(BUILD)
+	$(call Q,RM,)rm -fr $(BUILD)

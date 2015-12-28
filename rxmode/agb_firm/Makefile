@@ -13,17 +13,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
-
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+ifeq ($(strip $(RXTOOLSMK)),)
+$(error "Please run `make` at the top directory")
 endif
 
-ifndef BUILD
-$(error "Please set BUILD")
-endif
+include $(RXTOOLSMK)
 
 include $(DEVKITARM)/base_rules
 
@@ -37,21 +31,20 @@ OBJCOPY	:= arm-none-eabi-objcopy
 all: $(BUILD)/$(TARGET).elf
 
 $(BUILD):
-	@[ -d $@ ] || mkdir -p $@
+	$(call Q,MKDIR,$@)mkdir -p $@
 
 %.elf: %_unstrip.elf
-	$(OBJCOPY) -S -R .text -R .data -R .bss -R .ARM.attributes $< $@
+	$(call Q,OBJCOPY,$@)$(OBJCOPY) -S -R .text -R .data -R .bss -R .ARM.attributes $< $@
 
 %_unstrip.elf: %_linked.elf
-	$(LD) -i -Tscript.ld $< -o $@
+	$(call Q,LINK,$@)$(LD) -i -Tscript.ld $< -o $@
 
 $(BUILD)/$(TARGET)_linked.elf: $(BUILD)/p9_signatures_spoof.o
-	$(LD) -Tscript.ld $^ -o $@
+	$(call Q,LINK,$@)$(LD) -Tscript.ld $^ -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
-	$(AS) $< -o $@
+	$(call Q,AS,$@)$(AS) $< -o $@
 
 #---------------------------------------------------------------------------------
 clean:
-	@echo clean ...
-	@rm -fr $(BUILD)
+	$(call Q,RM,)rm -fr $(BUILD)
