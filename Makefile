@@ -30,13 +30,37 @@ BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
 			APP_AUTHOR="Patois, et al." \
 			ICON=$(abspath icon.png)
 
-.PHONY: rxtools/build/$(CODE_FILE) clean distclean release all-target-patches	\
-	all-target-mset	all-target-brahma all-target-theme release-licenses	\
-	release-code release-doc release-patches release-themes-langs	\
-	release-tools release-mset release-brahma
+.PHONY: rxtools/build/$(CODE_FILE) reboot/reboot.bin rxmode/build/%	\
+	all-target-patches all-target-theme all-target-mset all-target-brahma	\
+	clean distclean release	\
+	release-licenses release-code release-doc release-lang release-patches	\
+	release-theme release-tools release-mset release-brahma
 
 rxtools/build/$(CODE_FILE):
 	@$(MAKE) $(SET_SYS_PATH) -C rxtools $(susbst rxtools/,,$@)
+
+rxtools/build/font.bin:
+	@$(MAKE) $(SET_SYS_PATH) -C rxtools $(susbst rxtools/,,$@)
+
+all-target-brahma:
+	$(MAKE) $(BRAHFLAGS) -C CakeBrah
+
+all-target-mset:
+	@$(MAKE) $(ROPFLAGS) -C CakesROP
+	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
+
+all-target-patches:	reboot/reboot.bin \
+	$(addprefix rxmode/build/,ktr/native_firm.elf \
+		ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
+
+all-target-theme:
+	@$(MAKE) -C theme
+
+reboot/reboot.bin:
+	$(MAKE) -C $(dir $@)
+
+rxmode/build/%:
+	$(MAKE) -C rxmode $(subst rxmode/,,$@)
 
 distclean:
 	@rm -rf release
@@ -50,15 +74,14 @@ clean: distclean
 	@$(MAKE) $(ROPFLAGS) -C CakesROP clean
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider clean	
 
-release: all-target-patches all-target-mset all-target-brahma all-target-theme \
-	release-licenses release-code release-doc release-patches release-themes-langs \
-	release-tools release-mset release-brahma
+release: release-licenses release-code release-doc release-lang release-patches	\
+	release-theme release-tools release-mset release-brahma
 
 release-licenses:
 	@mkdir -p release
 	@cp LICENSE release
 	@cp LICENSE_JSMN release
-	@cp CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
+	@cp rxtools/CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
 	@cp CakesROP/LICENSE release/LICENSE_CakesROP
 
 release-code: rxtools/build/$(CODE_FILE)
@@ -66,7 +89,15 @@ release-code: rxtools/build/$(CODE_FILE)
 	@cp $< release/$(SYS_PATH)
 
 release-doc:
-	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release/
+	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release
+
+release-font: rxtools/build/font.bin
+	@mkdir release/$(SYS_PATH)
+	@cp $< release/$(SYS_PATH)
+
+release-lang:
+	mkdir -p release/rxTools/lang
+	@cp lang/* release/rxTools/lang
 
 release-patches: reboot/reboot.bin all-target-patches
 	@mkdir -p release/$(SYS_PATH) release/$(PATCHES_PATH)
@@ -76,12 +107,10 @@ release-patches: reboot/reboot.bin all-target-patches
 	@cp rxmode/build/ctr/agb_firm.elf release/$(PATCHES_PATH)/0004013800000202.elf
 	@cp rxmode/build/ktr/native_firm.elf release/$(PATCHES_PATH)/0004013820000002.elf
 
-release-themes-langs:
-	@mkdir -p release/rxTools/theme/0 release/rxTools/lang release/$(SYS_PATH)
+release-theme: all-target-theme
+	mkdir -p release/rxTools/theme/0
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
-	@cp rxtools/build/font.bin release/$(SYS_PATH)
-	@cp lang/* release/rxTools/lang/
 
 release-tools:
 	@mkdir -p release/Tools/fbi_injection release/Tools/scripts
@@ -89,33 +118,12 @@ release-tools:
 	@cp -r tools/fbi_injection/* release/Tools/fbi_injection/
 	@cp tools/scripts/* release/Tools/scripts/
 
-release-mset:
+release-mset: all-target-mset
 	@mkdir -p release/mset
 	@cp CakesROP/CakesROP.nds release/mset/rxinstaller.nds
 	@cp CakesROP/CakesROPSpider/code.bin release/mset/rxinstaller.bin
 
-release-brahma:
+release-brahma: all-target-brahma
 	@mkdir -p release/ninjhax/rxTools
 	@cp CakeBrah/code.bin.3dsx release/ninjhax/rxTools/rxtools.3dsx
 	@cp CakeBrah/code.bin.smdh release/ninjhax/rxTools/rxtools.smdh
-
-all-target-patches:	reboot/reboot.bin \
-	$(addprefix rxmode/build/,ktr/native_firm.elf \
-		ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
-
-all-target-mset:
-	@$(MAKE) $(ROPFLAGS) -C CakesROP
-	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
-
-all-target-brahma:
-	$(MAKE) $(BRAHFLAGS) -C CakeBrah
-
-reboot/reboot.bin:
-	$(MAKE) -C $(dir $@)
-
-rxmode/build/%:
-	$(MAKE) -C rxmode $(subst rxmode/,,$@)
-
-.PHONY: all-target-theme
-all-target-theme:
-	@$(MAKE) -C theme
