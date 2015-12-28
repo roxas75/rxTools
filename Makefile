@@ -79,7 +79,7 @@ release-themes-langs:
 	@mkdir -p release/rxTools/theme/0 release/rxTools/lang release/$(SYS_PATH)
 	@mv theme/*.bin release/rxTools/theme/0
 	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
-	@cp rxtools/font.bin release/$(SYS_PATH)
+	@cp rxtools/build/font.bin release/$(SYS_PATH)
 	@cp lang/* release/rxTools/lang/
 
 release-tools:
@@ -102,9 +102,9 @@ all-target-patches:	reboot/reboot.bin \
 	$(addprefix rxmode/build/,ktr/native_firm.elf \
 		ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
 
-$(CODE_FILE): rxtools/rxtools.bin
+$(CODE_FILE): rxtools/build/rxtools.bin
 	@$(MAKE) $(CAKEFLAGS) -C CakeHax bigpayload
-	@dd if=rxtools/rxtools.bin of=$@ seek=160 conv=notrunc
+	@dd if=rxtools/build/rxtools.bin of=$@ seek=160 conv=notrunc
 
 all-target-mset:
 	@$(MAKE) $(ROPFLAGS) -C CakesROP
@@ -119,8 +119,8 @@ reboot/reboot.bin:
 rxmode/build/%:
 	$(MAKE) -C rxmode $(subst rxmode/,,$@)
 
-rxtools/rxtools.bin:
-	@$(MAKE) $(SET_SYS_PATH) -C $(dir $@) all
+rxtools/build/rxtools.bin:
+	@$(MAKE) $(SET_SYS_PATH) -C rxtools $(susbst rxtools/,,$@)
 	@dd if=$@ of=$@ bs=896K count=1 conv=sync,notrunc
 
 .PHONY: all-target-theme

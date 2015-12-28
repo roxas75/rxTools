@@ -21,14 +21,14 @@
 #include <stdio.h>
 #include <wchar.h>
 #include "fs.h"
-#include "font.h"
 #include "draw.h"
 #include "lang.h"
 
 uint32_t current_y = 1;
 
 uint8_t *tmpscreen = (uint8_t*)0x26000000;
-const uint16_t (* fontaddr)[FONT_WIDTH] = (void *)font;
+extern const uint16_t _binary_font_ascii_bin_start[][FONT_WIDTH];
+const uint16_t (* fontaddr)[FONT_WIDTH] = _binary_font_ascii_bin_start;
 
 void ClearScreen(uint8_t *screen, uint32_t color)
 {
