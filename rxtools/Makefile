@@ -59,7 +59,7 @@ MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 .PHONY: $(BUILD)/code.bin all clean
 
 $(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
-	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(BUILD) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload
+	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=$(BUILD) dir_build=$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload
 	$(call Q,DD,$@)dd if=$< bs=896K conv=sync,notrunc | dd of=$@ seek=160 conv=notrunc
 
 %.bin: %.elf

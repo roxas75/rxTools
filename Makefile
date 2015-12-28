@@ -31,27 +31,28 @@ BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
 			APP_AUTHOR="Patois, et al." \
 			ICON=$(abspath icon.png)
 
-.PHONY: rxtools/build/$(CODE_FILE) reboot/reboot.bin rxmode/build/%	\
-	all-target-patches all-target-theme all-target-mset all-target-brahma	\
-	clean distclean release	\
+RELEASE := build/release
+
+.PHONY: all-target-patches all-target-theme all-target-mset all-target-brahma	\
+	reboot/reboot.bin clean distclean release	\
 	release-licenses release-code release-doc release-lang release-patches	\
 	release-theme release-tools release-mset release-brahma
 
-rxtools/build/$(CODE_FILE):
-	@$(MAKE) $(SET_SYS_PATH) -C rxtools $(susbst rxtools/,,$@)
+build/rxtools/%: rxtools
+	@$(MAKE) $(SET_SYS_PATH) BUILD=$(CURDIR)/build/rxtools -C $< $(CURDIR)/$@
 
-rxtools/build/font.bin:
-	@$(MAKE) $(SET_SYS_PATH) -C rxtools $(susbst rxtools/,,$@)
+build/rxmode/%: rxmode
+	@$(MAKE) BUILD=$(CURDIR)/build/rxmode -C $< $(CURDIR)/$@
 
 all-target-brahma:
-	$(MAKE) $(BRAHFLAGS) -C CakeBrah
+	@$(MAKE) $(BRAHFLAGS) -C CakeBrah
 
 all-target-mset:
 	@$(MAKE) $(ROPFLAGS) -C CakesROP
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
 
 all-target-patches:	reboot/reboot.bin \
-	$(addprefix rxmode/build/,ktr/native_firm.elf \
+	$(addprefix build/rxmode/,ktr/native_firm.elf \
 		ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
 
 all-target-theme:
@@ -60,15 +61,11 @@ all-target-theme:
 reboot/reboot.bin:
 	$(MAKE) -C $(dir $@)
 
-rxmode/build/%:
-	$(MAKE) -C rxmode $(subst rxmode/,,$@)
-
 distclean:
-	@rm -rf release
+	@rm -rf $(RELEASE)
 
-clean: distclean
-	@$(MAKE) $(SET_SYS_PATH) -C rxtools clean
-	@$(MAKE) -C rxmode clean
+clean:
+	@rm -rf build
 	@$(MAKE) -C reboot clean
 	@$(MAKE) $(BRAHFLAGS) -C CakeBrah clean
 	@$(MAKE) -C theme clean
@@ -79,52 +76,52 @@ release: release-licenses release-code release-doc release-lang release-patches	
 	release-theme release-tools release-mset release-brahma
 
 release-licenses:
-	@mkdir -p release
-	@cp LICENSE release
-	@cp LICENSE_JSMN release
-	@cp rxtools/CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
-	@cp CakesROP/LICENSE release/LICENSE_CakesROP
+	@mkdir -p $(RELEASE)
+	@cp LICENSE $(RELEASE)
+	@cp LICENSE_JSMN $(RELEASE)
+	@cp rxtools/CakeHax/LICENSE.txt $(RELEASE)/LICENSE_CakeHax.txt
+	@cp CakesROP/LICENSE $(RELEASE)/LICENSE_CakesROP
 
-release-code: rxtools/build/$(CODE_FILE)
-	@mkdir -p release/$(SYS_PATH)
-	@cp $< release/$(SYS_PATH)
+release-code: build/rxtools/$(CODE_FILE)
+	@mkdir -p $(RELEASE)/$(SYS_PATH)
+	@cp $< $(RELEASE)/$(SYS_PATH)
 
 release-doc:
-	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf release
+	@cp doc/QuickStartGuide.pdf doc/rxTools.pdf $(RELEASE)
 
-release-font: rxtools/build/font.bin
-	@mkdir release/$(SYS_PATH)
-	@cp $< release/$(SYS_PATH)
+release-font: build/rxtools/font.bin
+	@mkdir $(RELEASE)/$(SYS_PATH)
+	@cp $< $(RELEASE)/$(SYS_PATH)
 
 release-lang:
-	mkdir -p release/rxTools/lang
-	@cp lang/* release/rxTools/lang
+	mkdir -p $(RELEASE)/rxTools/lang
+	@cp lang/* $(RELEASE)/rxTools/lang
 
 release-patches: reboot/reboot.bin all-target-patches
-	@mkdir -p release/$(SYS_PATH) release/$(PATCHES_PATH)
-	@cp reboot/reboot.bin release/$(SYS_PATH)
-	@cp rxmode/build/ctr/native_firm.elf release/$(PATCHES_PATH)/0004013800000002.elf
-	@cp rxmode/build/ctr/twl_firm.elf release/$(PATCHES_PATH)/0004013800000102.elf
-	@cp rxmode/build/ctr/agb_firm.elf release/$(PATCHES_PATH)/0004013800000202.elf
-	@cp rxmode/build/ktr/native_firm.elf release/$(PATCHES_PATH)/0004013820000002.elf
+	@mkdir -p $(RELEASE)/$(SYS_PATH) $(RELEASE)/$(PATCHES_PATH)
+	@cp reboot/reboot.bin $(RELEASE)/$(SYS_PATH)
+	@cp build/rxmode/ctr/native_firm.elf $(RELEASE)/$(PATCHES_PATH)/0004013800000002.elf
+	@cp build/rxmode/ctr/twl_firm.elf $(RELEASE)/$(PATCHES_PATH)/0004013800000102.elf
+	@cp build/rxmode/ctr/agb_firm.elf $(RELEASE)/$(PATCHES_PATH)/0004013800000202.elf
+	@cp build/rxmode/ktr/native_firm.elf $(RELEASE)/$(PATCHES_PATH)/0004013820000002.elf
 
 release-theme: all-target-theme
-	mkdir -p release/rxTools/theme/0
-	@mv theme/*.bin release/rxTools/theme/0
-	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
+	mkdir -p $(RELEASE)/rxTools/theme/0
+	@mv theme/*.bin $(RELEASE)/rxTools/theme/0
+	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat $(RELEASE)/rxTools/theme/0
 
 release-tools:
-	@mkdir -p release/Tools/fbi_injection release/Tools/scripts
-	@cp tools/cdn_firm.py tools/readme.txt release/Tools
-	@cp -r tools/fbi_injection/* release/Tools/fbi_injection/
-	@cp tools/scripts/* release/Tools/scripts/
+	@mkdir -p $(RELEASE)/Tools/fbi_injection $(RELEASE)/Tools/scripts
+	@cp tools/cdn_firm.py tools/readme.txt $(RELEASE)/Tools
+	@cp -r tools/fbi_injection/* $(RELEASE)/Tools/fbi_injection/
+	@cp tools/scripts/* $(RELEASE)/Tools/scripts/
 
 release-mset: all-target-mset
-	@mkdir -p release/mset
-	@cp CakesROP/CakesROP.nds release/mset/rxinstaller.nds
-	@cp CakesROP/CakesROPSpider/code.bin release/mset/rxinstaller.bin
+	@mkdir -p $(RELEASE)/mset
+	@cp CakesROP/CakesROP.nds $(RELEASE)/mset/rxinstaller.nds
+	@cp CakesROP/CakesROPSpider/code.bin $(RELEASE)/mset/rxinstaller.bin
 
 release-brahma: all-target-brahma
-	@mkdir -p release/ninjhax/rxTools
-	@cp CakeBrah/code.bin.3dsx release/ninjhax/rxTools/rxtools.3dsx
-	@cp CakeBrah/code.bin.smdh release/ninjhax/rxTools/rxtools.smdh
+	@mkdir -p $(RELEASE)/ninjhax/rxTools
+	@cp CakeBrah/code.bin.3dsx $(RELEASE)/ninjhax/rxTools/rxtools.3dsx
+	@cp CakeBrah/code.bin.smdh $(RELEASE)/ninjhax/rxTools/rxtools.smdh
