@@ -36,26 +36,26 @@ uint32_t selectedFile;
 void SelectFile();
 
 static struct {
-    char* name;
-    char* path;
+    TCHAR* name;
+    TCHAR* path;
 } CoolFiles[] = {
-    {"movable.sed", "private"},
-    {"SecureInfo_A", "rw/sys"},
-    {"LocalFriendCodeSeed_B", "rw/sys"},
-    {"rand_seed", "rw/sys"},
-    {"ticket.db", "dbs"},
-    {"import.db", "dbs"},
+    {_T("movable.sed"), _T("private")},
+    {_T("SecureInfo_A"), _T("rw/sys")},
+    {_T("LocalFriendCodeSeed_B"), _T("rw/sys")},
+    {_T("rand_seed"), _T("rw/sys")},
+    {_T("ticket.db"), _T("dbs")},
+    {_T("import.db"), _T("dbs")},
 };
 
 static Menu CoolFilesMenu = {
 	L"Choose the file to work on",
 	.Option = (MenuEntry[nCoolFiles]){
-		{ L" movable.sed", &SelectFile, "fil0.bin" },
-		{ L" SecureInfo_A", &SelectFile, "fil1.bin" },
-		{ L" LocalFriendCodeSeed_B", &SelectFile, "fil2.bin" },
-		{ L" rand_seed", &SelectFile, "fil3.bin" },
-		{ L" ticket.db", &SelectFile, "fil4.bin" },
-		{ L" import.db", &SelectFile, "fil5.bin" },
+		{ L" movable.sed", &SelectFile, L"fil0.bin" },
+		{ L" SecureInfo_A", &SelectFile, L"fil1.bin" },
+		{ L" LocalFriendCodeSeed_B", &SelectFile, L"fil2.bin" },
+		{ L" rand_seed", &SelectFile, L"fil3.bin" },
+		{ L" ticket.db", &SelectFile, L"fil4.bin" },
+		{ L" import.db", &SelectFile, L"fil5.bin" },
 	},
 	nCoolFiles,
 	0,
@@ -90,12 +90,12 @@ void dumpCoolFiles()
 	ConsoleInit();
 	ConsoleSetTitle(strings[STR_DUMP], strings[STR_FILES]);
 
-	char dest[256], tmpstr[sizeof(dest)];
-	wchar_t wsrc[sizeof(tmpstr)];
-	sprintf(dest, "rxTools/%s", CoolFiles[selectedFile].name);
-	sprintf(tmpstr, "%d:%s/%s", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name);
-	mbstowcs(wsrc, tmpstr, sizeof(tmpstr));
-	print(strings[STR_DUMPING], wsrc, dest);
+	wchar_t dest[_MAX_LFN], tmpstr[_MAX_LFN];
+	swprintf(dest, _MAX_LFN, L"rxTools/%ls", CoolFiles[selectedFile].name);
+	swprintf(tmpstr, _MAX_LFN, L"%d:%ls/%ls",
+		nandtype, CoolFiles[selectedFile].path,
+		CoolFiles[selectedFile].name);
+	print(strings[STR_DUMPING], tmpstr, dest);
 	ConsoleShow();
 
 	unsigned int res = FSFileCopy(dest, tmpstr);
@@ -103,18 +103,24 @@ void dumpCoolFiles()
 		if (selectedFile == 1)
 		{
 			/* Fix for SecureInfo_B */
-			sprintf(dest, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
-			sprintf(tmpstr, "%d:%s/%.11s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'B');
+			swprintf(dest, _MAX_LFN, L"rxTools/%.11ls%c",
+				CoolFiles[selectedFile].name, 'B');
+
+			swprintf(tmpstr, _MAX_LFN, L"%d:%ls/%.11ls%c",
+				nandtype, CoolFiles[selectedFile].path,
+				CoolFiles[selectedFile].name, 'B');
 		}
 		else if (selectedFile == 2)
 		{
 			/* Fix for LocalFriendCodeSeed_A */
-			sprintf(dest, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
-			sprintf(tmpstr, "%d:%s/%.20s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'A');
+			swprintf(dest, _MAX_LFN, L"rxTools/%.20ls%c",
+				CoolFiles[selectedFile].name, 'A');
+			swprintf(tmpstr, _MAX_LFN, L"%d:%ls/%.20ls%c",
+				nandtype, CoolFiles[selectedFile].path,
+				CoolFiles[selectedFile].name, 'A');
 		}
-		mbstowcs(wsrc, tmpstr, sizeof(tmpstr));
 		print(strings[STR_FAILED]);
-		print(strings[STR_DUMPING], wsrc, dest);
+		print(strings[STR_DUMPING], tmpstr, dest);
 		ConsoleShow();
 		res = FSFileCopy(dest, tmpstr);
 	}
@@ -171,12 +177,16 @@ void restoreCoolFiles()
 	ConsoleInit();
 	ConsoleSetTitle(strings[STR_INJECT], strings[STR_FILES]);
 
-	char dest[256], tmpstr[sizeof(dest)];
-	wchar_t wdest[sizeof(dest)];
-	sprintf(tmpstr, "rxTools/%s", CoolFiles[selectedFile].name);
-	sprintf(dest, "%d:%s/%s", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name);
-	mbstowcs(wdest, dest, sizeof(dest));
-	print(strings[STR_INJECTING], tmpstr, wdest);
+	wchar_t dest[_MAX_LFN], tmpstr[_MAX_LFN];
+
+	swprintf(tmpstr, _MAX_LFN, L"rxTools/%ls",
+		CoolFiles[selectedFile].name);
+
+	swprintf(dest, _MAX_LFN, L"%d:%ls/%ls",
+		nandtype, CoolFiles[selectedFile].path,
+		CoolFiles[selectedFile].name);
+
+	print(strings[STR_INJECTING], tmpstr, dest);
 	ConsoleShow();
 
 	unsigned int res = FSFileCopy(dest, tmpstr);
@@ -184,17 +194,24 @@ void restoreCoolFiles()
 		if (selectedFile == 1)
 		{
 			/* Fix for SecureInfo_B */
-			sprintf(tmpstr, "rxTools/%.11s%c", CoolFiles[selectedFile].name, 'B');
-			sprintf(dest, "%d:%s/%.11s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'B');
+			swprintf(tmpstr, _MAX_LFN, L"rxTools/%.11ls%lc",
+				CoolFiles[selectedFile].name, L'B');
+
+			swprintf(dest, _MAX_LFN, L"%d:%ls/%.11ls%lc",
+				nandtype, CoolFiles[selectedFile].path,
+				CoolFiles[selectedFile].name, L'B');
 		}
 		else if (selectedFile == 2)
 		{
-			sprintf(tmpstr, "rxTools/%.20s%c", CoolFiles[selectedFile].name, 'A');
-			sprintf(dest, "%d:%s/%.20s%c", nandtype, CoolFiles[selectedFile].path, CoolFiles[selectedFile].name, 'A');
+			swprintf(tmpstr, _MAX_LFN, L"rxTools/%.20s%lc",
+				CoolFiles[selectedFile].name, L'A');
+
+			swprintf(dest, _MAX_LFN, L"%d:%ls/%.20ls%lc",
+				nandtype, CoolFiles[selectedFile].path,
+				CoolFiles[selectedFile].name, L'A');
 		}
-		mbstowcs(wdest, dest, sizeof(dest));
 		print(strings[STR_FAILED]);
-		print(strings[STR_INJECTING], tmpstr, wdest);
+		print(strings[STR_INJECTING], tmpstr, dest);
 		ConsoleShow();
 		res = FSFileCopy(dest, tmpstr);
 	}

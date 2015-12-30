@@ -19,13 +19,14 @@
 #define DOWNGRADEAPP_H
 
 #include <stdint.h>
+#include <fatfs/ff.h>
 
 typedef struct {
         unsigned int drive;
         uint32_t tidLo;
         uint32_t tidHi;
-        char tmd[64];
-        char content[64];
+        TCHAR tmd[64];
+        TCHAR content[64];
 } AppInfo;
 
 //Utilities

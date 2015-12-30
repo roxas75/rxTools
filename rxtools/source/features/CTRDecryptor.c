@@ -86,7 +86,7 @@ void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. 
 	}
 }
 
-int ProcessCTR(char* path){
+int ProcessCTR(TCHAR* path){
 	PartitionInfo myInfo;
 	File myFile;
 	if(FileOpen(&myFile, path, 0)){
@@ -185,7 +185,7 @@ int ProcessCTR(char* path){
 	}else return 1;
 }
 
-int ExploreFolders(char* folder){
+int ExploreFolders(wchar_t* folder){
 	int nfiles = 0;
 	DIR myDir;
 	FILINFO curInfo;
@@ -197,11 +197,11 @@ int ExploreFolders(char* folder){
 	while(f_opendir(&myDir, folder) != FR_OK);
 	for(int i = 0; myInfo->fname[0] != 0; i++){
 		if( f_readdir(&myDir, myInfo)) break;
-		if(myInfo->fname[0] == '.' || !strcmp(myInfo->fname, "NINTEN~1")) continue;
+		if(myInfo->fname[0] == '.' || !wcscmp(myInfo->fname, L"NINTEN~1")) continue;
 
-		char path[1024];
-		sprintf(path, "%s/%s", folder, myInfo->fname);
-		if(path[strlen(path) - 1] == '/') break;
+		wchar_t path[_MAX_LFN];
+		swprintf(path, _MAX_LFN, L"%ls/%ls", folder, myInfo->fname);
+		if(path[wcslen(path) - 1] == '/') break;
 
 		if(myInfo->fattrib & AM_DIR){
 			nfiles += ExploreFolders(path);
@@ -221,7 +221,7 @@ void CTRDecryptor(){
 	ConsoleSetTitle(strings[STR_DECRYPT], strings[STR_CTR]);
 	ConsoleShow();
 
-	int nfiles = ExploreFolders("");
+	int nfiles = ExploreFolders(L"");
 
 	ConsoleInit();
 	print(strings[STR_DECRYPTED], nfiles, strings[STR_FILES]);

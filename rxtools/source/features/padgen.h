@@ -23,7 +23,7 @@
 typedef struct {
     uint8_t   CTR[16];
     uint32_t  size_mb;
-    char filename[180];
+    TCHAR filename[180];
 } __attribute__((packed)) SdInfoEntry;
 
 typedef struct {
@@ -38,7 +38,7 @@ typedef struct {
     uint32_t  size_mb;
     uint8_t   reserved[8];
     uint32_t  uses7xCrypto;
-    char filename[112];
+    TCHAR filename[112];
 } __attribute__((packed)) NcchInfoEntry;
 
 typedef struct {
@@ -56,7 +56,7 @@ typedef struct {
     uint8_t   CTR[16];
     uint8_t   keyY[16];
     uint32_t  size_mb;
-    char filename[180];
+    TCHAR filename[180];
 } __attribute__((packed, aligned(16))) PadInfo;
 
 uint32_t CreatePad(PadInfo *info, int index);

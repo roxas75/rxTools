@@ -37,17 +37,17 @@ void ScreenShot(){
 		};
 
 	File myFile;
-	char tmp[256];
+	wchar_t tmp[_MAX_LFN];
 	static int top_count = 0;
 	static int bot_count = 0;
 	unsigned int written = 0;
 	char* bmp_cache; char* bmp_ptr;
 	uint8_t (*screen_ptr) [SCREEN_HEIGHT][BYTES_PER_PIXEL];
 
-	f_mkdir ("Screenshot");
+	f_mkdir (L"Screenshot");
 
 	do{
-		sprintf(tmp, "/Screenshot/top_screen_%d.bmp", top_count++);
+		swprintf(tmp, _MAX_LFN, L"/Screenshot/top_screen_%d.bmp", top_count++);
 		if(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) != FR_OK) break;
 		f_close(&myFile);
 	}while(1);
@@ -74,7 +74,7 @@ void ScreenShot(){
 	}
 
 	do{
-		sprintf(tmp, "/Screenshot/bot_screen_%d.bmp", bot_count++);
+		swprintf(tmp, _MAX_LFN, L"/Screenshot/bot_screen_%d.bmp", bot_count++);
 		if(f_open(&myFile, tmp, FA_READ | FA_OPEN_EXISTING) != FR_OK) break;
 		f_close(&myFile);
 	}while(1);

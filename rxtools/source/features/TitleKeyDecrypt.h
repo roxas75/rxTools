@@ -19,6 +19,7 @@
 #define TITLE_KEY_DECRYPT_H
 
 #include <stdint.h>
+#include <fatfs/ff.h>
 
 typedef struct {
 	uint8_t issuer[64];
@@ -48,6 +49,6 @@ typedef struct {
 void DecryptTitleKeys();
 void DecryptTitleKeyFile(void);
 int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive);
-int getTitleKeyWithCetk(uint8_t dst[16], const char *path);
+int getTitleKeyWithCetk(uint8_t dst[16], const TCHAR *path);
 
 #endif

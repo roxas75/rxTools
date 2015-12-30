@@ -42,7 +42,7 @@ void MenuInit(Menu* menu){
 }
 
 void MenuShow(){
-	char str[100];
+	wchar_t str[_MAX_LFN];
 
 	//OLD TEXT MENU:
 	/*int x = 0, y = 0;
@@ -58,7 +58,8 @@ void MenuShow(){
 	}*/
 
 	//NEW GUI:
-	sprintf(str, "/rxTools/Theme/%u/%s", cfgs[CFG_THEME].val.i, MyMenu->Option[MyMenu->Current].gfx_splash);
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/%ls",
+		cfgs[CFG_THEME].val.i, MyMenu->Option[MyMenu->Current].gfx_splash);
 	DrawBottomSplash(str);
 }
 

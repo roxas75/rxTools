@@ -39,8 +39,8 @@
 #include "configuration.h"
 #include "lang.h"
 
-const char firmPathFmt[] = FIRM_PATH_FMT;
-const char firmPatchPathFmt[] = FIRM_PATCH_PATH_FMT;
+const wchar_t firmPathFmt[] = _T("") FIRM_PATH_FMT;
+const wchar_t firmPatchPathFmt[] = _T("") FIRM_PATCH_PATH_FMT;
 
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
@@ -53,7 +53,7 @@ static FRESULT loadExecReboot()
 	FRESULT r;
 	UINT br;
 
-	r = f_open(&fd, SYS_PATH "/reboot.bin", FA_READ);
+	r = f_open(&fd, _T("") SYS_PATH "/reboot.bin", FA_READ);
 	if (r != FR_OK)
 		return r;
 
@@ -65,7 +65,7 @@ static FRESULT loadExecReboot()
 	_softreset();
 }
 
-static int loadFirm(char *path, UINT *fsz)
+static int loadFirm(TCHAR *path, UINT *fsz)
 {
 	FIL fd;
 	FRESULT r;
@@ -153,7 +153,7 @@ uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t
 static void setAgbBios()
 {
 	File agb_firm;
-	char path[64];
+	TCHAR path[64];
 	unsigned char svc = (cfgs[CFG_AGB].val.i ? 0x26 : 0x01);
 
 	getFirmPath(path, TID_CTR_AGB_FIRM);
@@ -166,7 +166,7 @@ static void setAgbBios()
 
 int rxMode(int emu)
 {
-	char path[64];
+	wchar_t path[64];
 	const char *shstrtab;
 	const wchar_t *msg;
 	uint8_t keyx[16];
@@ -191,7 +191,8 @@ int rxMode(int emu)
 
 			WaitForButton(BUTTON_A);
 
-			sprintf(path, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+			swprintf(path, _MAX_LFN, L"/rxTools/Theme/%u/boot.bin",
+				cfgs[CFG_THEME].val.i);
 			DrawBottomSplash(path);
 		}
 	} else
@@ -214,7 +215,7 @@ int rxMode(int emu)
 
 	setAgbBios();
 
-	if (sysver < 7 && f_open(&fd, "slot0x25KeyX.bin", FA_READ) == FR_OK) {
+	if (sysver < 7 && f_open(&fd, _T("slot0x25KeyX.bin"), FA_READ) == FR_OK) {
 		f_read(&fd, keyx, sizeof(keyx), &br);
 		f_close(&fd);
 		keyxArg = keyx;
@@ -274,9 +275,10 @@ patchFail:
 
 void rxModeWithSplash(int emu)
 {
-	char s[32];
+	wchar_t s[_MAX_LFN];
 
-	sprintf(s, "/rxTools/Theme/%u/boot.bin", cfgs[CFG_THEME].val.i);
+	swprintf(s, _MAX_LFN, L"/rxTools/Theme/%u/boot.bin",
+		cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(s);
 	rxMode(emu);
 }
@@ -321,9 +323,9 @@ int PastaMode(){
 }
 
 void FirmLoader(){
-	char firm_path[256];
+	TCHAR firm_path[_MAX_LFN];
 
-	if (!FileExplorerMain(firm_path, sizeof(firm_path)))
+	if (!FileExplorerMain(firm_path, _MAX_LFN))
 	{
 		UINT fsz;
 		if (loadFirm(firm_path, &fsz))

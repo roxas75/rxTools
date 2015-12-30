@@ -73,8 +73,9 @@ void NandDumper(){
 	for(int i=0; i<PROGRESS_WIDTH; i++)
 		wcscat(ProgressBar, strings[STR_PROGRESS]);
 	unsigned int progress = 0;
-	char filename[256];
-	sprintf(filename, "rxTools/nand/%sNAND.bin", isEmuNand ? "EMU" : "");
+	wchar_t filename[_MAX_LFN];
+	swprintf(filename, _MAX_LFN, L"rxTools/nand/%sNAND.bin",
+		isEmuNand ? L"EMU" : L"");
 	if(FileOpen(&myFile, filename, 1)){
 		print(strings[STR_DUMPING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND], filename);
 		ConsoleShow();
@@ -129,28 +130,30 @@ void DumpNandPartitions(){
 	ConsoleInit();
 	ConsoleSetTitle(strings[STR_DUMP], strings[STR_NAND_PARTITIONS]);
 	print(strings[STR_PROCESSING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND]);
-	char* p_name[] = { "twln.bin", "twlp.bin", "agb_save.bin", "firm0.bin", "firm1.bin", "ctrnand.bin" };
+	wchar_t* p_name[] = {
+		L"twln.bin", L"twlp.bin", L"agb_save.bin",
+		L"firm0.bin", L"firm1.bin", L"ctrnand.bin"
+	};
 	wchar_t* p_descr[] = { strings[STR_TWLN], strings[STR_TWLP], strings[STR_AGB_SAVE], strings[STR_FIRM0], strings[STR_FIRM1], strings[STR_CTRNAND] };
 	unsigned int p_size[] = { 0x08FB5200, 0x020B6600, 0x00030000, 0x00400000, 0x00400000, getMpInfo() == MPINFO_KTR ? 0x41D2D200 : 0x2F3E3600 };
 	unsigned int p_addr[] = { TWLN, TWLP, AGB_SAVE, FIRM0, FIRM1, CTRNAND };
 	int sect_row = 0x80;
 
-	char tmp[256];
-	wchar_t wtmp[256];
+	wchar_t tmp[_MAX_LFN];
 	for(int i = 3; i < 6; i++){		//Cutting out twln, twlp and agb_save. Todo: Properly decrypt them
 		File out;
-		sprintf(tmp, "rxTools/nand/%s%s", isEmuNand ? "emu_" : "", p_name[i]);
+		swprintf(tmp, _MAX_LFN, L"rxTools/nand/%ls%ls", isEmuNand ? L"emu_" : L"", p_name[i]);
 		FileOpen(&out, tmp, 1);
 		print(strings[STR_DUMPING], p_descr[i], tmp);
 		ConsoleShow();
 
 		for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
-			swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%08X / %08X", j*0x200, p_size[i]);
+			swprintf(tmp, _MAX_LFN, L"%08X / %08X", j*0x200, p_size[i]);
 			int x, y;
 			ConsoleGetXY(&x, &y);
 			y += FONT_HEIGHT * 3;
 			x += FONT_HWIDTH*2;
-			DrawString(BOT_SCREEN, wtmp, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
+			DrawString(BOT_SCREEN, tmp, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 			if(isEmuNand) emunand_readsectors(j, sect_row, BUF1, p_addr[i]);
 			else nand_readsectors(j, sect_row, BUF1, p_addr[i]);
@@ -165,7 +168,7 @@ void DumpNandPartitions(){
 
 void GenerateNandXorpads(){
 
-	PadInfo myInfo = { .keyslot = getMpInfo() == MPINFO_KTR ? 0x5 : 0x4, .setKeyY = 0, .size_mb = getMpInfo() == MPINFO_KTR ? 1055 : 758, .filename = "rxTools/nand.fat16.xorpad" };
+	PadInfo myInfo = { .keyslot = getMpInfo() == MPINFO_KTR ? 0x5 : 0x4, .setKeyY = 0, .size_mb = getMpInfo() == MPINFO_KTR ? 1055 : 758, .filename = L"rxTools/nand.fat16.xorpad" };
 	GetNANDCTR(myInfo.CTR); add_ctr(myInfo.CTR, 0xB93000);
 
 	ConsoleInit();
@@ -187,11 +190,11 @@ void DumpNANDSystemTitles(){
 	ConsoleInit();
 	ConsoleSetTitle(strings[STR_DUMP], strings[STR_SYSTEM_TITLES]);
 	print(strings[STR_PROCESSING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND]);
-	char* outfolder = "rxTools/titles";
+	wchar_t* outfolder = L"rxTools/titles";
 	print(strings[STR_SYSTEM_TITLES_WARNING]);
 	ConsoleShow();
 	File pfile;
-	char filename[256];
+	wchar_t filename[_MAX_LFN];
 	int nTitle = 0;
 	unsigned int tot_size = 0x179000;
 	f_mkdir (outfolder);
@@ -201,7 +204,9 @@ void DumpNANDSystemTitles(){
 		if(*((char*)BUF1 + 0x100) == 'N' && *((char*)BUF1 + 0x101) == 'C' && *((char*)BUF1 + 0x102) == 'C' && *((char*)BUF1 + 0x103) == 'H'){
 			ctr_ncchheader ncch;
 			memcpy((void*)&ncch, BUF1, 0x200);
-			sprintf(filename, "%s/%s%08X%08X.app", outfolder, isEmuNand ? "emu_" : "", *((unsigned int*)(BUF1 + 0x10C)), *((unsigned int*)(BUF1 + 0x108)));
+			swprintf(filename, _MAX_LFN, L"%ls/%ls%08X%08X.app",
+				outfolder, isEmuNand ? L"emu_" : L"",
+				*((unsigned int*)(BUF1 + 0x10C)), *((unsigned int*)(BUF1 + 0x108)));
 			ConsoleInit();
 			print(strings[STR_DUMPING], L"", filename);
 			ConsoleShow();
@@ -249,17 +254,17 @@ void RebuildNand(){
 		return;
 	}
 	print(strings[STR_PROCESSING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND]);
-	char tmp[256];
-	wchar_t wtmp[256];
+	const size_t wtmpLen = 256;
+	wchar_t wtmp[wtmpLen];
 	for(int i = 3; i < 6; i++){		//Cutting out twln, twlp and agb_save. Todo: Properly decrypt them
 		File out;
-		sprintf(tmp, "rxTools/nand/%s%s", isEmuNand ? "emu_" : "", p_name[i]);
-		if(FileOpen(&out, tmp, 0)){
-			print(strings[STR_INJECTING], tmp, p_descr[i]);
+		swprintf(wtmp, wtmpLen, L"rxTools/nand/%ls%ls", isEmuNand ? L"emu_" : L"", p_name[i]);
+		if(FileOpen(&out, wtmp, 0)){
+			print(strings[STR_INJECTING], wtmp, p_descr[i]);
 			ConsoleShow();
 
 			for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
-				swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%08X / %08X", j*0x200, p_size[i]);
+				swprintf(wtmp, wtmpLen, L"%08X / %08X", j*0x200, p_size[i]);
 				int x, y;
 				ConsoleGetXY(&x, &y);
 				y += FONT_HEIGHT * 3;

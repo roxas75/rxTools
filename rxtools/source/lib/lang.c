@@ -26,7 +26,7 @@
 
 int fontIsLoaded = 0;
 wchar_t strings[STR_NUM][STR_MAX_LEN] = {};
-const char langPath[] = "/rxTools/lang";
+const wchar_t langPath[] = L"/rxTools/lang";
 
 static const char *keys[STR_NUM] = {
 	[STR_LANG_NAME] = "LANG_NAME",
@@ -260,14 +260,16 @@ int loadStrings()
 	const size_t tokenNum = 1 + STR_NUM * 2;
 	jsmntok_t t[tokenNum];
 	char buf[8192];
+	wchar_t path[_MAX_LFN];
 	jsmn_parser p;
 	unsigned int i, j, k;
 	const char *s;
 	int l, r, len;
 	File fd;
 
-	sprintf(buf, "%s/%s", langPath, fontIsLoaded ? cfgs[CFG_LANG].val.s : "en.json");
-	if (!FileOpen(&fd, buf, 0))
+	swprintf(path, _MAX_LFN, L"%ls/%s",
+		langPath, fontIsLoaded ? cfgs[CFG_LANG].val.s : "en.json");
+	if (!FileOpen(&fd, path, 0))
 		return 1;
 
 	len = FileGetSize(&fd);
