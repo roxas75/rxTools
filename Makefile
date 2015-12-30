@@ -115,5 +115,5 @@ release-mset: all-target-mset
 
 release-brahma: all-target-brahma
 	@mkdir -p $(RELEASE)/ninjhax/rxTools
-	@cp CakeBrah/code.bin.3dsx $(RELEASE)/ninjhax/rxTools/rxtools.3dsx
-	@cp CakeBrah/code.bin.smdh $(RELEASE)/ninjhax/rxTools/rxtools.smdh
+	@cp CakeBrah/code.bin.3dsx $(RELEASE)/ninjhax/rxTools/rxTools.3dsx
+	@cp CakeBrah/code.bin.smdh $(RELEASE)/ninjhax/rxTools/rxTools.smdh
