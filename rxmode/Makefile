@@ -15,8 +15,8 @@
 
 .PHONY: all clean
 
-all: $(addprefix $(BUILD),ktr/native_firm.elf	\
-	ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
+all: $(addprefix $(BUILD),/ktr/native_firm.elf	\
+	/ctr/native_firm.elf /ctr/agb_firm.elf /ctr/twl_firm.elf)
 
 $(BUILD)/ktr/native_firm.elf:
 	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ktr PLATFORM_KTR=1 -C native_firm $@
