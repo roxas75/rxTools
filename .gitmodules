@@ -14,7 +14,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 [submodule "CakeHax"]
-	path = CakeHax
+	path = rxtools/CakeHax
 	url = https://github.com/mid-kid/CakeHax
 [submodule "CakesROP"]
 	path = CakesROP

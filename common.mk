@@ -13,22 +13,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-.PHONY: all clean
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+endif
 
-all: $(addprefix $(BUILD),ktr/native_firm.elf	\
-	ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
+include $(DEVKITARM)/base_rules
 
-$(BUILD)/ktr/native_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ktr PLATFORM_KTR=1 -C native_firm $@
+ifeq ($(V),1)
+Q =
+else
+Q = @echo '	$1	$2';
+endif
 
-$(BUILD)/ctr/native_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ctr -C native_firm $@
+DEPDIR = $(foreach f,$1,$(eval $f : | $(dir $f)D))
 
-$(BUILD)/ctr/agb_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ctr -C agb_firm $@
-
-$(BUILD)/ctr/twl_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ctr -C twl_firm $@
-
-clean:
-	rm -Rf build
+%/D:
+	$(call Q,MKDIR,$(dir $@))mkdir -p $(dir $@)

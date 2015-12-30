@@ -13,153 +13,91 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#---------------------------------------------------------------------------------
-.SUFFIXES:
-#---------------------------------------------------------------------------------
-
-ifeq ($(strip $(DEVKITARM)),)
-$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+ifeq ($(strip $(RXTOOLSMK)),)
+$(error "Please run `make` at the top directory")
 endif
 
-include $(DEVKITARM)/ds_rules
+BUILD := build
+DEPS_DIR := $(BUILD)/.deps
+SOURCE := source
 
-#---------------------------------------------------------------------------------
-# TARGET is the name of the output
-# BUILD is the directory where object files & intermediate files will be placed
-# SOURCES is a list of directories containing source code
-# DATA is a list of directories containing data files
-# INCLUDES is a list of directories containing header files
-# SPECS is the directory containing the important build and link files
-#---------------------------------------------------------------------------------
-export TARGET		:=	$(shell basename $(CURDIR))
-BUILD		:=	build
-SOURCES		:=	source/features source source/lib source/lib/fatfs source/lib/polarssl
-DATA		:=
-INCLUDES	:=	include source source/lib source/features
+all: $(BUILD)/code.bin
 
-FILES       := data/titlekey.bin data/reboot.bin data/patch.bin data/SplashScreen.bin
-#---------------------------------------------------------------------------------
-# Setup some defines
-#---------------------------------------------------------------------------------
+include $(RXTOOLSMK)
 
-#---------------------------------------------------------------------------------
-# options for code generation
-#---------------------------------------------------------------------------------
-ARCH	:=	-mthumb -mthumb-interwork
+LD := $(CC)
 
-CFLAGS	:=	-g -Wall -Wno-multichar -O2 -mtune=arm946e-s -fomit-frame-pointer -ffast-math	\
-		-std=c99 $(ARCH)
+INCDIR += -Isource -Isource/features -Isource/lib
+CPPDEFS	:= -DSYS_PATH=\"$(SYS_PATH)\" -DPATCHES_PATH=\"$(PATCHES_PATH)\"
+CPPFLAGS := $(INCDIR) $(CPPDEFS)
 
-CFLAGS	+=	$(INCLUDE) -DARM9 -DSYS_PATH=\"$(SYS_PATH)\" -DPATCHES_PATH=\"$(PATCHES_PATH)\"
+CFORCE := -fomit-frame-pointer -ffast-math
+CMACHINE := -mtune=arm946e-s -mthumb -mthumb-interwork
+CWARNING := -Wall -Wno-multichar
+CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS)
 
-CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
+LDFLAGS := -nostartfiles -g $(CMACHINE) -Wl,-Tstub.ld
 
-ASFLAGS	:=	$(CFLAGS)
-LDFLAGS	=	-nostartfiles -g $(ARCH) -Wl,-T../stub.ld,-Map,$(TARGET).map
+CCOBJS := $(addprefix $(BUILD)/,main.o features/CTRDecryptor.o	\
+	features/NandDumper.o features/TitleKeyDecrypt.o	\
+	features/configuration.o features/downgradeapp.o	\
+	features/fileexplorer.o features/firm.o	\
+	features/nandtools.o features/padgen.o features/screenshot.o	\
+	lib/fatfs/diskio.o lib/fatfs/ff.o	\
+	lib/polarssl/padlock.o lib/polarssl/sha2.o lib/polarssl/aes.o	\
+	lib/console.o lib/crypto.o lib/draw.o lib/fs.o lib/hid.o lib/lang.o	\
+	lib/log.o lib/i2c.o lib/jsmn.o lib/menu.o lib/nand.o lib/ncch.o	\
+	features/reboot.o)
 
-LIBS	:=
+OBJS	:= $(CCOBJS) $(addprefix $(BUILD)/, start.o lib/fatfs/sdmc.o font_ascii.o)
+DEPS	:= $(subst $(BUILD)/,$(DEPS_DIR)/,$(CCOBJS))
 
-#---------------------------------------------------------------------------------
-# list of directories containing libraries, this must be the top level containing
-# include and lib
-#---------------------------------------------------------------------------------
-LIBDIRS	:=
+$(call DEPDIR,$(BUILD)/rxtools.elf $(BUILD)/font.bin $(OBJS) $(DEPS))
 
-#---------------------------------------------------------------------------------
-# no real need to edit anything past this point unless you need to add additional
-# rules for different file extensions
-#---------------------------------------------------------------------------------
-ifneq ($(BUILD),$(notdir $(CURDIR)))
-#---------------------------------------------------------------------------------
+MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 
-export OUTPUT	:=	$(CURDIR)/$(TARGET)
+.PHONY: $(BUILD)/code.bin all clean
 
-export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
-			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+# Move to $(BUILD) before execute make because it crashes when it received
+# the absolute path on Windows.
+$(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
+	$(call Q,MAKE,CakeHax)cd $(BUILD);$(MAKE) dir_out=. dir_build=./CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C $(abspath CakeHax) bigpayload
+	$(call Q,DD,$@)dd if=$< bs=896K conv=sync,notrunc | dd of=$@ seek=160 conv=notrunc
 
-export DEPSDIR	:=	$(CURDIR)/$(BUILD)
-
-CFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
-CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
-SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
-BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
-
-#---------------------------------------------------------------------------------
-# use CXX for linking C++ projects, CC for standard C
-#---------------------------------------------------------------------------------
-ifeq ($(strip $(CPPFILES)),)
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CC)
-#---------------------------------------------------------------------------------
-else
-#---------------------------------------------------------------------------------
-	export LD	:=	$(CXX)
-#---------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------
-
-export OFILES	:= $(addsuffix .o,$(BINFILES)) \
-			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
-
-export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
-			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			$(INCDIR) -I$(CURDIR)/$(BUILD)
-
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
-
-.PHONY: $(BUILD) clean all
-
-#---------------------------------------------------------------------------------
-all: $(BUILD)
-
-source/lib/font.h: font.bin
-	@dd if=$< of=font.tmp count=8
-	@raw2c font.tmp
-	@mv font.c $@
-	@rm font.h font.tmp
-
-font.bin: unifont-8.0.01.bmp
-	@convert -crop 4096x4096+32+64 -transpose $< - | convert -crop 16x4096 -append - - | convert -roll +8 -negate -depth 1 - gray:$@;
-
-$(BUILD): source/lib/font.h
-	@[ -d $@ ] || mkdir -p $@
-	@make --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
-
-#---------------------------------------------------------------------------------
-clean:
-	@echo clean ...
-	@rm -fr $(BUILD) $(OUTPUT).elf $(OUTPUT).bin source/lib/font.h font.bin
-
-
-#---------------------------------------------------------------------------------
-else
-
-DEPENDS	:=	$(OFILES:.o=.d)
-
-#---------------------------------------------------------------------------------
-# main targets
-#---------------------------------------------------------------------------------
-$(OUTPUT).bin	:	$(OUTPUT).elf
-$(OUTPUT).elf	:	$(OFILES)
-
-
-#---------------------------------------------------------------------------------
 %.bin: %.elf
-	@$(OBJCOPY) -O binary $< $@
-	@echo built ... $(notdir $@)
+	$(call Q,OBJCOPY,$@)$(OBJCOPY) -O binary $< $@
 
-#---------------------------------------------------------------------------------
-# you need a rule like this for each extension you use as binary data
-#---------------------------------------------------------------------------------
-%.bin.o	:	%.bin
-#---------------------------------------------------------------------------------
-	@echo $(notdir $<)
-	@$(bin2o)
-#---------------------------------------------------------------------------------
+$(BUILD)/rxtools.elf: $(OBJS)
+	$(call Q,LINK,$@)$(LINK.o) $^ $(OUTPUT_OPTION)
 
--include $(DEPENDS)
+$(BUILD)/%.o: $(SOURCE)/%.c
+	$(call Q,CC,$@)$(COMPILE.c) $< $(OUTPUT_OPTION)
+	$(MAKEDEP)
 
+$(BUILD)/%.o: $(SOURCE)/%.S
+	$(call Q,CPPAS,$@)$(COMPILE.c) $< $(OUTPUT_OPTION)
+	$(MAKEDEP)
 
-#---------------------------------------------------------------------------------------
-endif
-#---------------------------------------------------------------------------------------
+$(BUILD)/%.o: $(SOURCE)/%.s
+	$(call Q,AS,$@)$(AS) $< $(OUTPUT_OPTION)
+
+$(BUILD)/%.o: $(BUILD)/%.bin
+	$(call Q,OBJCOPY,$@)cd $(BUILD); $(OBJCOPY) -Ibinary -Oelf32-littlearm -Barmv5te $(subst $(BUILD)/,,$< $@)
+
+%_ascii.bin: %.bin
+	$(call Q,DD,$@)dd if=$< of=$@ count=8
+
+# Move to the parent directory of the target because convert fails to parse
+# the argument with the absolute path on Windows.
+$(BUILD)/font.bin: unifont-8.0.01.bmp
+	$(call Q,CONVERT,$@)cd $(dir $@);convert -crop 4096x4096+32+64 -transpose $(abspath $<) - | convert -crop 16x4096 -append - - | convert -roll +8 -negate -depth 1 - gray:$(notdir $@);
+
+$(foreach f,$(NEED_DIRS),$(eval $f : | $(dir $f)D))
+
+%/D:
+	$(call Q,MKDIR,$(dir $@))mkdir -p $(dir $@)
+
+clean:
+	$(call Q,RM,)rm -fr $(BUILD)
+
+-include $(DEPS)
