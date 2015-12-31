@@ -190,7 +190,7 @@ uint32_t CreatePad(PadInfo *info, int index)
 		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
 			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
-			aes_decrypt((void*)zero_buf, (void*)BUFFER_ADDR+j, ctr, 1, AES_CTR_MODE);
+			aes_decrypt((void*)zero_buf, (void*)BUFFER_ADDR+j, 1, AES_CTR_MODE);
 			add_ctr(ctr, 1);
 		}
 

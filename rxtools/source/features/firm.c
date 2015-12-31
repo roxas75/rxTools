@@ -104,10 +104,10 @@ static int decryptFirmKtrArm9(void *p)
 	use_aeskey(0x11);
 	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
 		info.keyslot = 0x15;
-		aes_decrypt(hdr->keyX, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+		aes_decrypt(key, hdr->keyX, 1, AES_ECB_DECRYPT_MODE);
 	} else {
 		info.keyslot = 0x16;
-		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+		aes_decrypt(key, hdr->ext.s.keyX_0x16, 1, AES_ECB_DECRYPT_MODE);
 	}
 
 	setup_aeskeyX(info.keyslot, key);
