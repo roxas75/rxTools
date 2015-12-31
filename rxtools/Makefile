@@ -58,10 +58,8 @@ MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 
 .PHONY: $(BUILD)/code.bin all clean
 
-# Move to $(BUILD) before execute make because it crashes when it received
-# the absolute path on Windows.
 $(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
-	$(call Q,MAKE,CakeHax)cd $(BUILD);$(MAKE) dir_out=. dir_build=./CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C $(abspath CakeHax) bigpayload
+	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(dir $@) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload
 	$(call Q,DD,$@)dd if=$< bs=896K conv=sync,notrunc | dd of=$@ seek=160 conv=notrunc
 
 %.bin: %.elf
@@ -87,10 +85,8 @@ $(BUILD)/%.o: $(BUILD)/%.bin
 %_ascii.bin: %.bin
 	$(call Q,DD,$@)dd if=$< of=$@ count=8
 
-# Move to the parent directory of the target because convert fails to parse
-# the argument with the absolute path on Windows.
 $(BUILD)/font.bin: unifont-8.0.01.bmp
-	$(call Q,CONVERT,$@)cd $(dir $@);convert -crop 4096x4096+32+64 -transpose $(abspath $<) - | convert -crop 16x4096 -append - - | convert -roll +8 -negate -depth 1 - gray:$(notdir $@);
+	$(call Q,CONVERT,$@)convert -crop 4096x4096+32+64 -transpose $< - | convert -crop 16x4096 -append - - | convert -roll +8 -negate -depth 1 - gray:$@;
 
 $(foreach f,$(NEED_DIRS),$(eval $f : | $(dir $f)D))
 
