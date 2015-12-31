@@ -21,7 +21,7 @@
 #include <features/configuration.h>
 #include <lib/lang.h>
 #include <features/fileexplorer.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 #include <lib/hid.h>
 #include <lib/fs.h>
 

@@ -25,12 +25,12 @@
 #include <lib/mpcore.h>
 #include <lib/hid.h>
 #include <lib/lang.h>
-#include <lib/console.h>
+#include <lib/ui/console.h>
 #include <lib/polarssl/aes.h>
 #include <lib/fatfs/ff.h>
 #include <lib/fs.h>
 #include <lib/ncch.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 #include <lib/menu.h>
 #include <features/fileexplorer.h>
 #include <features/CTRDecryptor.h>

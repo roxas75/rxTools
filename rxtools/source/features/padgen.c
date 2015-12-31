@@ -19,11 +19,11 @@
 #include <string.h>
 
 #include <lib/fs.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 #include <lib/lang.h>
 #include <features/padgen.h>
 #include <lib/crypto.h>
-#include <lib/console.h>
+#include <lib/ui/console.h>
 #include <lib/hid.h>
 
 void PadGen(){

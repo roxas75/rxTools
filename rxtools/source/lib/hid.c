@@ -16,7 +16,7 @@
  */
 
 #include <stdbool.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 #include <lib/hid.h>
 #include <lib/i2c.h>
 #include <features/screenshot.h>

@@ -18,8 +18,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <features/TitleKeyDecrypt.h>
-#include <lib/console.h>
-#include <lib/draw.h>
+#include <lib/ui/console.h>
+#include <lib/ui/draw.h>
 #include <lib/lang.h>
 #include <lib/hid.h>
 #include <lib/fs.h>

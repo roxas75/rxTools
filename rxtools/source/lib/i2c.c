@@ -19,7 +19,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <lib/i2c.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 
 //-----------------------------------------------------------------------------
 

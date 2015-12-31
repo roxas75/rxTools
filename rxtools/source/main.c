@@ -23,8 +23,8 @@
 #include "MainMenu.h"
 #include <lib/crypto.h>
 #include <lib/fs.h>
-#include <lib/console.h>
-#include <lib/draw.h>
+#include <lib/ui/console.h>
+#include <lib/ui/draw.h>
 #include <lib/hid.h>
 #include <features/screenshot.h>
 #include <features/firm.h>

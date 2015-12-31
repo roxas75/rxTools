@@ -21,7 +21,7 @@
 #include <features/configuration.h>
 #include <lib/lang.h>
 #include <lib/menu.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 #include <lib/hid.h>
 
 Menu* MyMenu;
