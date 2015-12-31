@@ -32,24 +32,26 @@ CPPDEFS	:= -DSYS_PATH=\"$(SYS_PATH)\" -DPATCHES_PATH=\"$(PATCHES_PATH)\"
 CPPFLAGS := $(INCDIR) $(CPPDEFS)
 
 CFORCE := -fomit-frame-pointer -ffast-math
-CMACHINE := -mtune=arm946e-s -mthumb -mthumb-interwork
+CMACHINE := -mtune=arm946e-s
 CWARNING := -Wall -Wno-multichar
 CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS)
 
-LDFLAGS := -nostartfiles -g $(CMACHINE) -Wl,-Tstub.ld
+# Use Thumb libraries because sbrk of ARM newlib in devkitPro doesn't work.
+LDFLAGS := -nostartfiles -g $(CMACHINE) -mthumb -mthumb-interwork -Wl,-Tstub.ld
 
 CCOBJS := $(addprefix $(BUILD)/,main.o features/CTRDecryptor.o	\
 	features/NandDumper.o features/TitleKeyDecrypt.o	\
 	features/configuration.o features/downgradeapp.o	\
 	features/fileexplorer.o features/firm.o	\
 	features/nandtools.o features/padgen.o features/screenshot.o	\
-	lib/fatfs/diskio.o lib/fatfs/ff.o	\
+	lib/fatfs/diskio.o lib/fatfs/ff.o lib/fatfs/option/unicode.o	\
+	lib/tmio/tmio.o	\
 	lib/polarssl/padlock.o lib/polarssl/sha2.o lib/polarssl/aes.o	\
 	lib/console.o lib/crypto.o lib/draw.o lib/fs.o lib/hid.o lib/lang.o	\
 	lib/log.o lib/i2c.o lib/jsmn.o lib/menu.o lib/nand.o lib/ncch.o	\
 	features/reboot.o)
 
-OBJS	:= $(CCOBJS) $(addprefix $(BUILD)/, start.o lib/fatfs/sdmc.o font_ascii.o)
+OBJS	:= $(CCOBJS) $(addprefix $(BUILD)/, start.o font_ascii.o lib/delay.o)
 DEPS	:= $(subst $(BUILD)/,$(DEPS_DIR)/,$(CCOBJS))
 
 $(call DEPDIR,$(BUILD)/rxtools.elf $(BUILD)/font.bin $(OBJS) $(DEPS))

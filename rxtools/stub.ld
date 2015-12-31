@@ -29,6 +29,7 @@ SECTIONS
 	.text :
 	{
 		KEEP(*(.text.vect))
+		KEEP(*(.text.start))
 		*(.text*)
 	} >ram
 
