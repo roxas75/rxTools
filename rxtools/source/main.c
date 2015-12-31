@@ -132,13 +132,16 @@ static void warn(const wchar_t *format, ...)
 	ConsoleShow();
 }
 
-_Noreturn void _start()
+__attribute__((section(".text.start"), noreturn)) void _start()
 {
 	static const char fontPath[] = SYS_PATH "/" FONT_NAME;
 	void *fontBuf;
 	UINT btr, br;
 	int r;
 	FIL f;
+
+	// Enable TMIO IRQ
+	*(volatile uint32_t *)0x10001000 = 0x00010000;
 
 	preloadStringsA();
 
