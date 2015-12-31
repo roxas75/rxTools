@@ -30,13 +30,6 @@ void setup_aeskeyX(uint8_t keyslot, void* keyx)
     *REG_AESKEYXFIFO = _keyx[3];
 }
 
-void decrypt(void* key, void* iv, void* inbuf, void* outbuf, size_t size)
-{
-    setup_aeskey(0x2C, AES_BIG_INPUT|AES_NORMAL_INPUT, key);
-    use_aeskey(0x2C);
-    aes_decrypt(inbuf, outbuf, iv, size / AES_BLOCK_SIZE, AES_CTR_MODE);
-}
-
 void setup_aeskey(uint32_t keyno, int value, void* key)
 {
     volatile uint32_t* aes_regs[] =
