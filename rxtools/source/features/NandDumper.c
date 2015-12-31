@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include <wchar.h>
-#include <lib/tmio.h>
+#include <lib/media/tmio.h>
 #include <features/NandDumper.h>
 #include <lib/console.h>
 #include <lib/draw.h>

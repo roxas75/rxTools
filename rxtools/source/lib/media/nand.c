@@ -18,8 +18,8 @@
 #include <lib/mpcore.h>
 #include <features/CTRDecryptor.h>
 #include <lib/crypto.h>
-#include <lib/tmio.h>
-#include <lib/nand.h>
+#include <lib/media/tmio.h>
+#include <lib/media/nand.h>
 
 uint8_t NANDCTR[16];
 int sysver;
