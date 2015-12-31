@@ -56,7 +56,6 @@
 void add_ctr(void* ctr, uint32_t carry);
 
 void setup_aeskeyX(uint8_t keyslot, void* keyx);
-void decrypt(void* key, void* iv, void* inbuf, void* outbuf, size_t size);
 void setup_aeskey(uint32_t keyno, int value, void* key);
 void use_aeskey(uint32_t keyno);
 void set_ctr(int mode, void* iv);
