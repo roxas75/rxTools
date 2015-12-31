@@ -29,11 +29,11 @@
  *  programming_guide.pdf
  */
 
-#include "polarssl/config.h"
+#include <lib/polarssl/config.h>
 
 #if defined(POLARSSL_PADLOCK_C)
 
-#include "polarssl/padlock.h"
+#include <lib/polarssl/padlock.h>
 
 #if defined(POLARSSL_HAVE_X86)
 

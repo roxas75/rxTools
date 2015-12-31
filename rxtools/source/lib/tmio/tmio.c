@@ -32,7 +32,7 @@
 #include <dirent.h>
 #include <errno.h>
 
-#include "tmio.h"
+#include <lib/tmio.h>
 #include "tmio_hardware.h"
 
 #define DATA32_SUPPORT

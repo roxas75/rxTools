@@ -27,7 +27,7 @@ include $(RXTOOLSMK)
 
 LD := $(CC)
 
-INCDIR += -Isource -Isource/features -Isource/lib
+INCDIR += -Isource/include
 CPPDEFS	:= -DSYS_PATH=\"$(SYS_PATH)\" -DPATCHES_PATH=\"$(PATCHES_PATH)\"
 CPPFLAGS := $(INCDIR) $(CPPDEFS)
 

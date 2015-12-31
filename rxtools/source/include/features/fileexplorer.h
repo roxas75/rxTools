@@ -19,7 +19,7 @@
 #define FILEEXPLORER_H
 
 #include <wchar.h>
-#include "console.h"
+#include <lib/console.h>
 
 void FileExplorerShow();
 void FileExplorerNextSelection();

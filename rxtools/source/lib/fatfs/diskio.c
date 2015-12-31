@@ -8,8 +8,8 @@
 /*-----------------------------------------------------------------------*/
 
 #include "diskio.h"     /* FatFs lower layer API */
-#include <tmio/tmio.h>
-#include "fs.h"
+#include <lib/tmio.h>
+#include <lib/fs.h>
 /* Definitions of physical drive number for each media */
 #define ATA     0
 #define MMC     1

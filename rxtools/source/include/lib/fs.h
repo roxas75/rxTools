@@ -15,40 +15,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MENU_H
-#define MENU_H
+#pragma once
 
 #include <stdbool.h>
-#include <wchar.h>
-#include "console.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <lib/fatfs/ff.h>
+#include <lib/nand.h>
+#define File FIL
 
-typedef struct{
-	wchar_t Str[CONSOLE_MAX_LINE_LENGTH+1];
-	void(* Func)();
-	char* gfx_splash;
-}MenuEntry;
-
-typedef struct{
-	wchar_t Name[CONSOLE_MAX_LINE_LENGTH+1];
-	MenuEntry* Option;
-	int nEntryes;
-	int Current;    //The current selected option
-	bool Showed;    //Useful, to not refresh everything everytime
-} Menu;
-
-void MenuInit(Menu* menu);
-void MenuShow();
-void MenuNextSelection();
-void MenuPrevSelection();
-void MenuSelect();
-void MenuClose();
-void MenuRefresh();
-
-extern bool bootGUI;
-extern unsigned char Theme;
-extern bool agb_bios;
-extern bool theme_3d;
-extern unsigned char language;
-extern Menu* MyMenu;
-
-#endif
+////////////////////////////////////////////////////////////////Basic FileSystem Operations
+bool FSInit(void);
+void FSDeInit(void);
+bool FileOpen(File *Handle, const char *path, bool truncate);
+size_t FileRead(File *Handle, void *buf, size_t size, size_t foffset);
+size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);
+size_t FileGetSize(File *Handle);
+void FileClose(File *Handle);
+////////////////////////////////////////////////////////////////Advanced FileSystem Operations
+uint32_t FSFileCopy(char *target, char *source);

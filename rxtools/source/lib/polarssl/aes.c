@@ -29,13 +29,13 @@
  *  http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
  */
 
-#include "polarssl/config.h"
+#include <lib/polarssl/config.h>
 
 #if defined(POLARSSL_AES_C)
 
-#include "polarssl/aes.h"
+#include <lib/polarssl/aes.h>
 #if defined(POLARSSL_PADLOCK_C)
-#include "polarssl/padlock.h"
+#include <lib/polarssl/padlock.h>
 #endif
 
 #if !defined(POLARSSL_AES_ALT)

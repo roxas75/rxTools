@@ -22,10 +22,10 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "configuration.h"
-#include "console.h"
-#include "draw.h"
-#include "menu.h"
+#include <features/configuration.h>
+#include <lib/console.h>
+#include <lib/draw.h>
+#include <lib/menu.h>
 
 wchar_t console[CONSOLE_MAX_LINES][CONSOLE_MAX_LINE_LENGTH + 1];
 wchar_t consoletitle[CONSOLE_MAX_TITLE_LENGTH+1] = L"";

@@ -19,7 +19,7 @@
 #define LANG_H
 
 #include <wchar.h>
-#include "configuration.h"
+#include <features/configuration.h>
 
 #define STR_MAX_LEN 128
 

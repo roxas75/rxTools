@@ -15,22 +15,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#pragma once
+#ifndef NAND_DUMPER_H
+#define NAND_DUMPER_H
+#include <lib/menu.h>
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include "fatfs/ff.h"
-#include "nand.h"
-#define File FIL
+enum nand_type{
+	UNK_NAND = -1,
+	SYS_NAND = 1,
+	EMU_NAND = 2
+};
 
-////////////////////////////////////////////////////////////////Basic FileSystem Operations
-bool FSInit(void);
-void FSDeInit(void);
-bool FileOpen(File *Handle, const char *path, bool truncate);
-size_t FileRead(File *Handle, void *buf, size_t size, size_t foffset);
-size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);
-size_t FileGetSize(File *Handle);
-void FileClose(File *Handle);
-////////////////////////////////////////////////////////////////Advanced FileSystem Operations
-uint32_t FSFileCopy(char *target, char *source);
+int NandSwitch();
+void NandDumper();
+void DumpNandPartitions();
+void GenerateNandXorpads();
+void DumpNANDSystemTitles();
+void RebuildNand();
+
+#endif

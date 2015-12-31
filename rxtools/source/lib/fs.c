@@ -15,8 +15,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "fs.h"
-#include "fatfs/ff.h"
+#include <lib/fs.h>
+#include <lib/fatfs/ff.h>
 
 ////////////////////////////////////////////////////////////////Basic FileSystem Operations
 static FATFS fs[3];

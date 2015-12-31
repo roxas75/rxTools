@@ -20,24 +20,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <reboot.h>
-#include "TitleKeyDecrypt.h"
-#include "configuration.h"
-#include "lang.h"
-#include "screenshot.h"
-#include "fs.h"
-#include "fatfs/ff.h"
-#include "console.h"
-#include "draw.h"
-#include "hid.h"
-#include "mpcore.h"
-#include "ncch.h"
-#include "crypto.h"
-#include "polarssl/aes.h"
-#include "firm.h"
-#include "downgradeapp.h"
+#include <features/TitleKeyDecrypt.h>
+#include <features/configuration.h>
+#include <lib/lang.h>
+#include <features/screenshot.h>
+#include <lib/fs.h>
+#include <lib/fatfs/ff.h>
+#include <lib/console.h>
+#include <lib/draw.h>
+#include <lib/hid.h>
+#include <lib/mpcore.h>
+#include <lib/ncch.h>
+#include <lib/crypto.h>
+#include <lib/polarssl/aes.h>
+#include <features/firm.h>
+#include <features/downgradeapp.h>
 #include "stdio.h"
-#include "menu.h"
-#include "jsmn.h"
+#include <lib/menu.h>
+#include <lib/jsmn.h>
 
 #define DATA_PATH	"rxtools/data"
 #define KEYFILENAME	"slot0x25KeyX.bin"

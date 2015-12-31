@@ -19,10 +19,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
-#include "fatfs/ff.h"
-#include "fs.h"
-#include "jsmn.h"
-#include "lang.h"
+#include <lib/fatfs/ff.h>
+#include <lib/fs.h>
+#include <lib/jsmn.h>
+#include <lib/lang.h>
 
 int fontIsLoaded = 0;
 wchar_t strings[STR_NUM][STR_MAX_LEN] = {};
