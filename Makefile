@@ -46,10 +46,10 @@ all-target-mset:
 	@$(MAKE) $(SET_DATNAME) -C CakesROP/CakesROPSpider
 
 all-target-patches: rxmode
-	@$(MAKE) BUILD=$(CURDIR)/build/rxmode -C $<
+	@$(MAKE) BUILD=../build/rxmode -C $<
 
 all-target-rxtools: rxtools
-	@$(MAKE) $(SET_SYS_PATH) BUILD=$(CURDIR)/build/rxtools -C $<
+	@$(MAKE) $(SET_SYS_PATH) BUILD=../build/rxtools -C $<
 
 all-target-theme:
 	@$(MAKE) -C theme

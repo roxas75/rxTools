@@ -19,16 +19,16 @@ all: $(addprefix $(BUILD)/,ktr/native_firm.elf	\
 	ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
 
 $(BUILD)/ktr/native_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ktr PLATFORM_KTR=1 -C native_firm $@
+	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ktr PLATFORM_KTR=1 -C native_firm ../$@
 
 $(BUILD)/ctr/native_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ctr -C native_firm $@
+	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ctr -C native_firm ../$@
 
 $(BUILD)/ctr/agb_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ctr -C agb_firm $@
+	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ctr -C agb_firm ../$@
 
 $(BUILD)/ctr/twl_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=$(BUILD)/ctr -C twl_firm $@
+	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ctr -C twl_firm ../$@
 
 clean:
 	rm -Rf build
