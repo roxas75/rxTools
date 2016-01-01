@@ -27,15 +27,15 @@
 
 //---- GLOBAL VARIABLES ----
 int pointer = 0;
-char **files;
+TCHAR **files;
 size_t count;
 int i;
 int beginning = 0;
-char dir[1000] = "/";
+TCHAR dir[1000] = L"/";
 int opened_folder = 0;
 
 
-size_t file_list(const char *path, char ***ls) {
+size_t file_list(const TCHAR *path, TCHAR ***ls) {
 	size_t count = 0;
 	DIR myDir;
 	FILINFO curInfo;
@@ -55,7 +55,7 @@ size_t file_list(const char *path, char ***ls) {
 
 	while (!myInfo->fname[0] == 0)
 	{
-		(*ls)[count++] = strdup(myInfo->fname);
+		(*ls)[count++] = wcsdup(myInfo->fname);
 		f_readdir(&myDir, myInfo);
 	}
 
@@ -98,8 +98,8 @@ void FileExplorerBack(){
 	if (opened_folder != 0)
 	{
 		int u;
-		dir[strlen(dir) - 1] = 'f'; //just a casual letter
-		for (u = strlen(dir); u >= 0; u--)
+		dir[wcslen(dir) - 1] = 'f'; //just a casual letter
+		for (u = wcslen(dir); u >= 0; u--)
 		{
 			if (dir[u] == '/') {
 				if(opened_folder==1) dir[u + 1] = '\0';
@@ -117,25 +117,25 @@ void FileExplorerBack(){
 /* This writes the path to p if it is a file.
 It returns written bytes to p if it succeeded in opening file or directory.
 Otherwise it returns a negative value */
-int FileExplorerSelect(char *p, size_t n){
+int FileExplorerSelect(TCHAR *p, size_t n){
 	//enter file/folder
 	int u;
 	int isafile = 0;
-	for (u = 0; u < strlen(files[pointer]); u++)
+	for (u = 0; u < wcslen(files[pointer]); u++)
 	{
 		if (files[pointer][u] == '.') isafile = 1;
 	}
 	if (isafile){
 		//Open file
-		return snprintf(p, n, "%s%s%s", dir,
-			opened_folder == 0 ? "" : "/", files[pointer]) > n ?
+		return swprintf(p, n, L"%ls%ls%ls", dir,
+			opened_folder == 0 ? L"" : L"/", files[pointer]) > n ?
 			-1 : n;
 	}
 	else
 	{
 		//enter folder
-		if (opened_folder != 0) strcat(dir, "/");
-		strcat(dir, files[pointer]);
+		if (opened_folder != 0) wcscat(dir, L"/");
+		wcscat(dir, files[pointer]);
 		beginning = 0;
 		pointer = 0;
 		opened_folder++;
@@ -148,7 +148,7 @@ int FileExplorerSelect(char *p, size_t n){
 Can be called from where you want and returns the selected file!
 */
 
-int FileExplorerMain(char *p, size_t n){
+int FileExplorerMain(TCHAR *p, size_t n){
 	count = file_list(dir, &files);
 	while (true)
 	{

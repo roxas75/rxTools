@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <wchar.h>
+#include "fatfs/ff.h"
 #include "fs.h"
 #include "draw.h"
 #include "lang.h"
@@ -182,7 +183,7 @@ uint32_t GetPixel(uint8_t *screen, uint32_t x, uint32_t y){
 
 //----------------New Splash Screen Stuff------------------
 
-void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[]) {
+void DrawTopSplash(TCHAR splash_file[], TCHAR splash_fileL[], TCHAR splash_fileR[]) {
 	unsigned int n = 0, bin_size;
 	File Splash, SplashL, SplashR;
 	if (FileOpen(&SplashL, splash_fileL, 0)&&FileOpen(&SplashR, splash_fileR, 0))
@@ -217,11 +218,11 @@ void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[])
 	}
 }
 
-void DrawBottomSplash(char splash_file[]) {
+void DrawBottomSplash(TCHAR splash_file[]) {
 	DrawSplash(BOT_SCREEN, splash_file);
 }
 
-void DrawSplash(uint8_t *screen, char splash_file[]) {
+void DrawSplash(uint8_t *screen, TCHAR splash_file[]) {
 	unsigned int n = 0, bin_size;
 	File Splash;
 	if(FileOpen(&Splash, splash_file, 0))

@@ -43,12 +43,12 @@ static void ShutDown(){
 static Menu DecryptMenu = {
 	L"Decryption Options",
 	.Option = (MenuEntry[6]){
-		{ L" Decrypt CTR Titles", &CTRDecryptor, "dec0.bin" },
-		{ L" Decrypt Title Keys", &DecryptTitleKeys, "dec1.bin" },
-		{ L" Decrypt encTitleKeys.bin", &DecryptTitleKeyFile, "dec2.bin" },
-		{ L" Generate Xorpads", &PadGen, "dec3.bin" },
-		{ L" Decrypt partitions", &DumpNandPartitions, "dec4.bin" },
-		{ L" Generate fat16 Xorpad", &GenerateNandXorpads, "dec5.bin" },
+		{ L" Decrypt CTR Titles", &CTRDecryptor, L"dec0.bin" },
+		{ L" Decrypt Title Keys", &DecryptTitleKeys, L"dec1.bin" },
+		{ L" Decrypt encTitleKeys.bin", &DecryptTitleKeyFile, L"dec2.bin" },
+		{ L" Generate Xorpads", &PadGen, L"dec3.bin" },
+		{ L" Decrypt partitions", &DumpNandPartitions, L"dec4.bin" },
+		{ L" Generate fat16 Xorpad", &GenerateNandXorpads, L"dec5.bin" },
 	},
 	6,
 	0,
@@ -58,9 +58,9 @@ static Menu DecryptMenu = {
 static Menu DumpMenu = {
 	L"Dumping Options",
 	.Option = (MenuEntry[3]){
-		{ L" Create NAND dump", &NandDumper, "dmp0.bin" },
-		{ L" Dump System Titles", &DumpNANDSystemTitles, "dmp1.bin" },
-		{ L" Dump NAND Files", &dumpCoolFiles, "dmp2.bin" },
+		{ L" Create NAND dump", &NandDumper, L"dmp0.bin" },
+		{ L" Dump System Titles", &DumpNANDSystemTitles, L"dmp1.bin" },
+		{ L" Dump NAND Files", &dumpCoolFiles, L"dmp2.bin" },
 	},
 	3,
 	0,
@@ -70,8 +70,8 @@ static Menu DumpMenu = {
 static Menu InjectMenu = {
 	L"Injection Options",
 	.Option = (MenuEntry[2]){
-		{ L" Inject EmuNAND partitions", &RebuildNand, "inj0.bin" },
-		{ L" Inject NAND Files", &restoreCoolFiles, "inj1.bin" },
+		{ L" Inject EmuNAND partitions", &RebuildNand, L"inj0.bin" },
+		{ L" Inject NAND Files", &restoreCoolFiles, L"inj1.bin" },
 	},
 	2,
 	0,
@@ -81,11 +81,11 @@ static Menu InjectMenu = {
 static Menu AdvancedMenu = {
 	L"Other Options",
 	.Option = (MenuEntry[5]){
-		{ L" Downgrade MSET on SysNAND", &downgradeMSET, "adv0.bin" },
-		{ L" Install FBI over Health&Safety App", &installFBI, "adv1.bin" },
-		{ L" Restore original Health&Safety App", &restoreHS, "adv2.bin" },
-		{ L" Launch PastaMode", (void(*)())&PastaMode, "adv3.bin" },
-		{ L" Load a firm", &FirmLoader, "adv4.bin" },
+		{ L" Downgrade MSET on SysNAND", &downgradeMSET, L"adv0.bin" },
+		{ L" Install FBI over Health&Safety App", &installFBI, L"adv1.bin" },
+		{ L" Restore original Health&Safety App", &restoreHS, L"adv2.bin" },
+		{ L" Launch PastaMode", (void(*)())&PastaMode, L"adv3.bin" },
+		{ L" Load a firm", &FirmLoader, L"adv4.bin" },
 	},
 	5,
 	0,
@@ -95,13 +95,13 @@ static Menu AdvancedMenu = {
 static Menu SettingsMenu = {
 	L"           SETTINGS",
 	.Option = (MenuEntry[8]){
-		{ L"Force UI boot               ", NULL, "app.bin" },
-		{ L"Selected theme:             ", NULL, "app.bin" },
-		{ L"Random theme:               ", NULL, "app.bin" },
-		{ L"Show AGB_FIRM BIOS:         ", NULL, "app.bin" },
-		{ L"Enable 3D UI:               ", NULL, "app.bin" },
-		{ L"Autoboot into sysNAND:      ", NULL, "app.bin" },
-		{ L"Console language:           ", NULL, "app.bin" },
+		{ L"Force UI boot               ", NULL, L"app.bin" },
+		{ L"Selected theme:             ", NULL, L"app.bin" },
+		{ L"Random theme:               ", NULL, L"app.bin" },
+		{ L"Show AGB_FIRM BIOS:         ", NULL, L"app.bin" },
+		{ L"Enable 3D UI:               ", NULL, L"app.bin" },
+		{ L"Autoboot into sysNAND:      ", NULL, L"app.bin" },
+		{ L"Console language:           ", NULL, L"app.bin" },
 	},
 	8,
 	0,
@@ -168,11 +168,11 @@ void SettingsMenuInit(){
 	MenuInit(&SettingsMenu);
 	DIR d;
 	FILINFO fno;
-	char str[100];
-	char strl[100];
-	char strr[100];
+	wchar_t str[_MAX_LFN];
+	wchar_t strl[_MAX_LFN];
+	wchar_t strr[_MAX_LFN];
 	const unsigned int maxLangNum = 16;
-	char langs[maxLangNum][CFG_STR_MAX_LEN];
+	TCHAR langs[maxLangNum][CFG_STR_MAX_LEN];
 	unsigned char theme_num = 0;
 	unsigned int curLang, langNum;
 
@@ -180,6 +180,8 @@ void SettingsMenuInit(){
 	langNum = 0;
 
 	if (!f_opendir(&d, langPath)) {
+		mbstowcs(str, cfgs[CFG_LANG].val.s, _MAX_LFN);
+
 		while (langNum < maxLangNum) {
 			fno.lfname = langs[langNum];
 			fno.lfsize = CFG_STR_MAX_LEN;
@@ -187,15 +189,10 @@ void SettingsMenuInit(){
 			if (f_readdir(&d, &fno))
 				break;
 
-			if (fno.fname[0] == 0)
+			if (fno.lfname[0] == 0)
 				break;
 
-			if (langs[langNum][0] == 0)
-				strcpy(langs[langNum], fno.fname);
-			else if (!strcmp(langs[langNum], cfgs[CFG_LANG].val.s))
-				curLang = langNum;
-
-			if (!strcmp(fno.fname, cfgs[CFG_LANG].val.s))
+			if (!wcscmp(fno.lfname, str))
 				curLang = langNum;
 
 			langNum++;
@@ -236,7 +233,7 @@ void SettingsMenuInit(){
 				{
 					for (i = theme_num - 1; i > 0; i--)
 					{
-						sprintf(str, "/rxTools/Theme/%u/app.bin", i);
+						swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/app.bin", i);
 						if (FileOpen(&AppBin, str, 0))
 						{
 							FileClose(&AppBin);
@@ -251,7 +248,7 @@ void SettingsMenuInit(){
 				{
 					for (i = theme_num + 1; i <= 9; i++)
 					{
-						sprintf(str, "/rxTools/Theme/%u/app.bin", i);
+						swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/app.bin", i);
 						if (FileOpen(&AppBin, str, 0))
 						{
 							FileClose(&AppBin);
@@ -264,16 +261,16 @@ void SettingsMenuInit(){
 				if (found)
 				{
 					theme_num = i;
-					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+					swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/TOP.bin", theme_num);
 					if (cfgs[CFG_3D].val.i)
 					{
-						sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", theme_num);
-						sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", theme_num);
+						swprintf(strl, _MAX_LFN, L"/rxTools/Theme/%u/TOPL.bin", theme_num);
+						swprintf(strr, _MAX_LFN, L"/rxTools/Theme/%u/TOPR.bin", theme_num);
 						DrawTopSplash(str, strl, strr);
 					}
 					else
 					{
-						sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+						swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/TOP.bin", theme_num);
 						DrawTopSplash(str, str, str);
 					}
 
@@ -286,16 +283,16 @@ void SettingsMenuInit(){
 			else if (MyMenu->Current == 4)
 			{
 				cfgs[CFG_3D].val.i ^= 1;
-				sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+				swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/TOP.bin", theme_num);
 				if(cfgs[CFG_3D].val.i)
 				{
-					sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", theme_num);
-					sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", theme_num);
+					swprintf(strl, _MAX_LFN, L"/rxTools/Theme/%u/TOPL.bin", theme_num);
+					swprintf(strr, _MAX_LFN, L"/rxTools/Theme/%u/TOPR.bin", theme_num);
 					DrawTopSplash(str, strl, strr);
 				}
 				else
 				{
-					sprintf(str, "/rxTools/Theme/%u/TOP.bin", theme_num);
+					swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/TOP.bin", theme_num);
 					DrawTopSplash(str, str, str);
 				}
 			}
@@ -310,7 +307,8 @@ void SettingsMenuInit(){
 				else if (pad_state & BUTTON_RIGHT && curLang + 1 < langNum)
 					curLang++;
 
-				strcpy(cfgs[CFG_LANG].val.s, langs[curLang]);
+				wcstombs(cfgs[CFG_LANG].val.s, langs[curLang],
+					CFG_STR_MAX_LEN);
 				switchStrings();
 			}
 		}
@@ -328,8 +326,11 @@ void SettingsMenuInit(){
 }
 
 void BootMenuInit(){
-	char str[100];
-	sprintf(str, "/rxTools/Theme/%u/boot%c.bin", cfgs[CFG_THEME].val.i, checkEmuNAND() ? '0' : 'S');//SHOW ONLY SYSYNAND IF EMUNAND IS NOT FOUND
+	wchar_t str[_MAX_LFN];
+
+	//SHOW ONLY SYSYNAND IF EMUNAND IS NOT FOUND
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/boot%c.bin",
+		cfgs[CFG_THEME].val.i, checkEmuNAND() ? L'0' : L'S');
 	DrawBottomSplash(str);
 	while (true) {
 		uint32_t pad_state = InputWait();
@@ -347,8 +348,9 @@ void BootMenuInit(){
 }
 
 void CreditsMenuInit(){
-	char str[100];
-	sprintf(str, "/rxTools/Theme/%u/credits.bin", cfgs[CFG_THEME].val.i);
+	wchar_t str[_MAX_LFN];
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/credits.bin",
+		cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(str);
 	WaitForButton(BUTTON_B);
 	OpenAnimation();
@@ -357,13 +359,13 @@ void CreditsMenuInit(){
 static Menu MainMenu = {
 		L"rxTools - Roxas75 [v3.0]",
 		.Option = (MenuEntry[7]){
-			{ L" Launch rxMode", &BootMenuInit, "menu0.bin" },
-			{ L" Decryption Options", &DecryptMenuInit, "menu1.bin" },
-			{ L" Dumping Options", &DumpMenuInit, "menu2.bin" },
-			{ L" Injection Options", &InjectMenuInit, "menu3.bin" },
-			{ L" Advanced Options", &AdvancedMenuInit, "menu4.bin" },
-			{ L" Settings", &SettingsMenuInit, "menu5.bin" },
-			{ L" Credits", &CreditsMenuInit, "menu6.bin" },
+			{ L" Launch rxMode", &BootMenuInit, L"menu0.bin" },
+			{ L" Decryption Options", &DecryptMenuInit, L"menu1.bin" },
+			{ L" Dumping Options", &DumpMenuInit, L"menu2.bin" },
+			{ L" Injection Options", &InjectMenuInit, L"menu3.bin" },
+			{ L" Advanced Options", &AdvancedMenuInit, L"menu4.bin" },
+			{ L" Settings", &SettingsMenuInit, L"menu5.bin" },
+			{ L" Credits", &CreditsMenuInit, L"menu6.bin" },
 		},
 		7,
 		0,

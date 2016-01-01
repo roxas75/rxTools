@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define LOG_FILENAME "rxTools/rx.log"
+#define LOG_FILENAME _T("rxTools/rx.log")
 #define LOGSTR_LENMAX (512)
 loglevel_t loglevel = ll_fatal;
 FIL* logfile = NULL;

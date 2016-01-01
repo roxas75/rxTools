@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <wchar.h>
+#include "fatfs/ff.h"
 
 //Screen Macros
 #define BYTES_PER_PIXEL	3  //Our color buffer accepts 24-bits color.
@@ -67,9 +68,9 @@ void DrawPixel(uint8_t *screen, uint32_t x, uint32_t y, uint32_t color);
 uint32_t GetPixel(uint8_t *screen, uint32_t x, uint32_t y);
 void Debug(const char *format, ...);
 
-void DrawSplash(uint8_t *screen, char splash_file[]);
-void DrawBottomSplash(char splash_file[]);
-void DrawTopSplash(char splash_file[], char splash_fileL[], char splash_fileR[]);
+void DrawSplash(uint8_t *screen, TCHAR splash_file[]);
+void DrawBottomSplash(TCHAR splash_file[]);
+void DrawTopSplash(TCHAR splash_file[], TCHAR splash_fileL[], TCHAR splash_fileR[]);
 void SplashScreen();
 void DrawFadeScreen(uint8_t *screen, uint16_t Width, uint16_t Height, uint32_t f);
 void fadeOut();

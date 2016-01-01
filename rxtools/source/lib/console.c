@@ -88,10 +88,10 @@ int countLines()
 }
 
 void ConsoleShow(){
-	char str[100];
+	wchar_t str[_MAX_LFN];
 
 	void *tmpscreen = (void*)0x27000000;
-	sprintf(str, "/rxTools/Theme/%u/app.bin", cfgs[CFG_THEME].val.i);
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/app.bin", cfgs[CFG_THEME].val.i);
 	DrawSplash(tmpscreen, str);
 	if(!consoleInited) return;
 	int titley = 2*FONT_HEIGHT;

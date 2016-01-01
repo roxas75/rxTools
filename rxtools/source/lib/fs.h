@@ -27,10 +27,10 @@
 ////////////////////////////////////////////////////////////////Basic FileSystem Operations
 bool FSInit(void);
 void FSDeInit(void);
-bool FileOpen(File *Handle, const char *path, bool truncate);
+bool FileOpen(File *Handle, const TCHAR *path, bool truncate);
 size_t FileRead(File *Handle, void *buf, size_t size, size_t foffset);
 size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);
 size_t FileGetSize(File *Handle);
 void FileClose(File *Handle);
 ////////////////////////////////////////////////////////////////Advanced FileSystem Operations
-uint32_t FSFileCopy(char *target, char *source);
+uint32_t FSFileCopy(TCHAR *target, TCHAR *source);

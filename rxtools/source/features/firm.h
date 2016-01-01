@@ -41,8 +41,8 @@ typedef struct {
 	} ext;
 } Arm9Hdr;
 
-extern const char firmPathFmt[];
-extern const char firmPatchPathFmt[];
+extern const wchar_t firmPathFmt[];
+extern const wchar_t firmPatchPathFmt[];
 
 int PastaMode();
 void FirmLoader();
@@ -52,14 +52,14 @@ uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size);
 uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16]);
 FRESULT applyPatch(void *file, const char *patch);
 
-static inline int getFirmPath(char *s, TitleIdLo id)
+static inline int getFirmPath(wchar_t *s, TitleIdLo id)
 {
-	return sprintf(s, firmPathFmt, TID_HI_FIRM, id);
+	return swprintf(s, _MAX_LFN, firmPathFmt, TID_HI_FIRM, id);
 }
 
-static inline int getFirmPatchPath(char *s, TitleIdLo id)
+static inline int getFirmPatchPath(wchar_t *s, TitleIdLo id)
 {
-	return sprintf(s, firmPatchPathFmt, TID_HI_FIRM, id);
+	return swprintf(s, _MAX_LFN, firmPatchPathFmt, TID_HI_FIRM, id);
 }
 
 #endif

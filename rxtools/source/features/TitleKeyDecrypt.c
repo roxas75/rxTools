@@ -94,12 +94,12 @@ void DecryptTitleKeys() {
 	ConsoleSetTitle(strings[STR_DECRYPT], strings[STR_TITLE_KEYS]);
 	File tick;
 	File dump;
-	const char *filename="rxTools/decTitleKeys.bin";
+	const TCHAR *filename=_T("rxTools/decTitleKeys.bin");
 	print(strings[STR_OPENING], "ticket.db");
 	FileOpen(&dump, filename, 1);
 	uint32_t tick_size = 0xD0000;     //Chunk size
 	nKey = 0; int nullbyte = 0;
-	if (FileOpen(&tick, "1:dbs/ticket.db", 0)) {
+	if (FileOpen(&tick, _T("1:dbs/ticket.db"), 0)) {
 		print(strings[STR_DECRYPTING], strings[STR_TITLE_KEYS], filename);
 		ConsoleShow();
 		uint8_t *buf = BUF1;
@@ -147,9 +147,9 @@ void DecryptTitleKeyFile(void) {
 	FIL tick, dump;
 	FRESULT rr = 0;
 	UINT br = 0;
-	const char *filename = "rxTools/encTitleKeys.bin";
-	const char *filename2 = "rxTools/decTitleKeys.bin";
-	const char *filename3 = "rxTools/decTitleKeysA.bin";
+	const TCHAR *filename = _T("rxTools/encTitleKeys.bin");
+	const TCHAR *filename2 = _T("rxTools/decTitleKeys.bin");
+	const TCHAR *filename3 = _T("rxTools/decTitleKeysA.bin");
 	print(strings[STR_OPENING], filename);
 	ConsoleShow();
 	//decTitleKeys.bin that generated from other stuff can be handled streamly.
@@ -291,10 +291,10 @@ int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive) {
 	uint32_t tid_high = ((high >> 24) & 0xff) | ((high << 8) & 0xff0000) | ((high >> 8) & 0xff00) | ((high << 24) & 0xff000000);
 	uint32_t tick_size = 0x200;     //Chunk size
 
-	char path[64] = {0};
+	wchar_t path[_MAX_LFN] = {0};
 	int r;
 
-	sprintf(path, "%d:dbs/ticket.db", drive);
+	swprintf(path, _MAX_LFN, L"%d:dbs/ticket.db", drive);
 
 	if (FileOpen(&tick, path, 0)) {
 		uint8_t *buf = TITLES;
@@ -345,7 +345,7 @@ static FRESULT seekRead(FIL *fp, DWORD ofs, void *buff, UINT btr)
 	(seekRead((fp), 0x140 + offsetof(TicketHdr, member), buff,	\
 		CETK_MEMBER_SIZE(member)))
 
-int getTitleKeyWithCetk(uint8_t dst[16], const char *path)
+int getTitleKeyWithCetk(uint8_t dst[16], const TCHAR *path)
 {
 	uint8_t id[CETK_MEMBER_SIZE(titleId)];
 	uint8_t index;

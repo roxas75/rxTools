@@ -46,7 +46,7 @@ typedef struct {
 
 unsigned char region = 0;
 
-char tmpstr[256];
+wchar_t tmpstr[_MAX_LFN];
 FILINFO curInfo;
 DIR myDir;
 
@@ -66,7 +66,7 @@ void sprint_sha256(wchar_t *str, unsigned char hash[32]) {
 
 int FindApp(AppInfo *info)
 {
-	char *folder = (char*)&tmpstr;
+	wchar_t *folder = tmpstr;
 	memset(folder, 0, 256);
 
 	DIR* curDir = &myDir;
@@ -76,12 +76,12 @@ int FindApp(AppInfo *info)
 	memset((unsigned char*)myInfo, 0, sizeof(FILINFO));
 	myInfo->fname[0] = 'A';
 
-	sprintf(folder, "%d:title/%08" PRIx32 "/%08" PRIx32 "/content",
+	swprintf(folder, _MAX_LFN, L"%d:title/%08" PRIx32 "/%08" PRIx32 "/content",
 		info->drive, info->tidHi, info->tidLo);
 
 	if (f_opendir(curDir, folder) != FR_OK) return 0;
 
-	char path[256];
+	wchar_t path[_MAX_LFN];
 	unsigned short latest_ver = 0, cur_ver = 0;
 	bool is_v0 = false;
 
@@ -90,10 +90,10 @@ int FindApp(AppInfo *info)
 		if (f_readdir(curDir, myInfo)) break;
 		if (myInfo->fname[0] == '.') continue;
 
-		if (strstr(myInfo->fname, ".tmd") || strstr(myInfo->fname, ".TMD"))
+		if (wcsstr(myInfo->fname, L".tmd") || wcsstr(myInfo->fname, L".TMD"))
 		{
 			memset(&path, 0, 256);
-			sprintf(path, "%s/%s", folder, myInfo->fname);
+			swprintf(path, _MAX_LFN, L"%ls/%ls", folder, myInfo->fname);
 
 			File tmp;
 			if (!FileOpen(&tmp, path, 0)) continue;
@@ -137,7 +137,7 @@ int FindApp(AppInfo *info)
 				if (b_read != 0x30) continue;
 
 				memset(&path, 0, 256);
-				sprintf(path, "%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
+				swprintf(path, _MAX_LFN, L"%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
 
 				if (FileOpen(&tmp, path, 0))
 				{
@@ -146,8 +146,8 @@ int FindApp(AppInfo *info)
 					if (cur_ver == 0) is_v0 = true;
 
 					/* Save TMD and content paths */
-					sprintf(info->tmd, "%s/%s", folder, myInfo->fname);
-					sprintf(info->content, "%s/%08x.app", folder, bswap_32(tmd_entry.id));
+					swprintf(info->tmd, _MAX_LFN, L"%ls/%ls", folder, myInfo->fname);
+					swprintf(info->content, _MAX_LFN, L"%ls/%08x.app", folder, bswap_32(tmd_entry.id));
 				}
 			} else {
 				FileClose(&tmp);
@@ -165,14 +165,14 @@ int FindApp(AppInfo *info)
 int CheckRegion(int drive)
 {
 	File secureinfo;
-	const char *filename="SecureInfo_A";
-	sprintf(tmpstr, "%d:rw/sys/%s", drive, filename);
+	const wchar_t *filename=L"SecureInfo_A";
+	swprintf(tmpstr, _MAX_LFN, L"%d:rw/sys/%s", drive, filename);
 	print(strings[STR_OPENING], filename);
 	ConsoleShow();
 	if (!FileOpen(&secureinfo, tmpstr, 0))
 	{
-		filename="SecureInfo_B";
-		sprintf(tmpstr, "%d:rw/sys/SecureInfo_B", drive);
+		filename=L"SecureInfo_B";
+		swprintf(tmpstr, _MAX_LFN, L"%d:rw/sys/SecureInfo_B", drive);
 		print(strings[STR_FAILED]);
 		print(strings[STR_OPENING], filename);
 		ConsoleShow();
@@ -208,11 +208,11 @@ int CheckRegion(int drive)
 int CheckRegionSilent(int drive)
 {
 	File secureinfo;
-	sprintf(tmpstr, "%d:rw/sys/SecureInfo_A", drive);
+	swprintf(tmpstr, _MAX_LFN, L"%d:rw/sys/SecureInfo_A", drive);
 	if (!FileOpen(&secureinfo, tmpstr, 0))
 	{
 		memset(&tmpstr, 0, 256);
-		sprintf(tmpstr, "%d:rw/sys/SecureInfo_B", drive);
+		swprintf(tmpstr, _MAX_LFN, L"%d:rw/sys/SecureInfo_B", drive);
 		if (!FileOpen(&secureinfo, tmpstr, 0))
 		{
 			print(strings[STR_ERROR_OPENING], tmpstr);
@@ -261,7 +261,7 @@ static unsigned int HashGen(unsigned char* file, unsigned int size)
 	return ~crc;
 }
 
-int checkDgFile(char* path, unsigned int hash)
+int checkDgFile(TCHAR* path, unsigned int hash)
 {
 	unsigned char* buf = (unsigned char*)0x21000000;
 	unsigned int rb, fixedsize = 0x00400000;
@@ -282,7 +282,7 @@ int checkDgFile(char* path, unsigned int hash)
 void downgradeMSET()
 {
 	File dg;
-	char *dgpath = "0:msetdg.bin";
+	TCHAR *dgpath = _T("0:msetdg.bin");
 	unsigned int titleid_low[6] = { 0x00020000, 0x00021000, 0x00022000, 0x00026000, 0x00027000, 0x00028000 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned int mset_hash[10] = { 0x96AEC379, 0xED315608, 0x3387F2CD, 0xEDAC05D7, 0xACC1BE62, 0xF0FF9F08, 0x565BCF20, 0xA04654C6, 0x2164C3C0, 0xD40B12F4 }; //JPN, USA, EUR, CHN, KOR, TWN
 	unsigned short mset_ver[10] = { 3074, 5127, 3078, 5128, 3075, 5127, 8, 1026, 2049, 8 };
@@ -459,12 +459,12 @@ void downgradeMSET()
 void manageFBI(bool restore)
 {
 	unsigned int titleid_low[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
-	char *backup_path = "rxTools/h&s_backup";
+	wchar_t *backup_path = L"rxTools/h&s_backup";
 	char *fbi = "FBI";
 
 	File tmp;
-	char path[256] = {0};
-	char path2[256] = {0};
+	wchar_t path[_MAX_LFN] = {0};
+	wchar_t path2[_MAX_LFN] = {0};
 	wchar_t wtmp[67];
 	unsigned char *buf = (unsigned char *)0x21000000;
 
@@ -569,18 +569,18 @@ void manageFBI(bool restore)
 					f_mkdir(backup_path);
 
 					memset(&tmpstr, 0, 256);
-					sprintf(tmpstr, "%s/%ls", backup_path, strings[STR_JAPAN+region]);
+					swprintf(tmpstr, _MAX_LFN, L"%ls/%ls", backup_path, strings[STR_JAPAN+region]);
 					f_mkdir(tmpstr);
 
 					memset(&tmpstr, 0, 256);
-					sprintf(tmpstr, "%s/%ls/v%u", backup_path, strings[STR_JAPAN+region], tmd_ver);
+					swprintf(tmpstr, _MAX_LFN, L"%ls/%ls/v%u", backup_path, strings[STR_JAPAN+region], tmd_ver);
 					f_mkdir(tmpstr);
 
 					/* Backup the H&S TMD */
 					ConsoleFlush();
 					print(strings[STR_BACKING_UP], strings[STR_HEALTH_AND_SAFETY]);
 					ConsoleShow();
-					sprintf(path, "0:%s/%.12s", tmpstr, info.tmd+34);
+					swprintf(path, _MAX_LFN, L"0:%ls/%.12ls", tmpstr, info.tmd+34);
 					if (FileOpen(&tmp, path, 1))
 					{
 						size = FileWrite(&tmp, buf, 0xB34, 0);
@@ -589,7 +589,7 @@ void manageFBI(bool restore)
 						{
 							/* Backup the H&S content file */
 							memset(&path, 0, 256);
-							sprintf(path, "0:%s/%.12s", tmpstr, info.content+34);
+							swprintf(path, _MAX_LFN, L"0:%ls/%.12ls", tmpstr, info.content+34);
 							if (FileOpen(&tmp, path, 1))
 							{
 								size = FileWrite(&tmp, buf + 0x1000, cntsize, 0);
@@ -613,16 +613,21 @@ void manageFBI(bool restore)
 					}
 
 					/* Generate the FBI data paths */
-					sprintf(path, "0:fbi_inject.tmd");
-					sprintf(path2, "0:fbi_inject.app");
+					swprintf(path, _MAX_LFN, L"0:fbi_inject.tmd");
+					swprintf(path2, _MAX_LFN, L"0:fbi_inject.app");
 
 					print(strings[STR_INJECTING], fbi, strings[STR_HEALTH_AND_SAFETY]);
 				} else {
 					/* Generate the H&S backup data paths */
 					memset(&tmpstr, 0, 256);
-					sprintf(tmpstr, "%s/%ls/v%u", backup_path, strings[STR_JAPAN+region], tmd_ver);
-					sprintf(path, "0:%s/%.12s", tmpstr, info.tmd+34);
-					sprintf(path2, "0:%s/%.12s", tmpstr, info.content+34);
+					swprintf(tmpstr, _MAX_LFN, L"%ls/%ls/v%u",
+						backup_path,
+						strings[STR_JAPAN+region],
+						tmd_ver);
+					swprintf(path, _MAX_LFN, L"0:%ls/%.12ls",
+						tmpstr, info.tmd+34);
+					swprintf(path2, _MAX_LFN, L"0:%ls/%.12ls",
+						tmpstr, info.content+34);
 
 					print(strings[STR_RESTORING], strings[STR_HEALTH_AND_SAFETY]);
 				}

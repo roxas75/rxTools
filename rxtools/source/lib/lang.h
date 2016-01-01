@@ -160,7 +160,7 @@ enum {
 };
 
 extern int fontIsLoaded;
-extern const char langPath[];
+extern const wchar_t langPath[];
 extern wchar_t strings[STR_NUM][STR_MAX_LEN];
 
 void preloadStringsA(void);

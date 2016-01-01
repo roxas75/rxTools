@@ -45,9 +45,7 @@ uint32_t NcchPadgen()
 	File pf;
 	NcchInfo *info = (NcchInfo*)0x20316000;
 
-	const char *filename = "/ncchinfo.bin";
-	wchar_t wfilename[14];
-	mbstowcs(wfilename, filename, 14);
+	const TCHAR *filename = _T("/ncchinfo.bin");
 	if (!FileOpen(&pf, filename, 0)) {
 		print(strings[STR_ERROR_OPENING], filename+1);
 		return 1;
@@ -65,7 +63,7 @@ uint32_t NcchPadgen()
 	FileRead(&pf, info->entries, info->n_entries * sizeof(NcchInfoEntry), 16);
 	FileClose(&pf);
 
-	print(strings[STR_PROCESSING], wfilename+1);
+	print(strings[STR_PROCESSING], filename+1);
 	ConsoleShow();
 	for(uint32_t i = 0; i < info->n_entries; i++) {
 		PadInfo padInfo = {.setKeyY = 1, .size_mb = info->entries[i].size_mb};
@@ -97,14 +95,17 @@ uint32_t SdPadgen()
 	SdInfo *info = (SdInfo*)0x20316000;
 
 	uint8_t movable_seed[0x120] = {0};
-	const char *filename;
-	const char *filenames[] = { "movable.sed", "2:private/movable.sed", "1:private/movable.sed", 0 };
-	const char **pfilename;
-	wchar_t wfilename[64];
+	const TCHAR *filename;
+	const TCHAR *filenames[] = {
+		_T("movable.sed"),
+		_T("2:private/movable.sed"),
+		_T("1:private/movable.sed"),
+		0
+	};
+	const TCHAR **pfilename;
 	for(pfilename = filenames; *pfilename != 0; pfilename++)
 	{
 		filename = *pfilename;
-		mbstowcs(wfilename, filename, 64);
 		// Load console 0x34 keyY from movable.sed if present on SD card
 		if (FileOpen(&fp, filename, 0)) {
 			bytesRead = FileRead(&fp, &movable_seed, 0x120, 0);
@@ -122,7 +123,7 @@ uint32_t SdPadgen()
 			break;
 		}
 	}
-	filename = "/SDinfo.bin";
+	filename = _T("/SDinfo.bin");
 	if (!FileOpen(&fp, filename, 0)) {
 		print(strings[STR_ERROR_OPENING], filename+1);
 		return 1;
@@ -134,7 +135,7 @@ uint32_t SdPadgen()
 		return 1;
 	}
 
-       	print(strings[STR_PROCESSING], wfilename+1);
+       	print(strings[STR_PROCESSING], filename);
 	ConsoleShow();
 
 	bytesRead = FileRead(&fp, info->entries, info->n_entries * sizeof(SdInfoEntry), 4);
@@ -163,13 +164,13 @@ uint32_t CreatePad(PadInfo *info, int index)
 
 	if(info->filename[0] != 0 && info->filename[1] == 0 && info->filename[2] != 0 && info->filename[3] == 0)
 	{
-		char fname[sizeof(info->filename) / 2];
+		wchar_t fname[sizeof(info->filename) / 2];
 		for(int i = 0; i < sizeof(info->filename) / 2; ++i)
 		{
 			fname[i] = info->filename[i*2];
 			if(fname[i] == 0) break;
 		}
-		if (!FileOpen(&pf, strncmp(fname, "sdmc:/", 6) == 0 ? fname + 6 : fname, 1))
+		if (!FileOpen(&pf, wcsncmp(fname, L"sdmc:/", 6) == 0 ? fname + 6 : fname, 1))
 			return 1;
 	}
 	else if (!FileOpen(&pf, info->filename, 1))

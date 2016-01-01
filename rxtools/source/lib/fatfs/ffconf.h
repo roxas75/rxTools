@@ -106,13 +106,13 @@
 /  to the project. */
 
 
-#define _LFN_UNICODE    0   /* 0:ANSI/OEM or 1:Unicode */
+#define _LFN_UNICODE    1   /* 0:ANSI/OEM or 1:Unicode */
 /* To switch the character encoding on the FatFs API (TCHAR) to Unicode, enable LFN
 /  feature and set _LFN_UNICODE to 1. This option affects behavior of string I/O
 /  functions. */
 
 
-#define _STRF_ENCODE    0   /* 0:ANSI/OEM, 1:UTF-16LE, 2:UTF-16BE, 3:UTF-8 */
+#define _STRF_ENCODE    1   /* 0:ANSI/OEM, 1:UTF-16LE, 2:UTF-16BE, 3:UTF-8 */
 /* When Unicode API is enabled by _LFN_UNICODE option, this option selects the character
 /  encoding on the file to be read/written via string I/O functions, f_gets(), f_putc(),
 /  f_puts and f_printf(). This option has no effect when Unicode API is not enabled. */

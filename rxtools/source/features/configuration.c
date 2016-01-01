@@ -39,7 +39,7 @@
 #include "menu.h"
 #include "jsmn.h"
 
-#define DATA_PATH	"rxtools/data"
+#define DATA_PATH	_T("rxtools/data")
 #define KEYFILENAME	"slot0x25KeyX.bin"
 
 static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
@@ -54,7 +54,7 @@ Cfg cfgs[] = {
 	[CFG_LANG] = { "Language", CFG_TYPE_STRING, { .s = cfgLang } }
 };
 
-static const char jsonPath[] = "/rxTools/data/system.json";
+static const TCHAR jsonPath[] = _T("/rxTools/data/system.json");
 
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
 	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
@@ -236,7 +236,7 @@ int readCfg()
 
 static FRESULT saveFirm(uint32_t id, const void *p, DWORD n)
 {
-	char path[64];
+	TCHAR path[64];
 	UINT bw;
 	FRESULT r;
 	FIL f;
@@ -254,16 +254,16 @@ static FRESULT saveFirm(uint32_t id, const void *p, DWORD n)
 
 static int processFirmFile(uint32_t lo)
 {
-	static const char pathFmt[] = "rxTools/firm/00040138%08" PRIX32 "%s.bin";
+	static const wchar_t pathFmt[] = L"rxTools/firm/00040138%08" PRIX32 "%ls.bin";
 	const uint32_t hi = 0x00040138;
 	uint8_t key[AES_BLOCK_SIZE];
-	char path[64];
+	wchar_t path[_MAX_LFN];
 	void *buff, *firm;
 	UINT size;
 	FRESULT r;
 	FIL f;
 
-	sprintf(path, pathFmt, lo, "");
+	swprintf(path, _MAX_LFN, pathFmt, lo, "");
 	r = f_open(&f, path, FA_READ);
 	if (r != FR_OK)
 		return r;
@@ -275,7 +275,7 @@ static int processFirmFile(uint32_t lo)
 	if (r != FR_OK)
 		return r;
 
-	sprintf(path, pathFmt, lo, "_cetk");
+	swprintf(path, _MAX_LFN, pathFmt, lo, L"_cetk");
 	if (!getTitleKeyWithCetk(key, path)) {
 		firm = decryptFirmTitle(buff, size, &size, key);
 		if (firm != NULL)
@@ -384,7 +384,7 @@ static void incBar(Bar *b)
 
 static int InstallData()
 {
-	static const char date[] = DATA_PATH "/data.bin";
+	static TCHAR date[] = DATA_PATH "/data.bin";
 	Bar b;
 	int r;
 
@@ -424,7 +424,7 @@ static int InstallData()
 
 int CheckInstallationData(){
 	File file;
-	char str[64];
+	TCHAR str[64];
 
 	switch (getMpInfo()) {
 		case MPINFO_CTR:
@@ -453,14 +453,14 @@ int CheckInstallationData(){
 			return 0;
 	}
 
-	if (f_stat("rxTools/data/data.bin", 0) == FR_OK)
+	if (f_stat(L"rxTools/data/data.bin", 0) == FR_OK)
 		return -4;
 
 	return 0;
 }
 
 void InstallConfigData(){
-	char path[64], pathL[64], pathR[64];
+	wchar_t path[_MAX_LFN], pathL[_MAX_LFN], pathR[_MAX_LFN];
 
 	if(CheckInstallationData() == 0)
 		return;
@@ -468,17 +468,23 @@ void InstallConfigData(){
 	trySetLangFromTheme(0);
 	writeCfg();
 
-	sprintf(path, "/rxTools/Theme/%u/cfg0TOP.bin", cfgs[CFG_THEME].val.i);
+	swprintf(path, _MAX_LFN, L"/rxTools/Theme/%u/cfg0TOP.bin",
+		cfgs[CFG_THEME].val.i);
 	DrawTopSplash(path, path, path);
-	sprintf(path, "/rxTools/Theme/%u/cfg0.bin", cfgs[CFG_THEME].val.i);
+	swprintf(path, _MAX_LFN, L"/rxTools/Theme/%u/cfg0.bin",
+		cfgs[CFG_THEME].val.i);
 	DrawBottomSplash(path);
 
 	int res = InstallData();
-	sprintf(path, "/rxTools/Theme/%u/cfg1%c.bin", cfgs[CFG_THEME].val.i, res == 0 ? 'O' : 'E');
+	swprintf(path, _MAX_LFN, L"/rxTools/Theme/%u/cfg1%c.bin",
+		cfgs[CFG_THEME].val.i, res == 0 ? 'O' : 'E');
 	DrawBottomSplash(path);
-	sprintf(path, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
-	sprintf(pathL, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
-	sprintf(pathR, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
+	swprintf(path, _MAX_LFN, L"/rxTools/Theme/%u/TOP.bin",
+		cfgs[CFG_THEME].val.i);
+	swprintf(pathL, _MAX_LFN, L"/rxTools/Theme/%u/TOPL.bin",
+		cfgs[CFG_THEME].val.i);
+	swprintf(pathR, _MAX_LFN, L"/rxTools/Theme/%u/TOPR.bin",
+		cfgs[CFG_THEME].val.i);
 	DrawTopSplash(path, pathL, pathR);
 
 	InputWait();
@@ -486,10 +492,11 @@ void InstallConfigData(){
 
 void trySetLangFromTheme(int onswitch) {
 	File MyFile;
-	char str[100];
+	wchar_t str[_MAX_LFN];
 	unsigned int i;
 
-	sprintf(str, "/rxTools/Theme/%u/LANG.txt", cfgs[CFG_THEME].val.i);
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/LANG.txt",
+		cfgs[CFG_THEME].val.i);
 	if (!FileOpen(&MyFile, str, 0))
 		return;
 	if (FileGetSize(&MyFile) > 0)

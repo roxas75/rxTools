@@ -49,21 +49,24 @@ static void setConsole()
 
 static void install()
 {
-	f_mkdir("rxTools");
-	f_mkdir("rxTools/nand");
+	f_mkdir(L"rxTools");
+	f_mkdir(L"rxTools/nand");
 	InstallConfigData();
 }
 
 static void drawTop()
 {
-	char str[64];
-	char strl[64];
-	char strr[64];
+	wchar_t str[_MAX_LFN];
+	wchar_t strl[_MAX_LFN];
+	wchar_t strr[_MAX_LFN];
 
-	sprintf(str, "/rxTools/Theme/%u/TOP.bin", cfgs[CFG_THEME].val.i);
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/TOP.bin",
+		cfgs[CFG_THEME].val.i);
 	if (cfgs[CFG_3D].val.i) {
-		sprintf(strl, "/rxTools/Theme/%u/TOPL.bin", cfgs[CFG_THEME].val.i);
-		sprintf(strr, "/rxTools/Theme/%u/TOPR.bin", cfgs[CFG_THEME].val.i);
+		swprintf(strl, _MAX_LFN, L"/rxTools/Theme/%u/TOPL.bin",
+			cfgs[CFG_THEME].val.i);
+		swprintf(strr, _MAX_LFN, L"/rxTools/Theme/%u/TOPR.bin",
+			cfgs[CFG_THEME].val.i);
 		DrawTopSplash(str, strl, strr);
 	} else
 		DrawTopSplash(str, str, str);
@@ -76,7 +79,7 @@ static FRESULT initKeyX()
 	FRESULT r;
 	FIL f;
 
-	r = f_open(&f, "slot0x25KeyX.bin", FA_READ);
+	r = f_open(&f, _T("slot0x25KeyX.bin"), FA_READ);
 	if (r != FR_OK)
 		return r;
 
@@ -134,7 +137,7 @@ static void warn(const wchar_t *format, ...)
 
 _Noreturn void _start()
 {
-	static const char fontPath[] = SYS_PATH "/" FONT_NAME;
+	static const TCHAR fontPath[] = _T("") SYS_PATH "/" FONT_NAME;
 	void *fontBuf;
 	UINT btr, br;
 	int r;

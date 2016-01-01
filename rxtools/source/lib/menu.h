@@ -25,7 +25,7 @@
 typedef struct{
 	wchar_t Str[CONSOLE_MAX_LINE_LENGTH+1];
 	void(* Func)();
-	char* gfx_splash;
+	wchar_t* gfx_splash;
 }MenuEntry;
 
 typedef struct{

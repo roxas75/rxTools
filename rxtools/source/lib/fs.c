@@ -23,19 +23,19 @@ static FATFS fs[3];
 /**Init FileSystems.*/
 bool FSInit(void) {
 	FSNandInitCrypto();
-	if (f_mount(&fs[0], "0:", 0) != FR_OK) return 0;		//SDCard
-	if (f_mount(&fs[1], "1:", 0) != FR_OK) return 0;		//NAND
-	if (f_mount(&fs[2], "2:", 0) != FR_OK) ; //return 0;	//EmuNAND, Sometimes it doesn't exist
+	if (f_mount(&fs[0], _T("0:"), 0) != FR_OK) return 0;		//SDCard
+	if (f_mount(&fs[1], _T("1:"), 0) != FR_OK) return 0;		//NAND
+	if (f_mount(&fs[2], _T("2:"), 0) != FR_OK) ; //return 0;	//EmuNAND, Sometimes it doesn't exist
 	return 1;
 }
 /**[Unused?]DeInit FileSystems.*/
 void FSDeInit(void) {
-	f_mount(NULL, "0:", 0);
-	f_mount(NULL, "1:", 0);
-	f_mount(NULL, "2:", 0);
+	f_mount(NULL, _T("0:"), 0);
+	f_mount(NULL, _T("1:"), 0);
+	f_mount(NULL, _T("2:"), 0);
 }
 
-bool FileOpen(File *Handle, const char *path, bool truncate) {
+bool FileOpen(File *Handle, const TCHAR *path, bool truncate) {
 	unsigned flags = FA_READ | FA_WRITE;
 	flags |= truncate ? FA_CREATE_ALWAYS : FA_OPEN_EXISTING; //: FA_OPEN_ALWAYS;
 	bool ret = (f_open(Handle, path, flags) == FR_OK);
@@ -73,7 +73,7 @@ void FileClose(File *Handle) {
   * @retval Compounded value of (STEP<<8)|FR_xx, so it contains real reasons.
   * @note   directly FATFS calls. FATFS return value only ranges from 0 to 19.
   */
-uint32_t FSFileCopy(char *target, char *source) {
+uint32_t FSFileCopy(TCHAR *target, TCHAR *source) {
 	FIL src, dst;
 	uint32_t step = 0; //Tells you where it failed
 	FRESULT retfatfs = 0; //FATFS return value
