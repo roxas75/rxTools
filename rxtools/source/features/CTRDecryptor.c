@@ -48,7 +48,7 @@ uint32_t DecryptPartition(PartitionInfo* info){
 	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
 		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
-			aesInit(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
+			aesSetCtr(ctr);
 			aesDecrypt((void*)info->buffer+j, (void*)info->buffer+j, 1, AES_CTR_MODE);
 			aesAddCtr(ctr, 1);
 			TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this

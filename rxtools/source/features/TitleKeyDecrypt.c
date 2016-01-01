@@ -68,7 +68,7 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	memcpy(titleId, titleid, 8);
 	memset(ctr, 0, blockSize);
 	memcpy(ctr, titleId, 8);
-	aesInit(AES_BIG_INPUT | AES_NORMAL_INPUT, ctr);
+	aesSetCtr(ctr);
 
 	if (keyYList == NULL) {
 		p = 0x08080000;
