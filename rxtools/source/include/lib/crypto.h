@@ -56,6 +56,6 @@
 void aesSetKeyX(uint8_t keyslot, void* keyx);
 void aesSetKey(uint32_t keyno, int value, void* key);
 void aesSelKey(uint32_t keyno);
-void aesInit(int mode, void* iv);
+void aesSetCtr(void* iv);
 void aesAddCtr(void* ctr, uint32_t carry);
 void aesDecrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode);

@@ -139,24 +139,13 @@ void aesSelKey(uint32_t keyno)
     *REG_AESCNT    = *REG_AESCNT | 0x04000000; /* mystery bit */
 }
 
-void aesInit(int mode, void* iv)
+void aesSetCtr(void* iv)
 {
     uint32_t * _iv = (uint32_t*)iv;
-    *REG_AESCNT = (*REG_AESCNT & ~(AES_CNT_INPUT_ENDIAN|AES_CNT_INPUT_ORDER)) | (mode << 23);
-    if (mode & AES_NORMAL_INPUT)
-    {
-        *(REG_AESCTR + 0) = _iv[3];
-        *(REG_AESCTR + 1) = _iv[2];
-        *(REG_AESCTR + 2) = _iv[1];
-        *(REG_AESCTR + 3) = _iv[0];
-    }
-    else
-    {
-        *(REG_AESCTR + 0) = _iv[0];
-        *(REG_AESCTR + 1) = _iv[1];
-        *(REG_AESCTR + 2) = _iv[2];
-        *(REG_AESCTR + 3) = _iv[3];
-    }
+    *(REG_AESCTR + 0) = _iv[3];
+    *(REG_AESCTR + 1) = _iv[2];
+    *(REG_AESCTR + 2) = _iv[1];
+    *(REG_AESCTR + 3) = _iv[0];
 }
 
 void aesAddCtr(void* ctr, uint32_t carry)
