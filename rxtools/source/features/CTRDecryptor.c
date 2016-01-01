@@ -38,8 +38,8 @@ char str[100];
 
 uint32_t DecryptPartition(PartitionInfo* info){
 	if(info->keyY != NULL)
-		setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
-	use_aeskey(info->keyslot);
+		aesSetKey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
+	aesSelKey(info->keyslot);
 
 	uint8_t ctr[16] __attribute__((aligned(32)));
 	memcpy(ctr, info->ctr, 16);
@@ -48,9 +48,9 @@ uint32_t DecryptPartition(PartitionInfo* info){
 	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
 		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
-			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
-			aes_decrypt((void*)info->buffer+j, (void*)info->buffer+j, 1, AES_CTR_MODE);
-			add_ctr(ctr, 1);
+			aesInit(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
+			aesDecrypt((void*)info->buffer+j, (void*)info->buffer+j, 1, AES_CTR_MODE);
+			aesAddCtr(ctr, 1);
 			TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this
 		}
 	}
@@ -65,7 +65,7 @@ void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. 
 		memcpy((void*)&myInfo, (void*)info, sizeof(PartitionInfo));
 		uint8_t OriginalCTR[16]; memcpy(OriginalCTR, info->ctr, 16);
 		myInfo.keyslot = 0x2C; myInfo.size = 0x200;
-		DecryptPartition(&myInfo); add_ctr(myInfo.ctr, 0x200 / 16);
+		DecryptPartition(&myInfo); aesAddCtr(myInfo.ctr, 0x200 / 16);
 		if(myInfo.buffer[0] == '.' && myInfo.buffer[1] == 'c' && myInfo.buffer[2] == 'o' && myInfo.buffer[3] == 'd' && myInfo.buffer[4] == 'e'){
 			//The 7.xKey encrypted .code partition
 			uint32_t codeSize = *((unsigned int*)(myInfo.buffer + 0x0C));
@@ -76,7 +76,7 @@ void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. 
 			memcpy((void*)&myInfo, (void*)info, sizeof(PartitionInfo));
 			myInfo.buffer += nextSection; myInfo.size -= nextSection; myInfo.keyslot = 0x2C;
 			myInfo.ctr = OriginalCTR;
-			add_ctr(myInfo.ctr, nextSection/16);
+			aesAddCtr(myInfo.ctr, nextSection/16);
 			DecryptPartition(&myInfo);
 		}else{
 			myInfo.size = info->size-0x200;
@@ -169,7 +169,7 @@ int ProcessCTR(char* path){
 				size_t bytesRead = FileRead(&myFile, BUFFER_ADDR, i*BLOCK_SIZE <= (getle32(NCCH.romfssize) * mediaunitsize) ? BLOCK_SIZE : (getle32(NCCH.romfssize) * mediaunitsize) % BLOCK_SIZE, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
 				myInfo.size = bytesRead;
 				DecryptPartition(&myInfo);
-				add_ctr(myInfo.ctr, bytesRead/16);
+				aesAddCtr(myInfo.ctr, bytesRead/16);
 				FileWrite(&myFile, BUFFER_ADDR, bytesRead, ncch_base + getle32(NCCH.romfsoffset) * mediaunitsize + i*BLOCK_SIZE);
 			}
 			print(L"\n");

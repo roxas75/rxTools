@@ -68,7 +68,7 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	memcpy(titleId, titleid, 8);
 	memset(ctr, 0, blockSize);
 	memcpy(ctr, titleId, 8);
-	set_ctr(AES_BIG_INPUT | AES_NORMAL_INPUT, ctr);
+	aesInit(AES_BIG_INPUT | AES_NORMAL_INPUT, ctr);
 
 	if (keyYList == NULL) {
 		p = 0x08080000;
@@ -82,9 +82,9 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	}
 
 	memcpy(keyY, keyYList[index].key, sizeof(keyY));
-	setup_aeskey(0x3D, AES_BIG_INPUT | AES_NORMAL_INPUT, keyY);
-	use_aeskey(0x3D);
-	aes_decrypt(key, key, 1, AES_CBC_DECRYPT_MODE);
+	aesSetKey(0x3D, AES_BIG_INPUT | AES_NORMAL_INPUT, keyY);
+	aesSelKey(0x3D);
+	aesDecrypt(key, key, 1, AES_CBC_DECRYPT_MODE);
 	return 0;
 }
 

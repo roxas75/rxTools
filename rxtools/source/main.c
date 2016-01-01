@@ -85,7 +85,7 @@ static FRESULT initKeyX()
 		return r == FR_OK ? EOF : r;
 
 	f_close(&f);
-	setup_aeskeyX(0x25, buff);
+	aesSetKeyX(0x25, buff);
 	return 0;
 }
 

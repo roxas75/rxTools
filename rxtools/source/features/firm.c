@@ -101,16 +101,16 @@ static int decryptFirmKtrArm9(void *p)
 	info.keyY = hdr->keyY;
 	info.size = atoi(hdr->size);
 
-	use_aeskey(0x11);
+	aesSelKey(0x11);
 	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
 		info.keyslot = 0x15;
-		aes_decrypt(key, hdr->keyX, 1, AES_ECB_DECRYPT_MODE);
+		aesDecrypt(key, hdr->keyX, 1, AES_ECB_DECRYPT_MODE);
 	} else {
 		info.keyslot = 0x16;
-		aes_decrypt(key, hdr->ext.s.keyX_0x16, 1, AES_ECB_DECRYPT_MODE);
+		aesDecrypt(key, hdr->ext.s.keyX_0x16, 1, AES_ECB_DECRYPT_MODE);
 	}
 
-	setup_aeskeyX(info.keyslot, key);
+	aesSetKeyX(info.keyslot, key);
 	return DecryptPartition(&info);
 }
 

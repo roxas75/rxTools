@@ -117,8 +117,8 @@ uint32_t SdPadgen()
 				print(strings[STR_WRONG], filename, strings[STR_CONTENT]);
 				return 1;
 			}
-			setup_aeskey(0x34, AES_BIG_INPUT|AES_NORMAL_INPUT, &movable_seed[0x110]);
-			use_aeskey(0x34);
+			aesSetKey(0x34, AES_BIG_INPUT|AES_NORMAL_INPUT, &movable_seed[0x110]);
+			aesSelKey(0x34);
 			break;
 		}
 	}
@@ -176,8 +176,8 @@ uint32_t CreatePad(PadInfo *info, int index)
 		return 1;
 
 	if(info->setKeyY != 0)
-		setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
-	use_aeskey(info->keyslot);
+		aesSetKey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
+	aesSelKey(info->keyslot);
 
 	uint8_t ctr[16] __attribute__((aligned(32)));
 	memcpy(ctr, info->CTR, 16);
@@ -189,9 +189,9 @@ uint32_t CreatePad(PadInfo *info, int index)
 	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
 		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
-			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
-			aes_decrypt((void*)zero_buf, (void*)BUFFER_ADDR+j, 1, AES_CTR_MODE);
-			add_ctr(ctr, 1);
+			aesInit(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
+			aesDecrypt((void*)zero_buf, (void*)BUFFER_ADDR+j, 1, AES_CTR_MODE);
+			aesAddCtr(ctr, 1);
 		}
 
 		print(L"\r\033[K%i : %i%%", index, (i+j)/size_100);
