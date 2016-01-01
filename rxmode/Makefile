@@ -15,20 +15,20 @@
 
 .PHONY: all clean
 
-all: $(addprefix $(BUILD)/,ktr/native_firm.elf	\
+all: $(addprefix build/,ktr/native_firm.elf	\
 	ctr/native_firm.elf ctr/agb_firm.elf ctr/twl_firm.elf)
 
-$(BUILD)/ktr/native_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ktr PLATFORM_KTR=1 -C native_firm ../$@
+build/ktr/native_firm.elf:
+	$(MAKE) INCDIR=$(INCDIR) BUILD=$(CURDIR)/build/ktr PLATFORM_KTR=1 -C native_firm $(CURDIR)/$@
 
-$(BUILD)/ctr/native_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ctr -C native_firm ../$@
+build/ctr/native_firm.elf:
+	$(MAKE) INCDIR=$(INCDIR) BUILD=$(CURDIR)/build/ctr -C native_firm $(CURDIR)/$@
 
-$(BUILD)/ctr/agb_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ctr -C agb_firm ../$@
+build/ctr/agb_firm.elf:
+	$(MAKE) INCDIR=$(INCDIR) BUILD=$(CURDIR)/build/ctr -C agb_firm $(CURDIR)/$@
 
-$(BUILD)/ctr/twl_firm.elf:
-	$(MAKE) INCDIR=$(INCDIR) BUILD=../$(BUILD)/ctr -C twl_firm ../$@
+build/ctr/twl_firm.elf:
+	$(MAKE) INCDIR=$(INCDIR) BUILD=$(CURDIR)/build/ctr -C twl_firm $(CURDIR)/$@
 
 clean:
 	rm -Rf build
