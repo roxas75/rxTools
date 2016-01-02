@@ -79,7 +79,7 @@ void FileExplorerShow(){
 
 		int i = 0;
 		for (i = beginning; i < beginning + list[(pointer / 7)]; i++) {
-			print(L"%ls %s\n", i == pointer ? strings[STR_CURSOR] : strings[STR_NO_CURSOR], files[i]);
+			print(L"%ls %ls\n", i == pointer ? strings[STR_CURSOR] : strings[STR_NO_CURSOR], files[i]);
 		}
 	}
 	ConsoleShow();
