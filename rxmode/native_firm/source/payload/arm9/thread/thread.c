@@ -30,7 +30,9 @@
 #endif
 #include "lib.c"
 
-#ifdef DEBUG_DUMP_FCRAM
+//#define DEBUG_DUMP_RAM              //Uncomment this to enable RAM (fcram+axiwram) dumper
+
+#ifdef DEBUG_DUMP_RAM
 static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
 {
 	unsigned int i;
@@ -95,7 +97,7 @@ static int patchLabel()
 	return 1;
 }
 
-#ifndef PLATFORM_KTR
+#ifndef PLATFORM_KTR && DEBUG_DUMP_RAM
 
 #define FB_HEIGHT 240
 #define FB_WIDTH 320
@@ -268,9 +270,10 @@ _Noreturn void thread()
 #endif
 
 	while (1) {
-#ifdef DEBUG_DUMP_FCRAM
+#ifdef DEBUG_DUMP_RAM
 		if(getHID() & BUTTON_SELECT){
 			memdump(L"sdmc:/FCRAM.bin", (void *)0x20000000, 0x10000);
+			memdump(L"sdmc:/AXIWRAM.bin", (void *)0x1FF80000, 0x00080000);
 		}
 #endif
 #ifdef DEBUG_DATA_ABORT
@@ -278,7 +281,7 @@ _Noreturn void thread()
 			*(int *)8192 = 100;
 #endif
 		if (!patchLabel()) {
-#if !defined(DEBUG_DATA_ABORT) && !defined(DEBUG_DUMP_FCRAM)
+#if !defined(DEBUG_DATA_ABORT) && !defined(DEBUG_DUMP_RAM)
 			svcExitThread();
 #endif
 		}
