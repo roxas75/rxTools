@@ -30,7 +30,8 @@
 #endif
 #include "lib.c"
 
-//#define DEBUG_DUMP_RAM              //Uncomment this to enable RAM (fcram+axiwram) dumper
+#define DEBUG_DATA_ABORT
+#define DEBUG_DUMP_RAM              //Uncomment this to enable RAM (fcram+axiwram) dumper
 
 #ifdef DEBUG_DUMP_RAM
 static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
@@ -53,7 +54,7 @@ static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
 
 #define VER_LEN 4
 
-static int patchLabel()
+static patchLabel()
 {
 	static const char verOrig[VER_LEN] = "Ver.";
 	static const char verEmu[VER_LEN] = "RX-E";
@@ -85,7 +86,7 @@ static int patchLabel()
 						p--;
 					}
 
-					return 0;
+					return;
 				}
 
 				p++;
@@ -93,8 +94,6 @@ static int patchLabel()
 		} else
 			p++;
 	}
-
-	return 1;
 }
 
 #ifndef PLATFORM_KTR && DEBUG_DUMP_RAM
@@ -265,25 +264,25 @@ static void initExceptionHandler()
 
 _Noreturn void thread()
 {
+
 #ifndef PLATFORM_KTR
-	initExceptionHandler();
+		initExceptionHandler();
 #endif
 
 	while (1) {
+
 #ifdef DEBUG_DUMP_RAM
 		if(getHID() & BUTTON_SELECT){
 			memdump(L"sdmc:/FCRAM.bin", (void *)0x20000000, 0x10000);
 			memdump(L"sdmc:/AXIWRAM.bin", (void *)0x1FF80000, 0x00080000);
 		}
 #endif
+
 #ifdef DEBUG_DATA_ABORT
 		if (getHID() & BUTTON_START)
 			*(int *)8192 = 100;
 #endif
-		if (!patchLabel()) {
-#if !defined(DEBUG_DATA_ABORT) && !defined(DEBUG_DUMP_RAM)
-			svcExitThread();
-#endif
-		}
+
+		patchLabel();
 	}
 }
