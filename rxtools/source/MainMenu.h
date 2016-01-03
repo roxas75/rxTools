@@ -82,8 +82,8 @@ static Menu AdvancedMenu = {
 	L"Other Options",
 	.Option = (MenuEntry[5]){
 		{ L" Downgrade MSET on SysNAND", &downgradeMSET, L"adv0.bin" },
-		{ L" Install FBI over Health&Safety App", &installFBI, L"adv1.bin" },
-		{ L" Restore original Health&Safety App", &restoreHS, L"adv2.bin" },
+		{ L" Install FBI over H&S App", &installFBI, L"adv1.bin" },
+		{ L" Restore original H&S App", &restoreHS, L"adv2.bin" },
 		{ L" Launch PastaMode", (void(*)())&PastaMode, L"adv3.bin" },
 		{ L" Load a firm", &FirmLoader, L"adv4.bin" },
 	},
