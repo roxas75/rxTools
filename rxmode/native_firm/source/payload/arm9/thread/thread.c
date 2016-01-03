@@ -30,8 +30,7 @@
 #endif
 #include "lib.c"
 
-#define DEBUG_DATA_ABORT
-#define DEBUG_DUMP_RAM              //Uncomment this to enable RAM (fcram+axiwram) dumper
+//#define DEBUG_DUMP_RAM              //Uncomment this to enable RAM (fcram+axiwram) dumper
 
 #ifdef DEBUG_DUMP_RAM
 static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
@@ -96,7 +95,8 @@ static patchLabel()
 	}
 }
 
-#ifndef PLATFORM_KTR && DEBUG_DUMP_RAM
+#ifndef PLATFORM_KTR 
+	#ifndef DEBUG_DUMP_RAM
 
 #define FB_HEIGHT 240
 #define FB_WIDTH 320
@@ -259,14 +259,16 @@ static void initExceptionHandler()
 	*(void **)0x0800002C = handleData;
 	*(void **)0x08000020 = handlePrefetch;
 }
-
+	#endif
 #endif
 
 _Noreturn void thread()
 {
 
 #ifndef PLATFORM_KTR
+	#ifndef DEBUG_DUMP_RAM
 		initExceptionHandler();
+	#endif
 #endif
 
 	while (1) {

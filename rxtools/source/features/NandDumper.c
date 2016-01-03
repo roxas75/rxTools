@@ -153,6 +153,7 @@ void DumpNandPartitions(){
 			ConsoleGetXY(&x, &y);
 			y += FONT_HEIGHT * 3;
 			x += FONT_HWIDTH*2;
+			ConsoleShow();
 			DrawString(BOT_SCREEN, tmp, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
 			if(isEmuNand) emunand_readsectors(j, sect_row, BUF1, p_addr[i]);
