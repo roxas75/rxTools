@@ -40,43 +40,37 @@ static uint32_t getReadCount()
     return (*REG_AESCNT >> 5) & 0x1F;
 }
 
-static uint32_t checkWrite()
-{
-    size_t ret = getWriteCount();
-    return (ret > 0xF);
-}
-
-static uint32_t checkRead()
-{
-    size_t ret = getReadCount();
-    return (ret <= 3);
-}
-
 static void fifo(const void* inbuf, void* outbuf, size_t blocks)
 {
-    uint32_t in  = (uint32_t)inbuf;
-    uint32_t out = (uint32_t)outbuf;
-    size_t curblock = 0;
-    while (curblock != blocks)
+    const size_t blockWords = AES_BLOCK_SIZE / 4;
+    const uint32_t *in;
+    uint32_t *out;
+    uint16_t bufBlocks;
+    int i;
+
+    in = inbuf;
+    out = outbuf;
+    while (blocks > 0)
     {
-        if (in)
+        bufBlocks = 8 - getWriteCount();
+        if (bufBlocks > blocks)
+            bufBlocks = blocks;
+
+        for (i = 0; i < bufBlocks * blockWords; i++)
         {
-            while (checkWrite()) ;
-            int ii = 0;
-            for (ii = in; ii != in + AES_BLOCK_SIZE; ii += 4)
-            {
-                writeFifo( *(uint32_t*)(ii) );
-            }
-            if (out)
-            {
-                while (checkRead()) ;
-                for (ii = out; ii != out + AES_BLOCK_SIZE; ii += 4)
-                {
-                    *(uint32_t*)ii = readFifo();
-                }
-            }
+            writeFifo(*in);
+            in++;
         }
-        curblock++;
+
+        while (getReadCount() < bufBlocks);
+
+        for (i = 0; i < bufBlocks * blockWords; i++)
+        {
+            *out = readFifo();
+            out++;
+        }
+
+        blocks -= bufBlocks;
     }
 }
 
