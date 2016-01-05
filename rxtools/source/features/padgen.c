@@ -159,7 +159,6 @@ uint32_t CreatePad(PadInfo *info, int index)
 {
 	File pf;
 	#define BUFFER_ADDR ((volatile uint8_t*)0x21000000)
-	#define BLOCK_SIZE  (4*1024*1024)
 
 	if(info->filename[0] != 0 && info->filename[1] == 0 && info->filename[2] != 0 && info->filename[3] == 0)
 	{
@@ -184,20 +183,15 @@ uint32_t CreatePad(PadInfo *info, int index)
 
 	uint32_t size_bytes = info->size_mb*1024*1024;
 	uint32_t size_100 = size_bytes/100;
-	uint32_t seekpos = 0;
 	print(strings[STR_GENERATING], strings[STR_PAD]);
-	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
-		uint32_t j;
-		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
-			aesSetCtr(ctr);
-			aesDecrypt((void*)zero_buf, (void*)BUFFER_ADDR+j, 1, AES_CTR_MODE);
-			aesAddCtr(ctr, 1);
-		}
+	for (uint32_t i = 0; i < size_bytes; i += 16) {
+		aesSetCtr(ctr);
+		aesDecrypt((void*)zero_buf, (void*)BUFFER_ADDR+i, 1, AES_CTR_MODE);
+		aesAddCtr(ctr, 1);
 
-		print(L"\r\033[K%i : %i%%", index, (i+j)/size_100);
+		print(L"\r\033[K%i : %i%%", index, i/size_100);
 		ConsoleShow();
-		FileWrite(&pf, (void*)BUFFER_ADDR, j, seekpos);
-		seekpos += j;
+		FileWrite(&pf, (void*)BUFFER_ADDR, 16, i);
 	}
 
 	FileClose(&pf);
