@@ -242,14 +242,11 @@ uint32_t DecryptPartition(PartitionInfo* info){
 	memcpy(ctr, info->ctr, 16);
 
 	uint32_t size_bytes = info->size;
-	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
-		uint32_t j;
-		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
-			aesSetCtr(ctr);
-			aesDecrypt((void*)info->buffer+j, (void*)info->buffer+j, 1, AES_CTR_MODE);
-			aesAddCtr(ctr, 1);
-			TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this
-		}
+	for (uint32_t i = 0; i < size_bytes; i += 16) {
+		aesSetCtr(ctr);
+		aesDecrypt((void*)info->buffer+i, (void*)info->buffer+i, 1, AES_CTR_MODE);
+		aesAddCtr(ctr, 1);
+		TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this
 	}
 	return 0;
 }
