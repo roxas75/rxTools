@@ -16,7 +16,6 @@
  */
 
 #include <lib/mpcore.h>
-#include <features/decryption.h>
 #include <lib/crypto.h>
 #include <lib/media/tmio.h>
 #include <lib/media/nand.h>
@@ -95,42 +94,47 @@ void GetNANDCTR(uint8_t *ctr) {
 	for (int i = 0; i < 16; i++) { *(ctr + i) = NANDCTR[i]; }
 }
 
-static void cryptNand(enum nandPart part, uint32_t sector, void *p, uint32_t n)
+static int cryptNand(enum nandPart part, uint32_t sector, void *p, uint32_t n)
 {
-	PartitionInfo info;
+	const uint32_t sectorBlocks = 512 / AES_BLOCK_SIZE;
 	uint8_t ctr[AES_BLOCK_SIZE];
+	uint32_t key;
 
-	GetNANDCTR(ctr);
-	aesAddCtr(ctr, part / 16 + sector * 0x20);
-	info.ctr = ctr;
-	info.buffer = p;
-	info.size = n * 0x200;
-	info.keyY = NULL;
 	switch (part) {
 		case TWLN:
 		case TWLP:
-			info.keyslot = 0x3;
+			key = 0x3;
 			break;
 
 		case AGB_SAVE:
-			info.keyslot = 0x7;
+			key = 0x7;
 			break;
 
 		case FIRM0:
 		case FIRM1:
-			info.keyslot = 0x6;
+			key = 0x6;
 			break;
 
 		case CTRNAND:
-			info.keyslot = 0x4;
+			key = 0x4;
 			break;
 
 		case KTR_CTRNAND:
-			info.keyslot = 0x5;
+			key = 0x5;
 			break;
+
+		default:
+			return -1;
 	}
 
-	DecryptPartition(&info);
+	aesSelKey(key);
+
+	GetNANDCTR(ctr);
+	aesAddCtr(ctr, part / 16 + sector * sectorBlocks);
+
+	aesCtr(p, p, n * sectorBlocks, ctr);
+
+	return 0;
 }
 
 void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {

@@ -74,6 +74,18 @@ static void fifo(const void* inbuf, void* outbuf, size_t blocks)
     }
 }
 
+static void start(uint32_t mode)
+{
+    *REG_AESCNT = mode |
+                  AES_CNT_START |
+                  AES_CNT_INPUT_ORDER |
+                  AES_CNT_OUTPUT_ORDER |
+                  AES_CNT_INPUT_ENDIAN |
+                  AES_CNT_OUTPUT_ENDIAN |
+                  AES_CNT_FLUSH_READ |
+                  AES_CNT_FLUSH_WRITE;
+}
+
 void aesSetKeyX(uint8_t keyslot, void* keyx)
 {
     uint32_t * _keyx = (uint32_t*)keyx;
@@ -178,13 +190,25 @@ void aesDecrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode)
 {
     *REG_AESCNT = 0;
     *REG_AESBLKCNT = blocks << 16;
-    *REG_AESCNT = mode |
-                  AES_CNT_START |
-                  AES_CNT_INPUT_ORDER |
-                  AES_CNT_OUTPUT_ORDER |
-                  AES_CNT_INPUT_ENDIAN |
-                  AES_CNT_OUTPUT_ENDIAN |
-                  AES_CNT_FLUSH_READ |
-                  AES_CNT_FLUSH_WRITE;
+    start(mode);
     fifo(src, dst, blocks);
+}
+
+void aesCtr(void *dst, const void *src, size_t n, void *ctr)
+{
+    *REG_AESBLKCNT = UINT16_MAX << 16;
+    while (n >= UINT16_MAX) {
+        aesSetCtr(ctr);
+        start(AES_CTR_MODE);
+        fifo(src, dst, UINT16_MAX);
+        src = (void *)((uintptr_t)src + UINT16_MAX * AES_BLOCK_SIZE);
+        dst = (void *)((uintptr_t)dst + UINT16_MAX * AES_BLOCK_SIZE);
+        n -= UINT16_MAX;
+        aesAddCtr(ctr, UINT16_MAX);
+    }
+
+    *REG_AESBLKCNT = n << 16;
+    aesSetCtr(ctr);
+    start(AES_CTR_MODE);
+    fifo(src, dst, n);
 }

@@ -59,3 +59,4 @@ void aesSelKey(uint32_t keyno);
 void aesSetCtr(void* iv);
 void aesAddCtr(void* ctr, uint32_t carry);
 void aesDecrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode);
+void aesCtr(void *dst, const void *src, size_t n, void *ctr);
