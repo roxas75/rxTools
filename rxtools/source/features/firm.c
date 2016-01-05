@@ -322,32 +322,28 @@ int PastaMode(){
 	return loadExecReboot();
 }
 
-void FirmLoader(){
-	TCHAR firm_path[_MAX_LFN];
+void FirmLoader(TCHAR firm_path[]){
 
-	if (!FileExplorerMain(firm_path, _MAX_LFN))
+	UINT fsz;
+	if (loadFirm(firm_path, &fsz))
 	{
-		UINT fsz;
-		if (loadFirm(firm_path, &fsz))
-		{
-			ConsoleInit();
-			ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
-			print(strings[STR_WRONG], "", strings[STR_FIRMWARE_FILE]);
-			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
-			return;
-		}
-
+		ConsoleInit();
+		ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
+		print(strings[STR_WRONG], "", strings[STR_FIRMWARE_FILE]);
+		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+		ConsoleShow();
+		WaitForButton(BUTTON_A);
+		return;
+	}
 		if (loadExecReboot())
-		{
-			ConsoleInit();
-			ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
-			print(strings[STR_ERROR_LAUNCHING], strings[STR_FIRMWARE_FILE]);
-			print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-			ConsoleShow();
-			WaitForButton(BUTTON_A);
-			return;
-		}
+	{
+		ConsoleInit();
+		ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
+		print(strings[STR_ERROR_LAUNCHING], strings[STR_FIRMWARE_FILE]);
+		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
+		ConsoleShow();
+		WaitForButton(BUTTON_A);
+		return;
 	}
 }
+

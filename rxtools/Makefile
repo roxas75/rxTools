@@ -41,7 +41,7 @@ LDFLAGS := -nostartfiles -g $(CMACHINE) -Wl,-Tstub.ld
 CCOBJS := $(addprefix $(BUILD)/,main.o features/CTRDecryptor.o	\
 	features/NandDumper.o features/TitleKeyDecrypt.o	\
 	features/configuration.o features/downgradeapp.o	\
-	features/fileexplorer.o features/firm.o	\
+	features/AdvancedFileManager.o features/firm.o	\
 	features/nandtools.o features/padgen.o features/screenshot.o	\
 	lib/fatfs/diskio.o lib/fatfs/ff.o	\
 	lib/polarssl/padlock.o lib/polarssl/sha2.o lib/polarssl/aes.o	\

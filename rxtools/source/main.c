@@ -30,6 +30,7 @@
 #include "firm.h"
 #include "configuration.h"
 #include "log.h"
+#include "AdvancedFileManager.h"
 
 #define FONT_NAME "font.bin"
 

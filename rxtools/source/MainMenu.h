@@ -34,6 +34,7 @@
 #include "i2c.h"
 #include "configuration.h"
 #include "lang.h"
+#include "AdvancedFileManager.h"
 
 static void ShutDown(){
 	i2cWriteRegister(I2C_DEV_MCU, 0x20, (uint8_t)(1<<0));
@@ -85,7 +86,7 @@ static Menu AdvancedMenu = {
 		{ L" Install FBI over H&S App", &installFBI, L"adv1.bin" },
 		{ L" Restore original H&S App", &restoreHS, L"adv2.bin" },
 		{ L" Launch PastaMode", (void(*)())&PastaMode, L"adv3.bin" },
-		{ L" Load a firm", &FirmLoader, L"adv4.bin" },
+		{ L" Advanced File Manager", &AdvFileManagerMain, L"adv4.bin" },
 	},
 	5,
 	0,
