@@ -95,86 +95,64 @@ void GetNANDCTR(uint8_t *ctr) {
 	for (int i = 0; i < 16; i++) { *(ctr + i) = NANDCTR[i]; }
 }
 
-void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
+static void cryptNand(enum nandPart part, uint32_t sector, void *p, uint32_t n)
+{
 	PartitionInfo info;
-	uint8_t myCtr[16];
-	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
-	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
-	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
-	aesAddCtr(info.ctr, partition / 16);
-	switch (partition) {
-		case TWLN	  : info.keyslot = 0x3; break;
-		case TWLP	  : info.keyslot = 0x3; break;
-		case AGB_SAVE : info.keyslot = 0x7; break;
-		case FIRM0    : info.keyslot = 0x6; break;
-		case FIRM1    : info.keyslot = 0x6; break;
-		case CTRNAND  : info.keyslot = 0x4; break;
-		case KTR_CTRNAND: info.keyslot = 0x5; break;
+	uint8_t ctr[AES_BLOCK_SIZE];
+
+	GetNANDCTR(ctr);
+	aesAddCtr(ctr, part / 16 + sector * 0x20);
+	info.ctr = ctr;
+	info.buffer = p;
+	info.size = n * 0x200;
+	info.keyY = NULL;
+	switch (part) {
+		case TWLN:
+		case TWLP:
+			info.keyslot = 0x3;
+			break;
+
+		case AGB_SAVE:
+			info.keyslot = 0x7;
+			break;
+
+		case FIRM0:
+		case FIRM1:
+			info.keyslot = 0x6;
+			break;
+
+		case CTRNAND:
+			info.keyslot = 0x4;
+			break;
+
+		case KTR_CTRNAND:
+			info.keyslot = 0x5;
+			break;
 	}
-	aesAddCtr(info.ctr, sector_no * 0x20);
-	tmio_readsectors(TMIO_DEV_NAND, sector_no + partition / 0x200, numsectors, out);
+
 	DecryptPartition(&info);
 }
 
-void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
-	PartitionInfo info;
-	uint8_t myCtr[16];
+void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
 	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
-	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
-	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
-	aesAddCtr(info.ctr, partition / 16);
-	switch (partition) {
-	case TWLN: info.keyslot = 0x3; break;
-	case TWLP: info.keyslot = 0x3; break;
-	case AGB_SAVE: info.keyslot = 0x7; break;
-	case FIRM0: info.keyslot = 0x6; break;
-	case FIRM1: info.keyslot = 0x6; break;
-	case CTRNAND: info.keyslot = 0x4; break;
-	case KTR_CTRNAND: info.keyslot = 0x5; break;
-	}
-	aesAddCtr(info.ctr, sector_no * 0x20);
-	DecryptPartition(&info);
+	tmio_readsectors(TMIO_DEV_NAND, sector_no + partition / 0x200, numsectors, out);
+	cryptNand(partition, sector_no, out, numsectors);
+}
+
+void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
+	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
+	cryptNand(partition, sector_no, out, numsectors);
 	tmio_writesectors(TMIO_DEV_NAND, sector_no + partition / 0x200, numsectors, out);	//Stubbed, i don't wanna risk
 }
 
 void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
-	PartitionInfo info;
-	uint8_t myCtr[16];
 	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
-	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
-	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
-	aesAddCtr(info.ctr, partition / 16);
-	switch (partition) {
-	case TWLN: info.keyslot = 0x3; break;
-	case TWLP: info.keyslot = 0x3; break;
-	case AGB_SAVE: info.keyslot = 0x7; break;
-	case FIRM0: info.keyslot = 0x6; break;
-	case FIRM1: info.keyslot = 0x6; break;
-	case CTRNAND: info.keyslot = 0x4; break;
-	case KTR_CTRNAND: info.keyslot = 0x5; break;
-	}
-	aesAddCtr(info.ctr, sector_no * 0x20);
 	tmio_readsectors(TMIO_DEV_SDMC, sector_no + partition / 0x200, numsectors, out);
-	DecryptPartition(&info);
+	cryptNand(partition, sector_no, out, numsectors);
 }
 
 void emunand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
-	PartitionInfo info;
-	uint8_t myCtr[16];
 	if (partition == CTRNAND && getMpInfo() == MPINFO_KTR) partition = KTR_CTRNAND; //SWITCH TO KTR_CTRNAND IF ON N3DS
-	for (int i = 0; i < 16; i++) { myCtr[i] = NANDCTR[i]; }
-	info.ctr = myCtr; info.buffer = out; info.size = numsectors * 0x200; info.keyY = NULL;
-	aesAddCtr(info.ctr, partition / 16);
-	switch (partition) {
-	case TWLN: info.keyslot = 0x3; break;
-	case TWLP: info.keyslot = 0x3; break;
-	case AGB_SAVE: info.keyslot = 0x7; break;
-	case FIRM0: info.keyslot = 0x6; break;
-	case FIRM1: info.keyslot = 0x6; break;
-	case CTRNAND: info.keyslot = 0x4; break;
-	case KTR_CTRNAND: info.keyslot = 0x5; break;
-	}
-	aesAddCtr(info.ctr, sector_no * 0x20);
-	DecryptPartition(&info);
+	cryptNand(partition, sector_no, out, numsectors);
 	tmio_writesectors(TMIO_DEV_SDMC, sector_no + partition / 0x200, numsectors, out);	//Stubbed, i don't wanna risk
 }
