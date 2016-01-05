@@ -166,7 +166,7 @@ int CheckRegion(int drive)
 {
 	File secureinfo;
 	const wchar_t *filename=L"SecureInfo_A";
-	swprintf(tmpstr, _MAX_LFN, L"%d:rw/sys/%s", drive, filename);
+	swprintf(tmpstr, _MAX_LFN, L"%d:rw/sys/%ls", drive, filename);
 	print(strings[STR_OPENING], filename);
 	ConsoleShow();
 	if (!FileOpen(&secureinfo, tmpstr, 0))
