@@ -28,6 +28,8 @@
 #include "firm.h"
 #include "console.h"
 
+ #define FILE_ACTIONS 2
+
 //---- GLOBAL VARIABLES ----
 int i;
 void *screentmp = (void*)0x27000000;
@@ -75,8 +77,8 @@ size_t AdvFileManagerList(const TCHAR *path, TCHAR ***ls) {
 void AdvFileManagerShow(panel_t* Panel, int x){
 
 	//Title
-	wchar_t tmp[256];
-	swprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), L"%ls", Panel->dir);
+	wchar_t tmp[_MAX_LFN];
+	swprintf(tmp, _MAX_LFN, L"%ls", Panel->dir);
 	DrawString(screentmp, tmp, 15 + x, FONT_HEIGHT * 2, ConsoleGetTextColor(), TRANSPARENT);
 
 	//FileList
@@ -93,7 +95,7 @@ void AdvFileManagerShow(panel_t* Panel, int x){
 
 		int i = 0;
 		for (i = Panel->beginning; i < Panel->beginning + list[(Panel->pointer / 10)]; i++) {
-			swprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), L"%ls %ls\n", (i == Panel->pointer && Panel->enabled == 1) ? strings[STR_CURSOR] : strings[STR_NO_CURSOR], Panel->files[i]);
+			swprintf(tmp, _MAX_LFN, L"%ls %ls", (i == Panel->pointer && Panel->enabled == 1) ? strings[STR_CURSOR] : strings[STR_NO_CURSOR], Panel->files[i]);
 			DrawString(screentmp, tmp, 15 + x, FONT_HEIGHT * 3 + FONT_HEIGHT * (i - Panel->beginning + 1), ConsoleGetTextColor(), TRANSPARENT);
 		}
 	}
@@ -139,7 +141,7 @@ void AdvFileManagerSelect(panel_t* Panel){
 			Panel->openedFolder == 0 ? L"" : L"/", 		// '/' or nothing
 			Panel->files[Panel->pointer]);              // File name
 
-		FirmLoader(filePath);	
+		AdvFileManagerFileAction(filePath, Panel->files[Panel->pointer]);
 	}
 	else
 	{
@@ -151,6 +153,55 @@ void AdvFileManagerSelect(panel_t* Panel){
 		Panel->pointer = 0;
 		Panel->openedFolder++;
 		Panel->count = AdvFileManagerList(Panel->dir, &Panel->files);
+	}
+}
+
+void AdvFileManagerFileAction(TCHAR filePath[], TCHAR fileName[])
+{
+	int actions_idx = 0;
+	while (true)
+	{
+		//DRAW GUI
+		ConsoleInit();
+		ConsoleSetTitle(fileName);
+		wchar_t* beg;
+		for (i = 0; i < FILE_ACTIONS; i++)
+		{
+			if (i == actions_idx) beg = strings[STR_CURSOR];
+			else beg = strings[STR_NO_CURSOR];
+
+			if (i == 0)print(L"%ls Launch as firm\n", beg);
+			if (i == 1)print(L"%ls Something...\n", beg);
+		}
+		ConsoleShow();
+
+		//APP CONTROLS
+		uint32_t pad_state = InputWait();
+		if (pad_state & BUTTON_DOWN)
+		{
+			if (actions_idx != FILE_ACTIONS - 1) actions_idx++; //MOVE DOWN
+			else actions_idx = 0; //MOVE DOWN While at bottom -> go to top
+		}
+		else if (pad_state & BUTTON_UP)
+		{
+			if (actions_idx != 0) actions_idx--; //MOVE UP
+			else actions_idx = FILE_ACTIONS - 1; //MOVE UP While at top -> go to bottom
+		}
+		else if (pad_state & BUTTON_A)
+		{
+			switch(actions_idx)
+			{
+				case 0:	
+				FirmLoader(filePath);	
+				break;
+
+				case 1:
+				//Something....
+				break;				
+			}
+			break;
+		}
+		else if (pad_state & BUTTON_B) break;	
 	}
 }
 

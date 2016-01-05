@@ -36,6 +36,7 @@ void AdvFileManagerShow(panel_t* Panel, int x);
 void AdvFileManagerNextSelection(panel_t* Panel);
 void AdvFileManagerPrevSelection(panel_t* Panel);
 void AdvFileManagerSelect(panel_t* Panel);
+void AdvFileManagerFileAction(TCHAR filePath[], TCHAR fileName[]);
 void AdvFileManagerBack(panel_t* Panel);
 void AdvFileManagerMain();
 #endif
