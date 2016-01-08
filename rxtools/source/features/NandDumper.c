@@ -17,7 +17,6 @@
 
 #include <string.h>
 #include <wchar.h>
-#include <tmio/tmio.h>
 #include "NandDumper.h"
 #include "console.h"
 #include "draw.h"
@@ -30,6 +29,7 @@
 #include "mpcore.h"
 #include "ncch.h"
 #include "CTRDecryptor.h"
+#include "fatfs/sdmmc.h" 
 #include "stdio.h"
 
 #define NAND_SECTOR_SIZE 0x200
@@ -90,8 +90,9 @@ void NandDumper(){
 
 		for(int count = 0; count < getNandSize()/NAND_SECTOR_SIZE/nsectors; count++){
 
-			if(isEmuNand) tmio_readsectors(TMIO_DEV_SDMC, count*nsectors, nsectors, buf);
-			else tmio_readsectors(TMIO_DEV_NAND, count*nsectors, nsectors, buf);
+			if(isEmuNand) sdmmc_sdcard_readsectors(count*nsectors, nsectors, buf);  
+			else sdmmc_nand_readsectors(count*nsectors, nsectors, buf);  
+
 
 			FileWrite(&myFile, buf, nsectors*NAND_SECTOR_SIZE, count*NAND_SECTOR_SIZE*nsectors);
 			TryScreenShot();
@@ -105,7 +106,7 @@ void NandDumper(){
 			}
 		}
 		if(isEmuNand){
-			tmio_readsectors(TMIO_DEV_SDMC, checkEmuNAND()/0x200, 1, buf);
+			sdmmc_sdcard_readsectors(checkEmuNAND()/0x200, 1, buf);
 			FileWrite(&myFile, buf, 0x200, 0);
 		}
 		FileClose(&myFile);
