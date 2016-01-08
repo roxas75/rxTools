@@ -95,7 +95,7 @@ static Menu AdvancedMenu = {
 
 static Menu SettingsMenu = {
 	L"           SETTINGS",
-	.Option = (MenuEntry[8]){
+	.Option = (MenuEntry[7]){
 		{ L"Force UI boot               ", NULL, L"app.bin" },
 		{ L"Selected theme:             ", NULL, L"app.bin" },
 		{ L"Random theme:               ", NULL, L"app.bin" },

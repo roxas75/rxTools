@@ -141,7 +141,7 @@ void AdvFileManagerSelect(panel_t* Panel){
 			Panel->openedFolder == 0 ? L"" : L"/", 		// '/' or nothing
 			Panel->files[Panel->pointer]);              // File name
 
-		AdvFileManagerFileAction(filePath, Panel->files[Panel->pointer]);
+		AdvFileManagerFileAction(filePath);
 	}
 	else
 	{
@@ -156,14 +156,19 @@ void AdvFileManagerSelect(panel_t* Panel){
 	}
 }
 
-void AdvFileManagerFileAction(TCHAR filePath[], TCHAR fileName[])
+void AdvFileManagerFileAction(TCHAR filePath[])
 {
+	FILINFO fno;	
+	memset(&fno, 0, sizeof(FILINFO));
+	FILINFO *myInfo = &fno;
+	f_stat(filePath, myInfo);
+
 	int actions_idx = 0;
 	while (true)
 	{
 		//DRAW GUI
 		ConsoleInit();
-		ConsoleSetTitle(fileName);
+		ConsoleSetTitle(myInfo->fname);
 		wchar_t* beg;
 		for (i = 0; i < FILE_ACTIONS; i++)
 		{
@@ -171,7 +176,8 @@ void AdvFileManagerFileAction(TCHAR filePath[], TCHAR fileName[])
 			else beg = strings[STR_NO_CURSOR];
 
 			if (i == 0)print(L"%ls Launch as firm\n", beg);
-			if (i == 1)print(L"%ls Something...\n", beg);
+			if (i == 1)print(L"%ls File info\n", beg);
+			if (i == 2)print(L"%ls Something...\n", beg);
 		}
 		ConsoleShow();
 
@@ -193,13 +199,25 @@ void AdvFileManagerFileAction(TCHAR filePath[], TCHAR fileName[])
 			{
 				case 0:	
 				FirmLoader(filePath);	
+				return;
+
+				case 1:			
+				while(!(pad_state & BUTTON_B))
+				{
+					ConsoleInit();
+					ConsoleSetTitle(L"File Info");
+					print(L"Name: %ls\n", myInfo->fname);
+					print(L"Size: %lu byte\n", myInfo->fsize);
+					print(L"Timestamp: %u/%02u/%02u, %02u:%02u\n", (myInfo->fdate >> 9) + 1980, myInfo->fdate >> 5 & 15, myInfo->fdate & 31, myInfo->ftime >> 11, myInfo->ftime >> 5 & 63);
+					ConsoleShow();
+					pad_state = InputWait();
+				}
 				break;
 
-				case 1:
+				case 2:
 				//Something....
-				break;				
+				return;				
 			}
-			break;
 		}
 		else if (pad_state & BUTTON_B) break;	
 	}
