@@ -104,7 +104,7 @@ static Menu SettingsMenu = {
 		{ L"Autoboot into sysNAND:      ", NULL, L"app.bin" },
 		{ L"Console language:           ", NULL, L"app.bin" },
 	},
-	8,
+	7,
 	0,
 	0
 };
