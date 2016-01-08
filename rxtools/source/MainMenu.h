@@ -36,8 +36,8 @@
 #include "lang.h"
 #include "AdvancedFileManager.h"
 
-static void ShutDown(){
-	i2cWriteRegister(I2C_DEV_MCU, 0x20, (uint8_t)(1<<0));
+static void ShutDown(int arg){
+	i2cWriteRegister(I2C_DEV_MCU, 0x20, (arg) ? (uint8_t)(1<<0):(uint8_t)(1<<2));
 	while(1);
 }
 
@@ -95,7 +95,7 @@ static Menu AdvancedMenu = {
 
 static Menu SettingsMenu = {
 	L"           SETTINGS",
-	.Option = (MenuEntry[7]){
+	.Option = (MenuEntry[9]){
 		{ L"Force UI boot               ", NULL, L"app.bin" },
 		{ L"Selected theme:             ", NULL, L"app.bin" },
 		{ L"Random theme:               ", NULL, L"app.bin" },
@@ -103,8 +103,10 @@ static Menu SettingsMenu = {
 		{ L"Enable 3D UI:               ", NULL, L"app.bin" },
 		{ L"Autoboot into sysNAND:      ", NULL, L"app.bin" },
 		{ L"Console language:           ", NULL, L"app.bin" },
+		{ L"Reboot                      ", NULL, L"app.bin" },
+		{ L"Shutdown                    ", NULL, L"app.bin" },
 	},
-	7,
+	9,
 	0,
 	0
 };
@@ -212,11 +214,21 @@ void SettingsMenuInit(){
 		swprintf(MyMenu->Option[4].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ENABLE_3D_UI], cfgs[CFG_3D].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
 		swprintf(MyMenu->Option[5].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_ABSYSN], cfgs[CFG_ABSYSN].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
 		swprintf(MyMenu->Option[6].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_MENU_LANGUAGE], strings[STR_LANG_NAME]);
+		swprintf(MyMenu->Option[7].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SHUTDOWN]);
+		swprintf(MyMenu->Option[8].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_REBOOT]);
 		MenuRefresh();
 
 		uint32_t pad_state = InputWait();
-		if (pad_state & BUTTON_DOWN) MenuNextSelection();
-		if (pad_state & BUTTON_UP)   MenuPrevSelection();
+		if (pad_state & BUTTON_DOWN)
+		{
+			if(MyMenu->Current == 7) MenuNextSelection();
+			MenuNextSelection();
+		}
+		if (pad_state & BUTTON_UP)
+		{
+			if(MyMenu->Current == 0) MenuPrevSelection();
+			MenuPrevSelection();
+		}
 		if (pad_state & BUTTON_LEFT || pad_state & BUTTON_RIGHT)
 		{
 			if (MyMenu->Current == 0)
@@ -311,6 +323,27 @@ void SettingsMenuInit(){
 				wcstombs(cfgs[CFG_LANG].val.s, langs[curLang],
 					CFG_STR_MAX_LEN);
 				switchStrings();
+			}
+			else if (MyMenu->Current == 7)
+			{
+				MenuNextSelection();
+			}
+			else if (MyMenu->Current == 8)
+			{
+				MenuPrevSelection();
+			}
+		}
+		else if (pad_state & BUTTON_A)
+		{
+			if (MyMenu->Current == 7)
+			{
+				fadeOut();
+				ShutDown(1);
+			}
+			else if (MyMenu->Current == 8)
+			{
+				fadeOut();
+				ShutDown(0);
 			}
 		}
 		if (pad_state & BUTTON_B)

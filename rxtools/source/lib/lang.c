@@ -142,6 +142,8 @@ static const char *keys[STR_NUM] = {
 	[STR_QUICK_BOOT] = "QUICK_BOOT",
 	[STR_ABSYSN] = "ABSYSN",
 	[STR_MENU_LANGUAGE] = "MENU_LANGUAGE",
+	[STR_REBOOT] = "REBOOT",
+	[STR_SHUTDOWN] = "SHUTDOWN",
 	[STR_AUTOBOOT] = "AUTOBOOT",
 	[STR_INITIALIZING] = "INITIALIZING",
 	[STR_LOADING] = "LOADING",
@@ -198,6 +200,8 @@ void preloadStringsA()
 	wcscpy(strings[STR_PROGRESS_FAIL], L"**");
 //Acronyms that most probably won't be translated
 	wcscpy(strings[STR_MENU_LANGUAGE], L"Language  %16ls");
+	wcscpy(strings[STR_REBOOT], L"Reboot");
+	wcscpy(strings[STR_SHUTDOWN], L"Shutdown");
 	wcscpy(strings[STR_BLANK_BUTTON_ACTION], L"%ls %ls\n");
 	wcscpy(strings[STR_NAND], L"NAND");
 	wcscpy(strings[STR_SYSNAND], L"sysNAND");

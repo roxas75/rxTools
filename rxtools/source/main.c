@@ -112,7 +112,11 @@ static _Noreturn void mainLoop()
 
 		if (pad & BUTTON_SELECT) {
 			fadeOut();
-			ShutDown();
+			ShutDown(1); //shutdown
+		}
+		if (pad & BUTTON_START) {
+			fadeOut();
+			ShutDown(0); //reboot
 		}
 
 		MenuShow();
