@@ -18,7 +18,7 @@
 #include "mpcore.h"
 #include "CTRDecryptor.h"
 #include "crypto.h"
-#include "tmio/tmio.h"
+#include "fatfs/sdmmc.h"
 #include "nand.h"
 
 uint8_t NANDCTR[16];
@@ -78,11 +78,11 @@ unsigned int checkEmuNAND() {
 	int isn3ds = 0;
 	if (getMpInfo() == MPINFO_KTR)isn3ds = 1;
 
-	tmio_readsectors(TMIO_DEV_SDMC, isn3ds ? 0x4D800000 /0x200 : 0x3AF00000 / 0x200, 1, check);
+	sdmmc_sdcard_readsectors(isn3ds ? 0x4D800000 /0x200 : 0x3AF00000 / 0x200, 1, check);
 	if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
 		return isn3ds ? 0x4D800000 : 0x3AF00000;
 	} else {
-		tmio_readsectors(TMIO_DEV_SDMC, isn3ds ? 0x76000000 /0x200 : 0x3BA00000 / 0x200, 1, check);
+		sdmmc_sdcard_readsectors(isn3ds ? 0x76000000 /0x200 : 0x3BA00000 / 0x200, 1, check);
 		if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
 			return isn3ds ? 0x76000000 : 0x3BA00000;
 		} else {
@@ -112,7 +112,7 @@ void nand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, uns
 		case KTR_CTRNAND: info.keyslot = 0x5; break;
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
-	tmio_readsectors(TMIO_DEV_NAND, sector_no + partition / 0x200, numsectors, out);
+	sdmmc_nand_readsectors(sector_no + partition / 0x200, numsectors, out);
 	DecryptPartition(&info);
 }
 
@@ -134,7 +134,7 @@ void nand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, un
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
 	DecryptPartition(&info);
-	tmio_writesectors(TMIO_DEV_NAND, sector_no + partition / 0x200, numsectors, out);	//Stubbed, i don't wanna risk
+	sdmmc_nand_writesectors(sector_no + partition / 0x200, numsectors, out);	//Stubbed, i don't wanna risk
 }
 
 void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, unsigned int partition) {
@@ -154,7 +154,7 @@ void emunand_readsectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out, 
 	case KTR_CTRNAND: info.keyslot = 0x5; break;
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
-	tmio_readsectors(TMIO_DEV_SDMC, sector_no + partition / 0x200, numsectors, out);
+	sdmmc_sdcard_readsectors(sector_no + partition / 0x200, numsectors, out);
 	DecryptPartition(&info);
 }
 
@@ -176,5 +176,5 @@ void emunand_writesectors(uint32_t sector_no, uint32_t numsectors, uint8_t *out,
 	}
 	add_ctr(info.ctr, sector_no * 0x20);
 	DecryptPartition(&info);
-	tmio_writesectors(TMIO_DEV_SDMC, sector_no + partition / 0x200, numsectors, out);	//Stubbed, i don't wanna risk
+	sdmmc_sdcard_writesectors(sector_no + partition / 0x200, numsectors, out);	//Stubbed, i don't wanna risk
 }

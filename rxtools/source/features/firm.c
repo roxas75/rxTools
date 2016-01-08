@@ -28,6 +28,7 @@
 #include "console.h"
 #include "polarssl/aes.h"
 #include "fatfs/ff.h"
+#include "fatfs/sdmmc.h"
 #include "fs.h"
 #include "ncch.h"
 #include "draw.h"
