@@ -35,5 +35,5 @@ perm:
 
 	ldr	r0, perm
 	mcr	p15, 0, r0, c5, c0, 2
-
-	msr	CPSR_c, #0xD3 @ Disable IRQ and FIQ and enter supervisor mode
+	blx _start
+	
