@@ -52,6 +52,7 @@ Requirements for GNU/Linux:
 Delete CakeBrah folder and rxtools/CakeHax,and then,clone them separately:
 
 git clone --recursive https://github.com/mid-kid/CakeHax
+
 git clone --recursive https://github.com/mid-kid/CakeBrah
 
 Run make in each folder.Then,replace original folder of your cloned rxTools folder.
