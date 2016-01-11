@@ -61,8 +61,6 @@ rxTools *now* stores its code.bin in rxTools/sys/code.bin (formerly /rxTools.dat
 ## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
 Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
 
-## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
-Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
 
 ## Credits
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
