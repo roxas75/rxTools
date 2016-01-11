@@ -169,7 +169,7 @@ void DumpNandPartitions(){
 
 void GenerateNandXorpads(){
 
-	PadInfo myInfo = { .keyslot = getMpInfo() == MPINFO_KTR ? 0x5 : 0x4, .setKeyY = 0, .size_mb = getMpInfo() == MPINFO_KTR ? 1055 : 758, .filename = L"rxTools/nand.fat16.xorpad" };
+	PadInfo myInfo = { .keyslot = getMpInfo() == MPINFO_KTR ? 0x5 : 0x4, .setKeyY = 0, .size_mb = getMpInfo() == MPINFO_KTR ? 1055 : 758, .filename = "rxTools/nand.fat16.xorpad" };
 	GetNANDCTR(myInfo.CTR); add_ctr(myInfo.CTR, 0xB93000);
 
 	ConsoleInit();

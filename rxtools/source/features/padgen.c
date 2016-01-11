@@ -162,18 +162,20 @@ uint32_t CreatePad(PadInfo *info, int index)
 	#define BUFFER_ADDR ((volatile uint8_t*)0x21000000)
 	#define BLOCK_SIZE  (4*1024*1024)
 
-	if(info->filename[0] != 0 && info->filename[1] == 0 && info->filename[2] != 0 && info->filename[3] == 0)
+	wchar_t filename[sizeof(info->filename)];
+	mbstowcs(filename, info->filename, sizeof(info->filename));
+	if(filename[0] != 0 && filename[1] == 0 && filename[2] != 0 && filename[3] == 0)
 	{
-		wchar_t fname[sizeof(info->filename) / 2];
-		for(int i = 0; i < sizeof(info->filename) / 2; ++i)
+		wchar_t fname[sizeof(filename) / 2];
+		for(int i = 0; i < sizeof(filename) / 2; ++i)
 		{
-			fname[i] = info->filename[i*2];
+			fname[i] = filename[i*2];
 			if(fname[i] == 0) break;
 		}
 		if (!FileOpen(&pf, wcsncmp(fname, L"sdmc:/", 6) == 0 ? fname + 6 : fname, 1))
 			return 1;
 	}
-	else if (!FileOpen(&pf, info->filename, 1))
+	else if (!FileOpen(&pf, filename, 1))
 		return 1;
 
 	if(info->setKeyY != 0)
