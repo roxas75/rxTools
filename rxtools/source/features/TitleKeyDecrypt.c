@@ -23,7 +23,6 @@
 #include "lang.h"
 #include "hid.h"
 #include "fs.h"
-#include "fatfs/sdmmc.h"
 #include "CTRDecryptor.h"
 #include "crypto.h"
 #include "stdio.h"

@@ -8,7 +8,7 @@
 /*-----------------------------------------------------------------------*/
 
 #include "diskio.h"     /* FatFs lower layer API */
-#include "sdmmc.h"
+#include <tmio/tmio.h>
 #include "fs.h"
 /* Definitions of physical drive number for each media */
 #define ATA     0
@@ -24,7 +24,7 @@ DSTATUS disk_initialize (
     BYTE pdrv               /* Physical drive nmuber (0..) */
 )
 {
-    sdmmc_sdcard_init();
+    tmio_init();
     return RES_OK;
 }
 
@@ -56,7 +56,7 @@ DRESULT disk_read (
 {
     switch(pdrv){
         case 0:
-            if (sdmmc_sdcard_readsectors(sector,count,(uint8_t *)buff))
+            if (tmio_readsectors(TMIO_DEV_SDMC, sector,count,(uint8_t *)buff))
                 return RES_PARERR;
             break;
         case 1:
@@ -85,7 +85,7 @@ DRESULT disk_write (
 {
     switch(pdrv){
         case 0:
-            if (sdmmc_sdcard_writesectors(sector,count,(uint8_t *)buff))
+            if (tmio_writesectors(TMIO_DEV_SDMC, sector,count,(uint8_t *)buff))
                 return RES_PARERR;
             break;
         case 1:
