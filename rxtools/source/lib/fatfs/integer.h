@@ -5,30 +5,30 @@
 #ifndef _FF_INTEGER
 #define _FF_INTEGER
 
-#ifdef _WIN32   /* FatFs development platform */
+#ifdef _WIN32	/* Development platform */
 
 #include <windows.h>
 #include <tchar.h>
 
-#else           /* Embedded platform */
+#else			/* Embedded platform */
 
 #include <wchar.h>
 
-/* This type MUST be 8 bit */
-typedef unsigned char   BYTE;
+/* This type MUST be 8-bit */
+typedef unsigned char	BYTE;
 
-/* These types MUST be 16 bit */
-typedef short           SHORT;
-typedef unsigned short  WORD;
-typedef wchar_t         WCHAR;
+/* These types MUST be 16-bit */
+typedef short			SHORT;
+typedef unsigned short	WORD;
+typedef wchar_t			WCHAR;
 
-/* These types MUST be 16 bit or 32 bit */
-typedef int             INT;
-typedef unsigned int    UINT;
+/* These types MUST be 16-bit or 32-bit */
+typedef int				INT;
+typedef unsigned int	UINT;
 
-/* These types MUST be 32 bit */
-typedef long            LONG;
-typedef unsigned long   DWORD;
+/* These types MUST be 32-bit */
+typedef long			LONG;
+typedef unsigned long	DWORD;
 
 #endif
 

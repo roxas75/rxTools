@@ -13,7 +13,7 @@
 @ along with this program; if not, write to the Free Software
 @ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-	.section ".init"
+	.section ".text.vect"
 	.align	2
 	.arm
 
@@ -35,4 +35,5 @@ perm:
 
 	ldr	r0, perm
 	mcr	p15, 0, r0, c5, c0, 2
-	blx	_start
+
+	msr	CPSR_c, #0xD3 @ Disable IRQ and FIQ and enter supervisor mode
