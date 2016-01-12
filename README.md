@@ -2,6 +2,8 @@
 
 [![Join the chat at https://gitter.im/roxas75/rxTools](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/roxas75/rxTools?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+[Official twitter account](https://twitter.com/RxTools)
+
 rxTools is a collection of hacking tools for Nintendo 3DS/3DSXL/2DS, compatible with all the system versions from 4.1 to 9.2.
 
 rxMode is a free custom firmware which works through rxTools, not meant to replace any existing software, but just my personal
