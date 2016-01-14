@@ -85,9 +85,11 @@ int FindApp(AppInfo *info)
 	unsigned short latest_ver = 0, cur_ver = 0;
 	bool is_v0 = false;
 
-	for (int i = 0; myInfo->fname[0] != 0; i++)
+	while (f_readdir(curDir, myInfo) == FR_OK)
 	{
-		if (f_readdir(curDir, myInfo)) break;
+		if (myInfo->fname[0] == 0)
+			break;
+
 		if (myInfo->fname[0] == '.') continue;
 
 		if (wcsstr(myInfo->fname, L".tmd") || wcsstr(myInfo->fname, L".TMD"))
