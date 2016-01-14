@@ -139,7 +139,7 @@ int FindApp(AppInfo *info)
 				if (b_read != 0x30) continue;
 
 				memset(&path, 0, 256);
-				swprintf(path, _MAX_LFN, L"%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
+				swprintf(path, _MAX_LFN, L"%ls/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
 
 				if (FileOpen(&tmp, path, 0))
 				{
