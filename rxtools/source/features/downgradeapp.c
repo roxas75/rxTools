@@ -67,7 +67,6 @@ void sprint_sha256(wchar_t *str, unsigned char hash[32]) {
 int FindApp(AppInfo *info)
 {
 	wchar_t *folder = tmpstr;
-	memset(folder, 0, 256);
 
 	DIR* curDir = &myDir;
 	memset((unsigned char*)curDir, 0, sizeof(DIR));
@@ -94,7 +93,6 @@ int FindApp(AppInfo *info)
 
 		if (wcsstr(myInfo->fname, L".tmd") || wcsstr(myInfo->fname, L".TMD"))
 		{
-			memset(&path, 0, 256);
 			swprintf(path, _MAX_LFN, L"%ls/%ls", folder, myInfo->fname);
 
 			File tmp;
@@ -138,7 +136,6 @@ int FindApp(AppInfo *info)
 
 				if (b_read != 0x30) continue;
 
-				memset(&path, 0, 256);
 				swprintf(path, _MAX_LFN, L"%ls/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
 
 				if (FileOpen(&tmp, path, 0))
