@@ -32,6 +32,7 @@
 #include <dirent.h>
 #include <errno.h>
 
+#include "command.h"
 #include "tmio.h"
 #include "tmio_hardware.h"
 
@@ -179,7 +180,10 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 #endif
 
 	tmio_write32(REG_SDIRMASK,~mask);
-	tmio_send_command(0x3C12,sector_no,0);
+	tmio_send_command(MMC_READ_BLOCK_MULTI
+		| TMIO_CMD_RESP_R1 | TMIO_CMD_DATA_PRESENT
+		| TMIO_CMD_TRANSFER_READ | TMIO_CMD_TRANSFER_MULTI,
+		sector_no, 0);
 
 	uint16_t *dataPtr = (uint16_t*)out;
 	uint32_t *dataPtr32 = (uint32_t*)out;
@@ -244,7 +248,10 @@ uint32_t tmio_writesectors(enum tmio_dev_id target,
 #endif
 	tmio_write32(REG_SDIRMASK,~mask);
 
-	tmio_send_command(0x2C19,sector_no,0);
+	tmio_send_command(MMC_WRITE_BLOCK_MULTI
+		| TMIO_CMD_RESP_R1 | TMIO_CMD_DATA_PRESENT
+		| TMIO_CMD_TRANSFER_MULTI,
+		sector_no, 0);
 
 #ifdef DATA32_SUPPORT
 	uint32_t *dataPtr32 = (uint32_t*)in;
@@ -392,22 +399,25 @@ uint32_t tmio_init_nand()
 	inittarget(TMIO_DEV_NAND);
 	waitcycles(0xF000);
 	
-	tmio_send_command(0,0,0);
+	tmio_send_command(MMC_IDLE,0,0);
 	
 	do
 	{
 		do
-			tmio_send_command(0x0701,0x100000,0);
+			tmio_send_command(MMC_SEND_OP_COND | TMIO_CMD_RESP_R3,
+				0x100000,0);
 		while (tmio_wait_respend());
 	}
 	while((tmio_read32(REG_SDRESP0) & 0x80000000) == 0);
 	
-	tmio_send_command(0x0602,0x0,0);
-	r = tmio_send_command(0x0403,tmio_dev[TMIO_DEV_NAND].initarg << 0x10,1);
+	tmio_send_command(MMC_ALL_SEND_CID | TMIO_CMD_RESP_R2,0x0,0);
+	r = tmio_send_command(MMC_SET_RELATIVE_ADDR | TMIO_CMD_RESP_R1,
+		tmio_dev[TMIO_DEV_NAND].initarg << 0x10,1);
 	if(r)
 		return r;
 
-	r = tmio_send_command(0x0609,tmio_dev[TMIO_DEV_NAND].initarg << 0x10,1);
+	r = tmio_send_command(MMC_SEND_CSD | TMIO_CMD_RESP_R2,
+		tmio_dev[TMIO_DEV_NAND].initarg << 0x10,1);
 	if(r)
 		return r;
 
@@ -419,22 +429,25 @@ uint32_t tmio_init_nand()
 	tmio_dev[TMIO_DEV_NAND].clk = 1;
 	setckl(1);
 	
-	tmio_send_command(0x0407,tmio_dev[TMIO_DEV_NAND].initarg << 0x10,0);
+	tmio_send_command(MMC_SELECT_CARD | TMIO_CMD_RESP_R1,
+		tmio_dev[TMIO_DEV_NAND].initarg << 0x10,0);
+
 	tmio_dev[TMIO_DEV_NAND].SDOPT = 1;
 
-	r = tmio_send_command(0x0506,0x3B70100,1);
+	r = tmio_send_command(MMC_SWITCH | TMIO_CMD_RESP_R1B,0x3B70100,1);
 	if(r)
 		return r;
 
-	r = tmio_send_command(0x0506,0x3B90100,1);
+	r = tmio_send_command(MMC_SWITCH | TMIO_CMD_RESP_R1B,0x3B90100,1);
 	if(r)
 		return r;
 
-	r = tmio_send_command(0x040D,tmio_dev[TMIO_DEV_NAND].initarg << 0x10,1);
+	r = tmio_send_command(MMC_SEND_STATUS | TMIO_CMD_RESP_R1,
+		tmio_dev[TMIO_DEV_NAND].initarg << 0x10,1);
 	if(r)
 		return r;
 
-	r = tmio_send_command(0x0410,0x200,1);
+	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,0x200,1);
 	if(r)
 		return r;
 
@@ -462,9 +475,9 @@ uint32_t tmio_init_sdmc()
 
 	inittarget(TMIO_DEV_SDMC);
 	waitcycles(0xF000);
-	tmio_send_command(0,0,0);
+	tmio_send_command(MMC_IDLE,0,0);
 
-	r = tmio_send_command(0x0408,0x1AA,1);
+	r = tmio_send_command(SD_SEND_IF_COND | TMIO_CMD_RESP_R1,0x1AA,1);
 	if(r)
 		return r;
 
@@ -475,9 +488,12 @@ uint32_t tmio_init_sdmc()
 	{
 		while(1)
 		{
-			tmio_send_command(0x0437,tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,0);
+			tmio_send_command(MMC_APP_CMD | TMIO_CMD_RESP_R1,
+				tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,0);
 			temp2 = 1;
-			if(tmio_send_command(0x0769,0x00FF8000 | temp,1))
+			if(tmio_send_command(SD_APP_OP_COND
+				| TMIO_CMD_APP | TMIO_CMD_RESP_R3,
+				0x00FF8000 | temp,1))
 				continue;
 			if(!tmio_wait_respend())
 				break;
@@ -492,9 +508,9 @@ uint32_t tmio_init_sdmc()
 	
 	tmio_dev[TMIO_DEV_SDMC].isSDHC = temp2;
 	
-	tmio_send_command(0x0602,0,0);
+	tmio_send_command(MMC_ALL_SEND_CID | TMIO_CMD_RESP_R2,0,0);
 	
-	r = tmio_send_command(0x0403,0,1);
+	r = tmio_send_command(MMC_SET_RELATIVE_ADDR | TMIO_CMD_RESP_R1,0,1);
 	if(r)
 		return r;
 
@@ -503,7 +519,8 @@ uint32_t tmio_init_sdmc()
 		return r;
 
 	tmio_dev[TMIO_DEV_SDMC].initarg = tmio_read32(REG_SDRESP0) >> 0x10;
-	tmio_send_command(0x0609,tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,0);
+	tmio_send_command(MMC_SEND_CSD | TMIO_CMD_RESP_R2,
+		tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,0);
 	r = tmio_wait_respend();
 	if(r)
 		return r;
@@ -512,25 +529,35 @@ uint32_t tmio_init_sdmc()
 	tmio_dev[TMIO_DEV_SDMC].clk = 1;
 	setckl(1);
 	
-	tmio_send_command(0x0507,tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,0);
-	r = tmio_send_command(0x0437,tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,1);
+	tmio_send_command(MMC_SELECT_CARD | TMIO_CMD_RESP_R1B,
+		tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,0);
+	r = tmio_send_command(MMC_APP_CMD | TMIO_CMD_RESP_R1,
+		tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,1);
 	if(r)
 		return r;
 	
 	tmio_dev[TMIO_DEV_SDMC].SDOPT = 1;
-	r = tmio_send_command(0x0446,0x2,1);
+	r = tmio_send_command(MMC_SWITCH | TMIO_CMD_APP | TMIO_CMD_RESP_R1,
+		0x2,1);
 	if(r)
 		return r;
 
-	r = tmio_send_command(0x040D,tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,1);
+	r = tmio_send_command(MMC_SEND_STATUS | TMIO_CMD_RESP_R1,
+		tmio_dev[TMIO_DEV_SDMC].initarg << 0x10,1);
 	if(r)
 		return r;
 	
-	r = tmio_send_command(0x0410,0x200,1);
+	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,0x200,1);
 	if(r)
 		return r;
 
 	tmio_dev[TMIO_DEV_SDMC].clk |= 0x200;
 	
 	return 0;
+}
+
+uint32_t tmio_wrprotected(enum tmio_dev_id target)
+{
+	inittarget(target);
+	return tmio_read32(REG_SDSTATUS) & TMIO_STAT_WRPROTECT;
 }
