@@ -73,13 +73,6 @@ static void tmio_mask16(enum tmio_regs reg, const uint16_t clear, const uint16_t
 	tmio_write16(reg, val);
 }
 
-static void tmio_mask32(enum tmio_regs reg, const uint32_t clear, const uint32_t set) {
-	uint32_t val = tmio_read32(reg);
-	val &= ~clear;
-	val |= set;
-	tmio_write32(reg, val);
-}
-
 static void setckl(uint32_t data)
 {
 	tmio_mask16(REG_SDCLKCTL,0x100,0);
