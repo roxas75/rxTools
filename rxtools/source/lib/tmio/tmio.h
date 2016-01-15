@@ -27,19 +27,32 @@
 
 #include <stdint.h>
 
-enum tmio_dev {
+enum tmio_dev_id {
 	TMIO_DEV_SDMC = 0,
 	TMIO_DEV_NAND = 1,
 
 	TMIO_DEV_NUM
 };
 
-void tmio_init();
+struct tmio_dev {
+	uint32_t initarg;
+	uint32_t isSDHC;
+	uint32_t clk;
+	uint32_t SDOPT;
+	uint32_t total_size; //size in sectors of the device
+	uint32_t res;
+};
 
-uint32_t tmio_readsectors(enum tmio_dev target,
+extern struct tmio_dev tmio_dev[TMIO_DEV_NUM];
+
+void tmio_init(void);
+uint32_t tmio_init_sdmc(void);
+uint32_t tmio_init_nand(void);
+
+uint32_t tmio_readsectors(enum tmio_dev_id target,
 	uint32_t sector_no, uint32_t numsectors, uint8_t *out);
 
-uint32_t tmio_writesectors(enum tmio_dev target,
+uint32_t tmio_writesectors(enum tmio_dev_id target,
 	uint32_t sector_no, uint32_t numsectors, uint8_t *in);
 
 #endif

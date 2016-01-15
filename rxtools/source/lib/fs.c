@@ -22,7 +22,6 @@
 static FATFS fs[3];
 /**Init FileSystems.*/
 bool FSInit(void) {
-	FSNandInitCrypto();
 	if (f_mount(&fs[0], _T("0:"), 0) != FR_OK) return 0;		//SDCard
 	if (f_mount(&fs[1], _T("1:"), 0) != FR_OK) return 0;		//NAND
 	if (f_mount(&fs[2], _T("2:"), 0) != FR_OK) ; //return 0;	//EmuNAND, Sometimes it doesn't exist
