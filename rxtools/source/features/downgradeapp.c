@@ -37,11 +37,11 @@
 #define bswap_32(a) ((((a) << 24) & 0xff000000) | (((a) << 8) & 0xff0000) | (((a) >> 8) & 0xff00) | (((a) >> 24) & 0xff))
 
 typedef struct {
-	unsigned int id;
-	unsigned short index;
-	unsigned short type;
-	unsigned int size;
-	unsigned char signature[0x20];
+	uint32_t id;
+	uint16_t index;
+	uint16_t type;
+	uint64_t size;
+	uint8_t signature[0x20];
 } tmd_chunk_struct;
 
 unsigned char region = 0;
