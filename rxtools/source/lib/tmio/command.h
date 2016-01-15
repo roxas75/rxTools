@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  *
- * Copyright (c) 2014-2015, Normmatt, 173210
+ * Copyright (c) 2016 173210
  *
  * Alternatively, the contents of this file may be used under the terms
  * of the GNU General Public License Version 2, as described below:
@@ -22,37 +22,37 @@
  * along with this program. If not, see http://www.gnu.org/licenses/.
  */
 
-#ifndef TMIO_H
-#define TMIO_H
+#ifndef COMMAND_H
+#define COMMAND_H
 
-#include <stdint.h>
+enum {
+	// Class 1
+	MMC_IDLE = 0,
+	MMC_SEND_OP_COND = 1,
+	MMC_ALL_SEND_CID = 2,
+	MMC_SET_RELATIVE_ADDR = 3,
+	MMC_SWITCH = 6,
+	MMC_SELECT_CARD = 7,
+	MMC_SEND_CSD = 9,
+	MMC_SEND_STATUS = 13,
 
-enum tmio_dev_id {
-	TMIO_DEV_SDMC = 0,
-	TMIO_DEV_NAND = 1,
+	// Class 2
+	MMC_SET_BLOCKLEN = 16,
+	MMC_READ_BLOCK_MULTI = 18,
 
-	TMIO_DEV_NUM
+	// Class 4
+	MMC_WRITE_BLOCK_MULTI = 25,
+
+	// Class 8
+	MMC_APP_CMD = 55
 };
 
-struct tmio_dev {
-	uint32_t initarg;
-	uint32_t isSDHC;
-	uint32_t clk;
-	uint32_t SDOPT;
-	uint32_t total_size; //size in sectors of the device
-	uint32_t res;
+enum {
+	// Class 0
+	SD_SEND_IF_COND = 8,
+
+	// Application command
+	SD_APP_OP_COND = 41
 };
-
-extern struct tmio_dev tmio_dev[TMIO_DEV_NUM];
-
-void tmio_init(void);
-uint32_t tmio_init_sdmc(void);
-uint32_t tmio_init_nand(void);
-
-uint32_t tmio_readsectors(enum tmio_dev_id target,
-	uint32_t sector_no, uint32_t numsectors, uint8_t *out);
-
-uint32_t tmio_writesectors(enum tmio_dev_id target,
-	uint32_t sector_no, uint32_t numsectors, uint8_t *in);
 
 #endif
