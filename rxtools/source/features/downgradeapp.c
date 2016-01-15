@@ -191,7 +191,7 @@ int CheckRegion(int drive)
 
 	if (region > 0x06)
 	{
-		print(strings[STR_WRONG], "", strings[STR_REGION]);
+		print(strings[STR_WRONG], L"", strings[STR_REGION]);
 		ConsoleShow();
 		return -1;
 	} else {
@@ -225,7 +225,7 @@ int CheckRegionSilent(int drive)
 
 	if (region > 0x06)
 	{
-		print(strings[STR_WRONG], "", strings[STR_REGION]);
+		print(strings[STR_WRONG], L"", strings[STR_REGION]);
 		ConsoleShow();
 		return -1;
 	} else {
@@ -356,7 +356,7 @@ void downgradeMSET()
 	}
 	if( mset_dg_ver == 0 )
 	{
-		print(strings[STR_WRONG], "", strings[STR_REGION]);
+		print(strings[STR_WRONG], L"", strings[STR_REGION]);
 	}
 	ConsoleShow();
 
@@ -425,13 +425,13 @@ void downgradeMSET()
 										ConsoleShow();
 										f_unlink(dgpath);
 									} else {
-										print(strings[STR_WRONG], "", strings[STR_DOWNGRADE_PACK]);
+										print(strings[STR_WRONG], L"", strings[STR_DOWNGRADE_PACK]);
 									}
 								} else {
 									print(strings[STR_ERROR_OPENING], dgpath);
 								}
 							} else {
-								print(strings[STR_WRONG], "", strings[STR_DOWNGRADE_PACK]);
+								print(strings[STR_WRONG], L"", strings[STR_DOWNGRADE_PACK]);
 							}
 						} else {
 							print(strings[STR_DOWNGRADING_NOT_NEEDED], strings[STR_MSET]);
@@ -709,7 +709,7 @@ void manageFBI(bool restore)
 													print(strings[STR_ERROR_COPYING], path, info.tmd);
 												}
 											} else {
-												print(strings[STR_WRONG], "", strings[STR_HASH]);
+												print(strings[STR_WRONG], L"", strings[STR_HASH]);
 												sprint_sha256(wtmp, CntDataSum);
 												print(strings[STR_GOT], wtmp);
 												sprint_sha256(wtmp, TmdCntDataSum);
@@ -717,7 +717,7 @@ void manageFBI(bool restore)
 											}
 										} else {
 											FileClose(&tmp);
-											print(strings[STR_WRONG], "", strings[STR_SIZE]);
+											print(strings[STR_WRONG], L"", strings[STR_SIZE]);
 											swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%u", size);
 											print(strings[STR_GOT], wtmp);
 											swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%u", sd_cntsize);
@@ -727,25 +727,25 @@ void manageFBI(bool restore)
 										print(strings[STR_ERROR_OPENING], path2);
 									}
 								} else {
-									print(strings[STR_WRONG], "", strings[STR_HASH]);
+									print(strings[STR_WRONG], L"", strings[STR_HASH]);
 									sprint_sha256(wtmp, CntChnkRecSum);
 									print(strings[STR_GOT], wtmp);
 									sprint_sha256(wtmp, TmdCntChnkRecSum);
 									print(strings[STR_EXPECTED], wtmp);
 								}
 							} else {
-								print(strings[STR_WRONG], "", strings[STR_HASH]);
+								print(strings[STR_WRONG], L"", strings[STR_HASH]);
 								sprint_sha256(wtmp, CntInfoRecSum);
 								print(strings[STR_GOT], wtmp);
 								sprint_sha256(wtmp, TmdCntInfoRecSum);
 								print(strings[STR_EXPECTED], wtmp);
 							}
 						} else {
-							print(strings[STR_WRONG], "", strings[STR_TMD_VERSION]);
+							print(strings[STR_WRONG], L"", strings[STR_TMD_VERSION]);
 						}
 					} else {
 						FileClose(&tmp);
-						print(strings[STR_WRONG], "", strings[STR_TMD_SIZE]);
+						print(strings[STR_WRONG], L"", strings[STR_TMD_SIZE]);
 					}
 				} else {
 					print(strings[STR_ERROR_OPENING], path);
