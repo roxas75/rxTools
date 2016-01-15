@@ -11,7 +11,6 @@
 	"INJECTING": "Injection de\n%ls\nvers %ls...\n",
 	"DECRYPT": "Décrypte %ls",
 	"DECRYPTING": "Décryptage de %ls...\n",
-	"DECRYPTING_TO": "Décrypte %ls\nvers %s...\n",
 	"DECRYPTED": "Décrypter %d %ls\n", 
 	"GENERATE": "Génère %ls",
 	"GENERATING": "Génération de %ls...\n",

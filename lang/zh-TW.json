@@ -11,7 +11,6 @@
     "INJECTING": "正在注入\n%ls\n到 %ls...\n",
     "DECRYPT": "解密 %ls", 
     "DECRYPTING": "正在解密 %ls...\n", 
-    "DECRYPTING_TO": "正在解密 %ls\n 到 %s...\n", 
     "DECRYPTED": "已解密 %d 個 %ls\n", 
     "GENERATE": "產生 %ls", 
     "GENERATING": "正在產生 %ls...\n", 

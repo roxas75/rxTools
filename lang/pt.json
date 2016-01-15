@@ -12,7 +12,6 @@
 	"DECRYPT": "Decriptar %ls",
 	"DECRYPTED": "%d %ls foi Decriptado\n", 
 	"DECRYPTING": "Decriptando %ls...\n",
-	"DECRYPTING_TO": "Decriptando %ls em\n%s...\n",
 	"DELETE": "excluir",
 	"DELETING": "Excluindo %ls...\n",
 	"DIRECTORY": "Diretório: %ls",
