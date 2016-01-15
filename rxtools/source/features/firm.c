@@ -328,7 +328,7 @@ void FirmLoader(TCHAR firm_path[]){
 	{
 		ConsoleInit();
 		ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
-		print(strings[STR_WRONG], "", strings[STR_FIRMWARE_FILE]);
+		print(strings[STR_WRONG], L"", strings[STR_FIRMWARE_FILE]);
 		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
 		ConsoleShow();
 		WaitForButton(BUTTON_A);

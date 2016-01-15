@@ -37,11 +37,11 @@
 #define bswap_32(a) ((((a) << 24) & 0xff000000) | (((a) << 8) & 0xff0000) | (((a) >> 8) & 0xff00) | (((a) >> 24) & 0xff))
 
 typedef struct {
-	unsigned int id;
-	unsigned short index;
-	unsigned short type;
-	unsigned int size;
-	unsigned char signature[0x20];
+	uint32_t id;
+	uint16_t index;
+	uint16_t type;
+	uint64_t size;
+	uint8_t signature[0x20];
 } tmd_chunk_struct;
 
 unsigned char region = 0;
@@ -67,7 +67,6 @@ void sprint_sha256(wchar_t *str, unsigned char hash[32]) {
 int FindApp(AppInfo *info)
 {
 	wchar_t *folder = tmpstr;
-	memset(folder, 0, 256);
 
 	DIR* curDir = &myDir;
 	memset((unsigned char*)curDir, 0, sizeof(DIR));
@@ -85,14 +84,15 @@ int FindApp(AppInfo *info)
 	unsigned short latest_ver = 0, cur_ver = 0;
 	bool is_v0 = false;
 
-	for (int i = 0; myInfo->fname[0] != 0; i++)
+	while (f_readdir(curDir, myInfo) == FR_OK)
 	{
-		if (f_readdir(curDir, myInfo)) break;
+		if (myInfo->fname[0] == 0)
+			break;
+
 		if (myInfo->fname[0] == '.') continue;
 
 		if (wcsstr(myInfo->fname, L".tmd") || wcsstr(myInfo->fname, L".TMD"))
 		{
-			memset(&path, 0, 256);
 			swprintf(path, _MAX_LFN, L"%ls/%ls", folder, myInfo->fname);
 
 			File tmp;
@@ -136,8 +136,7 @@ int FindApp(AppInfo *info)
 
 				if (b_read != 0x30) continue;
 
-				memset(&path, 0, 256);
-				swprintf(path, _MAX_LFN, L"%s/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
+				swprintf(path, _MAX_LFN, L"%ls/%08x.app", folder, bswap_32(tmd_entry.id)); // Change Endianness
 
 				if (FileOpen(&tmp, path, 0))
 				{
@@ -192,7 +191,7 @@ int CheckRegion(int drive)
 
 	if (region > 0x06)
 	{
-		print(strings[STR_WRONG], "", strings[STR_REGION]);
+		print(strings[STR_WRONG], L"", strings[STR_REGION]);
 		ConsoleShow();
 		return -1;
 	} else {
@@ -226,7 +225,7 @@ int CheckRegionSilent(int drive)
 
 	if (region > 0x06)
 	{
-		print(strings[STR_WRONG], "", strings[STR_REGION]);
+		print(strings[STR_WRONG], L"", strings[STR_REGION]);
 		ConsoleShow();
 		return -1;
 	} else {
@@ -357,7 +356,7 @@ void downgradeMSET()
 	}
 	if( mset_dg_ver == 0 )
 	{
-		print(strings[STR_WRONG], "", strings[STR_REGION]);
+		print(strings[STR_WRONG], L"", strings[STR_REGION]);
 	}
 	ConsoleShow();
 
@@ -426,13 +425,13 @@ void downgradeMSET()
 										ConsoleShow();
 										f_unlink(dgpath);
 									} else {
-										print(strings[STR_WRONG], "", strings[STR_DOWNGRADE_PACK]);
+										print(strings[STR_WRONG], L"", strings[STR_DOWNGRADE_PACK]);
 									}
 								} else {
 									print(strings[STR_ERROR_OPENING], dgpath);
 								}
 							} else {
-								print(strings[STR_WRONG], "", strings[STR_DOWNGRADE_PACK]);
+								print(strings[STR_WRONG], L"", strings[STR_DOWNGRADE_PACK]);
 							}
 						} else {
 							print(strings[STR_DOWNGRADING_NOT_NEEDED], strings[STR_MSET]);
@@ -710,7 +709,7 @@ void manageFBI(bool restore)
 													print(strings[STR_ERROR_COPYING], path, info.tmd);
 												}
 											} else {
-												print(strings[STR_WRONG], "", strings[STR_HASH]);
+												print(strings[STR_WRONG], L"", strings[STR_HASH]);
 												sprint_sha256(wtmp, CntDataSum);
 												print(strings[STR_GOT], wtmp);
 												sprint_sha256(wtmp, TmdCntDataSum);
@@ -718,7 +717,7 @@ void manageFBI(bool restore)
 											}
 										} else {
 											FileClose(&tmp);
-											print(strings[STR_WRONG], "", strings[STR_SIZE]);
+											print(strings[STR_WRONG], L"", strings[STR_SIZE]);
 											swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%u", size);
 											print(strings[STR_GOT], wtmp);
 											swprintf(wtmp, sizeof(wtmp)/sizeof(wtmp[0]), L"%u", sd_cntsize);
@@ -728,25 +727,25 @@ void manageFBI(bool restore)
 										print(strings[STR_ERROR_OPENING], path2);
 									}
 								} else {
-									print(strings[STR_WRONG], "", strings[STR_HASH]);
+									print(strings[STR_WRONG], L"", strings[STR_HASH]);
 									sprint_sha256(wtmp, CntChnkRecSum);
 									print(strings[STR_GOT], wtmp);
 									sprint_sha256(wtmp, TmdCntChnkRecSum);
 									print(strings[STR_EXPECTED], wtmp);
 								}
 							} else {
-								print(strings[STR_WRONG], "", strings[STR_HASH]);
+								print(strings[STR_WRONG], L"", strings[STR_HASH]);
 								sprint_sha256(wtmp, CntInfoRecSum);
 								print(strings[STR_GOT], wtmp);
 								sprint_sha256(wtmp, TmdCntInfoRecSum);
 								print(strings[STR_EXPECTED], wtmp);
 							}
 						} else {
-							print(strings[STR_WRONG], "", strings[STR_TMD_VERSION]);
+							print(strings[STR_WRONG], L"", strings[STR_TMD_VERSION]);
 						}
 					} else {
 						FileClose(&tmp);
-						print(strings[STR_WRONG], "", strings[STR_TMD_SIZE]);
+						print(strings[STR_WRONG], L"", strings[STR_TMD_SIZE]);
 					}
 				} else {
 					print(strings[STR_ERROR_OPENING], path);

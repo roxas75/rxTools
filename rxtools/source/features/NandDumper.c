@@ -74,7 +74,7 @@ void NandDumper(){
 		wcscat(ProgressBar, strings[STR_PROGRESS]);
 	unsigned int progress = 0;
 	wchar_t filename[_MAX_LFN];
-	swprintf(filename, _MAX_LFN, L"rxTools/nand/%sNAND.bin",
+	swprintf(filename, _MAX_LFN, L"rxTools/nand/%lsNAND.bin",
 		isEmuNand ? L"EMU" : L"");
 	if(FileOpen(&myFile, filename, 1)){
 		print(strings[STR_DUMPING], isEmuNand ? strings[STR_EMUNAND] : strings[STR_SYSNAND], filename);
