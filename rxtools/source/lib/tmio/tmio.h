@@ -55,4 +55,6 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 uint32_t tmio_writesectors(enum tmio_dev_id target,
 	uint32_t sector_no, uint32_t numsectors, uint8_t *in);
 
+#define TMIO_BBS 512
+
 #endif

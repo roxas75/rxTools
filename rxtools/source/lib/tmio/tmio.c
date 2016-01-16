@@ -168,7 +168,7 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 	tmio_write16(REG_SDSTOP,0x100);
 #ifdef DATA32_SUPPORT
 	tmio_write16(REG_SDBLKCOUNT32,numsectors);
-	tmio_write16(REG_SDBLKLEN32,0x200);
+	tmio_write16(REG_SDBLKLEN32,TMIO_BBS);
 #endif
 	tmio_write16(REG_SDBLKCOUNT,numsectors);
 
@@ -205,7 +205,7 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 		#ifdef DATA32_SUPPORT
 		if(useBuf32)
 		{
-			for(int i = 0; i<0x200; i+=4)
+			for(int i = 0; i<TMIO_BBS; i+=4)
 			{
 				*dataPtr32++ = tmio_read32(REG_SDFIFO32);
 			}
@@ -213,7 +213,7 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 		else
 		{
 		#endif
-			for(int i = 0; i<0x200; i+=2)
+			for(int i = 0; i<TMIO_BBS; i+=2)
 			{
 				*dataPtr++ = tmio_read16(REG_SDFIFO);
 			}
@@ -236,7 +236,7 @@ uint32_t tmio_writesectors(enum tmio_dev_id target,
 	tmio_write16(REG_SDSTOP,0x100);
 #ifdef DATA32_SUPPORT
 	tmio_write16(REG_SDBLKCOUNT32,numsectors);
-	tmio_write16(REG_SDBLKLEN32,0x200);
+	tmio_write16(REG_SDBLKLEN32,TMIO_BBS);
 #endif
 	tmio_write16(REG_SDBLKCOUNT,numsectors);
 
@@ -273,12 +273,12 @@ uint32_t tmio_writesectors(enum tmio_dev_id target,
 #endif
 
 		#ifdef DATA32_SUPPORT
-		for(int i = 0; i<0x200; i+=4)
+		for(int i = 0; i<TMIO_BBS; i+=4)
 		{
 			tmio_write32(REG_SDFIFO32,*dataPtr32++);
 		}
 		#else
-		for(int i = 0; i<0x200; i+=2)
+		for(int i = 0; i<TMIO_BBS; i+=2)
 		{
 			tmio_write16(REG_SDFIFO,*dataPtr++);
 		}
@@ -340,7 +340,7 @@ void tmio_init()
 	//tmio_write16(REG_SDCLKCTL,0x40);
 	//tmio_write16(REG_SDOPT,0x40EB);
 	//tmio_mask16(0x02,0x3,0);
-	//tmio_write16(REG_SDBLKLEN,0x200);
+	//tmio_write16(REG_SDBLKLEN,TMIO_BBS);
 	//tmio_write16(REG_SDSTOP,0);
 	
 	*(volatile uint16_t*)0x10006100 &= 0xF7FFu; //SDDATACTL32
@@ -447,7 +447,7 @@ uint32_t tmio_init_nand()
 	if(r)
 		return r;
 
-	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,0x200,1);
+	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,TMIO_BBS,1);
 	if(r)
 		return r;
 
@@ -547,7 +547,7 @@ uint32_t tmio_init_sdmc()
 	if(r)
 		return r;
 	
-	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,0x200,1);
+	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,TMIO_BBS,1);
 	if(r)
 		return r;
 
