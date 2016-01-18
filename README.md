@@ -57,11 +57,22 @@ If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x42
 
 Make sure that the path to rxTools doesn't include space (' ').
 
+## Setting up rxTools  
+- If you have used a previous version, please delete SD:/rxTools, SD:/3ds/rxTools, and rxTools.dat, if present on your (m)SD card.  
+- Extract the rxTools folder from the release and place it into the root of your card.
+- If you are using an o3ds or 2ds, ensure you have Python 2.7 installed on your PC and run /Tools/cdn_firm.py. This should download 3 files into a folder named /firm. Copy this entire folder and place it into SD:/rxTools/.  
+- If you are using an n3ds, you must search for the encrypted firmware.bin used by previous versions of Cakehax. It should have an MD5 of: B99ADF0ADB279712367C06EB83BA9AE6. You will need to rename it and place it here-> SD:/rxTools/firm/0004013820000002.bin  
+- For use with the Homebrew Launcher, go into the ninjhax folder and copy the /rxTools folder to SD:/3ds/  
+  
+
+
 ## How to launch with Spider
 rxTools *now* stores its code.bin in rxTools/sys/code.bin (formerly /rxTools.dat). To launch rxTools using the Spider exploit visit https://dukesrg.github.io/?rxTools/sys/code.bin using the 3DS Internet Browser. (Requires ver 9.2 or older).
 
 ## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
 Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
+Alternatively, you can install the MSET ROP with FBI. Press select and use left and right on the D-pad to select "rxTools3.x 4.x" or "rxTools3.x 6.x", depending on the version of MSET you are using. 
+* Do NOT install 4.x MSET on a 2ds. Formatting in this configuration will cause a soft brick!
 
 
 ## Credits
