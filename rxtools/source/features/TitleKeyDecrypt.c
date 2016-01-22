@@ -23,7 +23,6 @@
 #include "lang.h"
 #include "hid.h"
 #include "fs.h"
-#include "fatfs/sdmmc.h"
 #include "CTRDecryptor.h"
 #include "crypto.h"
 #include "stdio.h"
@@ -259,14 +258,14 @@ void DecryptTitleKeyFile(void) {
 			percent++;
 			wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 			progress += wcslen(strings[STR_PROGRESS_OK]);
-			print(L"\r%s", progressbar);
+			print(L"\r%ls", progressbar);
 			ConsoleShow();
 		}
 	}
 	percent++;
 	wcsncpy(progress, strings[STR_PROGRESS_OK], wcslen(strings[STR_PROGRESS_OK]));
 	progress += wcslen(strings[STR_PROGRESS_OK]);
-	print(L"\r%s\n", progressbar);
+	print(L"\r%ls\n", progressbar);
 	ConsoleShow();
 	rr = f_write(&dump, line, sizeof(line), &br);
 	if ((rr != FR_OK)||(br != sizeof(line)))

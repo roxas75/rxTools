@@ -41,7 +41,6 @@ static const char *keys[STR_NUM] = {
 	[STR_INJECTING] = "INJECTING",
 	[STR_DECRYPT] = "DECRYPT",
 	[STR_DECRYPTING] = "DECRYPTING",
-	[STR_DECRYPTING_TO] = "DECRYPTING_TO",
 	[STR_DECRYPTED] = "DECRYPTED",
 	[STR_GENERATE] = "GENERATE",
 	[STR_GENERATING] = "GENERATING",
@@ -171,7 +170,7 @@ void preloadStringsA()
 	wcscpy(strings[STR_INITIALIZING], L"Initializing...");
 	wcscpy(strings[STR_LOADING], L"Loading...");
 	wcscpy(strings[STR_FAILED], L"Failed!");
-	wcscpy(strings[STR_ERROR_OPENING], L"Error opening %s!");
+	wcscpy(strings[STR_ERROR_OPENING], L"Error opening %ls!");
 	wcscpy(strings[STR_AUTOBOOT], L"Autoboot");
 	wcscpy(strings[STR_OPEN_MENU], L"open menu");
 	wcscpy(strings[STR_WARNING], L"Warning");

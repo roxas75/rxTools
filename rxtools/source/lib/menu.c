@@ -37,7 +37,7 @@ void MenuInit(Menu* menu){
     MyMenu->Showed = 0;
 	ConsoleSetTitle(MyMenu->Name);
 	for(int i = 0; i < MyMenu->nEntryes; i++){
-		print(L"%s\n", MyMenu->Option[i].Str);
+		ConsoleAddText(MyMenu->Option[i].Str);
 	}
 }
 

@@ -7,14 +7,22 @@
 /* storage control module to the FatFs module with a defined API.        */
 /*-----------------------------------------------------------------------*/
 
+#include <stdbool.h>
 #include "diskio.h"     /* FatFs lower layer API */
-#include "sdmmc.h"
-#include "fs.h"
-/* Definitions of physical drive number for each media */
-#define ATA     0
-#define MMC     1
-#define USB     2
+#include <tmio/tmio.h>
+#include <nand.h>
 
+/* Definitions of physical drive number for each media */
+enum {
+	DRV_SDMC,
+	DRV_NAND,
+	DRV_EMU,
+
+	DRV_NUM
+};
+
+static bool initedTmio = false;
+static bool initedCrypto = false;
 
 /*-----------------------------------------------------------------------*/
 /* Inidialize a Drive                                                    */
@@ -24,8 +32,33 @@ DSTATUS disk_initialize (
     BYTE pdrv               /* Physical drive nmuber (0..) */
 )
 {
-    sdmmc_sdcard_init();
-    return RES_OK;
+	uint32_t res;
+
+	if (initedTmio == false) {
+		tmio_init();
+		initedTmio = true;
+	}
+
+	if ((pdrv == DRV_EMU || pdrv == DRV_NAND) && initedCrypto == false) {
+		FSNandInitCrypto();
+		initedCrypto = true;
+	}
+
+	switch (pdrv) {
+		case DRV_EMU:
+		case DRV_SDMC:
+			res = tmio_init_sdmc();
+			break;
+
+		case DRV_NAND:
+			res = tmio_init_nand();
+			break;
+
+		default:
+			return RES_PARERR;
+	}
+
+	return res ? RES_ERROR : RES_OK;
 }
 
 
@@ -38,7 +71,26 @@ DSTATUS disk_status (
     BYTE pdrv       /* Physical drive nmuber (0..) */
 )
 {
-    return RES_OK; // Stubbed
+	enum tmio_dev_id d;
+
+	if ((pdrv == DRV_EMU || pdrv == DRV_NAND) && initedCrypto == false)
+		return STA_NOINIT;
+
+	switch (pdrv) {
+		case DRV_EMU:
+		case DRV_SDMC:
+			d = TMIO_DEV_SDMC;
+			break;
+
+		case DRV_NAND:
+			d = TMIO_DEV_SDMC;
+			break;
+
+		default:
+			return RES_PARERR;
+	}
+
+	return tmio_dev[d].total_size > 0 ? RES_OK : STA_NOINIT;
 }
 
 
@@ -55,14 +107,14 @@ DRESULT disk_read (
 )
 {
     switch(pdrv){
-        case 0:
-            if (sdmmc_sdcard_readsectors(sector,count,(uint8_t *)buff))
+        case DRV_SDMC:
+            if (tmio_readsectors(TMIO_DEV_SDMC, sector,count,(uint8_t *)buff))
                 return RES_PARERR;
             break;
-        case 1:
+        case DRV_NAND:
             nand_readsectors(sector, count, (uint8_t *)buff, CTRNAND);
             break;
-        case 2:
+        case DRV_EMU:
             emunand_readsectors(sector, count, (uint8_t *)buff, CTRNAND);
             break;
     }
@@ -84,14 +136,14 @@ DRESULT disk_write (
 )
 {
     switch(pdrv){
-        case 0:
-            if (sdmmc_sdcard_writesectors(sector,count,(uint8_t *)buff))
+        case DRV_SDMC:
+            if (tmio_writesectors(TMIO_DEV_SDMC, sector,count,(uint8_t *)buff))
                 return RES_PARERR;
             break;
-        case 1:
+        case DRV_NAND:
             nand_writesectors(sector, count, (uint8_t *)buff, CTRNAND);
 			break;
-        case 2:
+        case DRV_EMU:
             emunand_writesectors(sector, count, (uint8_t *)buff, CTRNAND);
 			break;
     }
