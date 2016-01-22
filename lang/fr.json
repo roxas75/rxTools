@@ -7,7 +7,7 @@
 	"DOWNGRADING_NOT_NEEDED": "Downgrade de %ls non nécessaire.\n",
 	"DUMP": "Extraction de %ls",
 	"DUMPING": "Extraction de %ls\nvers %ls...\n",
-	"INJECT": "Injecte %ls",
+	"INJECT": "Injection de %ls",
 	"INJECTING": "Injection de\n%ls\nvers %ls...\n",
 	"DECRYPT": "Décrypte %ls",
 	"DECRYPTING": "Décryptage de %ls...\n",
