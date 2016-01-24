@@ -51,7 +51,7 @@ Requirements for GNU/Linux:
 - [devkitPRO and devkitARM](http://3dbrew.org/wiki/Setting_up_Development_Environment) (follow the tutorial for Linux)
 - [ImageMagick](http://www.imagemagick.org) (on Debian/Ubuntu, [install it using apt](https://apps.ubuntu.com/cat/applications/imagemagick/))
 
-Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets,then copy the contents of the release folder to the root of your SD card.  
+Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets, then copy the contents of the release folder to the root of your SD card.  
 
 If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)* error on Windows, look at your PATH and move any path with parenthesis to the end of it
 
