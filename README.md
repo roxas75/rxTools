@@ -22,7 +22,7 @@ I do not support piracy in any way, all the data and information in my software 
 - Hacking tools collection
 
 ### rxMode
-- Support for the latest emuNAND version
+- Support for the latest emuNAND version on O3ds (currently limited to 9.5 on N3ds,but it will be soon)
 - Support for sysNAND, in case an emuNAND is not found
 - Access to the eShop and to online playing (requires an updated emuNAND)
 - Support for 100% of the games (newer ones will require emuNAND)
