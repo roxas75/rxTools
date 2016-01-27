@@ -459,7 +459,7 @@ void manageFBI(bool restore)
 {
 	unsigned int titleid_low[6] = { 0x00020300, 0x00021300, 0x00022300, 0x00026300, 0x00027300, 0x00028300 }; //JPN, USA, EUR, CHN, KOR, TWN
 	wchar_t *backup_path = L"rxTools/h&s_backup";
-	char *fbi = "FBI";
+	wchar_t *fbi = L"FBI";
 
 	File tmp;
 	wchar_t path[_MAX_LFN] = {0};
