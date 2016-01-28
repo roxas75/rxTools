@@ -22,13 +22,13 @@ I do not support piracy in any way, all the data and information in my software 
 - Hacking tools collection
 
 ### rxMode
-- Support for the latest emuNAND version on O3ds (currently limited to 9.5 on N3ds,but it will be soon)
+- Support for the latest emuNAND version on O3ds (currently limited to 9.5 on N3ds)
 - Support for sysNAND, in case an emuNAND is not found
 - Access to the eShop and to online playing (requires an updated emuNAND)
 - Support for 100% of the games (newer ones will require emuNAND)
 - Signatures Checks disabled, which should allow just homebrew, but the world is cruel...
 - Support for installing FBI (a CIA Manager) in both emuNAND and sysNAND
-- Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND on O3ds (currently limited on N3ds)
+- Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND on O3ds
 - Support for TWL (DS/DSi cartridges and DSiWare) **only on sysNAND**
 - Dynamic RAM dumping (just for debug purposes)
 
