@@ -15,20 +15,20 @@ I do not support piracy in any way, all the data and information in my software 
 
 ## Current functionality
 ### General
-- Support for Web Browser (SPIDER) entrypoint for Old3DS (ver 4.1-9.2)
-- Support for System Settings (MSET) entrypoint for Old3DS (ver 4.1-4.5, 6.0-6.4, and 9.2 with MSET downgraded to 6.x)
-- Support for System Settings (MSET) downgrading for Old3DS
+- Support for Web Browser (SPIDER) entrypoint for Old 3DS (ver 4.1-9.2)
+- Support for System Settings (MSET) entrypoint for Old 3DS (ver 4.1-4.5, 6.0-6.4, and 9.2 with MSET downgraded to 6.x)
+- Support for System Settings (MSET) downgrading for Old 3DS
 - Support for Ninjhax (Not Stable)
 - Hacking tools collection
 
 ### rxMode
-- Support for the latest emuNAND version on O3ds (currently limited to 9.5 on N3ds)
+- Support for the latest emuNAND version on Old 3DS (currently limited to 9.5 on New 3DS)
 - Support for sysNAND, in case an emuNAND is not found
 - Access to the eShop and to online playing (requires an updated emuNAND)
 - Support for 100% of the games (newer ones will require emuNAND)
 - Signatures Checks disabled, which should allow just homebrew, but the world is cruel...
 - Support for installing FBI (a CIA Manager) in both emuNAND and sysNAND
-- Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND on O3ds
+- Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND on Old 3DS
 - Support for TWL (DS/DSi cartridges and DSiWare) **only on sysNAND**
 - Dynamic RAM dumping (just for debug purposes)
 
@@ -60,8 +60,8 @@ Make sure that the path to rxTools doesn't include space (' ').
 ## Setting up rxTools  
 - If you have used a previous version, please delete SD:/rxTools, SD:/3ds/rxTools, and rxTools.dat, if present on your (m)SD card.  
 - Extract the rxTools folder from the release and place it into the root of your card.
-- If you are using an o3ds or 2ds, ensure you have Python 2.7 installed on your PC and run /Tools/cdn_firm.py. This should download 3 files into a folder named /firm. Copy this entire folder and place it into SD:/rxTools/.  
-- If you are using an n3ds, you must search for the encrypted firmware.bin used by previous versions of Cakehax. It should have an MD5 of: B99ADF0ADB279712367C06EB83BA9AE6. You will need to rename it and place it here-> SD:/rxTools/firm/0004013820000002.bin  
+- If you are using an Old 3DS or 2DS, ensure you have Python 2.7 installed on your PC and run /Tools/cdn_firm.py. This should download 3 files into a folder named /firm. Copy this entire folder and place it into SD:/rxTools/.  
+- If you are using an New 3DS, you must search for the encrypted firmware.bin used by previous versions of Cakehax. It should have an MD5 of: B99ADF0ADB279712367C06EB83BA9AE6. You will need to rename it and place it here-> SD:/rxTools/firm/0004013820000002.bin  
 - For use with the Homebrew Launcher, go into the ninjhax folder and copy the /rxTools folder to SD:/3ds/  
   
 
@@ -79,7 +79,7 @@ Alternatively, you can install the MSET ROP with FBI. Press select and use left 
 - All the documentation on http://3dbrew.org, and to all the devs who contributed
 - Roxas75, myself, as the creator of rxTools
 - Gateway team, for their work
-- Reisyukaku for N3DS MSET
+- Reisyukaku for New 3DS MSET
 - Archshift, who wrote some useful libs I used: https://github.com/archshift
 - Many GBATemp users, who helped in the testing process
 - patois, who developed BRAHMA: https://github.com/patois/Brahma
