@@ -22,13 +22,13 @@ I do not support piracy in any way, all the data and information in my software 
 - Hacking tools collection
 
 ### rxMode
-- Support for the latest emuNAND version
+- Support for the latest emuNAND version on O3ds (currently limited to 9.5 on N3ds)
 - Support for sysNAND, in case an emuNAND is not found
 - Access to the eShop and to online playing (requires an updated emuNAND)
 - Support for 100% of the games (newer ones will require emuNAND)
 - Signatures Checks disabled, which should allow just homebrew, but the world is cruel...
 - Support for installing FBI (a CIA Manager) in both emuNAND and sysNAND
-- Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND
+- Support for AGB (GBA Virtual Console) on both sysNAND and emuNAND on O3ds
 - Support for TWL (DS/DSi cartridges and DSiWare) **only on sysNAND**
 - Dynamic RAM dumping (just for debug purposes)
 
@@ -51,7 +51,7 @@ Requirements for GNU/Linux:
 - [devkitPRO and devkitARM](http://3dbrew.org/wiki/Setting_up_Development_Environment) (follow the tutorial for Linux)
 - [ImageMagick](http://www.imagemagick.org) (on Debian/Ubuntu, [install it using apt](https://apps.ubuntu.com/cat/applications/imagemagick/))
 
-Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets. Add firmware.bin (run tools/cdn_firm.py to download it) to release/rxTools/sys, then copy the contents of the release folder to the root of your SD card.  
+Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets, then copy the contents of the release folder to the root of your SD card.  
 
 If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)* error on Windows, look at your PATH and move any path with parenthesis to the end of it
 
@@ -70,7 +70,7 @@ Make sure that the path to rxTools doesn't include space (' ').
 rxTools *now* stores its code.bin in rxTools/sys/code.bin (formerly /rxTools.dat). To launch rxTools using the Spider exploit visit https://dukesrg.github.io/?rxTools/sys/code.bin using the 3DS Internet Browser. (Requires ver 9.2 or older).
 
 ## How to install DS Profile (MSET) Exploit (requires MSET 6.x)
-Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
+Upon building, there will be a folder called release/mset that contains the files rxinstaller.nds and rxinstaller.bin. Using a supported NDS flash cart, launch rxinstaller.nds to install the MSET exploit. Otherwise, on firmwares 9.2 or older, copy rxinstaller.bin (take it in release/mset/) to SD:/mset/, and visit https://dukesrg.github.io/?mset/rxinstaller.bin to install the MSET exploit via the Spider exploit. If it worked, you'll see the bottom screen flash, and then the browser will appear to continue functioning normally. Press the home button, and after you see the Home Menu splash screen your DS will say "an error occurred" and ask you to reboot, but it's already done. You can then launch rxTools by going to Settings -> Profile -> DS Profile Settings.
 Alternatively, you can install the MSET ROP with FBI. Press select and use left and right on the D-pad to select "rxTools3.x 4.x" or "rxTools3.x 6.x", depending on the version of MSET you are using. 
 * Do NOT install 4.x MSET on a 2ds. Formatting in this configuration will cause a soft brick!
 
