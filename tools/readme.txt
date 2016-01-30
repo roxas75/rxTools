@@ -1,7 +1,7 @@
 cdn_firm.exe :
     Use this the first time you use rxTools.
     It will generate 'firm' directory, containing files necessary for the toolkit to work.
-    (for New 3DS, you need to download encrypted 9.5 'firm' from thatISO site)
+    (for New 3DS, you need to download encrypted 9.5 'firm' from thatISO site. It should have an MD5 of: B99ADF0ADB279712367C06EB83BA9AE6.)
     Once successfully generated, copy 'firm' to your rxTools directory.
     
 msetdg.exe :
