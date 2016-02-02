@@ -66,8 +66,8 @@ void NandDumper(){
 	isEmuNand--;
 	ConsoleInit();
 	ConsoleSetTitle(strings[STR_DUMP], strings[STR_NAND]);
-	unsigned char* buf = (void*)0x21000000;
-	unsigned int nsectors = 0x200;  //sectors in a row
+	unsigned char* buf = BUF1;
+	unsigned int nsectors = NAND_SECTOR_SIZE;  //sectors in a row
 	wchar_t tmpstr[STR_MAX_LEN];
 	wchar_t ProgressBar[41] = {0,};
 	for(int i=0; i<PROGRESS_WIDTH; i++)
@@ -105,8 +105,8 @@ void NandDumper(){
 			}
 		}
 		if(isEmuNand){
-			tmio_readsectors(TMIO_DEV_SDMC, checkEmuNAND()/0x200, 1, buf);
-			FileWrite(&myFile, buf, 0x200, 0);
+			tmio_readsectors(TMIO_DEV_SDMC, checkEmuNAND()/NAND_SECTOR_SIZE, 1, buf);
+			FileWrite(&myFile, buf, NAND_SECTOR_SIZE, 0);
 		}
 		FileClose(&myFile);
 		print(strings[STR_COMPLETED]);
@@ -147,8 +147,8 @@ void DumpNandPartitions(){
 		print(strings[STR_DUMPING], p_descr[i], tmp);
 		ConsoleShow();
 
-		for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
-			swprintf(tmp, _MAX_LFN, L"%08X / %08X", j*0x200, p_size[i]);
+		for(int j = 0; j*NAND_SECTOR_SIZE < p_size[i]; j += sect_row){
+			swprintf(tmp, _MAX_LFN, L"%08X / %08X", j*NAND_SECTOR_SIZE, p_size[i]);
 			int x, y;
 			ConsoleGetXY(&x, &y);
 			y += FONT_HEIGHT * 3;
@@ -158,7 +158,7 @@ void DumpNandPartitions(){
 
 			if(isEmuNand) emunand_readsectors(j, sect_row, BUF1, p_addr[i]);
 			else nand_readsectors(j, sect_row, BUF1, p_addr[i]);
-			FileWrite(&out, BUF1, sect_row*0x200, j*0x200);
+			FileWrite(&out, BUF1, sect_row*NAND_SECTOR_SIZE, j*NAND_SECTOR_SIZE);
 		}
 		FileClose(&out);
 	}
@@ -204,7 +204,7 @@ void DumpNANDSystemTitles(){
 		else nand_readsectors(i, 1, BUF1, CTRNAND);
 		if(*((char*)BUF1 + 0x100) == 'N' && *((char*)BUF1 + 0x101) == 'C' && *((char*)BUF1 + 0x102) == 'C' && *((char*)BUF1 + 0x103) == 'H'){
 			ctr_ncchheader ncch;
-			memcpy((void*)&ncch, BUF1, 0x200);
+			memcpy((void*)&ncch, BUF1, NAND_SECTOR_SIZE);
 			swprintf(filename, _MAX_LFN, L"%ls/%ls%08X%08X.app",
 				outfolder, isEmuNand ? L"emu_" : L"",
 				*((unsigned int*)(BUF1 + 0x10C)), *((unsigned int*)(BUF1 + 0x108)));
@@ -215,7 +215,7 @@ void DumpNANDSystemTitles(){
 			for(int j = 0; j < getle32(ncch.contentsize); j++){
 				if(isEmuNand) emunand_readsectors(i + j, 1, BUF1, CTRNAND);
 				else nand_readsectors(i + j, 1, BUF1, CTRNAND);
-				FileWrite(&pfile, BUF1, 0x200, j*0x200);
+				FileWrite(&pfile, BUF1, NAND_SECTOR_SIZE, j*NAND_SECTOR_SIZE);
 			}
 			FileClose(&pfile);
 			i += getle32(ncch.contentsize);
@@ -264,15 +264,15 @@ void RebuildNand(){
 			print(strings[STR_INJECTING], wtmp, p_descr[i]);
 			ConsoleShow();
 
-			for(int j = 0; j*0x200 < p_size[i]; j += sect_row){
-				swprintf(wtmp, wtmpLen, L"%08X / %08X", j*0x200, p_size[i]);
+			for(int j = 0; j*NAND_SECTOR_SIZE < p_size[i]; j += sect_row){
+				swprintf(wtmp, wtmpLen, L"%08X / %08X", j*NAND_SECTOR_SIZE, p_size[i]);
 				int x, y;
 				ConsoleGetXY(&x, &y);
 				y += FONT_HEIGHT * 3;
 				x += FONT_HWIDTH*2;
 				DrawString(BOT_SCREEN, wtmp, x, y, ConsoleGetTextColor(), ConsoleGetBackgroundColor());
 
-				FileRead(&out, BUF1, sect_row*0x200, j*0x200);
+				FileRead(&out, BUF1, sect_row*NAND_SECTOR_SIZE, j*NAND_SECTOR_SIZE);
 				if(isEmuNand) emunand_writesectors(j, sect_row, BUF1, p_addr[i]);
 			}
 			FileClose(&out);
