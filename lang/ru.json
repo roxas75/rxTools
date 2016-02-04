@@ -74,7 +74,7 @@
 	"ENABLE_3D_UI": "Включить 3D в меню     %ls",
 	"QUICK_BOOT": "Быстрая загрузка       %ls",
 	"MENU_LANGUAGE": "Язык      %16ls",
-	"ABSYSN": "Автозагрузка в sysNAND  %ls",
+	"ABSYSN": "Автозагрузка в sysNAND %ls",
 	"AUTOBOOT": "Автозагрузка",
 	"WARNING": "Внимание",
 	"REGION_": "Регион: %ls\n",
