@@ -23,7 +23,7 @@ enum {
 	SVC_KERNEL_STATE_TITLE_COMPAT = 0
 };
 
-static inline _Noreturn svcExitThread()
+static inline void __attribute__((noreturn)) svcExitThread()
 {
 	__asm__ volatile ("svc 9\n");
 	__builtin_unreachable();

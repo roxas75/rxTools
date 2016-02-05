@@ -53,7 +53,7 @@ static void memdump(wchar_t *filename, unsigned char *buf, size_t size)
 
 #define VER_LEN 4
 
-static patchLabel()
+static void patchLabel()
 {
 	static const char verOrig[VER_LEN] = "Ver.";
 	static const char verEmu[VER_LEN] = "RX-E";
