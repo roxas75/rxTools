@@ -22,3 +22,6 @@
 [submodule "CakeBrah"]
 	path = CakeBrah
 	url = https://github.com/mid-kid/CakeBrah.git
+[submodule "rxtools/source/lib/jsmn"]
+	path = rxtools/source/lib/jsmn
+	url = https://github.com/zserge/jsmn

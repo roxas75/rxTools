@@ -73,7 +73,7 @@ release: release-licenses release-rxtools release-doc release-lang	\
 release-licenses:
 	@mkdir -p release
 	@cp LICENSE release
-	@cp LICENSE_JSMN release
+	@cp rxtools/source/lib/jsmn/LICENSE release/LICENSE_JSMN
 	@cp rxtools/CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
 	@cp CakesROP/LICENSE release/LICENSE_CakesROP
 

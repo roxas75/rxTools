@@ -37,7 +37,7 @@
 #include "downgradeapp.h"
 #include "stdio.h"
 #include "menu.h"
-#include "jsmn.h"
+#include "jsmn/jsmn.h"
 
 #define DATA_PATH	_T("rxtools/data")
 #define KEYFILENAME	"slot0x25KeyX.bin"
