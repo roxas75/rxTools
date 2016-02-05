@@ -21,7 +21,7 @@
 #include <wchar.h>
 #include "fatfs/ff.h"
 #include "fs.h"
-#include "jsmn.h"
+#include "jsmn/jsmn.h"
 #include "lang.h"
 
 int fontIsLoaded = 0;
