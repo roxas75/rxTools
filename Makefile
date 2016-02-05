@@ -26,9 +26,9 @@ export RXTOOLSMK := $(CURDIR)/common.mk
 CFLAGS = -std=c11 -O2 -Wall -Wextra
 ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
 BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
-			APP_TITLE="rxTools" \
-			APP_DESCRIPTION="Roxas75 3DS Toolkit & Custom Firmware" \
-			APP_AUTHOR="Patois, et al." \
+			APP_TITLE='rxTools' \
+			APP_DESCRIPTION='Roxas75 3DS Toolkit & Custom Firmware' \
+			APP_AUTHOR='Patois, et al.' \
 			ICON=$(abspath icon.png)
 
 .PHONY: all-target-patches all-target-theme all-target-mset all-target-brahma	\
