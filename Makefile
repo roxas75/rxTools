@@ -83,7 +83,7 @@ release-rxtools: all-target-rxtools
 	@cp rxtools/build/font.bin release/$(SYS_PATH)
 
 release-doc:
-	@cp README.md doc/QuickStartGuide.pdf release
+	@cp README.md docs/QuickStartGuide_v3.0.pdf release
 
 release-lang:
 	mkdir -p release/rxTools/lang
