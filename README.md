@@ -22,7 +22,7 @@ I do not support piracy in any way, all the data and information in my software 
 - Hacking tools collection
 
 ### rxMode
-- Support for the latest emuNAND version on Old 3DS (currently limited to 9.5 on New 3DS)
+- Support for the latest emuNAND version on Old 3DS and New 3DS (you currently need key_0x16.bin and key_0x1B.bin for N3DS)
 - Support for sysNAND, in case an emuNAND is not found
 - Access to the eShop and to online playing (requires an updated emuNAND)
 - Support for 100% of the games (newer ones will require emuNAND)
@@ -60,8 +60,8 @@ Make sure that the path to rxTools doesn't include space (' ').
 ## Setting up rxTools  
 - If you have used a previous version, please delete SD:/rxTools, SD:/3ds/rxTools, and rxTools.dat, if present on your (m)SD card.  
 - Extract the rxTools folder from the release and place it into the root of your card.
-- If you are using an Old 3DS or 2DS, ensure you have Python 2.7 installed on your PC and run /Tools/cdn_firm.py. This should download 3 files into a folder named /firm. Copy this entire folder and place it into SD:/rxTools/.  
-- If you are using an New 3DS, you must search for the encrypted firmware.bin used by previous versions of Cakehax. It should have an MD5 of: B99ADF0ADB279712367C06EB83BA9AE6. You will need to rename it and place it here-> SD:/rxTools/firm/0004013820000002.bin  
+- If you are using an Old 3DS or 2DS, ensure you have Python 2.7 installed on your PC and run /Tools/o3ds_cdn_firm.py. This should download 3 files into a folder named /firm. Copy this entire folder and place it into SD:/rxTools/.
+- If you are using an New 3DS, ensure you have Python 2.7 installed on your PC and run /Tools/n3ds_cdn_firm.py. This should download 1 file into a folder named /firm. Copy this entire folder and place it into SD:/rxTools/. You also need the files key_0x16.bin (N3DS arm9bin decryption, 9.6+ keyX) and key_0x1B.bin (N3DS 9.6 NCCH keyX) on the root of your SD card.
 - For use with the Homebrew Launcher, go into the ninjhax folder and copy the /rxTools folder to SD:/3ds/  
   
 

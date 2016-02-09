@@ -83,7 +83,7 @@ release-rxtools: all-target-rxtools
 	@cp rxtools/build/font.bin release/$(SYS_PATH)
 
 release-doc:
-	@cp README.md doc/QuickStartGuide.pdf release
+	@cp README.md docs/QuickStartGuide_v3.0.pdf release
 
 release-lang:
 	mkdir -p release/rxTools/lang
@@ -104,7 +104,7 @@ release-theme: all-target-theme
 
 release-tools:
 	@mkdir -p release/Tools/fbi_injection release/Tools/scripts
-	@cp tools/cdn_firm.py tools/readme.txt release/Tools
+	@cp tools/o3ds_cdn_firm.py tools/n3ds_cdn_firm.py tools/readme.txt release/Tools
 	@cp -r tools/fbi_injection/* release/Tools/fbi_injection/
 	@cp tools/scripts/* release/Tools/scripts/
 

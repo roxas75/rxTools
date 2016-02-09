@@ -50,7 +50,7 @@ end:
 	pop	{r0-r5}
 	@ Call the original function
 #ifdef PLATFORM_KTR
-	b	0xFFF036F8
+	b	0xFFF036F4
 #else
 	b	0xFFF036E8
 #endif

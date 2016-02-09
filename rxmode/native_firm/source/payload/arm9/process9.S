@@ -32,11 +32,11 @@
 .type swprintf, %function
 
 #ifdef PLATFORM_KTR
-.thumb_set p9Open, 0x0805B014
-.thumb_set p9Write, 0x0805C378
-.thumb_set p9Read, 0x0804D854
-.thumb_set p9Close, 0x0805B100
-.thumb_set p9RecvPxi, 0x0805501C
+.thumb_set p9Open, 0x0805B180
+.thumb_set p9Write, 0x0805C4D0
+.thumb_set p9Read, 0x0804D9B0
+.thumb_set p9Close, 0x0805B26C
+.thumb_set p9RecvPxi, 0x08055178
 #else
 .thumb_set p9Open, 0x0805B180
 .thumb_set p9Write, 0x0805C4D0

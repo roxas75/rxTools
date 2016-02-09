@@ -105,12 +105,11 @@ static int decryptFirmKtrArm9(void *p)
 	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
 		info.keyslot = 0x15;
 		aes_decrypt(hdr->keyX, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+		setup_aeskeyX(info.keyslot, key);
 	} else {
 		info.keyslot = 0x16;
-		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
 	}
 
-	setup_aeskeyX(info.keyslot, key);
 	return DecryptPartition(&info);
 }
 
