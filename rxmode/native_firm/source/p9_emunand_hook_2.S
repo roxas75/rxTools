@@ -21,7 +21,7 @@
 
 	blx	nandHook
 #ifdef PLATFORM_KTR
-	.word	0x080786A1
+	.word	0x08078751
 #else
 	.word	0x08078751
 #endif

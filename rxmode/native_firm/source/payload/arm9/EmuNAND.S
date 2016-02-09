@@ -36,7 +36,7 @@ loc_801A310:
 	movs	r0, r1, lsl #23
 	beq	loc_801A33C
 #ifdef PLATFORM_KTR
-	blx	0x08062890
+	blx	0x08062A28
 #else
 	blx	0x08062A28
 #endif

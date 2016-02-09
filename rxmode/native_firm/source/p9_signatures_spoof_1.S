@@ -18,9 +18,5 @@
 .section .patch.p9.sig.1, "a"
 .thumb
 	mov	r0, #0
-#ifdef PLATFORM_KTR
-	bx	lr
-#else
 	add	sp, #0x138
 	pop 	{r4-r6,pc}
-#endif
