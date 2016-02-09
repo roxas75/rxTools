@@ -108,6 +108,7 @@ static int decryptFirmKtrArm9(void *p)
 		setup_aeskeyX(info.keyslot, key);
 	} else {
 		info.keyslot = 0x16;
+		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
 	}
 
 	return DecryptPartition(&info);
