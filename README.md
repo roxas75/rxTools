@@ -84,6 +84,7 @@ Alternatively, you can install the MSET ROP with FBI. Press select and use left 
 - Many GBATemp users, who helped in the testing process
 - patois, who developed BRAHMA: https://github.com/patois/Brahma
 - mid-kid and b1l1s, who developed CakeHax: https://github.com/mid-kid/CakeHax
+- Steveice10, ApacheThunder and TuxSH for most TWL patches
 - Many other people who helped me in private
 - All the dudes who reversed and fucked up my project, who wasted their time on making useless keeping the sources private
 
