@@ -241,8 +241,12 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 
 	drawTop();
 
-	if (!cfgs[CFG_GUI].val.i && HID_STATE & BUTTON_L1)
-		rxMode(cfgs[CFG_ABSYSN].val.i ? 0 : 1);
+	if (!cfgs[CFG_GUI].val.i && HID_STATE & BUTTON_L1) {
+		if(~HID_STATE & BUTTON_Y) rxMode(1);
+		else if(~HID_STATE & BUTTON_X) rxMode(0);
+		else if(~HID_STATE & BUTTON_B) PastaMode();
+		else rxMode(cfgs[CFG_ABSYSN].val.i ? 0 : 1);
+	}
 
 	if (sysver < 7) {
 		r = initKeyX();
