@@ -77,7 +77,7 @@ static void DrawCharacterOn1frame(void *screen, wchar_t character, uint32_t x, u
 	back.a = bgcolor >> 24;
 	back.r = bgcolor >> 16;
 	back.g = bgcolor >> 8;
-	back.b = color;
+	back.b = bgcolor;
 
 	pScreen = screen;
 
