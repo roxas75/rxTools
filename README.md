@@ -37,23 +37,25 @@ Nightly builds of rxTools are a thing, again! :D https://lavanoid.github.io/
 
 
 ## How to build
-Requires ImageMagick >= 6.8.9 - If you are using Ubuntu 14.04 or below, do not use the version in the official repositories, as it is outdated
 
 Requirements for Windows:
 - git, clone this repository with the following command: *git  clone --recursive https://github.com/roxas75/rxTools.git*
-- [Python 2.7](https://www.python.org)
-- [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM option and suboptions installed (in case make.exe fails with stack trace dump, install [GnuWin Make](http://gnuwin32.sourceforge.net) and place it in path before devkitPRO/msys/bin)
-- GCC (for Windows [MinGW](http://sourceforge.net/projects/mingw) with mingw32-base will be fine)
+- [devkitPRO](http://sourceforge.net/projects/devkitpro) with devkitARM option and suboptions installed
 - [ImageMagick](http://www.imagemagick.org)
+- [Python 2.7](https://www.python.org) non needed for build, only for auxiliary tools
 
 Requirements for GNU/Linux:
 - [git](https://apps.ubuntu.com/cat/applications/git/), clone this repository with the following command: *git  clone --recursive https://github.com/roxas75/rxTools.git*
 - [devkitPRO and devkitARM](http://3dbrew.org/wiki/Setting_up_Development_Environment) (follow the tutorial for Linux)
 - [ImageMagick](http://www.imagemagick.org) (on Debian/Ubuntu, [install it using apt](https://apps.ubuntu.com/cat/applications/imagemagick/))
 
-Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets, then copy the contents of the release folder to the root of your SD card.  
+In case make.exe fails with stack trace dump, install [GnuWin Make](http://gnuwin32.sourceforge.net) and place it in path before devkitPRO/msys/bin
 
 If you get the *make: Interrupt/Exception caught (code = 0xc00000fd, addr = 0x4227d3)* error on Windows, look at your PATH and move any path with parenthesis to the end of it
+
+Requires ImageMagick >= 6.8.9 - If you are using Ubuntu 14.04 or below, do not use the version in the official repositories, as it is outdated
+
+Just run **make release** and rxTools/sys directory should be generated in the **release** folder, along with all the other packets, then copy the contents of the release folder to the root of your SD card.  
 
 Make sure that the path to rxTools doesn't include space (' ').
 
