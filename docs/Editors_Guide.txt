@@ -1,0 +1,64 @@
+The following is intended for editors of docs only. everybody else should ignore this file.
+________________________________________
+
+- DO NOT include this file in release or any makefile.
+
+- DO NOT format this file as anything other than plain text.
+
+________________________________________
+::::::::::::::::::::::::::::::::::::::::
+
+To maintain a standardised formatting across all documentation editors should stick closely to the following:
+
+
+TITLE:::::
+
+Font: AR DESTINE
+Size: 72
+Style: B
+
+
+
+SUB-TITLE:::::
+
+Font: Berlin Sans FB Demi
+Size: 24
+Style: B
+
+
+
+(rxtools_manual) (PORTRAIT)
+PAGE-HEADER:::::
+
+Font: Arial
+Size: 16
+Style: 
+
+
+PAGE-CONTENT:::::
+
+Font: Arial
+Size: 16
+Style: 
+
+
+
+
+(QuickStartGuide) (LANDSCAPE)
+PAGE-CONTENT:::::
+
+Font: Arial
+Size: 28
+Style: B (keywords/section headers only)
+
+
+SUB-CONTENT:::::
+
+Font: Arial
+Size: 16-18 (depending on importance)
+Style: 
+
+
+________________________________________
+
+- any changes to formatting should be applied across the board to prevent fragmented layouts and maintain readability.
