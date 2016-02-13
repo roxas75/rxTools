@@ -88,7 +88,7 @@ $(BUILD)/%.o: $(BUILD)/%.bin
 	$(call Q,DD,$@)dd if=$< of=$@ count=8
 
 $(BUILD)/font.bin: unifont-8.0.01.bmp
-	$(call Q,CONVERT,$@)convert -negate -crop +32+64 -transpose +repage -crop 16 -append $< - | convert -crop 8 -swap 0,-1 +append -depth 1 - gray:$@;
+	$(call Q,CONVERT,$@)convert -crop +32+64 -transpose +repage -crop 16 -append $< - | convert -flop - mono:$@;
 
 $(foreach f,$(NEED_DIRS),$(eval $f : | $(dir $f)D))
 
