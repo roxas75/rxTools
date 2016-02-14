@@ -55,12 +55,12 @@ void ScreenShot(){
 	if(f_open(&myFile, tmp, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK){
 		unsigned int bmp_size = TOP_SCREEN_WIDTH*SCREEN_HEIGHT*3;
 		bmp_cache = (char*)malloc(bmp_size + 0x36);
-		bmp_ptr = bmp_cache;
+		bmp_ptr = bmp_cache + 0x36;
 		*(unsigned int*)(bmpHeader+0x02) = bmp_size + 0x36;
 		*(unsigned int*)(bmpHeader+0x12) = TOP_SCREEN_WIDTH;
 		*(unsigned int*)(bmpHeader+0x16) = SCREEN_HEIGHT;
 		*(unsigned int*)(bmpHeader+0x22) = bmp_size;
-		f_write(&myFile, bmpHeader, 0x36, &written);
+		memcpy(bmp_cache, bmpHeader, 0x36);
 		screen_ptr = (void*)TOP_SCREEN;
 		for(int y = 0; y < SCREEN_HEIGHT; y++){
 			for(int x = 0; x < TOP_SCREEN_WIDTH; x++){
@@ -82,12 +82,12 @@ void ScreenShot(){
 	if(f_open(&myFile, tmp, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK){
 		unsigned int bmp_size = BOT_SCREEN_WIDTH*SCREEN_HEIGHT*3;
 		bmp_cache = (char*)malloc(bmp_size + 0x36);
-		bmp_ptr = bmp_cache;
+		bmp_ptr = bmp_cache + 0x36;
 		*(unsigned int*)(bmpHeader+0x02) = bmp_size + 0x36;
 		*(unsigned int*)(bmpHeader+0x12) = BOT_SCREEN_WIDTH;
 		*(unsigned int*)(bmpHeader+0x16) = SCREEN_HEIGHT;
 		*(unsigned int*)(bmpHeader+0x22) = bmp_size;
-		f_write(&myFile, bmpHeader, 0x36, &written);
+		memcpy(bmp_cache, bmpHeader, 0x36);
 		screen_ptr = (void*)BOT_SCREEN;
 		for(int y = 0; y < SCREEN_HEIGHT; y++){
 			for(int x = 0; x < BOT_SCREEN_WIDTH; x++){
@@ -103,7 +103,6 @@ void ScreenShot(){
 }
 
 void TryScreenShot(){
-/*	uint32_t pad = */GetInput();
-	//if(pad & BUTTON_L1 && pad & BUTTON_R1) ScreenShot();
-	//Disabled, i don't need any screenshot for now, but the function is here
+	uint32_t pad = GetInput();
+	if(pad & BUTTON_L1 && pad & BUTTON_R1) ScreenShot();
 }
