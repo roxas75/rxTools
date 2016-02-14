@@ -103,7 +103,6 @@ void ScreenShot(){
 }
 
 void TryScreenShot(){
-/*	uint32_t pad = */GetInput();
-	//if(pad & BUTTON_L1 && pad & BUTTON_R1) ScreenShot();
-	//Disabled, i don't need any screenshot for now, but the function is here
+	uint32_t pad = GetInput();
+	if(pad & BUTTON_L1 && pad & BUTTON_R1) ScreenShot();
 }
