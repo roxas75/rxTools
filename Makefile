@@ -25,6 +25,10 @@ export RXTOOLSMK := $(CURDIR)/common.mk
 
 export GIT_VERSION := $(shell git rev-parse --short HEAD)
 
+ifeq ($(GIT_VERSION),)
+    GIT_VERSION := "N/A"
+endif
+
 CFLAGS = -std=c11 -O2 -Wall -Wextra -DVERSION=\"$(GIT_VERSION)\"
 ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
 BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
