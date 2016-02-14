@@ -29,7 +29,7 @@ ifeq ($(GIT_VERSION),)
     GIT_VERSION := "N/A"
 endif
 
-CFLAGS = -std=c11 -O2 -Wall -Wextra -DVERSION=\"$(GIT_VERSION)\"
+CFLAGS = -std=c11 -O2 -Wall -Wextra
 ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
 BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
 			APP_TITLE='rxTools' \
