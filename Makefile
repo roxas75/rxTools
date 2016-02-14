@@ -23,7 +23,9 @@ SET_DATNAME := DATNAME=$(SYS_PATH)/$(CODE_FILE)
 export INCDIR := -I$(CURDIR)/include
 export RXTOOLSMK := $(CURDIR)/common.mk
 
-CFLAGS = -std=c11 -O2 -Wall -Wextra
+export GIT_VERSION := $(shell git rev-parse --short HEAD)
+
+CFLAGS = -std=c11 -O2 -Wall -Wextra -DVERSION=\"$(GIT_VERSION)\"
 ROPFLAGS = $(SET_DATNAME) DISPNAME=rxTools GRAPHICS=../logo
 BRAHFLAGS = name=$(CODE_FILE) filepath=$(SYS_PATH)/ \
 			APP_TITLE='rxTools' \

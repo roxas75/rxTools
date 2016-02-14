@@ -34,7 +34,7 @@ CPPFLAGS := $(INCDIR) $(CPPDEFS)
 CFORCE := -fomit-frame-pointer -ffast-math
 CMACHINE := -mtune=arm946e-s
 CWARNING := -Wall -Wno-multichar
-CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS)
+CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS) -DVERSION=\"$(GIT_VERSION)\"
 
 # Use Thumb libraries because sbrk of ARM newlib in devkitPro doesn't work.
 LDFLAGS := -nostartfiles -g $(CMACHINE) -mthumb -mthumb-interwork -Wl,-Tstub.ld

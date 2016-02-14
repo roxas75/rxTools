@@ -206,7 +206,7 @@ void SettingsMenuInit(){
 
 	while (true) {
 		//UPDATE SETTINGS GUI
-		swprintf(MyMenu->Name, CONSOLE_MAX_TITLE_LENGTH+1, strings[STR_SETTINGS]);
+		swprintf(MyMenu->Name, CONSOLE_MAX_TITLE_LENGTH+1, L"%ls    Git: %s", strings[STR_SETTINGS], VERSION);
 		swprintf(MyMenu->Option[0].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_FORCE_UI_BOOT], cfgs[CFG_GUI].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
 		swprintf(MyMenu->Option[1].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_SELECTED_THEME], cfgs[CFG_THEME].val.i + '0');
 		swprintf(MyMenu->Option[2].Str, CONSOLE_MAX_LINE_LENGTH+1, strings[STR_RANDOM], cfgs[CFG_RANDOM].val.i ? strings[STR_ENABLED] : strings[STR_DISABLED]);
