@@ -8,6 +8,9 @@ SECTIONS
 	. = twl_p9 + 0x13656;
 	.patch.p9.sha_compare_stub : { *(.patch.p9.sha_compare_stub) }
 	
+	. = twl_p9 + 0x1220e;
+	.patch.p9.rsa_validity_check_disable : { *(.patch.p9.rsa_validity_check_disable) }
+	
 	. = twl_p9 + 0x13164;
 	.patch.p9.whitelist_check_disable : { *(.patch.p9.whitelist_check_disable) }
 	

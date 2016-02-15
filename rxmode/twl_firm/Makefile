@@ -39,7 +39,7 @@ $(BUILD):
 %_unstrip.elf: %_linked.elf
 	$(call Q,LINK,$@)$(LD) -i -Tscript.ld $< -o $@
 
-$(BUILD)/$(TARGET)_linked.elf: $(BUILD)/p9_signatures_spoof.o $(BUILD)/p9_sha_compare_stub.o $(BUILD)/p9_whitelist_check_disable.o $(BUILD)/p9_cartridge_save_type_check_disable.o $(BUILD)/p9_dsi_cartridge_save_exploit_check_disable.o $(BUILD)/p9_ninlogo_check_disable.o $(BUILD)/p9_blacklist_check_disable.o
+$(BUILD)/$(TARGET)_linked.elf: $(BUILD)/p9_signatures_spoof.o $(BUILD)/p9_sha_compare_stub.o $(BUILD)/p9_rsa_validity_check_disable.o $(BUILD)/p9_whitelist_check_disable.o $(BUILD)/p9_cartridge_save_type_check_disable.o $(BUILD)/p9_dsi_cartridge_save_exploit_check_disable.o $(BUILD)/p9_ninlogo_check_disable.o $(BUILD)/p9_blacklist_check_disable.o
 	$(call Q,LINK,$@)$(LD) -Tscript.ld $^ -o $@
 
 $(BUILD)/%.o: $(SOURCE)/%.s $(BUILD)
