@@ -32,7 +32,7 @@
 #include <dirent.h>
 #include <errno.h>
 
-#include <lib/tmio.h>
+#include <lib/media/tmio.h>
 #include "command.h"
 #include "tmio_hardware.h"
 

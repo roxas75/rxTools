@@ -2,7 +2,7 @@
 /  FatFs - FAT file system module configuration file  R0.11a (C)ChaN, 2015
 /---------------------------------------------------------------------------*/
 
-#include <lib/tmio.h>
+#include <lib/media/tmio.h>
 
 #define _FFCONF 64180	/* Revision ID */
 

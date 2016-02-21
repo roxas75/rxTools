@@ -21,7 +21,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <lib/fatfs/ff.h>
-#include <lib/nand.h>
+#include <lib/media/nand.h>
 #define File FIL
 
 ////////////////////////////////////////////////////////////////Basic FileSystem Operations
