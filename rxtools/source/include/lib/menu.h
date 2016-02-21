@@ -15,17 +15,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILEEXPLORER_H
-#define FILEEXPLORER_H
+#ifndef MENU_H
+#define MENU_H
 
+#include <stdbool.h>
 #include <wchar.h>
-#include "console.h"
+#include <lib/console.h>
 
-void FileExplorerShow();
-void FileExplorerNextSelection();
-void FileExplorerPrevSelection();
-int FileExplorerSelect(TCHAR *p, size_t n);
-void FileExplorerBack();
-int FileExplorerMain(TCHAR *p, size_t n);
+typedef struct{
+	wchar_t Str[CONSOLE_MAX_LINE_LENGTH+1];
+	void(* Func)();
+	wchar_t* gfx_splash;
+}MenuEntry;
+
+typedef struct{
+	wchar_t Name[CONSOLE_MAX_LINE_LENGTH+1];
+	MenuEntry* Option;
+	int nEntryes;
+	int Current;    //The current selected option
+	bool Showed;    //Useful, to not refresh everything everytime
+} Menu;
+
+void MenuInit(Menu* menu);
+void MenuShow();
+void MenuNextSelection();
+void MenuPrevSelection();
+void MenuSelect();
+void MenuClose();
+void MenuRefresh();
+
+extern bool bootGUI;
+extern unsigned char Theme;
+extern bool agb_bios;
+extern bool theme_3d;
+extern unsigned char language;
+extern Menu* MyMenu;
 
 #endif

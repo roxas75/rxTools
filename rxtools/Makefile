@@ -27,7 +27,7 @@ include $(RXTOOLSMK)
 
 LD := $(CC)
 
-INCDIR += -Isource -Isource/features -Isource/lib
+INCDIR += -Isource/include
 CPPDEFS	:= -DSYS_PATH=\"$(SYS_PATH)\" -DPATCHES_PATH=\"$(PATCHES_PATH)\"
 CPPFLAGS := $(INCDIR) $(CPPDEFS)
 
@@ -41,15 +41,15 @@ LDFLAGS := -nostartfiles -g $(CMACHINE) -mthumb -mthumb-interwork -Wl,-Tstub.ld
 
 CCOBJS := $(addprefix $(BUILD)/,main.o features/CTRDecryptor.o	\
 	features/NandDumper.o features/TitleKeyDecrypt.o	\
-	features/configuration.o features/downgradeapp.o	\
+	features/install.o features/downgradeapp.o	\
 	features/AdvancedFileManager.o features/firm.o	\
 	features/nandtools.o features/padgen.o features/screenshot.o	\
 	lib/fatfs/diskio.o lib/fatfs/ff.o lib/fatfs/option/unicode.o	\
 	lib/tmio/tmio.o	\
 	lib/polarssl/padlock.o lib/polarssl/sha2.o lib/polarssl/aes.o	\
-	lib/console.o lib/crypto.o lib/draw.o lib/fs.o lib/hid.o lib/lang.o	\
-	lib/log.o lib/i2c.o lib/jsmn/jsmn.o lib/menu.o lib/nand.o lib/ncch.o	\
-	features/reboot.o)
+	lib/cfg.o lib/console.o lib/crypto.o lib/draw.o lib/fs.o lib/hid.o	\
+	lib/lang.o lib/log.o lib/i2c.o lib/jsmn/jsmn.o lib/menu.o lib/nand.o	\
+	lib/ncch.o features/reboot.o)
 
 OBJS	:= $(CCOBJS) $(addprefix $(BUILD)/, start.o font_ascii.o lib/delay.o)
 DEPS	:= $(subst $(BUILD)/,$(DEPS_DIR)/,$(CCOBJS))

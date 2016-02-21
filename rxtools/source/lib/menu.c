@@ -18,11 +18,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "configuration.h"
-#include "lang.h"
-#include "menu.h"
-#include "draw.h"
-#include "hid.h"
+#include <lib/cfg.h>
+#include <lib/lang.h>
+#include <lib/menu.h>
+#include <lib/draw.h>
+#include <lib/hid.h>
 
 Menu* MyMenu;
 Menu *MenuChain[100];

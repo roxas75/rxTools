@@ -19,7 +19,7 @@
 #define TITLE_KEY_DECRYPT_H
 
 #include <stdint.h>
-#include <fatfs/ff.h>
+#include <lib/fatfs/ff.h>
 
 typedef struct {
 	uint8_t issuer[64];

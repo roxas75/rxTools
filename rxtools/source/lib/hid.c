@@ -16,10 +16,10 @@
  */
 
 #include <stdbool.h>
-#include "draw.h"
-#include "hid.h"
-#include "i2c.h"
-#include "screenshot.h"
+#include <lib/draw.h>
+#include <lib/hid.h>
+#include <lib/i2c.h>
+#include <features/screenshot.h>
 
 static void bgWork()
 {

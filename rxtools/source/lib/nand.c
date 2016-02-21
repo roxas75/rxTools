@@ -15,11 +15,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "mpcore.h"
-#include "CTRDecryptor.h"
-#include "crypto.h"
-#include "tmio/tmio.h"
-#include "nand.h"
+#include <lib/mpcore.h>
+#include <features/CTRDecryptor.h>
+#include <lib/crypto.h>
+#include <lib/tmio.h>
+#include <lib/nand.h>
 
 uint8_t NANDCTR[16];
 int sysver;

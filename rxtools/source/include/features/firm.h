@@ -22,8 +22,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <reboot.h>
-#include "fatfs/ff.h"
-#include "crypto.h"
+#include <lib/fatfs/ff.h>
+#include <lib/crypto.h>
 
 typedef struct {
 	uint8_t keyX[AES_BLOCK_SIZE];

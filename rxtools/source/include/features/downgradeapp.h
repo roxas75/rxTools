@@ -15,28 +15,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef ADVANCEDFILEMANAGER_H
-#define ADVANCEDFILEMANAGER_H
+#ifndef DOWNGRADEAPP_H
+#define DOWNGRADEAPP_H
 
-#include <wchar.h>
-#include "console.h"
+#include <stdint.h>
+#include <lib/fatfs/ff.h>
 
-#pragma once
+typedef struct {
+        unsigned int drive;
+        uint32_t tidLo;
+        uint32_t tidHi;
+        TCHAR tmd[64];
+        TCHAR content[64];
+} AppInfo;
 
-typedef struct
-{
-	int pointer, beginning, openedFolder;
-	size_t count;
-	TCHAR **files;
-	TCHAR dir[1000];
-	int enabled; 
-} panel_t;
+//Utilities
+// Fill drive, tidLo and tidHi before calling this.
+int FindApp(AppInfo *info);
+int CheckRegion(int drive);
 
-void AdvFileManagerShow(panel_t* Panel, int x);
-void AdvFileManagerNextSelection(panel_t* Panel);
-void AdvFileManagerPrevSelection(panel_t* Panel);
-void AdvFileManagerSelect(panel_t* Panel);
-void AdvFileManagerFileAction(TCHAR filePath[]);
-void AdvFileManagerBack(panel_t* Panel);
-void AdvFileManagerMain();
+//Features
+void downgradeMSET();
+void installFBI();
+void restoreHS();
+
 #endif

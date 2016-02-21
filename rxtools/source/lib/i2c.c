@@ -18,8 +18,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "i2c.h"
-#include "draw.h"
+#include <lib/i2c.h>
+#include <lib/draw.h>
 
 //-----------------------------------------------------------------------------
 

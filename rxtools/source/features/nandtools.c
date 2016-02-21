@@ -16,18 +16,18 @@
  */
 
 #include <stdlib.h>
-#include "menu.h"
-#include "nandtools.h"
-#include "console.h"
-#include "draw.h"
-#include "lang.h"
-#include "hid.h"
-#include "fs.h"
-#include "screenshot.h"
-#include "padgen.h"
-#include "crypto.h"
-#include "ncch.h"
-#include "NandDumper.h"
+#include <lib/menu.h>
+#include <features/nandtools.h>
+#include <lib/console.h>
+#include <lib/draw.h>
+#include <lib/lang.h>
+#include <lib/hid.h>
+#include <lib/fs.h>
+#include <features/screenshot.h>
+#include <features/padgen.h>
+#include <lib/crypto.h>
+#include <lib/ncch.h>
+#include <features/NandDumper.h>
 #include "stdio.h"
 
 #define nCoolFiles sizeof(CoolFiles)/sizeof(CoolFiles[0])

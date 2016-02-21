@@ -18,7 +18,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "crypto.h"
+#include <lib/crypto.h>
 
 void setup_aeskeyX(uint8_t keyslot, void* keyx)
 {

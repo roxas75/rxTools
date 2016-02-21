@@ -15,28 +15,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef DOWNGRADEAPP_H
-#define DOWNGRADEAPP_H
+#pragma once
 
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-#include <fatfs/ff.h>
+#include <lib/fatfs/ff.h>
+#include <lib/nand.h>
+#define File FIL
 
-typedef struct {
-        unsigned int drive;
-        uint32_t tidLo;
-        uint32_t tidHi;
-        TCHAR tmd[64];
-        TCHAR content[64];
-} AppInfo;
-
-//Utilities
-// Fill drive, tidLo and tidHi before calling this.
-int FindApp(AppInfo *info);
-int CheckRegion(int drive);
-
-//Features
-void downgradeMSET();
-void installFBI();
-void restoreHS();
-
-#endif
+////////////////////////////////////////////////////////////////Basic FileSystem Operations
+bool FSInit(void);
+void FSDeInit(void);
+bool FileOpen(File *Handle, const TCHAR *path, bool truncate);
+size_t FileRead(File *Handle, void *buf, size_t size, size_t foffset);
+size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);
+size_t FileGetSize(File *Handle);
+void FileClose(File *Handle);
+////////////////////////////////////////////////////////////////Advanced FileSystem Operations
+uint32_t FSFileCopy(TCHAR *target, TCHAR *source);

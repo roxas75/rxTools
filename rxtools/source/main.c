@@ -21,17 +21,16 @@
 #include <stdio.h>
 #include <wchar.h>
 #include "MainMenu.h"
-#include "crypto.h"
-#include "fs.h"
-#include "console.h"
-#include "draw.h"
-#include "hid.h"
-#include "screenshot.h"
-#include "firm.h"
-#include "configuration.h"
-#include "log.h"
-#include "AdvancedFileManager.h"
-#include "mpcore.h"
+#include <lib/crypto.h>
+#include <lib/fs.h>
+#include <lib/console.h>
+#include <lib/draw.h>
+#include <lib/hid.h>
+#include <lib/mpcore.h>
+#include <features/screenshot.h>
+#include <features/firm.h>
+#include <features/install.h>
+#include <lib/log.h>
 
 #define FONT_NAME "font.bin"
 

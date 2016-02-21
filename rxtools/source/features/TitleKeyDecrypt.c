@@ -17,14 +17,14 @@
 
 #include <stdint.h>
 #include <string.h>
-#include "TitleKeyDecrypt.h"
-#include "console.h"
-#include "draw.h"
-#include "lang.h"
-#include "hid.h"
-#include "fs.h"
-#include "CTRDecryptor.h"
-#include "crypto.h"
+#include <features/TitleKeyDecrypt.h>
+#include <lib/console.h>
+#include <lib/draw.h>
+#include <lib/lang.h>
+#include <lib/hid.h>
+#include <lib/fs.h>
+#include <features/CTRDecryptor.h>
+#include <lib/crypto.h>
 #include "stdio.h"
 
 #define BUF1 (uint8_t*)0x21000000

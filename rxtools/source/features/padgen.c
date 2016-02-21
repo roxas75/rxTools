@@ -18,13 +18,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fs.h"
-#include "draw.h"
-#include "lang.h"
-#include "padgen.h"
-#include "crypto.h"
-#include "console.h"
-#include "hid.h"
+#include <lib/fs.h>
+#include <lib/draw.h>
+#include <lib/lang.h>
+#include <features/padgen.h>
+#include <lib/crypto.h>
+#include <lib/console.h>
+#include <lib/hid.h>
 
 void PadGen(){
 	ConsoleInit();

@@ -27,7 +27,7 @@
 #ifndef POLARSSL_SHA2_H
 #define POLARSSL_SHA2_H
 
-#include "polarssl/config.h"
+#include <lib/polarssl/config.h>
 
 #include <string.h>
 

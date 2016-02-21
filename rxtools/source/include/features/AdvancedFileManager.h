@@ -15,40 +15,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MENU_H
-#define MENU_H
+#ifndef ADVANCEDFILEMANAGER_H
+#define ADVANCEDFILEMANAGER_H
 
-#include <stdbool.h>
 #include <wchar.h>
-#include "console.h"
+#include <lib/console.h>
 
-typedef struct{
-	wchar_t Str[CONSOLE_MAX_LINE_LENGTH+1];
-	void(* Func)();
-	wchar_t* gfx_splash;
-}MenuEntry;
+#pragma once
 
-typedef struct{
-	wchar_t Name[CONSOLE_MAX_LINE_LENGTH+1];
-	MenuEntry* Option;
-	int nEntryes;
-	int Current;    //The current selected option
-	bool Showed;    //Useful, to not refresh everything everytime
-} Menu;
+typedef struct
+{
+	int pointer, beginning, openedFolder;
+	size_t count;
+	TCHAR **files;
+	TCHAR dir[1000];
+	int enabled; 
+} panel_t;
 
-void MenuInit(Menu* menu);
-void MenuShow();
-void MenuNextSelection();
-void MenuPrevSelection();
-void MenuSelect();
-void MenuClose();
-void MenuRefresh();
-
-extern bool bootGUI;
-extern unsigned char Theme;
-extern bool agb_bios;
-extern bool theme_3d;
-extern unsigned char language;
-extern Menu* MyMenu;
-
+void AdvFileManagerShow(panel_t* Panel, int x);
+void AdvFileManagerNextSelection(panel_t* Panel);
+void AdvFileManagerPrevSelection(panel_t* Panel);
+void AdvFileManagerSelect(panel_t* Panel);
+void AdvFileManagerFileAction(TCHAR filePath[]);
+void AdvFileManagerBack(panel_t* Panel);
+void AdvFileManagerMain();
 #endif

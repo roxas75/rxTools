@@ -15,8 +15,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef LIB_CFG_H
+#define LIB_CFG_H
 
 #define CFG_STR_MAX_LEN 16
 
@@ -50,11 +50,8 @@ enum {
 
 extern Cfg cfgs[];
 
-void InstallConfigData();
-
+int writeCfg(void);
+int readCfg(void);
 void trySetLangFromTheme(int onswitch);
-
-int writeCfg();
-int readCfg();
 
 #endif

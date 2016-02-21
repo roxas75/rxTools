@@ -17,20 +17,20 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include "downgradeapp.h"
-#include "screenshot.h"
-#include "fs.h"
-#include "fatfs/ff.h"
-#include "console.h"
-#include "draw.h"
-#include "lang.h"
-#include "hid.h"
-#include "ncch.h"
-#include "crypto.h"
-#include "TitleKeyDecrypt.h"
-#include "NandDumper.h"
-#include "polarssl/aes.h"
-#include "polarssl/sha2.h"
+#include <features/downgradeapp.h>
+#include <features/screenshot.h>
+#include <lib/fs.h>
+#include <lib/fatfs/ff.h>
+#include <lib/console.h>
+#include <lib/draw.h>
+#include <lib/lang.h>
+#include <lib/hid.h>
+#include <lib/ncch.h>
+#include <lib/crypto.h>
+#include <features/TitleKeyDecrypt.h>
+#include <features/NandDumper.h>
+#include <lib/polarssl/aes.h>
+#include <lib/polarssl/sha2.h>
 #include "stdio.h"
 
 #define bswap_16(a) ((((a) << 8) & 0xff00) | (((a) >> 8) & 0xff))

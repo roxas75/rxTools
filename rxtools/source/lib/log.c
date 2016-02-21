@@ -15,9 +15,9 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "log.h"
+#include <lib/log.h>
 
-#include "fatfs/ff.h"
+#include <lib/fatfs/ff.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
