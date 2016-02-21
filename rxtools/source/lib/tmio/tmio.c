@@ -168,7 +168,7 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 	tmio_write16(REG_SDSTOP,0x100);
 #ifdef DATA32_SUPPORT
 	tmio_write16(REG_SDBLKCOUNT32,numsectors);
-	tmio_write16(REG_SDBLKLEN32,0x200);
+	tmio_write16(REG_SDBLKLEN32,TMIO_BBS);
 #endif
 	tmio_write16(REG_SDBLKCOUNT,numsectors);
 
@@ -205,7 +205,7 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 		#ifdef DATA32_SUPPORT
 		if(useBuf32)
 		{
-			for(int i = 0; i<0x200; i+=4)
+			for(int i = 0; i<TMIO_BBS; i+=4)
 			{
 				*dataPtr32++ = tmio_read32(REG_SDFIFO32);
 			}
@@ -213,7 +213,7 @@ uint32_t tmio_readsectors(enum tmio_dev_id target,
 		else
 		{
 		#endif
-			for(int i = 0; i<0x200; i+=2)
+			for(int i = 0; i<TMIO_BBS; i+=2)
 			{
 				*dataPtr++ = tmio_read16(REG_SDFIFO);
 			}
@@ -236,7 +236,7 @@ uint32_t tmio_writesectors(enum tmio_dev_id target,
 	tmio_write16(REG_SDSTOP,0x100);
 #ifdef DATA32_SUPPORT
 	tmio_write16(REG_SDBLKCOUNT32,numsectors);
-	tmio_write16(REG_SDBLKLEN32,0x200);
+	tmio_write16(REG_SDBLKLEN32,TMIO_BBS);
 #endif
 	tmio_write16(REG_SDBLKCOUNT,numsectors);
 
@@ -273,12 +273,12 @@ uint32_t tmio_writesectors(enum tmio_dev_id target,
 #endif
 
 		#ifdef DATA32_SUPPORT
-		for(int i = 0; i<0x200; i+=4)
+		for(int i = 0; i<TMIO_BBS; i+=4)
 		{
 			tmio_write32(REG_SDFIFO32,*dataPtr32++);
 		}
 		#else
-		for(int i = 0; i<0x200; i+=2)
+		for(int i = 0; i<TMIO_BBS; i+=2)
 		{
 			tmio_write16(REG_SDFIFO,*dataPtr++);
 		}
@@ -320,64 +320,35 @@ static uint32_t calcSDSize(uint8_t* csd, int type)
 
 void tmio_init()
 {
-	//tmio_mask16(0x100,0x800,0);
-	//tmio_mask16(0x100,0x1000,0);
-	//tmio_mask16(0x100,0x0,0x402);
-	//tmio_mask16(0xD8,0x22,0x2);
-	//tmio_mask16(0x100,0x2,0);
-	//tmio_mask16(0xD8,0x22,0);
-	//tmio_write16(0x104,0);
-	//tmio_write16(0x108,1);
-	//tmio_mask16(REG_SDRESET,1,0); //not in new Version -- nintendo's code does this
-	//tmio_mask16(REG_SDRESET,0,1); //not in new Version -- nintendo's code does this
-	//tmio_mask16(0x20,0,0x31D);
-	//tmio_mask16(0x22,0,0x837F);
-	//tmio_mask16(0xFC,0,0xDB);
-	//tmio_mask16(0xFE,0,0xDB);
-	////tmio_write16(REG_SDCLKCTL,0x20);
-	////tmio_write16(REG_SDOPT,0x40EE);
-	////tmio_mask16(0x02,0x3,0);
-	//tmio_write16(REG_SDCLKCTL,0x40);
-	//tmio_write16(REG_SDOPT,0x40EB);
-	//tmio_mask16(0x02,0x3,0);
-	//tmio_write16(REG_SDBLKLEN,0x200);
-	//tmio_write16(REG_SDSTOP,0);
-	
-	*(volatile uint16_t*)0x10006100 &= 0xF7FFu; //SDDATACTL32
-	*(volatile uint16_t*)0x10006100 &= 0xEFFFu; //SDDATACTL32
+	tmio_mask16(REG_DATACTL32, 0x0800, 0x0000);
+	tmio_mask16(REG_DATACTL32, 0x1000, 0x0000);
+	tmio_mask16(REG_DATACTL32, 0x0000, 0x0402);
+	tmio_mask16(REG_DATACTL, 0x2200, 0x0002);
 #ifdef DATA32_SUPPORT
-	*(volatile uint16_t*)0x10006100 |= 0x402u; //SDDATACTL32
+	tmio_mask16(REG_DATACTL, 0x0020, 0x0000);
+	tmio_write16(REG_SDBLKLEN32, TMIO_BBS);
 #else
-	*(volatile uint16_t*)0x10006100 |= 0x402u; //SDDATACTL32
+	tmio_mask16(REG_DATACTL32, 0x0020, 0x0000);
+	tmio_mask16(REG_DATACTL, 0x0020, 0x0000);
+	tmio_write16(REG_SDBLKLEN32, 0);
 #endif
-	*(volatile uint16_t*)0x100060D8 = (*(volatile uint16_t*)0x100060D8 & 0xFFDD) | 2;
+	tmio_write16(REG_SDBLKCOUNT32, 1);
+	tmio_mask16(REG_SDRESET, 0x0001, 0x0000);
+	tmio_mask16(REG_SDRESET, 0x0000, 0x0001);
+	tmio_write32(REG_SDIRMASK, ~TMIO_MASK_ALL);
+	tmio_mask16(0xFC, 0x0000, 0x00DB);
+	tmio_mask16(0xFE, 0x0000, 0x00DB);
+	tmio_mask16(REG_SDPORTSEL, 0x0002, 0x0000);
 #ifdef DATA32_SUPPORT
-	*(volatile uint16_t*)0x10006100 &= 0xFFFFu; //SDDATACTL32
-	*(volatile uint16_t*)0x100060D8 &= 0xFFDFu; //SDDATACTL
-	*(volatile uint16_t*)0x10006104 = 512; //SDBLKLEN32
+	tmio_write16(REG_SDCLKCTL, 0x0020);
+	tmio_write16(REG_SDOPT, 0x40EE);
 #else
-	*(volatile uint16_t*)0x10006100 &= 0xFFFDu; //SDDATACTL32
-	*(volatile uint16_t*)0x100060D8 &= 0xFFDDu; //SDDATACTL
-	*(volatile uint16_t*)0x10006104 = 0; //SDBLKLEN32
+	tmio_write16(REG_SDCLKCTL, 0x0040);
+	tmio_write16(REG_SDOPT, 0x40EB);
 #endif
-	*(volatile uint16_t*)0x10006108 = 1; //SDBLKCOUNT32
-	*(volatile uint16_t*)0x100060E0 &= 0xFFFEu; //SDRESET
-	*(volatile uint16_t*)0x100060E0 |= 1u; //SDRESET
-	*(volatile uint16_t*)0x10006020 |= TMIO_MASK_ALL; //SDIR_MASK0
-	*(volatile uint16_t*)0x10006022 |= TMIO_MASK_ALL>>16; //SDIR_MASK1
-	*(volatile uint16_t*)0x100060FC |= 0xDBu; //SDCTL_RESERVED7
-	*(volatile uint16_t*)0x100060FE |= 0xDBu; //SDCTL_RESERVED8
-	*(volatile uint16_t*)0x10006002 &= 0xFFFCu; //SDPORTSEL
-#ifdef DATA32_SUPPORT
-	*(volatile uint16_t*)0x10006024 = 0x20;
-	*(volatile uint16_t*)0x10006028 = 0x40EE;
-#else
-	*(volatile uint16_t*)0x10006024 = 0x40; //Nintendo sets this to 0x20
-	*(volatile uint16_t*)0x10006028 = 0x40EB; //Nintendo sets this to 0x40EE
-#endif
-	*(volatile uint16_t*)0x10006002 &= 0xFFFCu; ////SDPORTSEL
-	*(volatile uint16_t*)0x10006026 = 512; //SDBLKLEN
-	*(volatile uint16_t*)0x10006008 = 0; //SDSTOP
+	tmio_mask16(REG_SDPORTSEL, 0x0002, 0x0000);
+	tmio_write16(REG_SDBLKLEN, TMIO_BBS);
+	tmio_write16(REG_SDSTOP, 0);
 	
 	inittarget(TMIO_DEV_SDMC);
 }
@@ -447,7 +418,7 @@ uint32_t tmio_init_nand()
 	if(r)
 		return r;
 
-	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,0x200,1);
+	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,TMIO_BBS,1);
 	if(r)
 		return r;
 
@@ -547,7 +518,7 @@ uint32_t tmio_init_sdmc()
 	if(r)
 		return r;
 	
-	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,0x200,1);
+	r = tmio_send_command(MMC_SET_BLOCKLEN | TMIO_CMD_RESP_R1,TMIO_BBS,1);
 	if(r)
 		return r;
 
