@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <features/screenshot.h>
-#include <lib/console.h>
-#include <lib/draw.h>
+#include <lib/ui/console.h>
+#include <lib/ui/draw.h>
 #include <lib/hid.h>
 #include <lib/fs.h>
 #include <lib/fatfs/ff.h>

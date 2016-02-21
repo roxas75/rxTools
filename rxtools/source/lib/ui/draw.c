@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <wchar.h>
 #include <lib/fs.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 #include <lib/lang.h>
 
 uint32_t current_y = 1;

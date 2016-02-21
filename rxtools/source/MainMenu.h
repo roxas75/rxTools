@@ -19,8 +19,8 @@
 #define MY_MENU
 
 #include <lib/hid.h>
-#include <lib/draw.h>
-#include <lib/console.h>
+#include <lib/ui/draw.h>
+#include <lib/ui/console.h>
 #include <features/screenshot.h>
 #include <lib/menu.h>
 #include <lib/fs.h>

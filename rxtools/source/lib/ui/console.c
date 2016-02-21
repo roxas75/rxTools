@@ -23,8 +23,8 @@
 #include <stdio.h>
 #include <wchar.h>
 #include <lib/cfg.h>
-#include <lib/console.h>
-#include <lib/draw.h>
+#include <lib/ui/console.h>
+#include <lib/ui/draw.h>
 #include <lib/menu.h>
 
 wchar_t console[CONSOLE_MAX_LINES][CONSOLE_MAX_LINE_LENGTH + 1];

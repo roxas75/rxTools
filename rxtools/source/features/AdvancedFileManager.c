@@ -21,12 +21,12 @@
 #include <lib/cfg.h>
 #include <lib/lang.h>
 #include <features/AdvancedFileManager.h>
-#include <lib/draw.h>
+#include <lib/ui/draw.h>
 #include <lib/hid.h>
 #include <lib/fs.h>
 #include <lib/menu.h>
 #include <features/firm.h>
-#include <lib/console.h>
+#include <lib/ui/console.h>
 
  #define FILE_ACTIONS 2
 

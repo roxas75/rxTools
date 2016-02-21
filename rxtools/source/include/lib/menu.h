@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include <wchar.h>
-#include <lib/console.h>
+#include <lib/ui/console.h>
 
 typedef struct{
 	wchar_t Str[CONSOLE_MAX_LINE_LENGTH+1];
