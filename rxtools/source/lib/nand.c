@@ -74,21 +74,14 @@ void FSNandInitCrypto(void) {
 }
 
 unsigned int checkEmuNAND() {
+	uint32_t addr[] = {0x3AF00000, 0x4D800000, 0x3BA00000, 0x76000000}; //CTR,KTR,CTR,KTR
 	uint8_t *check = (uint8_t *)0x26000000;
-	int isn3ds = 0;
-	if (getMpInfo() == MPINFO_KTR)isn3ds = 1;
-
-	tmio_readsectors(TMIO_DEV_SDMC, isn3ds ? 0x4D800000 /0x200 : 0x3AF00000 / 0x200, 1, check);
-	if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
-		return isn3ds ? 0x4D800000 : 0x3AF00000;
-	} else {
-		tmio_readsectors(TMIO_DEV_SDMC, isn3ds ? 0x76000000 /0x200 : 0x3BA00000 / 0x200, 1, check);
-		if (*((char *)check + 0x100) == 'N' && *((char *)check + 0x101) == 'C' && *((char *)check + 0x102) == 'S' && *((char *)check + 0x103) == 'D') {
-			return isn3ds ? 0x76000000 : 0x3BA00000;
-		} else {
-			return 0;
-		}
+	for(int i = getMpInfo() == MPINFO_KTR; i < sizeof(addr)/sizeof(addr[0]); i += 2) {
+		tmio_readsectors(TMIO_DEV_SDMC, addr[i] >> 9, 1, check);
+		if (*(uint32_t*)(check + 0x100) == *(uint32_t*)&"NCSD")
+			return addr[i];
 	}
+	return 0;
 }
 
 void GetNANDCTR(uint8_t *ctr) {
