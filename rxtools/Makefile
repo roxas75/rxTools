@@ -34,7 +34,7 @@ CPPFLAGS := $(INCDIR) $(CPPDEFS)
 CFORCE := -fomit-frame-pointer -ffast-math
 CMACHINE := -mtune=arm946e-s
 CWARNING := -Wall -Wno-multichar
-CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS)
+CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS) -DVERSION=\"$(GIT_VERSION)\"
 
 # Use Thumb libraries because sbrk of ARM newlib in devkitPro doesn't work.
 LDFLAGS := -nostartfiles -g $(CMACHINE) -mthumb -mthumb-interwork -Wl,-Tstub.ld
@@ -86,7 +86,7 @@ $(BUILD)/%.o: $(BUILD)/%.bin
 	$(call Q,DD,$@)dd if=$< of=$@ count=8
 
 $(BUILD)/font.bin: unifont-8.0.01.bmp
-	$(call Q,CONVERT,$@)convert -crop 4096x4096+32+64 -transpose $< - | convert -crop 16x4096 -append - - | convert -roll +8 -negate -depth 1 - gray:$@;
+	$(call Q,CONVERT,$@)convert -crop +32+64 -transpose +repage -crop 16 -append $< - | convert -flop - mono:$@;
 
 $(foreach f,$(NEED_DIRS),$(eval $f : | $(dir $f)D))
 

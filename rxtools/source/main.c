@@ -31,6 +31,7 @@
 #include "i2c.h"
 #include "configuration.h"
 #include "lang.h"
+#include "mpcore.h"
 
 #define FONT_NAME "font.bin"
 
@@ -104,6 +105,37 @@ static FRESULT initKeyX()
 
 	f_close(&f);
 	setup_aeskeyX(0x25, buff);
+	return 0;
+}
+
+static FRESULT initN3DSKeys()
+{
+    uint8_t buff[AES_BLOCK_SIZE];
+	UINT br;
+	FRESULT r;
+	FIL f;
+
+	r = f_open(&f, _T("key_0x16.bin"), FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&f, buff, sizeof(buff), &br);
+	if (br < sizeof(buff))
+		return r == FR_OK ? EOF : r;
+
+	f_close(&f);
+	setup_aeskeyX(0x16, buff);
+
+	r = f_open(&f, _T("key_0x1B.bin"), FA_READ);
+	if (r != FR_OK)
+		return r;
+
+	r = f_read(&f, buff, sizeof(buff), &br);
+	if (br < sizeof(buff))
+		return r == FR_OK ? EOF : r;
+
+	f_close(&f);
+	setup_aeskeyX(0x1B, buff);
 	return 0;
 }
 
@@ -196,7 +228,24 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 	else
 		warn(L"Failed to load " FONT_NAME ": %d\n", r);
 
+	if (getMpInfo() == MPINFO_KTR)
+    {
+        r = initN3DSKeys();
+        if (r != FR_OK) {
+            warn(L"Failed to load keys for N3DS\n"
+            "  Code: %d\n"
+            "  RxMode will not boot. Please\n"
+            "  include key_0x16.bin and\n"
+            "  key_0x1B.bin at the root of your\n"
+            "  SD card.\n", r);
+            InputWait();
+            goto postinstall;
+        }
+    }
+
+
 	install();
+	postinstall:
 	readCfg();
 
 	r = loadStrings();
