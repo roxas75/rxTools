@@ -31,10 +31,7 @@
 #include "fs.h"
 #include "ncch.h"
 #include "draw.h"
-#include "menu.h"
-#include "fileexplorer.h"
-#include "CTRDecryptor.h"
-#include "TitleKeyDecrypt.h"
+#include "decryption.h"
 #include "configuration.h"
 #include "lang.h"
 

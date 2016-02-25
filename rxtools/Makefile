@@ -34,21 +34,19 @@ CPPFLAGS := $(INCDIR) $(CPPDEFS)
 CFORCE := -fomit-frame-pointer -ffast-math
 CMACHINE := -mtune=arm946e-s
 CWARNING := -Wall -Wno-multichar
-CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS) -DVERSION=\"$(GIT_VERSION)\"
+CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS)
 
 # Use Thumb libraries because sbrk of ARM newlib in devkitPro doesn't work.
 LDFLAGS := -nostartfiles -g $(CMACHINE) -mthumb -mthumb-interwork -Wl,-Tstub.ld
 
-CCOBJS := $(addprefix $(BUILD)/,main.o features/CTRDecryptor.o	\
-	features/NandDumper.o features/TitleKeyDecrypt.o	\
-	features/configuration.o features/downgradeapp.o	\
-	features/AdvancedFileManager.o features/firm.o	\
-	features/nandtools.o features/padgen.o features/screenshot.o	\
+CCOBJS := $(addprefix $(BUILD)/,main.o features/decryption.o	\
+	features/configuration.o features/firm.o \
+	features/screenshot.o	\
 	lib/fatfs/diskio.o lib/fatfs/ff.o lib/fatfs/option/unicode.o	\
 	lib/tmio/tmio.o	\
 	lib/polarssl/padlock.o lib/polarssl/sha2.o lib/polarssl/aes.o	\
 	lib/console.o lib/crypto.o lib/draw.o lib/fs.o lib/hid.o lib/lang.o	\
-	lib/log.o lib/i2c.o lib/jsmn/jsmn.o lib/menu.o lib/nand.o lib/ncch.o	\
+	lib/log.o lib/i2c.o lib/jsmn/jsmn.o lib/nand.o lib/ncch.o	\
 	features/reboot.o)
 
 OBJS	:= $(CCOBJS) $(addprefix $(BUILD)/, start.o font_ascii.o lib/delay.o)
@@ -62,7 +60,7 @@ MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 
 $(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
 	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(dir $@) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload
-	$(call Q,DD,$@)dd if=$< bs=896k conv=sync,notrunc | dd of=$@ seek=160 conv=notrunc
+	$(call Q,DD,$@)dd if=$< bs=896K conv=sync,notrunc | dd of=$@ seek=160 conv=notrunc
 
 %.bin: %.elf
 	$(call Q,OBJCOPY,$@)$(OBJCOPY) -O binary $< $@
@@ -88,7 +86,7 @@ $(BUILD)/%.o: $(BUILD)/%.bin
 	$(call Q,DD,$@)dd if=$< of=$@ count=8
 
 $(BUILD)/font.bin: unifont-8.0.01.bmp
-	$(call Q,CONVERT,$@)convert -crop +32+64 -transpose +repage -crop 16 -append $< - | convert -flop - mono:$@;
+	$(call Q,CONVERT,$@)convert -crop 4096x4096+32+64 -transpose $< - | convert -crop 16x4096 -append - - | convert -roll +8 -negate -depth 1 - gray:$@;
 
 $(foreach f,$(NEED_DIRS),$(eval $f : | $(dir $f)D))
 

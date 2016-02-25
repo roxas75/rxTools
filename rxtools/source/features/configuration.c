@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <reboot.h>
-#include "TitleKeyDecrypt.h"
+#include "decryption.h"
 #include "configuration.h"
 #include "lang.h"
 #include "screenshot.h"
@@ -34,9 +34,7 @@
 #include "crypto.h"
 #include "polarssl/aes.h"
 #include "firm.h"
-#include "downgradeapp.h"
 #include "stdio.h"
-#include "menu.h"
 #include "jsmn/jsmn.h"
 
 #define DATA_PATH	_T("rxtools/data")
@@ -45,12 +43,11 @@
 static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
 
 Cfg cfgs[] = {
-	[CFG_GUI] = { "GUI", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_DEFAULT] = { "Default", CFG_TYPE_INT, { .i = 0 } },
 	[CFG_THEME] = { "Theme", CFG_TYPE_INT, { .i = 0 } },
 	[CFG_RANDOM] = { "Random theme", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_AGB] = { "AGB", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_3D] = { "3D", CFG_TYPE_BOOLEAN, { .i = 1 } },
-	[CFG_ABSYSN] = { "Autoboot-sysNAND", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_LANG] = { "Language", CFG_TYPE_STRING, { .s = cfgLang } }
 };
 
@@ -297,44 +294,12 @@ static int processFirmFile(uint32_t lo)
 	return -1;
 }
 
-static int processFirmInstalled(uint32_t lo)
-{
-	void *buff, *firm;
-	AppInfo appInfo;
-	UINT size;
-	FRESULT r;
-	FIL f;
-
-	appInfo.drive = 1;
-	appInfo.tidLo = lo;
-	appInfo.tidHi = TID_HI_FIRM;
-	FindApp(&appInfo);
-	if (f_open(&f, appInfo.content, FA_READ) != FR_OK) {
-		appInfo.drive = 2;
-		FindApp(&appInfo);
-		r = f_open(&f, appInfo.content, FA_READ);
-		if (r != FR_OK)
-			return r;
-	}
-
-	size = f_size(&f);
-	buff = __builtin_alloca(size);
-
-	r = f_read(&f, buff, size, &size);
-	f_close(&f);
-	if (r != FR_OK)
-		return r;
-
-	firm = decryptFirmTitleNcch(buff, &size);
-	return firm == NULL ? -1 : saveFirm(lo, firm, size);
-}
-
 static int processFirm(uint32_t lo)
 {
 	int r;
 
 	r = processFirmFile(lo);
-	if (r && processFirmInstalled(lo))
+	if (r)
 		return r;
 
 	return 0;

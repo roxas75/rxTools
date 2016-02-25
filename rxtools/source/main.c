@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "MainMenu.h"
 #include "crypto.h"
 #include "fs.h"
 #include "console.h"
@@ -28,12 +27,17 @@
 #include "hid.h"
 #include "screenshot.h"
 #include "firm.h"
-#include "configuration.h"
 #include "log.h"
-#include "AdvancedFileManager.h"
-#include "mpcore.h"
+#include "i2c.h"
+#include "configuration.h"
+#include "lang.h"
 
 #define FONT_NAME "font.bin"
+
+static void ShutDown(int arg){
+	i2cWriteRegister(I2C_DEV_MCU, 0x20, (arg) ? (uint8_t)(1<<0):(uint8_t)(1<<2));
+	while(1);
+}
 
 static int warned = 0;
 
@@ -74,6 +78,15 @@ static void drawTop()
 		DrawTopSplash(str, str, str);
 }
 
+static void drawBottom()
+{
+	wchar_t str[_MAX_LFN];
+
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/BOT%u.bin",
+		cfgs[CFG_THEME].val.i, cfgs[CFG_DEFAULT].val.i);
+	DrawBottomSplash(str);
+}
+
 static FRESULT initKeyX()
 {
 	uint8_t buff[AES_BLOCK_SIZE];
@@ -94,64 +107,31 @@ static FRESULT initKeyX()
 	return 0;
 }
 
-static FRESULT initN3DSKeys()
-{
-    uint8_t buff[AES_BLOCK_SIZE];
-	UINT br;
-	FRESULT r;
-	FIL f;
-
-	r = f_open(&f, _T("key_0x16.bin"), FA_READ);
-	if (r != FR_OK)
-		return r;
-
-	r = f_read(&f, buff, sizeof(buff), &br);
-	if (br < sizeof(buff))
-		return r == FR_OK ? EOF : r;
-
-	f_close(&f);
-	setup_aeskeyX(0x16, buff);
-
-	r = f_open(&f, _T("key_0x1B.bin"), FA_READ);
-	if (r != FR_OK)
-		return r;
-
-	r = f_read(&f, buff, sizeof(buff), &br);
-	if (br < sizeof(buff))
-		return r == FR_OK ? EOF : r;
-
-	f_close(&f);
-	setup_aeskeyX(0x1B, buff);
-	return 0;
-}
-
 static _Noreturn void mainLoop()
 {
 	uint32_t pad;
 
 	while (true) {
+		drawBottom();
 		pad = InputWait();
-		if (pad & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1))
-			MenuNextSelection();
 
-		if (pad & (BUTTON_UP | BUTTON_LEFT | BUTTON_L1))
-			MenuPrevSelection();
+		if (pad & BUTTON_A) rxMode(1);		//EMUNAND
+		if (pad & BUTTON_X) rxMode(0);		//SYSNAND
+		if (pad & BUTTON_Y) PastaMode();	//PASTAMODE
+		if (pad & BUTTON_B) ShutDown(1);	//SHUTDOWN
+		if (pad & BUTTON_LEFT)
+		{
+			if(cfgs[CFG_DEFAULT].val.i == 0) cfgs[CFG_DEFAULT].val.i = 3;
+			else cfgs[CFG_DEFAULT].val.i--;
+			writeCfg();
 
-		if (pad & BUTTON_A) {
-			OpenAnimation();
-			MenuSelect();
 		}
-
-		if (pad & BUTTON_SELECT) {
-			fadeOut();
-			ShutDown(1); //shutdown
+		if(pad & BUTTON_RIGHT)
+		{
+			if(cfgs[CFG_DEFAULT].val.i == 3) cfgs[CFG_DEFAULT].val.i = 0;
+			else cfgs[CFG_DEFAULT].val.i++;
+			writeCfg();
 		}
-		if (pad & BUTTON_START) {
-			fadeOut();
-			ShutDown(0); //reboot
-		}
-
-		MenuShow();
 	}
 }
 
@@ -216,23 +196,7 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 	else
 		warn(L"Failed to load " FONT_NAME ": %d\n", r);
 
-    if (getMpInfo() == MPINFO_KTR)
-    {
-        r = initN3DSKeys();
-        if (r != FR_OK) {
-            warn(L"Failed to load keys for N3DS\n"
-            "  Code: %d\n"
-            "  RxMode will not boot. Please\n"
-            "  include key_0x16.bin and\n"
-            "  key_0x1B.bin at the root of your\n"
-            "  SD card.\n", r);
-            InputWait();
-            goto postinstall;
-        }
-    }
-
 	install();
-	postinstall:
 	readCfg();
 
 	r = loadStrings();
@@ -241,12 +205,12 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 
 	drawTop();
 
-	if (!cfgs[CFG_GUI].val.i && HID_STATE & BUTTON_L1) {
-		if(~HID_STATE & BUTTON_Y) rxMode(1);
-		else if(~HID_STATE & BUTTON_X) rxMode(0);
-		else if(~HID_STATE & BUTTON_B) PastaMode();
-		else rxMode(cfgs[CFG_ABSYSN].val.i ? 0 : 1);
-	}
+	//Default boot check
+	if (cfgs[CFG_DEFAULT].val.i && HID_STATE & BUTTON_L1)
+		{
+			if(cfgs[CFG_DEFAULT].val.i == 3) PastaMode();
+			else rxMode(cfgs[CFG_DEFAULT].val.i - 1);
+		}
 
 	if (sysver < 7) {
 		r = initKeyX();
@@ -266,7 +230,5 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 	}
 
 	OpenAnimation();
-	MenuInit(&MainMenu);
-	MenuShow();
 	mainLoop();
 }
