@@ -21,7 +21,7 @@ BUILD := build
 DEPS_DIR := $(BUILD)/.deps
 SOURCE := source
 
-all: $(BUILD)/code.bin 
+all: $(BUILD)/code.bin $(BUILD)/arm9loaderhax.bin
 
 include $(RXTOOLSMK)
 
@@ -58,8 +58,8 @@ MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 
 .PHONY: $(BUILD)/code.bin all clean
 
-#$(BUILD)/arm9loaderhax.bin: 
-	#@dd if=$(BUILD)/code.bin of=$(BUILD)/arm9loaderhax.bin skip=73728 bs=1 
+$(BUILD)/arm9loaderhax.bin: 
+	@dd if=$(BUILD)/code.bin of=$(BUILD)/arm9loaderhax.bin skip=73728 bs=1 
 
 $(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
 	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(dir $@) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload
