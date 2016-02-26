@@ -34,6 +34,7 @@
 #include "decryption.h"
 #include "configuration.h"
 #include "lang.h"
+#include "log.h"
 
 const wchar_t firmPathFmt[] = _T("") FIRM_PATH_FMT;
 const wchar_t firmPatchPathFmt[] = _T("") FIRM_PATCH_PATH_FMT;
@@ -174,6 +175,9 @@ int rxMode(int emu)
 	FIL fd;
 	UINT br, fsz;
 
+	log(ll_info, "Starting rxMode");
+
+
 	if (emu) {
 		sector = checkEmuNAND();
 		if (sector == 0) {
@@ -194,6 +198,12 @@ int rxMode(int emu)
 	} else
 		sector = 0;
 
+
+	char str[256];
+	sprintf(str, "EMU: %d", emu);
+	log(ll_info, str);
+
+
 	r = getMpInfo();
 	switch (r) {
 		case MPINFO_KTR:
@@ -208,6 +218,9 @@ int rxMode(int emu)
 			msg = L"Unknown Platform: %d";
 			goto fail;
 	}
+
+	sprintf(str, "MP: %d   TID:%d", r, tid);
+	log(ll_info, str);
 
 	setAgbBios();
 
@@ -244,6 +257,7 @@ int rxMode(int emu)
 	shstrtab = (char *)PATCH_ADDR + shdr[ehdr->e_shstrndx].sh_offset;
 	for (btm = shdr + ehdr->e_shnum; shdr != btm; shdr++) {
 		if (!strcmp(shstrtab + shdr->sh_name, ".patch.p9.reboot.body")) {
+			log(ll_info, "execReboot!");
 			execReboot(sector, keyxArg, ehdr->e_entry, shdr);
 			__builtin_unreachable();
 		}
@@ -288,7 +302,7 @@ int PastaMode(){
 	if (strncmp((char*)firm, "FIRM", 4))
 		nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM1);
 
-	/*if(getMpInfo() == MPINFO_CTR)
+	if(getMpInfo() == MPINFO_CTR)
 	{
 		//o3ds patches
 		unsigned char sign1[] = { 0xC1, 0x17, 0x49, 0x1C, 0x31, 0xD0, 0x68, 0x46, 0x01, 0x78, 0x40, 0x1C, 0x00, 0x29, 0x10, 0xD1 };
@@ -306,14 +320,14 @@ int PastaMode(){
 		}
 	}
 	else
-	{*/
+	{
 		//new 3ds patches
 		decryptFirmKtrArm9((void *)FIRM_ADDR);
 		uint8_t patch0[] = { 0x00, 0x20, 0x3B, 0xE0 };
         uint8_t patch1[] = { 0x00, 0x20, 0x08, 0xE0 };
         memcpy((uint32_t*)(FIRM_ADDR + 0xB39D8), patch0, 4);
 		memcpy((uint32_t*)(FIRM_ADDR + 0xB9204), patch1, 4);
-	//}
+	}
 
 	return loadExecReboot();
 }
