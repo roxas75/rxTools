@@ -37,7 +37,7 @@ static void bgWork()
 uint32_t InputWait() {
     uint32_t pad_state_old = HID_STATE;
     while (true) {
-        bgWork();
+        //bgWork();
 
         uint32_t pad_state = HID_STATE;
         if (pad_state ^ pad_state_old)
@@ -52,7 +52,7 @@ uint32_t GetInput() {
 
 void WaitForButton(uint32_t button){
 	while (true) {
-		bgWork();
+		//bgWork();
 
         uint32_t pad_state = InputWait();
         if (pad_state & button)

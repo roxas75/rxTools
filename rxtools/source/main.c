@@ -184,7 +184,7 @@ static void warn(const wchar_t *format, ...)
 	ConsoleShow();
 }
 
-__attribute__((section(".text.start"), noreturn)) void _start()
+void main()
 {
 	static const TCHAR fontPath[] = _T("") SYS_PATH "/" FONT_NAME;
 	void *fontBuf;
@@ -197,11 +197,12 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 
 	preloadStringsA();
 
-	if (!FSInit()) {
-		DrawString(BOT_SCREEN, strings[STR_FAILED],
-			BOT_SCREEN_WIDTH / 2, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
-		while (1);
-	}
+	//NAND never mounts with arm9loaderhax, so I'll just leave this commented out
+	//if (!FSInit()) {
+	//	DrawString(BOT_SCREEN, strings[STR_FAILED],
+	//		BOT_SCREEN_WIDTH / 2, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+	//	while (1);
+	//}
 
 	/*
 	set_loglevel(ll_info);
