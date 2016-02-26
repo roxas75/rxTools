@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 export PATH := $(DEVKITARM)/bin:$(PATH)
+.DEFAULT_GOAL := release
 CODE_FILE := code.bin
 SYS_PATH := rxTools/sys
 SET_SYS_PATH := SYS_PATH=$(SYS_PATH)
