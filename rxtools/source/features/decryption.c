@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include "decryption.h"
 #include "console.h"
 #include "draw.h"
@@ -25,7 +26,11 @@
 #include "fs.h"
 #include "crypto.h"
 #include "stdio.h"
- #include "screenshot.h"
+#include "screenshot.h"
+#include "firm.h"
+#include "ncch.h"
+#include "mpcore.h"
+#include "polarssl/aes.h"
 
 #define TITLES (uint8_t*)0x22000000
 #define BUFFER_ADDR ((uint8_t*)0x21000000)
@@ -33,6 +38,72 @@
 
 char str[100];
 
+int decryptFirmKtrArm9(void *p)
+{
+	uint8_t key[AES_BLOCK_SIZE];
+	PartitionInfo info;
+	Arm9Hdr *hdr;
+	FirmSeg *seg, *btm;
+
+	seg = ((FirmHdr *)p)->segs;
+	for (btm = seg + FIRM_SEG_NUM; seg->isArm11; seg++)
+		 if (seg == btm)
+			 return -1;
+
+	hdr = (void *)(p + seg->offset);
+
+	info.ctr = hdr->ctr;
+	info.buffer = (uint8_t *)hdr + 0x800;
+	info.keyY = hdr->keyY;
+	info.size = atoi(hdr->size);
+
+	use_aeskey(0x11);
+	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
+		info.keyslot = 0x15;
+		aes_decrypt(hdr->keyX, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+		setup_aeskeyX(info.keyslot, key);
+	} else {
+		info.keyslot = 0x16;
+		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+	}
+
+	return DecryptPartition(&info);
+}
+
+uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
+{
+	const size_t sector = 512;
+	const size_t header = 512;
+	ctr_ncchheader NCCH;
+	uint8_t CTR[16];
+	PartitionInfo INFO;
+	NCCH = *((ctr_ncchheader*)title);
+	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
+	ncch_get_counter(NCCH, CTR, 2);
+	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*sector; INFO.keyY = NCCH.signature; INFO.size = getle32(NCCH.exefssize)*sector; INFO.keyslot = 0x2C;
+	DecryptPartition(&INFO);
+
+	if (size != NULL)
+		*size = INFO.size - header;
+
+	uint8_t* firm = (uint8_t*)(INFO.buffer + header);
+
+	if (getMpInfo() == MPINFO_KTR)
+	    if (decryptFirmKtrArm9(firm))
+			return NULL;
+
+	return firm;
+}
+
+uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
+{
+	aes_context aes_ctxt;
+
+	uint8_t iv[16] = { 0 };
+	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
+	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
+	return decryptFirmTitleNcch(title, firmSize);
+}
 
 int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	const size_t blockSize = 16;

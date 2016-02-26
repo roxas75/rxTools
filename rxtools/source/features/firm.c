@@ -39,7 +39,6 @@
 const wchar_t firmPathFmt[] = _T("") FIRM_PATH_FMT;
 const wchar_t firmPatchPathFmt[] = _T("") FIRM_PATCH_PATH_FMT;
 
-unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
 
 _Noreturn void execReboot(uint32_t, void *, uintptr_t, const Elf32_Shdr *);
@@ -78,73 +77,6 @@ static int loadFirm(TCHAR *path, UINT *fsz)
 	f_close(&fd);
 
 	return ((FirmHdr *)FIRM_ADDR)->magic == 0x4D524946 ? 0 : -1;
-}
-
-static int decryptFirmKtrArm9(void *p)
-{
-	uint8_t key[AES_BLOCK_SIZE];
-	PartitionInfo info;
-	Arm9Hdr *hdr;
-	FirmSeg *seg, *btm;
-
-	seg = ((FirmHdr *)p)->segs;
-	for (btm = seg + FIRM_SEG_NUM; seg->isArm11; seg++)
-		 if (seg == btm)
-			 return -1;
-
-	hdr = (void *)(p + seg->offset);
-
-	info.ctr = hdr->ctr;
-	info.buffer = (uint8_t *)hdr + 0x800;
-	info.keyY = hdr->keyY;
-	info.size = atoi(hdr->size);
-
-	use_aeskey(0x11);
-	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
-		info.keyslot = 0x15;
-		aes_decrypt(hdr->keyX, key, NULL, 1, AES_ECB_DECRYPT_MODE);
-		setup_aeskeyX(info.keyslot, key);
-	} else {
-		info.keyslot = 0x16;
-		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
-	}
-
-	return DecryptPartition(&info);
-}
-
-uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size)
-{
-	const size_t sector = 512;
-	const size_t header = 512;
-	ctr_ncchheader NCCH;
-	uint8_t CTR[16];
-	PartitionInfo INFO;
-	NCCH = *((ctr_ncchheader*)title);
-	if(memcmp(NCCH.magic, "NCCH", 4) != 0) return NULL;
-	ncch_get_counter(NCCH, CTR, 2);
-	INFO.ctr = CTR; INFO.buffer = title + getle32(NCCH.exefsoffset)*sector; INFO.keyY = NCCH.signature; INFO.size = getle32(NCCH.exefssize)*sector; INFO.keyslot = 0x2C;
-	DecryptPartition(&INFO);
-
-	if (size != NULL)
-		*size = INFO.size - header;
-
-	uint8_t* firm = (uint8_t*)(INFO.buffer + header);
-
-	if (getMpInfo() == MPINFO_KTR)
-	    if (decryptFirmKtrArm9(firm))
-			return NULL;
-
-	return firm;
-}
-
-uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16])
-{
-	aes_context aes_ctxt;
-
-	uint8_t iv[16] = { 0 };
-	aes_setkey_dec(&aes_ctxt, &key[0], 0x80);
-	aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, size, iv, title, title);
-	return decryptFirmTitleNcch(title, firmSize);
 }
 
 static void setAgbBios()
@@ -283,19 +215,8 @@ patchFail:
 	goto fail;
 }
 
-void rxModeWithSplash(int emu)
-{
-	wchar_t s[_MAX_LFN];
-
-	swprintf(s, _MAX_LFN, L"/rxTools/Theme/%u/boot.bin",
-		cfgs[CFG_THEME].val.i);
-	DrawBottomSplash(s);
-	rxMode(emu);
-}
-
 //Just patches signatures check, loads in sysnand
 int PastaMode(){
-	/*PastaMode is ready for n3ds BUT there's an unresolved bug which affects nand reading functions, like nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);*/
 
 	uint8_t* firm = (void*)FIRM_ADDR;
 	nand_readsectors(0, 0xF0000 / 0x200, firm, FIRM0);
@@ -331,29 +252,3 @@ int PastaMode(){
 
 	return loadExecReboot();
 }
-
-void FirmLoader(TCHAR firm_path[]){
-
-	UINT fsz;
-	if (loadFirm(firm_path, &fsz))
-	{
-		ConsoleInit();
-		ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
-		print(strings[STR_WRONG], L"", strings[STR_FIRMWARE_FILE]);
-		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-		ConsoleShow();
-		WaitForButton(BUTTON_A);
-		return;
-	}
-		if (loadExecReboot())
-	{
-		ConsoleInit();
-		ConsoleSetTitle(strings[STR_LOAD], strings[STR_FIRMWARE_FILE]);
-		print(strings[STR_ERROR_LAUNCHING], strings[STR_FIRMWARE_FILE]);
-		print(strings[STR_PRESS_BUTTON_ACTION], strings[STR_BUTTON_A], strings[STR_CONTINUE]);
-		ConsoleShow();
-		WaitForButton(BUTTON_A);
-		return;
-	}
-}
-

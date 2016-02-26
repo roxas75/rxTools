@@ -45,12 +45,7 @@ extern const wchar_t firmPathFmt[];
 extern const wchar_t firmPatchPathFmt[];
 
 int PastaMode();
-void FirmLoader();
-void rxModeWithSplash(int emu);
 int rxMode(int emu);
-uint8_t* decryptFirmTitleNcch(uint8_t* title, size_t *size);
-uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16]);
-FRESULT applyPatch(void *file, const char *patch);
 
 static inline int getFirmPath(wchar_t *s, TitleIdLo id)
 {

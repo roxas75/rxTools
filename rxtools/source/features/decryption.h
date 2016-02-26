@@ -59,5 +59,8 @@ typedef struct{
 int getTitleKey(uint8_t *TitleKey, uint32_t low, uint32_t high, int drive);
 int getTitleKeyWithCetk(uint8_t dst[16], const TCHAR *path);
 uint32_t DecryptPartition(PartitionInfo* info);
+uint8_t *decryptFirmTitleNcch(uint8_t* title, size_t *size);
+uint8_t *decryptFirmTitle(uint8_t *title, size_t size, size_t *firmSize, uint8_t key[16]);
+int decryptFirmKtrArm9(void *p);
 
 #endif
