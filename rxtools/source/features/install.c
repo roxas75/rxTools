@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <reboot.h>
-#include <features/TitleKeyDecrypt.h>
+#include <features/decryption.h>
 #include <features/install.h>
 #include <lib/cfg.h>
 #include <lib/lang.h>
@@ -35,9 +35,7 @@
 #include <lib/crypto.h>
 #include <lib/polarssl/aes.h>
 #include <features/firm.h>
-#include <features/downgradeapp.h>
 #include "stdio.h"
-#include <lib/menu.h>
 
 #define DATA_PATH	_T("rxtools/data")
 #define KEYFILENAME	"slot0x25KeyX.bin"
@@ -105,49 +103,6 @@ static int processFirmFile(uint32_t lo)
 	return -1;
 }
 
-static int processFirmInstalled(uint32_t lo)
-{
-	void *buff, *firm;
-	AppInfo appInfo;
-	UINT size;
-	FRESULT r;
-	FIL f;
-
-	appInfo.drive = 1;
-	appInfo.tidLo = lo;
-	appInfo.tidHi = TID_HI_FIRM;
-	FindApp(&appInfo);
-	if (f_open(&f, appInfo.content, FA_READ) != FR_OK) {
-		appInfo.drive = 2;
-		FindApp(&appInfo);
-		r = f_open(&f, appInfo.content, FA_READ);
-		if (r != FR_OK)
-			return r;
-	}
-
-	size = f_size(&f);
-	buff = __builtin_alloca(size);
-
-	r = f_read(&f, buff, size, &size);
-	f_close(&f);
-	if (r != FR_OK)
-		return r;
-
-	firm = decryptFirmTitleNcch(buff, &size);
-	return firm == NULL ? -1 : saveFirm(lo, firm, size);
-}
-
-static int processFirm(uint32_t lo)
-{
-	int r;
-
-	r = processFirmFile(lo);
-	if (r && processFirmInstalled(lo))
-		return r;
-
-	return 0;
-}
-
 typedef struct {
 	wchar_t str[16];
 	wchar_t *cur;
@@ -201,7 +156,7 @@ static int InstallData()
 	f_mkdir(DATA_PATH);
 	incBar(&b);
 
-	r = processFirm(getMpInfo() == MPINFO_CTR ?
+	r = processFirmFile(getMpInfo() == MPINFO_CTR ?
 		TID_CTR_NATIVE_FIRM : TID_KTR_NATIVE_FIRM);
 	if (r)
 		return r;
@@ -209,13 +164,13 @@ static int InstallData()
 	incBar(&b);
 
 	if (getMpInfo() == MPINFO_CTR) {
-		r = processFirm(TID_CTR_AGB_FIRM);
+		r = processFirmFile(TID_CTR_AGB_FIRM);
 		if (r)
 			return r;
 
 		incBar(&b);
 
-		r = processFirm(TID_CTR_TWL_FIRM);
+		r = processFirmFile(TID_CTR_TWL_FIRM);
 		if (r != FR_OK)
 			return r;
 

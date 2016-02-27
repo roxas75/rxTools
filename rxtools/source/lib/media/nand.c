@@ -16,7 +16,7 @@
  */
 
 #include <lib/mpcore.h>
-#include <features/CTRDecryptor.h>
+#include <features/decryption.h>
 #include <lib/crypto.h>
 #include <lib/media/tmio.h>
 #include <lib/media/nand.h>

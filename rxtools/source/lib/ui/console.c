@@ -25,7 +25,6 @@
 #include <lib/cfg.h>
 #include <lib/ui/console.h>
 #include <lib/ui/draw.h>
-#include <lib/menu.h>
 
 wchar_t console[CONSOLE_MAX_LINES][CONSOLE_MAX_LINE_LENGTH + 1];
 wchar_t consoletitle[CONSOLE_MAX_TITLE_LENGTH+1] = L"";

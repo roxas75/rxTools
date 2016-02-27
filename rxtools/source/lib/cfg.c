@@ -26,12 +26,11 @@
 static char cfgLang[CFG_STR_MAX_LEN] = "en.json";
 
 Cfg cfgs[] = {
-	[CFG_GUI] = { "GUI", CFG_TYPE_BOOLEAN, { .i = 0 } },
+	[CFG_DEFAULT] = { "Default", CFG_TYPE_INT, { .i = 0 } },
 	[CFG_THEME] = { "Theme", CFG_TYPE_INT, { .i = 0 } },
 	[CFG_RANDOM] = { "Random theme", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_AGB] = { "AGB", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_3D] = { "3D", CFG_TYPE_BOOLEAN, { .i = 1 } },
-	[CFG_ABSYSN] = { "Autoboot-sysNAND", CFG_TYPE_BOOLEAN, { .i = 0 } },
 	[CFG_LANG] = { "Language", CFG_TYPE_STRING, { .s = cfgLang } }
 };
 

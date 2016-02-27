@@ -37,12 +37,11 @@ typedef struct {
 } Cfg;
 
 enum {
-	CFG_GUI,
+	CFG_DEFAULT,
 	CFG_THEME,
 	CFG_RANDOM,
 	CFG_AGB,
 	CFG_3D,
-	CFG_ABSYSN,
 	CFG_LANG,
 
 	CFG_NUM

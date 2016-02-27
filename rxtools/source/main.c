@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "MainMenu.h"
 #include <lib/crypto.h>
 #include <lib/fs.h>
 #include <lib/ui/console.h>
@@ -31,8 +30,16 @@
 #include <features/firm.h>
 #include <features/install.h>
 #include <lib/log.h>
+#include <lib/i2c.h>
+#include <lib/cfg.h>
+#include <lib/lang.h>
 
 #define FONT_NAME "font.bin"
+
+static void ShutDown(int arg){
+	i2cWriteRegister(I2C_DEV_MCU, 0x20, (arg) ? (uint8_t)(1<<0):(uint8_t)(1<<2));
+	while(1);
+}
 
 static int warned = 0;
 
@@ -71,6 +78,15 @@ static void drawTop()
 		DrawTopSplash(str, strl, strr);
 	} else
 		DrawTopSplash(str, str, str);
+}
+
+static void drawBottom()
+{
+	wchar_t str[_MAX_LFN];
+
+	swprintf(str, _MAX_LFN, L"/rxTools/Theme/%u/BOT%u.bin",
+		cfgs[CFG_THEME].val.i, cfgs[CFG_DEFAULT].val.i);
+	DrawBottomSplash(str);
 }
 
 static FRESULT initKeyX()
@@ -129,28 +145,26 @@ static _Noreturn void mainLoop()
 	uint32_t pad;
 
 	while (true) {
+		drawBottom();
 		pad = InputWait();
-		if (pad & (BUTTON_DOWN | BUTTON_RIGHT | BUTTON_R1))
-			MenuNextSelection();
 
-		if (pad & (BUTTON_UP | BUTTON_LEFT | BUTTON_L1))
-			MenuPrevSelection();
+		if (pad & BUTTON_A) rxMode(1);		//EMUNAND
+		if (pad & BUTTON_X) rxMode(0);		//SYSNAND
+		if (pad & BUTTON_Y) PastaMode();	//PASTAMODE
+		if (pad & BUTTON_B) ShutDown(1);	//SHUTDOWN
+		if (pad & BUTTON_LEFT)
+		{
+			if(cfgs[CFG_DEFAULT].val.i == 0) cfgs[CFG_DEFAULT].val.i = 3;
+			else cfgs[CFG_DEFAULT].val.i--;
+			writeCfg();
 
-		if (pad & BUTTON_A) {
-			OpenAnimation();
-			MenuSelect();
 		}
-
-		if (pad & BUTTON_SELECT) {
-			fadeOut();
-			ShutDown(1); //shutdown
+		if(pad & BUTTON_RIGHT)
+		{
+			if(cfgs[CFG_DEFAULT].val.i == 3) cfgs[CFG_DEFAULT].val.i = 0;
+			else cfgs[CFG_DEFAULT].val.i++;
+			writeCfg();
 		}
-		if (pad & BUTTON_START) {
-			fadeOut();
-			ShutDown(0); //reboot
-		}
-
-		MenuShow();
 	}
 }
 
@@ -184,16 +198,17 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 
 	preloadStringsA();
 
+	
 	if (!FSInit()) {
 		DrawString(BOT_SCREEN, strings[STR_FAILED],
 			BOT_SCREEN_WIDTH / 2, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
 		while (1);
 	}
 
-	/*
+	
 	set_loglevel(ll_info);
 	log(ll_info, "Initializing rxTools...");
-	*/
+	
 
 	setConsole();
 
@@ -215,7 +230,7 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 	else
 		warn(L"Failed to load " FONT_NAME ": %d\n", r);
 
-    if (getMpInfo() == MPINFO_KTR)
+	if (getMpInfo() == MPINFO_KTR)
     {
         r = initN3DSKeys();
         if (r != FR_OK) {
@@ -230,9 +245,12 @@ __attribute__((section(".text.start"), noreturn)) void _start()
         }
     }
 
+
 	install();
 	postinstall:
 	readCfg();
+
+	log(ll_info, "Done...");
 
 	r = loadStrings();
 	if (r)
@@ -240,12 +258,12 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 
 	drawTop();
 
-	if (!cfgs[CFG_GUI].val.i && HID_STATE & BUTTON_L1) {
-		if(~HID_STATE & BUTTON_Y) rxMode(1);
-		else if(~HID_STATE & BUTTON_X) rxMode(0);
-		else if(~HID_STATE & BUTTON_B) PastaMode();
-		else rxMode(cfgs[CFG_ABSYSN].val.i ? 0 : 1);
-	}
+	//Default boot check
+	if (cfgs[CFG_DEFAULT].val.i && HID_STATE & BUTTON_L1)
+		{
+			if(cfgs[CFG_DEFAULT].val.i == 3) PastaMode();
+			else rxMode(cfgs[CFG_DEFAULT].val.i - 1);
+		}
 
 	if (sysver < 7) {
 		r = initKeyX();
@@ -265,7 +283,5 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 	}
 
 	OpenAnimation();
-	MenuInit(&MainMenu);
-	MenuShow();
 	mainLoop();
 }
