@@ -41,4 +41,7 @@ SECTIONS
 
 	. = 0x1ff824d4;
 	.patch.k11.codeset.addr : { *(.patch.k11.codeset.addr) }
+
+	. = 0x1ffae070;
+	.patch.k11.entry : { *(.patch.k11.entry) }
 }
