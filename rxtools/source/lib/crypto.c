@@ -20,39 +20,39 @@
 #include <stdint.h>
 #include <lib/crypto.h>
 
-static void set_aeswrfifo(uint32_t value)
+static void writeFifo(uint32_t value)
 {
     *REG_AESWRFIFO = value;
 }
 
-static uint32_t read_aesrdfifo(void)
+static uint32_t readFifo(void)
 {
     return *REG_AESRDFIFO;
 }
 
-static uint32_t aes_getwritecount()
+static uint32_t getWriteCount()
 {
     return *REG_AESCNT & 0x1F;
 }
 
-static uint32_t aes_getreadcount()
+static uint32_t getReadCount()
 {
     return (*REG_AESCNT >> 5) & 0x1F;
 }
 
-static uint32_t aescnt_checkwrite()
+static uint32_t checkWrite()
 {
-    size_t ret = aes_getwritecount();
+    size_t ret = getWriteCount();
     return (ret > 0xF);
 }
 
-static uint32_t aescnt_checkread()
+static uint32_t checkRead()
 {
-    size_t ret = aes_getreadcount();
+    size_t ret = getReadCount();
     return (ret <= 3);
 }
 
-static void aes_fifos(const void* inbuf, void* outbuf, size_t blocks)
+static void fifo(const void* inbuf, void* outbuf, size_t blocks)
 {
     uint32_t in  = (uint32_t)inbuf;
     uint32_t out = (uint32_t)outbuf;
@@ -61,18 +61,18 @@ static void aes_fifos(const void* inbuf, void* outbuf, size_t blocks)
     {
         if (in)
         {
-            while (aescnt_checkwrite()) ;
+            while (checkWrite()) ;
             int ii = 0;
             for (ii = in; ii != in + AES_BLOCK_SIZE; ii += 4)
             {
-                set_aeswrfifo( *(uint32_t*)(ii) );
+                writeFifo( *(uint32_t*)(ii) );
             }
             if (out)
             {
-                while (aescnt_checkread()) ;
+                while (checkRead()) ;
                 for (ii = out; ii != out + AES_BLOCK_SIZE; ii += 4)
                 {
-                    *(uint32_t*)ii = read_aesrdfifo();
+                    *(uint32_t*)ii = readFifo();
                 }
             }
         }
@@ -80,7 +80,7 @@ static void aes_fifos(const void* inbuf, void* outbuf, size_t blocks)
     }
 }
 
-void setup_aeskeyX(uint8_t keyslot, void* keyx)
+void aesSetKeyX(uint8_t keyslot, void* keyx)
 {
     uint32_t * _keyx = (uint32_t*)keyx;
     *REG_AESKEYCNT = (*REG_AESKEYCNT >> 6 << 6) | keyslot| 0x80;
@@ -90,7 +90,7 @@ void setup_aeskeyX(uint8_t keyslot, void* keyx)
     *REG_AESKEYXFIFO = _keyx[3];
 }
 
-void setup_aeskey(uint32_t keyno, int value, void* key)
+void aesSetKey(uint32_t keyno, int value, void* key)
 {
     volatile uint32_t* aes_regs[] =
     {
@@ -131,7 +131,7 @@ void setup_aeskey(uint32_t keyno, int value, void* key)
     }
 }
 
-void use_aeskey(uint32_t keyno)
+void aesSelKey(uint32_t keyno)
 {
     if (keyno > 0x3F)
         return;
@@ -139,7 +139,7 @@ void use_aeskey(uint32_t keyno)
     *REG_AESCNT    = *REG_AESCNT | 0x04000000; /* mystery bit */
 }
 
-void set_ctr(int mode, void* iv)
+void aesInit(int mode, void* iv)
 {
     uint32_t * _iv = (uint32_t*)iv;
     *REG_AESCNT = (*REG_AESCNT & ~(AES_CNT_INPUT_ENDIAN|AES_CNT_INPUT_ORDER)) | (mode << 23);
@@ -159,7 +159,7 @@ void set_ctr(int mode, void* iv)
     }
 }
 
-void add_ctr(void* ctr, uint32_t carry)
+void aesAddCtr(void* ctr, uint32_t carry)
 {
     uint32_t counter[4];
     uint8_t *outctr = (uint8_t *) ctr;
@@ -191,7 +191,7 @@ void add_ctr(void* ctr, uint32_t carry)
     }
 }
 
-void aes_decrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode)
+void aesDecrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode)
 {
     *REG_AESCNT = 0;
     *REG_AESBLKCNT = blocks << 16;
@@ -203,5 +203,5 @@ void aes_decrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode)
                   AES_CNT_OUTPUT_ENDIAN |
                   AES_CNT_FLUSH_READ |
                   AES_CNT_FLUSH_WRITE;
-    aes_fifos(src, dst, blocks);
+    fifo(src, dst, blocks);
 }

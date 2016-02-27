@@ -105,7 +105,7 @@ static FRESULT initKeyX()
 		return r == FR_OK ? EOF : r;
 
 	f_close(&f);
-	setup_aeskeyX(0x25, buff);
+	aesSetKeyX(0x25, buff);
 	return 0;
 }
 
@@ -125,7 +125,7 @@ static FRESULT initN3DSKeys()
 		return r == FR_OK ? EOF : r;
 
 	f_close(&f);
-	setup_aeskeyX(0x16, buff);
+	aesSetKeyX(0x16, buff);
 
 	r = f_open(&f, _T("key_0x1B.bin"), FA_READ);
 	if (r != FR_OK)
@@ -136,7 +136,7 @@ static FRESULT initN3DSKeys()
 		return r == FR_OK ? EOF : r;
 
 	f_close(&f);
-	setup_aeskeyX(0x1B, buff);
+	aesSetKeyX(0x1B, buff);
 	return 0;
 }
 
