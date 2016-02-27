@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The PASTA Team
+ * Copyright (C) 2015-2016 The PASTA Team
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -43,8 +43,6 @@ const wchar_t firmPatchPathFmt[] = _T("") FIRM_PATCH_PATH_FMT;
 
 unsigned int emuNandMounted = 0;
 _Noreturn void (* const _softreset)() = (void *)0x080F0000;
-
-_Noreturn void execReboot(uint32_t, void *, uintptr_t, const Elf32_Shdr *);
 
 static FRESULT loadExecReboot()
 {
@@ -165,6 +163,7 @@ static void setAgbBios()
 
 int rxMode(int emu)
 {
+	const Elf32_Addr line = 32;
 	wchar_t path[64];
 	const char *shstrtab;
 	const wchar_t *msg;
@@ -172,7 +171,8 @@ int rxMode(int emu)
 	uint32_t tid;
 	int r, sector;
 	Elf32_Ehdr *ehdr;
-	Elf32_Shdr *shdr, *btm;
+	Elf32_Shdr *shdr, *btmShdr;
+	Elf32_Addr cur, btm;
 	void *keyxArg;
 	FIL fd;
 	UINT br, fsz;
@@ -245,9 +245,37 @@ int rxMode(int emu)
 	ehdr = (void *)PATCH_ADDR;
 	shdr = (void *)(PATCH_ADDR + ehdr->e_shoff);
 	shstrtab = (char *)PATCH_ADDR + shdr[ehdr->e_shstrndx].sh_offset;
-	for (btm = shdr + ehdr->e_shnum; shdr != btm; shdr++) {
+	for (btmShdr = shdr + ehdr->e_shnum; shdr != btmShdr; shdr++) {
 		if (!strcmp(shstrtab + shdr->sh_name, ".patch.p9.reboot.body")) {
-			execReboot(sector, keyxArg, ehdr->e_entry, shdr);
+			/* Set MPU area 2.
+			   address: 0x0800000, size: 2^0x28 = 2M, enable */
+			__asm__ volatile ("mcr p15, 0, %0, c6, c2, 0"
+				:: "r"(0x08000029));
+
+			memcpy((void *)ehdr->e_entry,
+				(void *)(PATCH_ADDR + shdr->sh_offset),
+				shdr->sh_size);
+
+			// Drain write buffer
+			__asm__ volatile ("mcr p15, 0, %0, c7, c10, 4" :: "r"(0));
+
+			cur = ehdr->e_entry & ~(line - 1);
+			btm = ehdr->e_entry + shdr->sh_size;
+			while (cur < btm) {
+				__asm__ volatile (
+					// Clean Dcache
+					"mcr p15, 0, %0, c7, c10, 1\n\t"
+
+					// Flush Icache
+					"mcr p15, 0, %0, c7, c5, 1"
+					:: "r"(cur));
+
+				cur += line;
+			}
+
+			((void (*)(uint32_t, void *, uintptr_t))ehdr->e_entry)(
+				sector, keyxArg, 0x1FFFFFF8);
+
 			__builtin_unreachable();
 		}
 	}
