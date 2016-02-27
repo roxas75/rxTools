@@ -41,6 +41,8 @@ ifdef PLATFORM_KTR
 LDSCRIPT_ROM	:= ktr_rom.ld
 LDSCRIPT_RAM	:= ktr_ram.ld
 CFLAGS	+= -DPLATFORM_KTR
+
+OBJS	+= $(BUILD)/k11_entry.o
 else
 LDSCRIPT_ROM	:= ctr_rom.ld
 LDSCRIPT_RAM	:= ctr_ram.ld
