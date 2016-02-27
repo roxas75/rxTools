@@ -23,7 +23,7 @@
 
 static void bgWork()
 {
-	TryScreenShot();
+	/*TryScreenShot();
 
 	// Check whether HOME or POWER button has been pressed
 	if (*(volatile uint8_t *)0x10147021 == 13) {
@@ -31,7 +31,7 @@ static void bgWork()
 		// Return to HOME menu
 		i2cWriteRegister(I2C_DEV_MCU, 0x20, 1 << 2);
 		while (1);
-	}
+	}*/
 }
 
 uint32_t InputWait() {
