@@ -17,7 +17,7 @@
 
 #ifndef NAND_DUMPER_H
 #define NAND_DUMPER_H
-#include "menu.h"
+#include <lib/menu.h>
 
 enum nand_type{
 	UNK_NAND = -1,

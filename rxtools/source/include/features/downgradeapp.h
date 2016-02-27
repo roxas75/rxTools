@@ -15,17 +15,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef FILEEXPLORER_H
-#define FILEEXPLORER_H
+#ifndef DOWNGRADEAPP_H
+#define DOWNGRADEAPP_H
 
-#include <wchar.h>
-#include "console.h"
+#include <stdint.h>
+#include <lib/fatfs/ff.h>
 
-void FileExplorerShow();
-void FileExplorerNextSelection();
-void FileExplorerPrevSelection();
-int FileExplorerSelect(TCHAR *p, size_t n);
-void FileExplorerBack();
-int FileExplorerMain(TCHAR *p, size_t n);
+typedef struct {
+        unsigned int drive;
+        uint32_t tidLo;
+        uint32_t tidHi;
+        TCHAR tmd[64];
+        TCHAR content[64];
+} AppInfo;
+
+//Utilities
+// Fill drive, tidLo and tidHi before calling this.
+int FindApp(AppInfo *info);
+int CheckRegion(int drive);
+
+//Features
+void downgradeMSET();
+void installFBI();
+void restoreHS();
 
 #endif

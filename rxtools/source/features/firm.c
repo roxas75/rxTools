@@ -21,22 +21,22 @@
 #include <stdio.h>
 #include <elf.h>
 #include <reboot.h>
-#include "firm.h"
-#include "mpcore.h"
-#include "hid.h"
-#include "lang.h"
-#include "console.h"
-#include "polarssl/aes.h"
-#include "fatfs/ff.h"
-#include "fs.h"
-#include "ncch.h"
-#include "draw.h"
-#include "menu.h"
-#include "fileexplorer.h"
-#include "CTRDecryptor.h"
-#include "TitleKeyDecrypt.h"
-#include "configuration.h"
-#include "lang.h"
+#include <features/firm.h>
+#include <lib/cfg.h>
+#include <lib/mpcore.h>
+#include <lib/hid.h>
+#include <lib/lang.h>
+#include <lib/ui/console.h>
+#include <lib/polarssl/aes.h>
+#include <lib/fatfs/ff.h>
+#include <lib/fs.h>
+#include <lib/ncch.h>
+#include <lib/ui/draw.h>
+#include <lib/menu.h>
+#include <features/fileexplorer.h>
+#include <features/CTRDecryptor.h>
+#include <features/TitleKeyDecrypt.h>
+#include <lib/lang.h>
 
 const wchar_t firmPathFmt[] = _T("") FIRM_PATH_FMT;
 const wchar_t firmPatchPathFmt[] = _T("") FIRM_PATCH_PATH_FMT;

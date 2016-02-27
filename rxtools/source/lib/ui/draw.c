@@ -20,10 +20,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <wchar.h>
-#include "fatfs/ff.h"
-#include "fs.h"
-#include "draw.h"
-#include "lang.h"
+#include <lib/fs.h>
+#include <lib/ui/draw.h>
+#include <lib/lang.h>
 
 uint32_t current_y = 1;
 

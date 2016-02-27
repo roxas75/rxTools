@@ -9,9 +9,8 @@
 
 #include <stdbool.h>
 #include "diskio.h"     /* FatFs lower layer API */
-#include <tmio/tmio.h>
-#include <nand.h>
-
+#include <lib/media/tmio.h>
+#include <lib/fs.h>
 /* Definitions of physical drive number for each media */
 enum {
 	DRV_SDMC,

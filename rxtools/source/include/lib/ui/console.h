@@ -20,7 +20,7 @@
 
 #include <stdarg.h>
 #include <wchar.h>
-#include "draw.h"
+#include <lib/ui/draw.h>
 
 #define CONSOLE_SIZE			(0x4000)
 #define CONSOLE_WIDTH			(BOT_SCREEN_WIDTH - FONT_WIDTH * 2)

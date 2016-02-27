@@ -21,7 +21,7 @@
 /   869   Greek 2
 */
 
-#include "../ff.h"
+#include <lib/fatfs/ff.h>
 
 
 #if _CODE_PAGE == 437

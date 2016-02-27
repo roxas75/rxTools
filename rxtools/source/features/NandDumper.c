@@ -17,19 +17,19 @@
 
 #include <string.h>
 #include <wchar.h>
-#include <tmio/tmio.h>
-#include "NandDumper.h"
-#include "console.h"
-#include "draw.h"
-#include "lang.h"
-#include "hid.h"
-#include "fs.h"
-#include "screenshot.h"
-#include "padgen.h"
-#include "crypto.h"
-#include "mpcore.h"
-#include "ncch.h"
-#include "CTRDecryptor.h"
+#include <lib/media/tmio.h>
+#include <features/NandDumper.h>
+#include <lib/ui/console.h>
+#include <lib/ui/draw.h>
+#include <lib/lang.h>
+#include <lib/hid.h>
+#include <lib/fs.h>
+#include <features/screenshot.h>
+#include <features/padgen.h>
+#include <lib/crypto.h>
+#include <lib/mpcore.h>
+#include <lib/ncch.h>
+#include <features/CTRDecryptor.h>
 #include "stdio.h"
 
 #define NAND_SECTOR_SIZE 0x200

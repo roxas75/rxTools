@@ -15,22 +15,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#pragma once
+#ifndef FEATURES_INSTALL_H
+#define FEATURES_INSTALL_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include "fatfs/ff.h"
-#include "nand.h"
-#define File FIL
+void InstallConfigData();
 
-////////////////////////////////////////////////////////////////Basic FileSystem Operations
-bool FSInit(void);
-void FSDeInit(void);
-bool FileOpen(File *Handle, const TCHAR *path, bool truncate);
-size_t FileRead(File *Handle, void *buf, size_t size, size_t foffset);
-size_t FileWrite(File *Handle, void *buf, size_t size, size_t foffset);
-size_t FileGetSize(File *Handle);
-void FileClose(File *Handle);
-////////////////////////////////////////////////////////////////Advanced FileSystem Operations
-uint32_t FSFileCopy(TCHAR *target, TCHAR *source);
+#endif

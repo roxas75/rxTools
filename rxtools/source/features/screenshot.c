@@ -17,12 +17,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "screenshot.h"
-#include "console.h"
-#include "draw.h"
-#include "hid.h"
-#include "fs.h"
-#include "fatfs/ff.h"
+#include <features/screenshot.h>
+#include <lib/ui/console.h>
+#include <lib/ui/draw.h>
+#include <lib/hid.h>
+#include <lib/fs.h>
+#include <lib/fatfs/ff.h>
 #include "stdio.h"
 
 void ScreenShot(){

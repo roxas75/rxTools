@@ -15,40 +15,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef MENU_H
-#define MENU_H
+#ifndef LIB_CFG_H
+#define LIB_CFG_H
 
-#include <stdbool.h>
-#include <wchar.h>
-#include "console.h"
+#define CFG_STR_MAX_LEN 16
 
-typedef struct{
-	wchar_t Str[CONSOLE_MAX_LINE_LENGTH+1];
-	void(* Func)();
-	wchar_t* gfx_splash;
-}MenuEntry;
+typedef enum {
+	CFG_TYPE_INT,
+	CFG_TYPE_BOOLEAN,
+	CFG_TYPE_STRING
+} CfgType;
 
-typedef struct{
-	wchar_t Name[CONSOLE_MAX_LINE_LENGTH+1];
-	MenuEntry* Option;
-	int nEntryes;
-	int Current;    //The current selected option
-	bool Showed;    //Useful, to not refresh everything everytime
-} Menu;
+typedef struct {
+	const char *key;
+	CfgType type;
+	union {
+		int i;
+		int b;
+		char *s;
+	} val;
+} Cfg;
 
-void MenuInit(Menu* menu);
-void MenuShow();
-void MenuNextSelection();
-void MenuPrevSelection();
-void MenuSelect();
-void MenuClose();
-void MenuRefresh();
+enum {
+	CFG_GUI,
+	CFG_THEME,
+	CFG_RANDOM,
+	CFG_AGB,
+	CFG_3D,
+	CFG_ABSYSN,
+	CFG_LANG,
 
-extern bool bootGUI;
-extern unsigned char Theme;
-extern bool agb_bios;
-extern bool theme_3d;
-extern unsigned char language;
-extern Menu* MyMenu;
+	CFG_NUM
+};
+
+extern Cfg cfgs[];
+
+int writeCfg(void);
+int readCfg(void);
+void trySetLangFromTheme(int onswitch);
 
 #endif

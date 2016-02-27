@@ -18,18 +18,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "CTRDecryptor.h"
-#include "screenshot.h"
-#include "fs.h"
-#include "fatfs/ff.h"
-#include "console.h"
-#include "draw.h"
-#include "hid.h"
-#include "ncch.h"
-#include "crypto.h"
+#include <features/CTRDecryptor.h>
+#include <features/screenshot.h>
+#include <lib/fs.h>
+#include <lib/fatfs/ff.h>
+#include <lib/ui/console.h>
+#include <lib/ui/draw.h>
+#include <lib/hid.h>
+#include <lib/ncch.h>
+#include <lib/crypto.h>
 #include "stdio.h"
-#include "lang.h"
-#include "menu.h"
+#include <lib/lang.h>
+#include <lib/menu.h>
 
 #define BUFFER_ADDR ((uint8_t*)0x21000000)
 #define BLOCK_SIZE  (8*1024*1024)

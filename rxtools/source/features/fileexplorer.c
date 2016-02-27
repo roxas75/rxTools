@@ -18,12 +18,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "configuration.h"
-#include "lang.h"
-#include "fileexplorer.h"
-#include "draw.h"
-#include "hid.h"
-#include "fs.h"
+#include <features/configuration.h>
+#include <lib/lang.h>
+#include <features/fileexplorer.h>
+#include <lib/ui/draw.h>
+#include <lib/hid.h>
+#include <lib/fs.h>
 
 //---- GLOBAL VARIABLES ----
 int pointer = 0;

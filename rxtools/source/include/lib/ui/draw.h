@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <wchar.h>
-#include "fatfs/ff.h"
+#include <lib/fatfs/ff.h>
 
 //Screen Macros
 #define BYTES_PER_PIXEL	3  //Our color buffer accepts 24-bits color.

@@ -15,46 +15,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#ifndef ADVANCEDFILEMANAGER_H
+#define ADVANCEDFILEMANAGER_H
 
-#define CFG_STR_MAX_LEN 16
+#include <wchar.h>
+#include <lib/ui/console.h>
 
-typedef enum {
-	CFG_TYPE_INT,
-	CFG_TYPE_BOOLEAN,
-	CFG_TYPE_STRING
-} CfgType;
+#pragma once
 
-typedef struct {
-	const char *key;
-	CfgType type;
-	union {
-		int i;
-		int b;
-		char *s;
-	} val;
-} Cfg;
+typedef struct
+{
+	int pointer, beginning, openedFolder;
+	size_t count;
+	TCHAR **files;
+	TCHAR dir[1000];
+	int enabled; 
+} panel_t;
 
-enum {
-	CFG_GUI,
-	CFG_THEME,
-	CFG_RANDOM,
-	CFG_AGB,
-	CFG_3D,
-	CFG_ABSYSN,
-	CFG_LANG,
-
-	CFG_NUM
-};
-
-extern Cfg cfgs[];
-
-void InstallConfigData();
-
-void trySetLangFromTheme(int onswitch);
-
-int writeCfg();
-int readCfg();
-
+void AdvFileManagerShow(panel_t* Panel, int x);
+void AdvFileManagerNextSelection(panel_t* Panel);
+void AdvFileManagerPrevSelection(panel_t* Panel);
+void AdvFileManagerSelect(panel_t* Panel);
+void AdvFileManagerFileAction(TCHAR filePath[]);
+void AdvFileManagerBack(panel_t* Panel);
+void AdvFileManagerMain();
 #endif

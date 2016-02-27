@@ -18,23 +18,23 @@
 #ifndef MY_MENU
 #define MY_MENU
 
-#include "hid.h"
-#include "draw.h"
-#include "console.h"
-#include "screenshot.h"
-#include "menu.h"
-#include "fs.h"
-#include "CTRDecryptor.h"
-#include "NandDumper.h"
-#include "TitleKeyDecrypt.h"
-#include "padgen.h"
-#include "nandtools.h"
-#include "downgradeapp.h"
-#include "firm.h"
-#include "i2c.h"
-#include "configuration.h"
-#include "lang.h"
-#include "AdvancedFileManager.h"
+#include <lib/hid.h>
+#include <lib/ui/draw.h>
+#include <lib/ui/console.h>
+#include <features/screenshot.h>
+#include <lib/menu.h>
+#include <lib/fs.h>
+#include <features/AdvancedFileManager.h>
+#include <features/CTRDecryptor.h>
+#include <features/NandDumper.h>
+#include <features/TitleKeyDecrypt.h>
+#include <features/padgen.h>
+#include <features/nandtools.h>
+#include <features/downgradeapp.h>
+#include <features/firm.h>
+#include <lib/i2c.h>
+#include <lib/cfg.h>
+#include <lib/lang.h>
 
 static void ShutDown(int arg){
 	i2cWriteRegister(I2C_DEV_MCU, 0x20, (arg) ? (uint8_t)(1<<0):(uint8_t)(1<<2));
