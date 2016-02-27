@@ -131,38 +131,7 @@ void add_ctr(void* ctr, uint32_t carry)
     }
 }
 
-void aes_decrypt(void* inbuf, void* outbuf, void* iv, size_t size, uint32_t mode)
-{
-    uint32_t in  = (uint32_t)inbuf;
-    uint32_t out = (uint32_t)outbuf;
-    size_t block_count = size;
-    size_t blocks;
-    while (block_count != 0)
-    {
-        blocks = (block_count >= 0xFFFF) ? 0xFFFF : block_count;
-        _decrypt(mode, (void*)in, (void*)out, blocks);
-        in  += blocks * AES_BLOCK_SIZE;
-        out += blocks * AES_BLOCK_SIZE;
-        block_count -= blocks;
-    }
-}
-
-void _decrypt(uint32_t value, void* inbuf, void* outbuf, size_t blocks)
-{
-    *REG_AESCNT = 0;
-    *REG_AESBLKCNT = blocks << 16;
-    *REG_AESCNT = value |
-                  AES_CNT_START |
-                  AES_CNT_INPUT_ORDER |
-                  AES_CNT_OUTPUT_ORDER |
-                  AES_CNT_INPUT_ENDIAN |
-                  AES_CNT_OUTPUT_ENDIAN |
-                  AES_CNT_FLUSH_READ |
-                  AES_CNT_FLUSH_WRITE;
-    aes_fifos(inbuf, outbuf, blocks);
-}
-
-void aes_fifos(void* inbuf, void* outbuf, size_t blocks)
+void aes_fifos(const void* inbuf, void* outbuf, size_t blocks)
 {
     uint32_t in  = (uint32_t)inbuf;
     uint32_t out = (uint32_t)outbuf;
@@ -188,6 +157,21 @@ void aes_fifos(void* inbuf, void* outbuf, size_t blocks)
         }
         curblock++;
     }
+}
+
+void aes_decrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode)
+{
+    *REG_AESCNT = 0;
+    *REG_AESBLKCNT = blocks << 16;
+    *REG_AESCNT = mode |
+                  AES_CNT_START |
+                  AES_CNT_INPUT_ORDER |
+                  AES_CNT_OUTPUT_ORDER |
+                  AES_CNT_INPUT_ENDIAN |
+                  AES_CNT_OUTPUT_ENDIAN |
+                  AES_CNT_FLUSH_READ |
+                  AES_CNT_FLUSH_WRITE;
+    aes_fifos(src, dst, blocks);
 }
 
 void set_aeswrfifo(uint32_t value)

@@ -60,11 +60,11 @@ int decryptFirmKtrArm9(void *p)
 	use_aeskey(0x11);
 	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
 		info.keyslot = 0x15;
-		aes_decrypt(hdr->keyX, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+		aes_decrypt(hdr->keyX, key, 1, AES_ECB_DECRYPT_MODE);
 		setup_aeskeyX(info.keyslot, key);
 	} else {
 		info.keyslot = 0x16;
-		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+		aes_decrypt(hdr->ext.s.keyX_0x16, key, 1, AES_ECB_DECRYPT_MODE);
 	}
 
 	return DecryptPartition(&info);
@@ -135,7 +135,7 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	memcpy(keyY, keyYList[index].key, sizeof(keyY));
 	setup_aeskey(0x3D, AES_BIG_INPUT | AES_NORMAL_INPUT, keyY);
 	use_aeskey(0x3D);
-	aes_decrypt(key, key, ctr, 1, AES_CBC_DECRYPT_MODE);
+	aes_decrypt(key, key, 1, AES_CBC_DECRYPT_MODE);
 	return 0;
 }
 
@@ -246,7 +246,7 @@ uint32_t DecryptPartition(PartitionInfo* info){
 		uint32_t j;
 		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
 			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
-			aes_decrypt((void*)info->buffer+j, (void*)info->buffer+j, ctr, 1, AES_CTR_MODE);
+			aes_decrypt((void*)info->buffer+j, (void*)info->buffer+j, 1, AES_CTR_MODE);
 			add_ctr(ctr, 1);
 			TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this
 		}
