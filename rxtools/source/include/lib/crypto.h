@@ -53,19 +53,10 @@
 #define AES_CNT_FLUSH_READ    0x00000800
 #define AES_CNT_FLUSH_WRITE   0x00000400
 
-void add_ctr(void* ctr, uint32_t carry);
-
-void setup_aeskeyX(uint8_t keyslot, void* keyx);
-void decrypt(void* key, void* iv, void* inbuf, void* outbuf, size_t size);
-void setup_aeskey(uint32_t keyno, int value, void* key);
-void use_aeskey(uint32_t keyno);
-void set_ctr(int mode, void* iv);
-void aes_decrypt(void* inbuf, void* outbuf, void* iv, size_t size, uint32_t mode);
-void _decrypt(uint32_t value, void* inbuf, void* outbuf, size_t blocks);
-void aes_fifos(void* inbuf, void* outbuf, size_t blocks);
-void set_aeswrfifo(uint32_t value);
-uint32_t read_aesrdfifo(void);
-uint32_t aes_getwritecount();
-uint32_t aes_getreadcount();
-uint32_t aescnt_checkwrite();
-uint32_t aescnt_checkread();
+void aesSetKeyX(uint8_t keyslot, void* keyx);
+void aesSetKey(uint32_t keyno, int value, void* key);
+void aesSelKey(uint32_t keyno);
+void aesSetCtr(void* iv);
+void aesAddCtr(void* ctr, uint32_t carry);
+void aesDecrypt(void *dst, const void *src, uint16_t blocks, uint32_t mode);
+void aesCtr(void *dst, const void *src, size_t n, void *ctr);

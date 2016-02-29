@@ -22,7 +22,7 @@
 
 #define File FIL
 
-enum {
+enum nandPart {
 	TWLN = 0x00012E00,
 	TWLP = 0x09011A00,
 	AGB_SAVE = 0x0B100000,
@@ -30,7 +30,7 @@ enum {
 	FIRM1 = 0x0B530000,
 	CTRNAND = 0x0B95CA00,
 	KTR_CTRNAND = 0x0B95AE00,
-} NAND_PARTITIONS;
+};
 
 extern int sysver;
 

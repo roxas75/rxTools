@@ -57,14 +57,14 @@ int decryptFirmKtrArm9(void *p)
 	info.keyY = hdr->keyY;
 	info.size = atoi(hdr->size);
 
-	use_aeskey(0x11);
+	aesSelKey(0x11);
 	if (hdr->ext.pad[0] == 0xFFFFFFFF) {
 		info.keyslot = 0x15;
-		aes_decrypt(hdr->keyX, key, NULL, 1, AES_ECB_DECRYPT_MODE);
-		setup_aeskeyX(info.keyslot, key);
+		aesDecrypt(hdr->keyX, key, 1, AES_ECB_DECRYPT_MODE);
+		aesSetKeyX(info.keyslot, key);
 	} else {
 		info.keyslot = 0x16;
-		aes_decrypt(hdr->ext.s.keyX_0x16, key, NULL, 1, AES_ECB_DECRYPT_MODE);
+		aesDecrypt(hdr->ext.s.keyX_0x16, key, 1, AES_ECB_DECRYPT_MODE);
 	}
 
 	return DecryptPartition(&info);
@@ -119,7 +119,7 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	memcpy(titleId, titleid, 8);
 	memset(ctr, 0, blockSize);
 	memcpy(ctr, titleId, 8);
-	set_ctr(AES_BIG_INPUT | AES_NORMAL_INPUT, ctr);
+	aesSetCtr(ctr);
 
 	if (keyYList == NULL) {
 		p = 0x08080000;
@@ -133,9 +133,9 @@ int DecryptTitleKey(uint8_t *titleid, uint8_t *key, uint32_t index) {
 	}
 
 	memcpy(keyY, keyYList[index].key, sizeof(keyY));
-	setup_aeskey(0x3D, AES_BIG_INPUT | AES_NORMAL_INPUT, keyY);
-	use_aeskey(0x3D);
-	aes_decrypt(key, key, ctr, 1, AES_CBC_DECRYPT_MODE);
+	aesSetKey(0x3D, AES_BIG_INPUT | AES_NORMAL_INPUT, keyY);
+	aesSelKey(0x3D);
+	aesDecrypt(key, key, 1, AES_CBC_DECRYPT_MODE);
 	return 0;
 }
 
@@ -235,22 +235,24 @@ int getTitleKeyWithCetk(uint8_t dst[16], const TCHAR *path)
 
 uint32_t DecryptPartition(PartitionInfo* info){
 	if(info->keyY != NULL)
-		setup_aeskey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
-	use_aeskey(info->keyslot);
+		aesSetKey(info->keyslot, AES_BIG_INPUT|AES_NORMAL_INPUT, info->keyY);
+	aesSelKey(info->keyslot);
 
 	uint8_t ctr[16] __attribute__((aligned(32)));
 	memcpy(ctr, info->ctr, 16);
 
 	uint32_t size_bytes = info->size;
-	for (uint32_t i = 0; i < size_bytes; i += BLOCK_SIZE) {
-		uint32_t j;
-		for (j = 0; (j < BLOCK_SIZE) && (i+j < size_bytes); j+= 16) {
-			set_ctr(AES_BIG_INPUT|AES_NORMAL_INPUT, ctr);
-			aes_decrypt((void*)info->buffer+j, (void*)info->buffer+j, ctr, 1, AES_CTR_MODE);
-			add_ctr(ctr, 1);
-			TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this
-		}
+	uint32_t i;
+	for (i = 0; i + UINT16_MAX * 16 < size_bytes; i += UINT16_MAX * 16) {
+		aesSetCtr(ctr);
+		aesDecrypt((void*)info->buffer+i, (void*)info->buffer+i, UINT16_MAX, AES_CTR_MODE);
+		aesAddCtr(ctr, UINT16_MAX);
+		TryScreenShot(); //Putting it here allows us to take screenshots at any decryption point, since everyting loops in this
 	}
+
+	aesSetCtr(ctr);
+	aesDecrypt((void*)info->buffer+i, (void*)info->buffer+i, (size_bytes - i) / 16, AES_CTR_MODE);
+
 	return 0;
 }
 
@@ -262,7 +264,7 @@ void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. 
 		memcpy((void*)&myInfo, (void*)info, sizeof(PartitionInfo));
 		uint8_t OriginalCTR[16]; memcpy(OriginalCTR, info->ctr, 16);
 		myInfo.keyslot = 0x2C; myInfo.size = 0x200;
-		DecryptPartition(&myInfo); add_ctr(myInfo.ctr, 0x200 / 16);
+		DecryptPartition(&myInfo); aesAddCtr(myInfo.ctr, 0x200 / 16);
 		if(myInfo.buffer[0] == '.' && myInfo.buffer[1] == 'c' && myInfo.buffer[2] == 'o' && myInfo.buffer[3] == 'd' && myInfo.buffer[4] == 'e'){
 			//The 7.xKey encrypted .code partition
 			uint32_t codeSize = *((unsigned int*)(myInfo.buffer + 0x0C));
@@ -273,7 +275,7 @@ void ProcessExeFS(PartitionInfo* info){ //We expect Exefs to take just a block. 
 			memcpy((void*)&myInfo, (void*)info, sizeof(PartitionInfo));
 			myInfo.buffer += nextSection; myInfo.size -= nextSection; myInfo.keyslot = 0x2C;
 			myInfo.ctr = OriginalCTR;
-			add_ctr(myInfo.ctr, nextSection/16);
+			aesAddCtr(myInfo.ctr, nextSection/16);
 			DecryptPartition(&myInfo);
 		}else{
 			myInfo.size = info->size-0x200;
