@@ -1,4 +1,4 @@
-# Copyright (C) 2015 The PASTA Team
+# Copyright (C) 2015-2016 The PASTA Team
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@ BUILD := build
 DEPS_DIR := $(BUILD)/.deps
 SOURCE := source
 
-all: $(BUILD)/code.bin
+all: $(BUILD)/code.bin $(BUILD)/bin/tool.bin
 
 include $(RXTOOLSMK)
 
@@ -36,35 +36,45 @@ CMACHINE := -mtune=arm946e-s
 CWARNING := -Wall -Wno-multichar
 CFLAGS := -g -O2 -std=c99 $(CWARNING) $(CFORCE) $(CMACHINE) $(CPPFLAGS) -DVERSION=\"$(GIT_VERSION)\"
 
-# Use Thumb libraries because sbrk of ARM newlib in devkitPro doesn't work.
-LDFLAGS := -nostartfiles -g $(CMACHINE) -mthumb -mthumb-interwork -Wl,-Tstub.ld
+LDFLAGS := -nostartfiles -g $(CMACHINE)
 
-CCOBJS := $(addprefix $(BUILD)/,main.o features/decryption.o	\
+INIT_CCOBJS := $(addprefix $(BUILD)/init/,cstart.o	\
+	lib/crypto.o lib/draw.o lib/fs.o	\
+	lib/fatfs/diskio.o lib/fatfs/ff.o lib/fatfs/option/unicode.o 	\
+	lib/media/nand.o lib/media/tmio/tmio.o)
+
+INIT_OBJS := $(INIT_CCOBJS)	\
+	$(BUILD)/init/lib/delay.o $(BUILD)/init/start.o $(BUILD)/font_ascii.o
+
+TOOL_CCOBJS := $(addprefix $(BUILD)/tool/,cstart.o features/decryption.o	\
 	features/install.o features/firm.o features/screenshot.o	\
-	lib/fatfs/diskio.o lib/fatfs/ff.o lib/fatfs/option/unicode.o	\
-	lib/media/nand.o lib/media/tmio/tmio.o	\
 	lib/polarssl/padlock.o lib/polarssl/sha2.o lib/polarssl/aes.o	\
-	lib/ui/console.o lib/ui/draw.o lib/cfg.o lib/crypto.o lib/fs.o lib/hid.o	\
-	lib/lang.o lib/log.o lib/i2c.o lib/jsmn/jsmn.o lib/ncch.o)
+	lib/jsmn/jsmn.o lib/cfg.o lib/console.o lib/hid.o	\
+	lib/lang.o lib/log.o lib/i2c.o lib/ncch.o)
 
-OBJS	:= $(CCOBJS) $(addprefix $(BUILD)/, start.o font_ascii.o lib/delay.o)
-DEPS	:= $(subst $(BUILD)/,$(DEPS_DIR)/,$(CCOBJS))
+TOOL_OBJS := $(TOOL_CCOBJS)
 
-$(call DEPDIR,$(BUILD)/rxtools.elf $(BUILD)/font.bin $(OBJS) $(DEPS))
+DEPS	:= $(subst $(BUILD)/,$(DEPS_DIR)/,$(TOOL_CCOBJS) $(INIT_CCOBJS))
+
+$(call DEPDIR,$(BUILD)/bin/init.elf $(BUILD)/bin/tool.elf $(BUILD)/font.bin $(INIT_OBJS) $(TOOL_OBJS) $(DEPS))
 
 MAKEDEP	= @$(COMPILE.c) -MM $< > $(patsubst $(BUILD)/%.o,$(DEPS_DIR)/%.d,$@)
 
 .PHONY: $(BUILD)/code.bin all clean
 
-$(BUILD)/code.bin: $(BUILD)/rxtools.bin $(BUILD)/CakeHax/D
-	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(dir $@) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax bigpayload
-	$(call Q,DD,$@)dd if=$< bs=896k conv=sync,notrunc | dd of=$@ seek=160 conv=notrunc
+$(BUILD)/code.bin: $(BUILD)/bin/init.bin $(BUILD)/CakeHax/D
+	$(call Q,MAKE,CakeHax)$(MAKE) dir_out=../$(dir $@) dir_build=../$(BUILD)/CakeHax name=$(notdir $@) filepath=$(SYS_PATH)/ -C CakeHax
+	dd if=$< of=$@ bs=512 seek=144
 
 %.bin: %.elf
 	$(call Q,OBJCOPY,$@)$(OBJCOPY) -O binary $< $@
 
-$(BUILD)/rxtools.elf: $(OBJS)
-	$(call Q,LINK,$@)$(LINK.o) $^ $(OUTPUT_OPTION)
+$(BUILD)/bin/init.elf: $(INIT_OBJS)
+	$(call Q,LINK,$@)$(LINK.o) -Tinit.ld $^ $(OUTPUT_OPTION)
+
+# Use Thumb libraries because sbrk of ARM newlib in devkitPro doesn't work.
+$(BUILD)/bin/tool.elf: $(BUILD)/bin/init.elf $(TOOL_OBJS)
+	$(call Q,LINK,$@)$(LINK.o) -mthumb -mthumb-interwork -Wl,-Ttool.ld,-R$< $(TOOL_OBJS) $(OUTPUT_OPTION)
 
 $(BUILD)/%.o: $(SOURCE)/%.c
 	$(call Q,CC,$@)$(COMPILE.c) $< $(OUTPUT_OPTION)

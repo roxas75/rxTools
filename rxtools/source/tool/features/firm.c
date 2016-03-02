@@ -176,11 +176,6 @@ int rxMode(int emu)
 	shstrtab = (char *)PATCH_ADDR + shdr[ehdr->e_shstrndx].sh_offset;
 	for (btmShdr = shdr + ehdr->e_shnum; shdr != btmShdr; shdr++) {
 		if (!strcmp(shstrtab + shdr->sh_name, ".patch.p9.reboot.body")) {
-			/* Set MPU area 2.
-			   address: 0x0800000, size: 2^0x28 = 2M, enable */
-			__asm__ volatile ("mcr p15, 0, %0, c6, c2, 0"
-				:: "r"(0x08000029));
-
 			memcpy((void *)ehdr->e_entry,
 				(void *)(PATCH_ADDR + shdr->sh_offset),
 				shdr->sh_size);

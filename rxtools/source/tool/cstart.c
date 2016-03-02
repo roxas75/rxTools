@@ -185,7 +185,7 @@ static void warn(const wchar_t *format, ...)
 	ConsoleShow();
 }
 
-__attribute__((section(".text.start"), noreturn)) void _start()
+__attribute__((section(".text.cstart"), noreturn)) void toolStart()
 {
 	static const TCHAR fontPath[] = _T("") SYS_PATH "/" FONT_NAME;
 	void *fontBuf;
@@ -193,22 +193,10 @@ __attribute__((section(".text.start"), noreturn)) void _start()
 	int r;
 	FIL f;
 
-	// Enable TMIO IRQ
-	*(volatile uint32_t *)0x10001000 = 0x00010000;
-
 	preloadStringsA();
 
-	
-	if (!FSInit()) {
-		DrawString(BOT_SCREEN, strings[STR_FAILED],
-			BOT_SCREEN_WIDTH / 2, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
-		while (1);
-	}
-
-	
 	set_loglevel(ll_info);
 	log(ll_info, "Initializing rxTools...");
-	
 
 	setConsole();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The PASTA Team
+ * Copyright (C) 2015-2016 The PASTA Team
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,27 +17,21 @@
 
 OUTPUT_FORMAT("elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(_start)
-
-MEMORY
-{
-	ram : ORIGIN = 0x08000000, LENGTH = 400K
-}
+ENTRY(toolStart)
 
 SECTIONS
 {
+	. = 0x23E00000;
+
 	.text :
 	{
-		KEEP(*(.text.vect))
-		KEEP(*(.text.start))
+		KEEP(*(.text.cstart))
 		*(.text*)
-	} >ram
+	}
 
-	.rodata : { *(.rodata*) } >ram
-
-	.data : { *(.data*) } >ram
-
-	.bss : { *(.bss*) } >ram
+	.rodata : { *(.rodata*) }
+	.data : { *(.data*) }
+	.bss : { *(.bss*) }
 
 	. = ALIGN(4);
 	__end__ = ABSOLUTE(.);

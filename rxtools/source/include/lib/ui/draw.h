@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The PASTA Team
+ * Copyright (C) 2015-2016 The PASTA Team
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -31,9 +31,9 @@
 #define FONT_HEIGHT	16
 #define FONT_HWIDTH	(FONT_WIDTH>>1)
 #define FONT_CJK_START	0x2400
-#define TOP_SCREEN	(uint8_t*)(*(uint32_t*)0x080FFFC0)
-#define TOP_SCREEN2	(uint8_t*)(*(uint32_t*)0x080FFFC8)
-#define BOT_SCREEN	(uint8_t*)(*(uint32_t*)0x080FFFD0)
+#define TOP_SCREEN	(*(uint8_t **)0x23FFFE00)
+#define TOP_SCREEN2	(*(uint8_t **)0x23FFFE04)
+#define BOT_SCREEN	(*(uint8_t **)0x23FFFE08)
 
 //Colors Macros
 #define ARGB(a,r,g,b)	(a<<24|r<<16|g<<8|b) //console asks for B,G,R in bytes
@@ -66,11 +66,10 @@ void DrawCharacter(uint8_t *screen, wchar_t character, uint32_t x, uint32_t y, u
 void DrawString(uint8_t *screen, const wchar_t *str, uint32_t x, uint32_t y, uint32_t color, uint32_t bgcolor);
 void DrawPixel(uint8_t *screen, uint32_t x, uint32_t y, uint32_t color);
 uint32_t GetPixel(uint8_t *screen, uint32_t x, uint32_t y);
-void Debug(const char *format, ...);
 
-void DrawSplash(uint8_t *screen, TCHAR splash_file[]);
-void DrawBottomSplash(TCHAR splash_file[]);
-void DrawTopSplash(TCHAR splash_file[], TCHAR splash_fileL[], TCHAR splash_fileR[]);
+int DrawSplash(uint8_t *screen, TCHAR splash_file[]);
+int DrawBottomSplash(TCHAR splash_file[]);
+int DrawTopSplash(TCHAR splash_file[], TCHAR splash_fileL[], TCHAR splash_fileR[]);
 void SplashScreen();
 void DrawFadeScreen(uint8_t *screen, uint16_t Width, uint16_t Height, uint32_t f);
 void fadeOut();
