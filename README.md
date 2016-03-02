@@ -33,7 +33,7 @@ I do not support piracy in any way, all the data and information in my software 
 - Dynamic RAM dumping (just for debug purposes)
 
 ## Nightlies
-Nightly builds of rxTools are a thing, again! :D https://lavanoid.github.io/
+Nightly builds of rxTools are a thing, again! :D https://astronautlevel2.github.io
 
 
 ## How to build
