@@ -79,12 +79,13 @@ release: release-licenses release-rxtools release-doc release-lang	\
 release-licenses:
 	@mkdir -p release
 	@cp LICENSE release
-	@cp rxtools/source/lib/jsmn/LICENSE release/LICENSE_JSMN
+	@cp rxtools/source/tool/lib/jsmn/LICENSE release/LICENSE_JSMN
 	@cp rxtools/CakeHax/LICENSE.txt release/LICENSE_CakeHax.txt
 	@cp CakesROP/LICENSE release/LICENSE_CakesROP
 
 release-rxtools: all-target-rxtools
 	@mkdir -p release/$(SYS_PATH)
+	@cp rxtools/build/bin/tool.bin release/$(SYS_PATH)
 	@cp rxtools/build/code.bin release/$(SYS_PATH)
 	@cp rxtools/build/font.bin release/$(SYS_PATH)
 

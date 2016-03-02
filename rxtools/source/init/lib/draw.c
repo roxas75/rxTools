@@ -136,21 +136,6 @@ void DrawHexWithName(uint8_t *screen, const wchar_t *str, uint32_t hex, uint32_t
 	DrawHex(screen, hex, x + wcslen(str) * FONT_HWIDTH, y, color, bgcolor);
 }
 
-void Debug(const char *format, ...)
-{
-	char *str;
-	va_list va;
-
-	va_start(va, format);
-	vasprintf(&str, format, va);
-	va_end(va);
-	wchar_t wstr[strlen(str)+1];
-	mbstowcs(wstr, str, strlen(str)+1);
-	free(str);
-	DrawString(TOP_SCREEN, wstr, 10, current_y, RGB(255, 255, 255), RGB(0, 0, 0));
-
-	current_y += 10;
-}
 //No need to enter and exit again and again, isn't it
 inline void writeByte(uint8_t *address, uint8_t value) {
 	*(address) = value;
@@ -182,7 +167,7 @@ uint32_t GetPixel(uint8_t *screen, uint32_t x, uint32_t y){
 
 //----------------New Splash Screen Stuff------------------
 
-void DrawTopSplash(TCHAR splash_file[], TCHAR splash_fileL[], TCHAR splash_fileR[]) {
+int DrawTopSplash(TCHAR splash_file[], TCHAR splash_fileL[], TCHAR splash_fileR[]) {
 	unsigned int n = 0, bin_size;
 	File Splash, SplashL, SplashR;
 	if (FileOpen(&SplashL, splash_fileL, 0)&&FileOpen(&SplashR, splash_fileR, 0))
@@ -211,34 +196,31 @@ void DrawTopSplash(TCHAR splash_file[], TCHAR splash_fileL[], TCHAR splash_fileR
 	}
 	else
 	{
-		wchar_t tmp[256];
-		swprintf(tmp, sizeof(tmp)/sizeof(tmp[0]), strings[STR_ERROR_OPENING], splash_file);
-		DrawString(BOT_SCREEN, tmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
+		return -1;
 	}
+
+	return 0;
 }
 
-void DrawBottomSplash(TCHAR splash_file[]) {
-	DrawSplash(BOT_SCREEN, splash_file);
+int DrawBottomSplash(TCHAR splash_file[]) {
+	return DrawSplash(BOT_SCREEN, splash_file);
 }
 
-void DrawSplash(uint8_t *screen, TCHAR splash_file[]) {
+int DrawSplash(uint8_t *screen, TCHAR splash_file[]) {
 	unsigned int n = 0, bin_size;
 	File Splash;
-	if(FileOpen(&Splash, splash_file, 0))
-	{
-		//Load the spash image
-		bin_size = 0;
-		while ((n = FileRead(&Splash, (void*)((uint32_t)screen + bin_size), 0x100000, bin_size)) > 0) {
-			bin_size += n;
-		}
-		FileClose(&Splash);
+
+	if(!FileOpen(&Splash, splash_file, 0))
+		return -1;
+
+	//Load the spash image
+	bin_size = 0;
+	while ((n = FileRead(&Splash, (void*)((uint32_t)screen + bin_size), 0x100000, bin_size)) > 0) {
+		bin_size += n;
 	}
-	else
-	{
-		wchar_t tmp[256];
-		swprintf(tmp, sizeof(tmp)/sizeof(tmp[0]), strings[STR_ERROR_OPENING], splash_file);
-		DrawString(BOT_SCREEN, tmp, FONT_WIDTH, SCREEN_HEIGHT - FONT_HEIGHT, RED, BLACK);
-	}
+	FileClose(&Splash);
+
+	return 0;
 }
 
 void DrawFadeScreen(uint8_t *screen, uint16_t Width, uint16_t Height, uint32_t f)
