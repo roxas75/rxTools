@@ -58,7 +58,6 @@ static void setConsole()
 static void install()
 {
 	f_mkdir(L"rxTools");
-	f_mkdir(L"rxTools/nand");
 	InstallConfigData();
 }
 
