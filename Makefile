@@ -106,13 +106,11 @@ release-patches: reboot/reboot.bin all-target-patches
 release-theme: all-target-theme
 	mkdir -p release/rxTools/theme/0
 	@mv theme/*.bin release/rxTools/theme/0
-	@cp theme/LANG.txt tools/themetool.sh tools/themetool.bat release/rxTools/theme/0
+	@cp theme/LANG.txt scripts/themetool.sh scripts/themetool.bat release/rxTools/theme/0
 
 release-tools:
-	@mkdir -p release/Tools/fbi_injection release/Tools/scripts
-	@cp tools/o3ds_cdn_firm.py tools/n3ds_cdn_firm.py tools/readme.txt release/Tools
-	@cp -r tools/fbi_injection/* release/Tools/fbi_injection/
-	@cp tools/scripts/* release/Tools/scripts/
+	@mkdir -p release/scripts
+	@cp scripts/o3ds_cdn_firm.py scripts/n3ds_cdn_firm.py scripts/readme.txt release/scripts
 
 release-mset: all-target-mset
 	@mkdir -p release/mset
