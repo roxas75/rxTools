@@ -31,24 +31,8 @@ const wchar_t langPath[] = L"/rxTools/lang";
 
 static const char *keys[STR_NUM] = {
 	[STR_LANG_NAME] = "LANG_NAME",
-	[STR_BACKING_UP] = "BACKING_UP",
 	[STR_DELETING] = "DELETING",
-	[STR_DOWNGRADE] = "DOWNGRADE",
-	[STR_DOWNGRADING] = "DOWNGRADING",
-	[STR_DOWNGRADING_NOT_NEEDED] = "DOWNGRADING_NOT_NEEDED",
-	[STR_DUMP] = "DUMP",
-	[STR_DUMPING] = "DUMPING",
-	[STR_INJECT] = "INJECT",
-	[STR_INJECTING] = "INJECTING",
-	[STR_DECRYPT] = "DECRYPT",
-	[STR_DECRYPTING] = "DECRYPTING",
-	[STR_DECRYPTED] = "DECRYPTED",
-	[STR_GENERATE] = "GENERATE",
-	[STR_GENERATING] = "GENERATING",
-	[STR_PROCESSING] = "PROCESSING",
 	[STR_OPENING] = "OPENING",
-	[STR_RESTORE] = "RESTORE",
-	[STR_RESTORING] = "RESTORING",
 	[STR_LOAD] = "LOAD",
 	[STR_DIRECTORY] = "DIRECTORY",
 	[STR_MISSING] = "MISSING",
@@ -71,39 +55,19 @@ static const char *keys[STR_NUM] = {
 	[STR_NAND] = "NAND",
 	[STR_SYSNAND] = "SYSNAND",
 	[STR_EMUNAND] = "EMUNAND",
-	[STR_NAND_PARTITIONS] = "NAND_PARTITIONS",
-	[STR_NAND_XORPAD] = "NAND_XORPAD",
-	[STR_XORPAD] = "XORPAD",
-	[STR_EXHEADER] = "EXHEADER",
-	[STR_EXEFS] = "EXEFS",
 	[STR_ROMFS] = "ROMFS",
 	[STR_TITLE_KEYS] = "TITLE_KEYS",
 	[STR_TITLE_KEYS_FILE] = "TITLE_KEYS_FILE",
 	[STR_FILES] = "FILES",
-	[STR_PAD] = "PAD",
-	[STR_DOWNGRADE_PACK] = "DOWNGRADE_PACK",
-	[STR_FBI] = "FBI",
-	[STR_HEALTH_AND_SAFETY] = "HEALTH_AND_SAFETY",
-	[STR_TMD_VERSION] = "TMD_VERSION",
-	[STR_TMD_SIZE] = "TMD_SIZE",
 	[STR_HASH] = "HASH",
 	[STR_FIRMWARE_FILE] = "FIRMWARE_FILE",
-	[STR_CHECK_TMD_ONLY] = "CHECK_TMD_ONLY",
-	[STR_INJECT_FBI] = "INJECT_FBI",
 	[STR_SOURCE_ACTION] = "SOURCE_ACTION",
 	[STR_SYSTEM_TITLES] = "SYSTEM_TITLES",
-	[STR_SYSTEM_TITLES_WARNING] = "SYSTEM_TITLES_WARNING",
-	[STR_SYSTEM_TITLES_DECRYPT] = "SYSTEM_TITLES_DECRYPT",
 	[STR_KEYS_MISMATCH] = "KEYS_MISMATCH",
 	[STR_NO_EMUNAND] = "NO_EMUNAND",
 	[STR_TWLN] = "TWLN",
 	[STR_TWLP] = "TWLP",
 	[STR_AGB_SAVE] = "AGB_SAVE",
-	[STR_FIRM0] = "FIRM0",
-	[STR_FIRM1] = "FIRM1",
-	[STR_CTRNAND] = "CTRNAND",
-	[STR_CTR] = "CTR",
-	[STR_TMD] = "TMD",
 	[STR_KEY7] = "KEY7",
 	[STR_SECURE] = "SECURE",
 	[STR_NONE] = "NONE",
@@ -157,9 +121,6 @@ static const char *keys[STR_NUM] = {
 	[STR_PROGRESS_FAIL] = "PROGRESS_FAIL",
 	[STR_REGION_] = "REGION_",
 	[STR_REGION] = "REGION",
-	[STR_MSET] = "MSET",
-	[STR_MSET4] = "MSET4",
-	[STR_MSET6] "MSET6",
 	[STR_YES] = "YES",
 	[STR_NO] = "NO",
 	[STR_RANDOM] = "RANDOM_THEME"
@@ -207,28 +168,16 @@ void preloadStringsA()
 	wcscpy(strings[STR_SYSNAND], L"sysNAND");
 	wcscpy(strings[STR_EMUNAND], L"emuNAND");
 	wcscpy(strings[STR_XORPAD], L"xorpad");
-	wcscpy(strings[STR_NAND_XORPAD], L"NAND xorpad");
-	wcscpy(strings[STR_EXHEADER], L"ExHeader");
-	wcscpy(strings[STR_EXEFS], L"ExeFS");
 	wcscpy(strings[STR_ROMFS], L"RomFS");
 	wcscpy(strings[STR_TWLN], L"TWLN");
 	wcscpy(strings[STR_TWLP], L"TWLP");
 	wcscpy(strings[STR_AGB_SAVE], L"AGB_SAVE");
-	wcscpy(strings[STR_FIRM0], L"FIRM0");
-	wcscpy(strings[STR_FIRM1], L"FIRM1");
-	wcscpy(strings[STR_CTRNAND], L"CTRNAND");
-	wcscpy(strings[STR_CTR], L"CTR");
-	wcscpy(strings[STR_TMD], L"TMD");
 	wcscpy(strings[STR_JAPAN], L"Japan");
 	wcscpy(strings[STR_USA], L"USA");
 	wcscpy(strings[STR_EUROPE], L"Europe");
 	wcscpy(strings[STR_CHINA], L"China");
 	wcscpy(strings[STR_KOREA], L"Korea");
 	wcscpy(strings[STR_TAIWAN], L"Taiwan");
-	wcscpy(strings[STR_MSET], L"MSET");
-	wcscpy(strings[STR_MSET4], L"MSET 4.x");
-	wcscpy(strings[STR_MSET6], L"MSET 6.x");
-	wcscpy(strings[STR_FBI], L"FBI");
 }
 
 void preloadStringsU()
